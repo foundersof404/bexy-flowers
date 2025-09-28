@@ -221,7 +221,7 @@ const UltraNavigation = () => {
             {/* Spacer */}
             <div className="flex-1"></div>
 
-            {/* Desktop Navigation */}
+            {/* Desktop Navigation with Advanced Hover Effects */}
             <div className="hidden lg:flex items-center space-x-8">
               {navigationItems.map((item, index) => (
                 <motion.div
@@ -240,63 +240,143 @@ const UltraNavigation = () => {
                     onClick={() => handleNavigation(item.path)}
                   >
                     <span className="relative z-10 flex items-center space-x-2">
+                      {/* Icon with Advanced 3D Hover Effects */}
                       <motion.span 
-                        className="transition-all duration-500"
+                        className="transition-all duration-500 relative"
                         whileHover={{ 
-                          scale: 1.15, 
-                          rotate: [0, -10, 10, 0],
-                          color: "rgb(196,166,105)"
+                          scale: 1.2, 
+                          rotateY: [0, 15, -15, 0],
+                          rotateX: [0, 10, -10, 0],
+                          color: "rgb(196,166,105)",
+                          filter: "drop-shadow(0 0 8px rgba(196,166,105,0.6))"
                         }}
                         transition={{ 
-                          duration: 0.6, 
+                          duration: 0.8, 
                           ease: [0.23, 1, 0.32, 1],
-                          rotate: { duration: 0.4, repeat: 1, repeatType: "reverse" }
+                          rotateY: { duration: 0.6, repeat: 1, repeatType: "reverse" },
+                          rotateX: { duration: 0.6, repeat: 1, repeatType: "reverse" }
                         }}
                       >
                         {item.icon}
+                        
+                        {/* Icon Glow Effect */}
+                        <motion.div
+                          className="absolute inset-0 bg-primary/30 rounded-full blur-md"
+                          initial={{ scale: 0, opacity: 0 }}
+                          whileHover={{ scale: 1.5, opacity: 0.6 }}
+                          transition={{ duration: 0.4 }}
+                        />
                       </motion.span>
+                      
+                      {/* Text with Morphing Animation */}
                       <motion.span
-                        whileHover={{ x: 2 }}
-                        transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
+                        className="relative"
+                        whileHover={{ 
+                          x: 3,
+                          scale: 1.05,
+                          textShadow: "0 0 10px rgba(196,166,105,0.5)"
+                        }}
+                        transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
                       >
                         {item.name}
+                        
+                        {/* Text Underline Animation */}
+                        <motion.div
+                          className="absolute -bottom-1 left-0 h-0.5 bg-primary"
+                          initial={{ width: 0, opacity: 0 }}
+                          whileHover={{ width: "100%", opacity: 1 }}
+                          transition={{ duration: 0.5, ease: "easeOut" }}
+                        />
                       </motion.span>
                     </span>
                     
-                    {/* Elegant Background Hover Effect */}
+                    {/* Multi-layered Background Effects */}
+                    
+                    {/* Primary Background Gradient */}
                     <motion.div
-                      className="absolute inset-0 bg-gradient-to-r from-primary/5 via-primary/15 to-primary/5 rounded-lg"
+                      className="absolute inset-0 bg-gradient-to-r from-primary/5 via-primary/20 to-primary/5 rounded-lg"
                       initial={{ scale: 0, opacity: 0, x: "-100%" }}
                       whileHover={{ scale: 1, opacity: 1, x: "0%" }}
-                      transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
+                      transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
                     />
                     
-                    {/* Shimmer Effect */}
+                    {/* Secondary Shimmer Effect */}
                     <motion.div
-                      className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent rounded-lg"
-                      initial={{ x: "-100%" }}
-                      whileHover={{ x: "100%" }}
-                      transition={{ duration: 0.8, ease: "easeInOut", delay: 0.1 }}
+                      className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent rounded-lg"
+                      initial={{ x: "-100%", opacity: 0 }}
+                      whileHover={{ x: "100%", opacity: 1 }}
+                      transition={{ duration: 1, ease: "easeInOut", delay: 0.2 }}
                     />
                     
-                    {/* Active Indicator */}
+                    {/* Pulsing Border Effect */}
+                    <motion.div
+                      className="absolute inset-0 border border-primary/30 rounded-lg"
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      whileHover={{ 
+                        opacity: 1, 
+                        scale: 1,
+                        borderColor: "rgba(196,166,105,0.6)"
+                      }}
+                      transition={{ duration: 0.4 }}
+                    />
+                    
+                    {/* Floating Particles */}
+                    <div className="absolute inset-0 pointer-events-none">
+                      {[...Array(3)].map((_, i) => (
+                        <motion.div
+                          key={i}
+                          className="absolute w-1 h-1 bg-primary/60 rounded-full"
+                          style={{
+                            left: `${20 + i * 30}%`,
+                            top: `${30 + (i % 2) * 40}%`,
+                          }}
+                          initial={{ scale: 0, opacity: 0 }}
+                          whileHover={{ 
+                            scale: [0, 1, 0],
+                            opacity: [0, 0.8, 0],
+                            y: [0, -10, 0]
+                          }}
+                          transition={{
+                            duration: 1.5,
+                            repeat: Infinity,
+                            delay: i * 0.3,
+                            ease: "easeInOut"
+                          }}
+                        />
+                      ))}
+                    </div>
+                    
+                    {/* Active Indicator with Enhanced Animation */}
                     {location.pathname === item.path && (
                       <motion.div
-                        className="absolute bottom-0 left-1/2 w-1 h-1 bg-primary rounded-full"
+                        className="absolute bottom-0 left-1/2 w-2 h-2 bg-primary rounded-full"
                         layoutId="activeIndicator"
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1, x: '-50%' }}
-                        transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+                        initial={{ scale: 0, opacity: 0 }}
+                        animate={{ 
+                          scale: 1, 
+                          opacity: 1,
+                          x: '-50%',
+                          boxShadow: "0 0 10px rgba(196,166,105,0.6)"
+                        }}
+                        transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
                       />
                     )}
+                    
+                    {/* Hover Glow Effect */}
+                    <motion.div
+                      className="absolute inset-0 bg-primary/10 rounded-lg blur-xl"
+                      initial={{ scale: 0, opacity: 0 }}
+                      whileHover={{ scale: 1.2, opacity: 0.3 }}
+                      transition={{ duration: 0.6 }}
+                    />
                   </Button>
                 </motion.div>
               ))}
             </div>
 
-            {/* Cart & Menu */}
+            {/* Cart & Menu with Enhanced Hover Effects */}
             <div className="flex items-center space-x-4 ml-8">
-              {/* Cart */}
+              {/* Cart with Advanced Hover Effects */}
               <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -307,63 +387,111 @@ const UltraNavigation = () => {
                   size="icon"
                   className="relative group hover:bg-primary/10 transition-all duration-500 overflow-hidden rounded-lg"
                 >
+                  {/* Cart Icon with 3D Effects */}
                   <motion.div
+                    className="relative z-10"
                     whileHover={{ 
-                      scale: 1.1, 
-                      rotate: [0, -5, 5, 0],
-                      color: "rgb(196,166,105)"
+                      scale: 1.15, 
+                      rotateY: [0, 20, -20, 0],
+                      rotateX: [0, 15, -15, 0],
+                      color: "rgb(196,166,105)",
+                      filter: "drop-shadow(0 0 12px rgba(196,166,105,0.8))"
                     }}
                     transition={{ 
-                      duration: 0.6, 
+                      duration: 0.8, 
                       ease: [0.23, 1, 0.32, 1],
-                      rotate: { duration: 0.4, repeat: 1, repeatType: "reverse" }
+                      rotateY: { duration: 0.6, repeat: 1, repeatType: "reverse" },
+                      rotateX: { duration: 0.6, repeat: 1, repeatType: "reverse" }
                     }}
                   >
                     <ShoppingCart className="w-6 h-6 text-foreground transition-all duration-500" />
+                    
+                    {/* Icon Glow Effect */}
+                    <motion.div
+                      className="absolute inset-0 bg-primary/40 rounded-full blur-lg"
+                      initial={{ scale: 0, opacity: 0 }}
+                      whileHover={{ scale: 1.8, opacity: 0.7 }}
+                      transition={{ duration: 0.5 }}
+                    />
                   </motion.div>
                   
-                  {/* Shimmer Effect for Cart */}
+                  {/* Multi-layered Background Effects */}
+                  
+                  {/* Primary Background */}
                   <motion.div
-                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent rounded-lg"
-                    initial={{ x: "-100%" }}
-                    whileHover={{ x: "100%" }}
-                    transition={{ duration: 0.8, ease: "easeInOut", delay: 0.1 }}
+                    className="absolute inset-0 bg-gradient-to-r from-primary/5 via-primary/15 to-primary/5 rounded-lg"
+                    initial={{ scale: 0, opacity: 0 }}
+                    whileHover={{ scale: 1, opacity: 1 }}
+                    transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
                   />
                   
-                  {/* Cart Badge */}
+                  {/* Shimmer Effect */}
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent rounded-lg"
+                    initial={{ x: "-100%", opacity: 0 }}
+                    whileHover={{ x: "100%", opacity: 1 }}
+                    transition={{ duration: 1, ease: "easeInOut", delay: 0.2 }}
+                  />
+                  
+                  {/* Pulsing Border */}
+                  <motion.div
+                    className="absolute inset-0 border border-primary/30 rounded-lg"
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    whileHover={{ 
+                      opacity: 1, 
+                      scale: 1,
+                      borderColor: "rgba(196,166,105,0.6)"
+                    }}
+                    transition={{ duration: 0.4 }}
+                  />
+                  
+                  {/* Cart Badge with Enhanced Animation */}
                   {cartItems > 0 && (
                     <motion.div
-                      className="absolute -top-2 -right-2 w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-luxury font-bold text-xs shadow-gold cart-pulse"
+                      className="absolute -top-2 -right-2 w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-luxury font-bold text-xs shadow-gold cart-pulse relative z-20"
                       initial={{ scale: 0, rotate: -180 }}
                       animate={{ scale: 1, rotate: 0 }}
                       transition={{ delay: 1.5, type: "spring", stiffness: 500 }}
-                      whileHover={{ scale: 1.2, rotate: 360 }}
+                      whileHover={{ 
+                        scale: 1.3, 
+                        rotate: 360,
+                        boxShadow: "0 0 20px rgba(196,166,105,0.8)"
+                      }}
                     >
                       <motion.span
-                        animate={{ scale: [1, 1.1, 1] }}
+                        animate={{ scale: [1, 1.2, 1] }}
                         transition={{ duration: 2, repeat: Infinity }}
                       >
                         {cartItems}
                       </motion.span>
+                      
+                      {/* Badge Glow */}
+                      <motion.div
+                        className="absolute inset-0 bg-primary/50 rounded-full blur-md"
+                        animate={{
+                          scale: [1, 1.5, 1],
+                          opacity: [0.5, 0.8, 0.5]
+                        }}
+                        transition={{
+                          duration: 2,
+                          repeat: Infinity,
+                          ease: "easeInOut"
+                        }}
+                      />
                     </motion.div>
                   )}
                   
-                  {/* Cart Glow */}
+                  {/* Overall Glow Effect */}
                   <motion.div
-                    className="absolute inset-0 bg-primary/20 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                    animate={{
-                      scale: [1, 1.2, 1],
-                    }}
-                    transition={{
-                      duration: 2,
-                      repeat: Infinity,
-                      ease: "easeInOut"
-                    }}
+                    className="absolute inset-0 bg-primary/10 rounded-lg blur-xl"
+                    initial={{ scale: 0, opacity: 0 }}
+                    whileHover={{ scale: 1.3, opacity: 0.4 }}
+                    transition={{ duration: 0.6 }}
                   />
                 </Button>
               </motion.div>
 
-              {/* Mobile Menu Button */}
+              {/* Mobile Menu Button with Enhanced Effects */}
               <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -374,31 +502,66 @@ const UltraNavigation = () => {
                   variant="ghost"
                   size="icon"
                   onClick={handleMenuToggle}
-                  className="relative group hover:bg-primary/10 transition-all duration-300"
+                  className="relative group hover:bg-primary/10 transition-all duration-500 overflow-hidden rounded-lg"
                 >
+                  {/* Background Effects */}
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-r from-primary/5 via-primary/15 to-primary/5 rounded-lg"
+                    initial={{ scale: 0, opacity: 0 }}
+                    whileHover={{ scale: 1, opacity: 1 }}
+                    transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
+                  />
+                  
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent rounded-lg"
+                    initial={{ x: "-100%", opacity: 0 }}
+                    whileHover={{ x: "100%", opacity: 1 }}
+                    transition={{ duration: 1, ease: "easeInOut", delay: 0.2 }}
+                  />
+                  
                   <AnimatePresence mode="wait">
                     {isMenuOpen ? (
                       <motion.div
                         key="close"
-                        initial={{ rotate: -90, opacity: 0 }}
-                        animate={{ rotate: 0, opacity: 1 }}
-                        exit={{ rotate: 90, opacity: 0 }}
-                        transition={{ duration: 0.3 }}
+                        className="relative z-10"
+                        initial={{ rotate: -90, opacity: 0, scale: 0.8 }}
+                        animate={{ rotate: 0, opacity: 1, scale: 1 }}
+                        exit={{ rotate: 90, opacity: 0, scale: 0.8 }}
+                        transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+                        whileHover={{
+                          scale: 1.1,
+                          color: "rgb(196,166,105)",
+                          filter: "drop-shadow(0 0 8px rgba(196,166,105,0.6))"
+                        }}
                       >
-                        <X className="w-6 h-6 text-foreground group-hover:text-primary transition-colors duration-300" />
+                        <X className="w-6 h-6 text-foreground transition-all duration-500" />
                       </motion.div>
                     ) : (
                       <motion.div
                         key="menu"
-                        initial={{ rotate: 90, opacity: 0 }}
-                        animate={{ rotate: 0, opacity: 1 }}
-                        exit={{ rotate: -90, opacity: 0 }}
-                        transition={{ duration: 0.3 }}
+                        className="relative z-10"
+                        initial={{ rotate: 90, opacity: 0, scale: 0.8 }}
+                        animate={{ rotate: 0, opacity: 1, scale: 1 }}
+                        exit={{ rotate: -90, opacity: 0, scale: 0.8 }}
+                        transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+                        whileHover={{
+                          scale: 1.1,
+                          color: "rgb(196,166,105)",
+                          filter: "drop-shadow(0 0 8px rgba(196,166,105,0.6))"
+                        }}
                       >
-                        <Menu className="w-6 h-6 text-foreground group-hover:text-primary transition-colors duration-300" />
+                        <Menu className="w-6 h-6 text-foreground transition-all duration-500" />
                       </motion.div>
                     )}
                   </AnimatePresence>
+                  
+                  {/* Glow Effect */}
+                  <motion.div
+                    className="absolute inset-0 bg-primary/10 rounded-lg blur-xl"
+                    initial={{ scale: 0, opacity: 0 }}
+                    whileHover={{ scale: 1.2, opacity: 0.3 }}
+                    transition={{ duration: 0.6 }}
+                  />
                 </Button>
               </motion.div>
             </div>
@@ -421,30 +584,135 @@ const UltraNavigation = () => {
                 {navigationItems.map((item, index) => (
                   <motion.div
                     key={item.name}
-                    initial={{ opacity: 0, x: -50 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.1, duration: 0.5 }}
+                    initial={{ opacity: 0, x: -50, scale: 0.95 }}
+                    animate={{ opacity: 1, x: 0, scale: 1 }}
+                    transition={{ 
+                      delay: index * 0.1, 
+                      duration: 0.6,
+                      type: "spring",
+                      stiffness: 100,
+                      damping: 15
+                    }}
                   >
                     <Button
                       variant="ghost"
-                      className={`w-full justify-start p-4 text-left group ${
+                      className={`w-full justify-start p-4 text-left group relative overflow-hidden rounded-xl transition-all duration-500 ${
                         location.pathname === item.path
                           ? 'text-primary bg-primary/10'
                           : 'text-foreground hover:text-primary hover:bg-primary/5'
                       }`}
                       onClick={() => handleNavigation(item.path)}
                     >
-                      <div className="flex items-center space-x-4">
-                        <span className="group-hover:scale-110 transition-transform duration-300">
+                      {/* Background Effects */}
+                      <motion.div
+                        className="absolute inset-0 bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 rounded-xl"
+                        initial={{ scale: 0, opacity: 0, x: "-100%" }}
+                        whileHover={{ scale: 1, opacity: 1, x: "0%" }}
+                        transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
+                      />
+                      
+                      <motion.div
+                        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent rounded-xl"
+                        initial={{ x: "-100%", opacity: 0 }}
+                        whileHover={{ x: "100%", opacity: 1 }}
+                        transition={{ duration: 0.8, ease: "easeInOut", delay: 0.2 }}
+                      />
+                      
+                      <div className="flex items-center space-x-4 relative z-10">
+                        {/* Icon with Enhanced Animation */}
+                        <motion.span 
+                          className="relative"
+                          whileHover={{ 
+                            scale: 1.2, 
+                            rotate: [0, -10, 10, 0],
+                            color: "rgb(196,166,105)",
+                            filter: "drop-shadow(0 0 8px rgba(196,166,105,0.6))"
+                          }}
+                          transition={{ 
+                            duration: 0.6, 
+                            ease: [0.23, 1, 0.32, 1],
+                            rotate: { duration: 0.4, repeat: 1, repeatType: "reverse" }
+                          }}
+                        >
                           {item.icon}
-                        </span>
-                        <div>
-                          <div className="font-luxury font-semibold">{item.name}</div>
-                          <div className="font-body text-sm text-muted-foreground">
+                          
+                          {/* Icon Glow */}
+                          <motion.div
+                            className="absolute inset-0 bg-primary/30 rounded-full blur-md"
+                            initial={{ scale: 0, opacity: 0 }}
+                            whileHover={{ scale: 1.5, opacity: 0.6 }}
+                            transition={{ duration: 0.4 }}
+                          />
+                        </motion.span>
+                        
+                        <div className="flex-1">
+                          {/* Title with Animation */}
+                          <motion.div 
+                            className="font-luxury font-semibold relative"
+                            whileHover={{
+                              scale: 1.05,
+                              textShadow: "0 0 8px rgba(196,166,105,0.5)"
+                            }}
+                            transition={{ duration: 0.3 }}
+                          >
+                            {item.name}
+                            
+                            {/* Title Underline */}
+                            <motion.div
+                              className="absolute -bottom-1 left-0 h-0.5 bg-primary"
+                              initial={{ width: 0, opacity: 0 }}
+                              whileHover={{ width: "100%", opacity: 1 }}
+                              transition={{ duration: 0.5, ease: "easeOut" }}
+                            />
+                          </motion.div>
+                          
+                          {/* Description with Fade Effect */}
+                          <motion.div 
+                            className="font-body text-sm text-muted-foreground mt-1"
+                            whileHover={{
+                              color: "rgba(196,166,105,0.8)",
+                              scale: 1.02
+                            }}
+                            transition={{ duration: 0.3 }}
+                          >
                             {item.description}
-                          </div>
+                          </motion.div>
                         </div>
                       </div>
+                      
+                      {/* Floating Particles */}
+                      <div className="absolute inset-0 pointer-events-none">
+                        {[...Array(2)].map((_, i) => (
+                          <motion.div
+                            key={i}
+                            className="absolute w-1 h-1 bg-primary/60 rounded-full"
+                            style={{
+                              left: `${20 + i * 60}%`,
+                              top: `${30 + (i % 2) * 40}%`,
+                            }}
+                            initial={{ scale: 0, opacity: 0 }}
+                            whileHover={{ 
+                              scale: [0, 1, 0],
+                              opacity: [0, 0.8, 0],
+                              y: [0, -8, 0]
+                            }}
+                            transition={{
+                              duration: 1.2,
+                              repeat: Infinity,
+                              delay: i * 0.4,
+                              ease: "easeInOut"
+                            }}
+                          />
+                        ))}
+                      </div>
+                      
+                      {/* Glow Effect */}
+                      <motion.div
+                        className="absolute inset-0 bg-primary/10 rounded-xl blur-lg"
+                        initial={{ scale: 0, opacity: 0 }}
+                        whileHover={{ scale: 1.1, opacity: 0.3 }}
+                        transition={{ duration: 0.6 }}
+                      />
                     </Button>
                   </motion.div>
                 ))}

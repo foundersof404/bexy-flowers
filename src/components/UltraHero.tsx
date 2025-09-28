@@ -83,6 +83,30 @@ const UltraHero = () => {
         }
       });
 
+      // Beautiful 3D rotation effect for flower image on scroll
+      const flowerImage = hero.querySelector('img[alt="Beautiful Flower"]');
+      if (flowerImage) {
+        ScrollTrigger.create({
+          trigger: hero,
+          start: "top center",
+          end: "bottom center",
+          scrub: 0.5,
+          onUpdate: (self) => {
+            const progress = self.progress;
+            const smoothProgress = progress * progress * (3 - 2 * progress); // Smooth easing
+            
+            gsap.to(flowerImage, {
+              duration: 0.1,
+              rotateY: smoothProgress * 720, // Two full rotations
+              rotateX: Math.sin(progress * Math.PI * 2) * 10, // Gentle X rotation
+              rotateZ: Math.sin(progress * Math.PI) * 5, // Subtle Z rotation
+              scale: 1 + Math.sin(progress * Math.PI) * 0.05, // Subtle scale breathing
+              ease: "none"
+            });
+          }
+        });
+      }
+
       // Floating elements animation
       const floatingElements = hero.querySelectorAll('.floating-element');
       floatingElements.forEach((element, index) => {
@@ -135,116 +159,520 @@ const UltraHero = () => {
           
           {/* Left Content */}
           <div className="space-y-8">
-            <motion.div
-              ref={titleRef}
-              className="overflow-hidden"
-              initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-            >
-              <h1 className="font-luxury text-4xl lg:text-6xl font-black text-foreground leading-tight mb-4">
-                <span className="inline-block hover:after:content-[''] hover:after:block hover:after:w-full hover:after:h-1 hover:after:bg-gradient-to-r hover:after:from-primary hover:after:to-transparent hover:after:mt-2 hover:after:transition-all hover:after:duration-500">
-                  Elegant Flowers for Every Occasion
-                </span>
-              </h1>
-              <p className="font-serif text-lg text-primary/80 font-light tracking-wide mb-2">
-                Crafting timeless beauty through floral artistry
-              </p>
-              <p className="font-body text-base text-muted-foreground leading-relaxed max-w-2xl">
-                From intimate weddings to grand celebrations, we create bespoke arrangements that capture life's most precious moments with unparalleled elegance.
-              </p>
-            </motion.div>
+             <motion.div
+               ref={titleRef}
+               className="overflow-hidden"
+               initial={{ opacity: 0, x: -100, scale: 0.9 }}
+               animate={{ opacity: 1, x: 0, scale: 1 }}
+               transition={{ 
+                 duration: 1.5, 
+                 delay: 0.2,
+                 type: "spring",
+                 stiffness: 60,
+                 damping: 15
+               }}
+             >
+               {/* Main Title with Character-by-Character Animation */}
+               <motion.h1 
+                 className="font-luxury text-4xl lg:text-6xl font-black text-foreground leading-tight mb-4"
+                 initial={{ opacity: 0 }}
+                 animate={{ opacity: 1 }}
+                 transition={{ duration: 0.1, delay: 0.4 }}
+               >
+                 <motion.span 
+                   className="inline-block relative overflow-hidden"
+                   whileHover={{
+                     scale: 1.02,
+                     transition: { duration: 0.3 }
+                   }}
+                 >
+                   {/* Animated background gradient */}
+                   <motion.div
+                     className="absolute inset-0 bg-gradient-to-r from-primary/10 via-yellow-400/5 to-transparent"
+                     initial={{ x: "-100%", opacity: 0 }}
+                     animate={{ x: "100%", opacity: 1 }}
+                     transition={{ duration: 2, delay: 1.5, ease: "easeInOut" }}
+                   />
+                   
+                   {/* Text with staggered character animation */}
+                   <span className="relative z-10">
+                     {"Elegant Flowers for Every Occasion".split("").map((char, index) => (
+                       <motion.span
+                         key={index}
+                         className="inline-block"
+                         initial={{ 
+                           opacity: 0, 
+                           y: 50, 
+                           rotateX: -90,
+                           filter: "blur(10px)"
+                         }}
+                         animate={{ 
+                           opacity: 1, 
+                           y: 0, 
+                           rotateX: 0,
+                           filter: "blur(0px)"
+                         }}
+                         transition={{ 
+                           duration: 0.6,
+                           delay: 0.5 + index * 0.05,
+                           ease: [0.25, 0.46, 0.45, 0.94]
+                         }}
+                         whileHover={{
+                           scale: 1.1,
+                           color: "#c6a151",
+                           textShadow: "0 0 20px rgba(198,161,81,0.5)",
+                           transition: { duration: 0.2 }
+                         }}
+                       >
+                         {char === " " ? "\u00A0" : char}
+                       </motion.span>
+                     ))}
+                   </span>
+                   
+                   {/* Animated underline with morphing effect */}
+                   <motion.div
+                     className="absolute -bottom-2 left-0 h-1 bg-gradient-to-r from-primary via-yellow-400 to-transparent"
+                     initial={{ width: 0, opacity: 0 }}
+                     animate={{ 
+                       width: "100%", 
+                       opacity: 1,
+                       boxShadow: "0 0 20px rgba(198,161,81,0.5)"
+                     }}
+                     transition={{ 
+                       duration: 2, 
+                       delay: 2.2, 
+                       ease: "easeOut"
+                     }}
+                   />
+                   
+                   {/* Floating particles around title */}
+                   <div className="absolute inset-0 pointer-events-none">
+                     {[...Array(4)].map((_, i) => (
+                       <motion.div
+                         key={i}
+                         className="absolute w-1 h-1 bg-primary/60 rounded-full"
+                         style={{
+                           left: `${20 + i * 20}%`,
+                           top: `${-10 + (i % 2) * 20}%`,
+                         }}
+                         animate={{
+                           y: [0, -15, 0],
+                           opacity: [0, 1, 0],
+                           scale: [0, 1, 0]
+                         }}
+                         transition={{
+                           duration: 3,
+                           repeat: Infinity,
+                           delay: 2.5 + i * 0.3,
+                           ease: "easeInOut"
+                         }}
+                       />
+                     ))}
+                   </div>
+                 </motion.span>
+               </motion.h1>
+               
+               {/* Subtitle with elegant reveal */}
+               <motion.div
+                 className="relative overflow-hidden"
+                 initial={{ opacity: 0, y: 30 }}
+                 animate={{ opacity: 1, y: 0 }}
+                 transition={{ duration: 1, delay: 0.8 }}
+               >
+                 <motion.p 
+                   className="font-serif text-lg text-primary/80 font-light tracking-wide mb-2 relative"
+                   initial={{ opacity: 0, x: -50 }}
+                   animate={{ opacity: 1, x: 0 }}
+                   transition={{ duration: 1.2, delay: 1, ease: "easeOut" }}
+                 >
+                   <motion.span
+                     className="inline-block"
+                     whileHover={{
+                       color: "#c6a151",
+                       scale: 1.05,
+                       transition: { duration: 0.3 }
+                     }}
+                   >
+                     Crafting timeless beauty through floral artistry
+                   </motion.span>
+                   
+                   {/* Decorative line */}
+                   <motion.div
+                     className="absolute -bottom-1 left-0 h-px bg-gradient-to-r from-primary/50 to-transparent"
+                     initial={{ width: 0 }}
+                     animate={{ width: "60%" }}
+                     transition={{ duration: 1.5, delay: 1.8, ease: "easeOut" }}
+                   />
+                 </motion.p>
+               </motion.div>
+               
+               {/* Description with typewriter effect */}
+               <motion.div
+                 className="relative overflow-hidden"
+                 initial={{ opacity: 0, y: 30 }}
+                 animate={{ opacity: 1, y: 0 }}
+                 transition={{ duration: 1, delay: 1.2 }}
+               >
+                 <motion.p 
+                   className="font-body text-base text-muted-foreground leading-relaxed max-w-2xl relative"
+                   initial={{ opacity: 0 }}
+                   animate={{ opacity: 1 }}
+                   transition={{ duration: 0.5, delay: 1.4 }}
+                 >
+                   <motion.span
+                     className="inline-block"
+                     initial={{ opacity: 0 }}
+                     animate={{ opacity: 1 }}
+                     transition={{ duration: 0.1, delay: 1.6 }}
+                   >
+                     From intimate weddings to grand celebrations, we create bespoke arrangements that capture life's most precious moments with unparalleled elegance.
+                   </motion.span>
+                   
+                   {/* Animated cursor */}
+                   <motion.span
+                     className="inline-block w-0.5 h-5 bg-primary ml-1"
+                     animate={{ opacity: [1, 0, 1] }}
+                     transition={{ 
+                       duration: 1, 
+                       repeat: Infinity, 
+                       delay: 2.5,
+                       ease: "easeInOut"
+                     }}
+                   />
+                   
+                   {/* Background highlight */}
+                   <motion.div
+                     className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-yellow-400/5 rounded-lg"
+                     initial={{ scaleX: 0, opacity: 0 }}
+                     animate={{ scaleX: 1, opacity: 1 }}
+                     transition={{ duration: 2, delay: 2, ease: "easeOut" }}
+                     style={{ transformOrigin: "left" }}
+                   />
+                 </motion.p>
+               </motion.div>
+             </motion.div>
 
 
             {/* Action Buttons */}
             <motion.div
               ref={buttonRef}
               className="flex flex-col sm:flex-row gap-4"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.6 }}
+              initial={{ opacity: 0, y: 30, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ 
+                duration: 1, 
+                delay: 0.6,
+                type: "spring",
+                stiffness: 100,
+                damping: 15
+              }}
             >
-              <Button
-                size="lg"
-                className="font-body text-lg px-8 py-4 bg-gradient-to-r from-[rgb(209,162,73)] via-[rgb(229,182,93)] to-[rgb(209,162,73)] text-white font-semibold shadow-lg hover:shadow-xl hover:shadow-[rgba(209,162,73,0.3)] transition-all duration-300 rounded-full transform hover:scale-105"
-                onClick={() => {
-                  const el = document.querySelector('[data-section="signature-collection"]');
-                  if (el) {
-                    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                  }
+              <motion.div
+                whileHover={{ 
+                  scale: 1.05,
+                  y: -2,
+                  transition: { duration: 0.3 }
                 }}
+                whileTap={{ scale: 0.95 }}
               >
-                Start Project
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="font-body text-lg px-8 py-4 border-2 border-muted-foreground/30 text-muted-foreground hover:border-primary hover:bg-primary/5 hover:text-primary transition-all duration-300 rounded-full backdrop-blur-sm"
-                onClick={() => {
-                  const el = document.querySelector('[data-section="custom-bouquet"]');
-                  if (el) {
-                    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                  }
+                <Button
+                  size="lg"
+                  className="font-body text-lg px-8 py-4 bg-gradient-to-r from-[rgb(209,162,73)] via-[rgb(229,182,93)] to-[rgb(209,162,73)] text-white font-semibold shadow-lg hover:shadow-xl hover:shadow-[rgba(209,162,73,0.3)] transition-all duration-300 rounded-full relative overflow-hidden group"
+                  onClick={() => {
+                    const el = document.querySelector('[data-section="signature-collection"]');
+                    if (el) {
+                      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                  }}
+                >
+                  <motion.span
+                    className="relative z-10"
+                    initial={{ opacity: 1 }}
+                    whileHover={{ opacity: 0.9 }}
+                  >
+                    Start Project
+                  </motion.span>
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-r from-yellow-400/20 to-transparent opacity-0 group-hover:opacity-100"
+                    initial={{ x: "-100%" }}
+                    whileHover={{ x: "100%" }}
+                    transition={{ duration: 0.6 }}
+                  />
+                </Button>
+              </motion.div>
+              
+              <motion.div
+                whileHover={{ 
+                  scale: 1.05,
+                  y: -2,
+                  transition: { duration: 0.3 }
                 }}
+                whileTap={{ scale: 0.95 }}
               >
-                Let's Talk
-              </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="font-body text-lg px-8 py-4 border-2 border-muted-foreground/30 text-muted-foreground hover:border-primary hover:bg-primary/5 hover:text-primary transition-all duration-300 rounded-full backdrop-blur-sm relative overflow-hidden group"
+                  onClick={() => {
+                    const el = document.querySelector('[data-section="custom-bouquet"]');
+                    if (el) {
+                      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                  }}
+                >
+                  <motion.span
+                    className="relative z-10"
+                    initial={{ opacity: 1 }}
+                    whileHover={{ opacity: 0.9 }}
+                  >
+                    Let's Talk
+                  </motion.span>
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-r from-primary/10 to-transparent opacity-0 group-hover:opacity-100"
+                    initial={{ x: "-100%" }}
+                    whileHover={{ x: "100%" }}
+                    transition={{ duration: 0.6 }}
+                  />
+                </Button>
+              </motion.div>
             </motion.div>
 
-            {/* Statistics */}
-            <motion.div
-              className="grid grid-cols-3 gap-8 pt-8"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.8 }}
-            >
-              <div className="text-center">
-                <div className="font-luxury text-3xl lg:text-4xl font-bold text-foreground">15+</div>
-                <div className="font-body text-sm text-muted-foreground mt-1">years experience</div>
-              </div>
-              <div className="text-center">
-                <div className="font-luxury text-3xl lg:text-4xl font-bold text-foreground">26K</div>
-                <div className="font-body text-sm text-muted-foreground mt-1">bouquets created</div>
-              </div>
-              <div className="text-center">
-                <div className="font-luxury text-3xl lg:text-4xl font-bold text-foreground">98%</div>
-                <div className="font-body text-sm text-muted-foreground mt-1">satisfied rate</div>
-              </div>
-            </motion.div>
+             {/* Statistics with Enhanced Animations */}
+             <motion.div
+               className="grid grid-cols-3 gap-8 pt-8"
+               initial={{ opacity: 0, y: 50, scale: 0.9 }}
+               animate={{ opacity: 1, y: 0, scale: 1 }}
+               transition={{ 
+                 duration: 1.2, 
+                 delay: 1.8,
+                 type: "spring",
+                 stiffness: 60,
+                 damping: 15
+               }}
+             >
+               {[
+                 { number: "15+", label: "years experience", color: "#c6a151" },
+                 { number: "26K", label: "bouquets created", color: "#ffd700" },
+                 { number: "98%", label: "satisfied rate", color: "#ff6b6b" }
+               ].map((stat, index) => (
+                 <motion.div 
+                   key={index}
+                   className="text-center group cursor-pointer relative"
+                   initial={{ opacity: 0, y: 30, rotateX: -45 }}
+                   animate={{ opacity: 1, y: 0, rotateX: 0 }}
+                   transition={{ 
+                     duration: 0.8, 
+                     delay: 2 + index * 0.3,
+                     type: "spring",
+                     stiffness: 100,
+                     damping: 15
+                   }}
+                   whileHover={{ 
+                     scale: 1.08,
+                     y: -8,
+                     rotateY: 5,
+                     transition: { duration: 0.4, ease: "easeOut" }
+                   }}
+                 >
+                   {/* Background glow effect */}
+                   <motion.div
+                     className="absolute inset-0 bg-gradient-radial from-primary/10 via-transparent to-transparent rounded-2xl blur-xl"
+                     initial={{ scale: 0, opacity: 0 }}
+                     animate={{ scale: 1, opacity: 1 }}
+                     transition={{ duration: 1, delay: 2.5 + index * 0.3 }}
+                     whileHover={{
+                       scale: 1.2,
+                       opacity: 0.3,
+                       transition: { duration: 0.3 }
+                     }}
+                   />
+                   
+                   {/* Number with counting animation */}
+                   <motion.div 
+                     className="font-luxury text-3xl lg:text-4xl font-bold text-foreground relative z-10"
+                     initial={{ scale: 0.5, opacity: 0 }}
+                     animate={{ scale: 1, opacity: 1 }}
+                     transition={{ 
+                       duration: 0.8, 
+                       delay: 2.2 + index * 0.3,
+                       type: "spring",
+                       stiffness: 200,
+                       damping: 15
+                     }}
+                     whileHover={{ 
+                       color: stat.color,
+                       scale: 1.1,
+                       textShadow: `0 0 20px ${stat.color}40`,
+                       transition: { duration: 0.3 }
+                     }}
+                   >
+                     <motion.span
+                       initial={{ opacity: 0, y: 20 }}
+                       animate={{ opacity: 1, y: 0 }}
+                       transition={{ duration: 0.6, delay: 2.4 + index * 0.3 }}
+                     >
+                       {stat.number}
+                     </motion.span>
+                     
+                     {/* Animated underline with color */}
+                     <motion.div
+                       className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 h-0.5 rounded-full"
+                       style={{ backgroundColor: stat.color }}
+                       initial={{ width: 0, opacity: 0 }}
+                       animate={{ width: "80%", opacity: 1 }}
+                       transition={{ duration: 1, delay: 2.8 + index * 0.3, ease: "easeOut" }}
+                       whileHover={{
+                         width: "100%",
+                         boxShadow: `0 0 10px ${stat.color}60`,
+                         transition: { duration: 0.3 }
+                       }}
+                     />
+                   </motion.div>
+                   
+                   {/* Label with typewriter effect */}
+                   <motion.div 
+                     className="font-body text-sm text-muted-foreground mt-2 relative z-10"
+                     initial={{ opacity: 0, y: 10 }}
+                     animate={{ opacity: 1, y: 0 }}
+                     transition={{ duration: 0.6, delay: 2.6 + index * 0.3 }}
+                     whileHover={{ 
+                       color: stat.color,
+                       scale: 1.05,
+                       transition: { duration: 0.3 }
+                     }}
+                   >
+                     <motion.span
+                       className="inline-block"
+                       initial={{ opacity: 0 }}
+                       animate={{ opacity: 1 }}
+                       transition={{ duration: 0.1, delay: 2.8 + index * 0.3 }}
+                     >
+                       {stat.label}
+                     </motion.span>
+                     
+                     {/* Decorative dot */}
+                     <motion.div
+                       className="absolute -right-2 top-1/2 transform -translate-y-1/2 w-1 h-1 rounded-full"
+                       style={{ backgroundColor: stat.color }}
+                       initial={{ scale: 0, opacity: 0 }}
+                       animate={{ scale: 1, opacity: 1 }}
+                       transition={{ duration: 0.4, delay: 3 + index * 0.3 }}
+                       whileHover={{
+                         scale: 1.5,
+                         boxShadow: `0 0 8px ${stat.color}80`,
+                         transition: { duration: 0.3 }
+                       }}
+                     />
+                   </motion.div>
+                   
+                   {/* Floating particles */}
+                   <div className="absolute inset-0 pointer-events-none">
+                     {[...Array(3)].map((_, i) => (
+                       <motion.div
+                         key={i}
+                         className="absolute w-0.5 h-0.5 rounded-full"
+                         style={{ backgroundColor: stat.color }}
+                         initial={{ 
+                           scale: 0, 
+                           opacity: 0,
+                           x: 0,
+                           y: 0
+                         }}
+                         animate={{ 
+                           scale: [0, 1, 0],
+                           opacity: [0, 0.8, 0],
+                           x: [0, Math.random() * 40 - 20],
+                           y: [0, -20 - Math.random() * 20]
+                         }}
+                         transition={{
+                           duration: 2,
+                           repeat: Infinity,
+                           delay: 3.5 + index * 0.3 + i * 0.5,
+                           ease: "easeOut"
+                         }}
+                       />
+                     ))}
+                   </div>
+                 </motion.div>
+               ))}
+             </motion.div>
           </div>
 
           {/* Right Content */}
           <div className="relative">
-            {/* Flower Image */}
+            {/* Flower Image with Clean Transitions */}
             <motion.div
               className="relative"
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8, delay: 0.3 }}
+              initial={{ 
+                opacity: 0, 
+                x: 300, 
+                scale: 0.8
+              }}
+              animate={{ 
+                opacity: 1, 
+                x: 0, 
+                scale: 1
+              }}
+              transition={{ 
+                duration: 1.5, 
+                delay: 0.3,
+                ease: [0.25, 0.46, 0.45, 0.94]
+              }}
             >
-              <div className="relative w-full h-96 lg:h-[500px] group">
-                {/* Soft glow background */}
-                <div className="absolute inset-0 bg-gradient-radial from-primary/20 via-primary/10 to-transparent rounded-full blur-3xl scale-110 group-hover:scale-125 transition-transform duration-700"></div>
-                
-                <img
-                  src="/assets/flower1.jpg"
-                  alt="Beautiful Flower"
-                  className="relative w-full h-full object-contain drop-shadow-[0_25px_50px_rgba(198,161,81,0.4)] hover:drop-shadow-[0_35px_70px_rgba(198,161,81,0.6)] transition-all duration-700 transform group-hover:rotate-2 hover:scale-105"
+              <div className="relative w-full h-96 lg:h-[500px] perspective-1000" style={{ transformStyle: "preserve-3d" }}>
+                {/* Subtle glow effect */}
+                <motion.div 
+                  className="absolute inset-0 bg-gradient-radial from-primary/20 via-primary/10 to-transparent rounded-full blur-3xl scale-110"
+                  animate={{
+                    scale: [1.1, 1.2, 1.1],
+                    opacity: [0.2, 0.3, 0.2]
+                  }}
+                  transition={{
+                    duration: 6,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
                 />
                 
-                {/* Floating particles around image */}
+                {/* Main flower image */}
+                <motion.img
+                  src="/assets/flower1.jpg"
+                  alt="Beautiful Flower"
+                  className="relative w-full h-full object-contain z-10"
+                  initial={{ 
+                    filter: "blur(8px) brightness(0.9)",
+                    scale: 0.95
+                  }}
+                  animate={{ 
+                    filter: "blur(0px) brightness(1)",
+                    scale: 1
+                  }}
+                  transition={{ 
+                    duration: 1.2, 
+                    delay: 0.5,
+                    ease: "easeOut"
+                  }}
+                  style={{
+                    filter: "drop-shadow(0 20px 40px rgba(198,161,81,0.3))",
+                    transformStyle: "preserve-3d"
+                  }}
+                />
+                
+                {/* Floating particles */}
                 <div className="absolute inset-0 pointer-events-none">
                   {[...Array(6)].map((_, i) => (
                     <motion.div
                       key={i}
-                      className="absolute w-2 h-2 bg-primary/40 rounded-full"
+                      className="absolute bg-primary/40 rounded-full"
                       style={{
+                        width: `${3 + (i % 2)}px`,
+                        height: `${3 + (i % 2)}px`,
                         left: `${20 + (i * 15)}%`,
                         top: `${30 + (i % 3) * 20}%`,
                       }}
                       animate={{
                         y: [0, -20, 0],
-                        opacity: [0.4, 0.8, 0.4],
+                        opacity: [0.3, 0.7, 0.3],
                         scale: [1, 1.2, 1]
                       }}
                       transition={{
@@ -262,63 +690,99 @@ const UltraHero = () => {
             {/* Glassmorphism Service Cards */}
             <motion.div
               className="absolute -right-16 top-8 space-y-6"
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8, delay: 0.5 }}
+              initial={{ opacity: 0, x: 50, scale: 0.9 }}
+              animate={{ opacity: 1, x: 0, scale: 1 }}
+              transition={{ 
+                duration: 1, 
+                delay: 0.5,
+                type: "spring",
+                stiffness: 80,
+                damping: 12
+              }}
             >
-              {/* Wedding Arrangements */}
-              <motion.div 
-                className="relative group"
-                whileHover={{ y: -8, scale: 1.02 }}
-                transition={{ duration: 0.3, ease: "easeOut" }}
-              >
-                <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-4 pr-6 shadow-2xl hover:shadow-[0_25px_50px_rgba(255,255,255,0.15)] hover:bg-white/15 transition-all duration-500">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center shadow-lg">
-                      <svg className="w-5 h-5 text-white drop-shadow-lg" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 2L13.09 8.26L20 9L13.09 9.74L12 16L10.91 9.74L4 9L10.91 8.26L12 2Z"/>
-                      </svg>
+              {[
+                { 
+                  icon: "M12 2L13.09 8.26L20 9L13.09 9.74L12 16L10.91 9.74L4 9L10.91 8.26L12 2Z", 
+                  title: "Wedding Arrangements" 
+                },
+                { 
+                  icon: "M12 2L13.5 7.5L20 9L14.5 10.5L12 16L9.5 10.5L4 9L10.5 7.5L12 2Z", 
+                  title: "Custom Bouquets" 
+                },
+                { 
+                  icon: "M12 2L13.5 6L18 7.5L14.5 10L15 14L12 12L9 14L9.5 10L6 7.5L10.5 6L12 2Z", 
+                  title: "Event Decor" 
+                }
+              ].map((service, index) => (
+                <motion.div 
+                  key={index}
+                  className="relative group"
+                  initial={{ opacity: 0, x: 30, y: 20 }}
+                  animate={{ opacity: 1, x: 0, y: 0 }}
+                  transition={{ 
+                    duration: 0.8, 
+                    delay: 0.7 + index * 0.2,
+                    type: "spring",
+                    stiffness: 100,
+                    damping: 15
+                  }}
+                  whileHover={{ 
+                    y: -8, 
+                    scale: 1.02,
+                    transition: { duration: 0.3, ease: "easeOut" }
+                  }}
+                >
+                  <motion.div 
+                    className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-4 pr-6 shadow-2xl hover:shadow-[0_25px_50px_rgba(255,255,255,0.15)] hover:bg-white/15 transition-all duration-500 relative overflow-hidden"
+                    whileHover={{
+                      borderColor: "rgba(198,161,81,0.4)",
+                      transition: { duration: 0.3 }
+                    }}
+                  >
+                    <div className="flex items-center gap-3 relative z-10">
+                      <motion.div 
+                        className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center shadow-lg"
+                        whileHover={{
+                          scale: 1.1,
+                          rotate: 5,
+                          backgroundColor: "rgba(198,161,81,0.3)",
+                          transition: { duration: 0.3 }
+                        }}
+                      >
+                        <motion.svg 
+                          className="w-5 h-5 text-white drop-shadow-lg" 
+                          fill="currentColor" 
+                          viewBox="0 0 24 24"
+                          whileHover={{
+                            scale: 1.1,
+                            rotate: -5,
+                            transition: { duration: 0.3 }
+                          }}
+                        >
+                          <path d={service.icon}/>
+                        </motion.svg>
+                      </motion.div>
+                      <motion.span 
+                        className="font-body font-semibold text-white drop-shadow-lg"
+                        whileHover={{
+                          color: "#c6a151",
+                          transition: { duration: 0.3 }
+                        }}
+                      >
+                        {service.title}
+                      </motion.span>
                     </div>
-                    <span className="font-body font-semibold text-white drop-shadow-lg">Wedding Arrangements</span>
-                  </div>
-                </div>
-              </motion.div>
-              
-              {/* Custom Bouquets */}
-              <motion.div 
-                className="relative group"
-                whileHover={{ y: -8, scale: 1.02 }}
-                transition={{ duration: 0.3, ease: "easeOut" }}
-              >
-                <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-4 pr-6 shadow-2xl hover:shadow-[0_25px_50px_rgba(255,255,255,0.15)] hover:bg-white/15 transition-all duration-500">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center shadow-lg">
-                      <svg className="w-5 h-5 text-white drop-shadow-lg" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 2L13.5 7.5L20 9L14.5 10.5L12 16L9.5 10.5L4 9L10.5 7.5L12 2Z"/>
-                      </svg>
-                    </div>
-                    <span className="font-body font-semibold text-white drop-shadow-lg">Custom Bouquets</span>
-                  </div>
-                </div>
-              </motion.div>
-              
-              {/* Event Decor */}
-              <motion.div 
-                className="relative group"
-                whileHover={{ y: -8, scale: 1.02 }}
-                transition={{ duration: 0.3, ease: "easeOut" }}
-              >
-                <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-4 pr-6 shadow-2xl hover:shadow-[0_25px_50px_rgba(255,255,255,0.15)] hover:bg-white/15 transition-all duration-500">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center shadow-lg">
-                      <svg className="w-5 h-5 text-white drop-shadow-lg" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 2L13.5 6L18 7.5L14.5 10L15 14L12 12L9 14L9.5 10L6 7.5L10.5 6L12 2Z"/>
-                      </svg>
-                    </div>
-                    <span className="font-body font-semibold text-white drop-shadow-lg">Event Decor</span>
-                  </div>
-                </div>
-              </motion.div>
+                    
+                    {/* Animated background gradient */}
+                    <motion.div
+                      className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-yellow-400/5 opacity-0 group-hover:opacity-100"
+                      initial={{ x: "-100%" }}
+                      whileHover={{ x: "100%" }}
+                      transition={{ duration: 0.8 }}
+                    />
+                  </motion.div>
+                </motion.div>
+              ))}
             </motion.div>
           </div>
         </div>
