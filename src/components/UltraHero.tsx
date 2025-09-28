@@ -4,7 +4,6 @@ import { ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import ParticleSystem from './ParticleSystem';
 import heroBackground from '@/assets/hero-bg.jpg';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -14,7 +13,6 @@ const UltraHero = () => {
   const titleRef = useRef<HTMLHeadingElement>(null);
   const subtitleRef = useRef<HTMLParagraphElement>(null);
   const buttonRef = useRef<HTMLDivElement>(null);
-  const particlesRef = useRef<HTMLDivElement>(null);
   const controls = useAnimation();
 
   useEffect(() => {
@@ -22,18 +20,15 @@ const UltraHero = () => {
     const title = titleRef.current;
     const subtitle = subtitleRef.current;
     const button = buttonRef.current;
-    const particles = particlesRef.current;
-
-    if (hero && title && subtitle && button && particles) {
+    if (hero && title && subtitle && button) {
       // Initial animation sequence
       const tl = gsap.timeline();
       
       // Set initial states
       gsap.set([title, subtitle, button], { y: 100, opacity: 0 });
-      gsap.set(particles, { opacity: 0 });
 
       // Animate in sequence
-      tl.to(particles, { duration: 2, opacity: 1, ease: "power2.out" })
+      tl
         .to(title, { 
           duration: 1.5, 
           y: 0, 
@@ -130,14 +125,14 @@ const UltraHero = () => {
   return (
     <section 
       ref={heroRef}
-      className="relative min-h-screen flex items-center justify-center overflow-hidden perspective-1000 pt-8 -mt-12"
+      className="relative min-h-screen flex items-center justify-center overflow-hidden perspective-1000 pt-8 -mt-20"
     >
       {/* Background Image with 3D Parallax */}
       <div className="absolute inset-0 z-0 -top-4">
         <motion.img
           src={heroBackground}
           alt="Luxury floral background"
-          className="w-full h-full object-cover opacity-20 transform-3d"
+          className="w-full h-full object-cover opacity-20 transform-3d shadow-gold"
           initial={{ scale: 1.2, rotateX: -5 }}
           whileInView={{ scale: 1, rotateX: 0 }}
           viewport={{ once: true, amount: 0.2 }}
@@ -146,10 +141,6 @@ const UltraHero = () => {
         <div className="absolute inset-0 -top-4 bg-gradient-to-b from-background/90 via-background/70 to-background/90" />
       </div>
 
-      {/* 3D Particles */}
-      <div ref={particlesRef} className="absolute inset-0 z-10">
-        <ParticleSystem />
-      </div>
 
       
 
@@ -245,30 +236,6 @@ const UltraHero = () => {
                      }}
                    />
                    
-                   {/* Floating particles around title */}
-                   <div className="absolute inset-0 pointer-events-none">
-                     {[...Array(4)].map((_, i) => (
-                       <motion.div
-                         key={i}
-                         className="absolute w-1 h-1 bg-primary/60 rounded-full"
-                         style={{
-                           left: `${20 + i * 20}%`,
-                           top: `${-10 + (i % 2) * 20}%`,
-                         }}
-                         animate={{
-                           y: [0, -15, 0],
-                           opacity: [0, 1, 0],
-                           scale: [0, 1, 0]
-                         }}
-                         transition={{
-                           duration: 3,
-                           repeat: Infinity,
-                           delay: 2.5 + i * 0.3,
-                           ease: "easeInOut"
-                         }}
-                       />
-                     ))}
-                   </div>
                  </motion.span>
                </motion.h1>
                
@@ -451,9 +418,9 @@ const UltraHero = () => {
                }}
              >
                {[
-                 { number: "15+", label: "years experience", color: "#c6a151" },
-                 { number: "26K", label: "bouquets created", color: "#ffd700" },
-                 { number: "98%", label: "satisfied rate", color: "#ff6b6b" }
+                 { number: "1+", label: "years experience", color: "#c6a151" },
+                 { number: "100+", label: "flowers", color: "#ffd700" },
+                 { number: "98%", label: "satisfied rate", color: "#e4b55c" }
                ].map((stat, index) => (
                  <motion.div 
                    key={index}
@@ -565,34 +532,6 @@ const UltraHero = () => {
                      />
                    </motion.div>
                    
-                   {/* Floating particles */}
-                   <div className="absolute inset-0 pointer-events-none">
-                     {[...Array(3)].map((_, i) => (
-                       <motion.div
-                         key={i}
-                         className="absolute w-0.5 h-0.5 rounded-full"
-                         style={{ backgroundColor: stat.color }}
-                         initial={{ 
-                           scale: 0, 
-                           opacity: 0,
-                           x: 0,
-                           y: 0
-                         }}
-                         animate={{ 
-                           scale: [0, 1, 0],
-                           opacity: [0, 0.8, 0],
-                           x: [0, Math.random() * 40 - 20],
-                           y: [0, -20 - Math.random() * 20]
-                         }}
-                         transition={{
-                           duration: 2,
-                           repeat: Infinity,
-                           delay: 3.5 + index * 0.3 + i * 0.5,
-                           ease: "easeOut"
-                         }}
-                       />
-                     ))}
-                   </div>
                  </motion.div>
                ))}
              </motion.div>
@@ -638,13 +577,13 @@ const UltraHero = () => {
                 <motion.img
                   src="/assets/flower1.jpg"
                   alt="Beautiful Flower"
-                  className="relative w-full h-full object-contain z-10"
+                  className="relative w-full h-full object-contain z-10 ml-8"
                   initial={{ 
-                    filter: "blur(8px) brightness(0.9)",
+                    filter: "blur(8px) brightness(0.9) drop-shadow(0 0 15px rgba(228, 181, 92, 0.4)) drop-shadow(0 0 25px rgba(228, 181, 92, 0.2))",
                     scale: 0.95
                   }}
                   animate={{ 
-                    filter: "blur(0px) brightness(1)",
+                    filter: "blur(0px) brightness(1) drop-shadow(0 0 15px rgba(228, 181, 92, 0.4)) drop-shadow(0 0 25px rgba(228, 181, 92, 0.2))",
                     scale: 1
                   }}
                   transition={{ 
@@ -658,38 +597,12 @@ const UltraHero = () => {
                   }}
                 />
                 
-                {/* Floating particles */}
-                <div className="absolute inset-0 pointer-events-none">
-                  {[...Array(6)].map((_, i) => (
-                    <motion.div
-                      key={i}
-                      className="absolute bg-primary/40 rounded-full"
-                      style={{
-                        width: `${3 + (i % 2)}px`,
-                        height: `${3 + (i % 2)}px`,
-                        left: `${20 + (i * 15)}%`,
-                        top: `${30 + (i % 3) * 20}%`,
-                      }}
-                      animate={{
-                        y: [0, -20, 0],
-                        opacity: [0.3, 0.7, 0.3],
-                        scale: [1, 1.2, 1]
-                      }}
-                      transition={{
-                        duration: 3 + i * 0.5,
-                        repeat: Infinity,
-                        delay: i * 0.3,
-                        ease: "easeInOut"
-                      }}
-                    />
-                  ))}
-                </div>
               </div>
             </motion.div>
 
             {/* Glassmorphism Service Cards */}
             <motion.div
-              className="absolute -right-16 top-8 space-y-6"
+              className="absolute -right-24 top-8 space-y-6"
               initial={{ opacity: 0, x: 50, scale: 0.9 }}
               animate={{ opacity: 1, x: 0, scale: 1 }}
               transition={{ 

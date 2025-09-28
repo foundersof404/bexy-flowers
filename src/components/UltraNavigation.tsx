@@ -222,7 +222,7 @@ const UltraNavigation = () => {
             <div className="flex-1"></div>
 
             {/* Desktop Navigation with Advanced Hover Effects */}
-            <div className="hidden lg:flex items-center space-x-8">
+            <div className="hidden lg:flex items-center space-x-4">
               {navigationItems.map((item, index) => (
                 <motion.div
                   key={item.name}
@@ -375,7 +375,7 @@ const UltraNavigation = () => {
             </div>
 
             {/* Cart & Menu with Enhanced Hover Effects */}
-            <div className="flex items-center space-x-4 ml-8">
+            <div className="flex items-center space-x-4 ml-4">
               {/* Cart with Advanced Hover Effects */}
               <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
@@ -448,12 +448,12 @@ const UltraNavigation = () => {
                   {/* Cart Badge with Enhanced Animation */}
                   {cartItems > 0 && (
                     <motion.div
-                      className="absolute -top-2 -right-2 w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-luxury font-bold text-xs shadow-gold cart-pulse relative z-20"
+                      className="absolute -top-3 -right-0 -left-3 w-5 h-5 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-luxury font-bold text-xs shadow-gold cart-pulse relative z-20"
                       initial={{ scale: 0, rotate: -180 }}
                       animate={{ scale: 1, rotate: 0 }}
                       transition={{ delay: 1.5, type: "spring", stiffness: 500 }}
                       whileHover={{ 
-                        scale: 1.3, 
+                        scale: 1.1, 
                         rotate: 360,
                         boxShadow: "0 0 20px rgba(196,166,105,0.8)"
                       }}
