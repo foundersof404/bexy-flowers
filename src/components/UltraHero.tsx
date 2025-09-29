@@ -132,13 +132,13 @@ const UltraHero = () => {
         <motion.img
           src={heroBackground}
           alt="Luxury floral background"
-          className="w-full h-full object-cover opacity-20 transform-3d shadow-gold"
+          className="w-full h-full object-cover opacity-40 transform-3d shadow-gold"
           initial={{ scale: 1.2, rotateX: -5 }}
           whileInView={{ scale: 1, rotateX: 0 }}
           viewport={{ once: true, amount: 0.2 }}
           transition={{ duration: 20, ease: "linear", repeat: Infinity, repeatType: "reverse" }}
         />
-        <div className="absolute inset-0 -top-4 bg-gradient-to-b from-background/90 via-background/70 to-background/90" />
+        <div className="absolute inset-0 -top-4 bg-gradient-to-b from-amber-50/80 via-white/70 to-amber-50/80" />
       </div>
 
 
@@ -246,20 +246,20 @@ const UltraHero = () => {
                  animate={{ opacity: 1, y: 0 }}
                  transition={{ duration: 1, delay: 0.8 }}
                >
-                 <motion.p 
-                   className="font-serif text-lg text-primary/80 font-light tracking-wide mb-2 relative"
-                   initial={{ opacity: 0, x: -50 }}
+                <motion.p 
+                  className="font-serif text-lg text-primary/100 font-light tracking-wide mb-2 relative"
+                   initial={{ opacity: 0.5, x: -50 }}
                    animate={{ opacity: 1, x: 0 }}
                    transition={{ duration: 1.2, delay: 1, ease: "easeOut" }}
-                 >
-                   <motion.span
-                     className="inline-block"
-                     whileHover={{
-                       color: "#c6a151",
-                       scale: 1.05,
-                       transition: { duration: 0.3 }
-                     }}
-                   >
+                >
+                  <motion.span
+                    className="inline-block bg-gradient-to-r from-yellow-300 via-amber-400 to-yellow-600 bg-clip-text text-transparent drop-shadow-[0_2px_6px_rgba(0,0,0,0.7)] drop-shadow-md"
+                    style={{ WebkitTextStroke: "1px #000", paintOrder: "stroke fill", textShadow: "0 1px 0 #000, 0 -1px 0 #000, 1px 0 0 #000, -1px 0 0 #000" }}
+                    whileHover={{
+                      scale: 1.03,
+                      transition: { duration: 0.3 }
+                    }}
+                  >
                      Crafting timeless beauty through floral artistry
                    </motion.span>
                    
@@ -295,17 +295,7 @@ const UltraHero = () => {
                      From intimate weddings to grand celebrations, we create bespoke arrangements that capture life's most precious moments with unparalleled elegance.
                    </motion.span>
                    
-                   {/* Animated cursor */}
-                   <motion.span
-                     className="inline-block w-0.5 h-5 bg-primary ml-1"
-                     animate={{ opacity: [1, 0, 1] }}
-                     transition={{ 
-                       duration: 1, 
-                       repeat: Infinity, 
-                       delay: 2.5,
-                       ease: "easeInOut"
-                     }}
-                   />
+                  {/* Removed typing cursor */}
                    
                    {/* Background highlight */}
                    <motion.div

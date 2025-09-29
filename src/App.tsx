@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import Collection from "./pages/Collection";
 import AboutPage from "./pages/About";
 import NotFound from "./pages/NotFound";
+import Customize from "./pages/Customize";
 import ScrollToTop from "@/components/ScrollToTop";
 
 const queryClient = new QueryClient();
@@ -27,6 +28,7 @@ const App = () => {
             <Route path="/" element={<Index />} />
             <Route path="/collection" element={<Collection />} />
             <Route path="/about" element={<AboutPage />} />
+            <Route path="/customize" element={<Customize />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
