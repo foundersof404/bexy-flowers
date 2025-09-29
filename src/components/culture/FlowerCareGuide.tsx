@@ -1,345 +1,213 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { LiquidButton } from '@/components/ui/liquid-button';
-import { Droplets, Sun, Scissors, Heart, PlayCircle, CheckCircle } from 'lucide-react';
-
-gsap.registerPlugin(ScrollTrigger);
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
+import { Droplets, Sun, Scissors, Heart, CheckCircle, ArrowRight } from 'lucide-react';
 
 interface CareStep {
   id: number;
   title: string;
   description: string;
   icon: React.ReactNode;
-  duration: string;
   tips: string[];
-  difficulty: 'Easy' | 'Medium' | 'Advanced';
+  color: string;
 }
 
 const careSteps: CareStep[] = [
   {
     id: 1,
-    title: "Proper Hydration",
-    description: "The foundation of flower longevity is consistent, clean water supply with the right additives.",
-    icon: <Droplets className="w-6 h-6" />,
-    duration: "Daily ritual",
+    title: "Water",
+    description: "Keep your flowers hydrated with clean, fresh water",
+    icon: <Droplets className="w-5 h-5" />,
     tips: [
-      "Use lukewarm water (70-80°F) for most flowers",
+      "Use lukewarm water (70-80°F)",
       "Add flower food or 1 tsp sugar + 1 tsp bleach per quart",
-      "Change water every 2-3 days completely",
-      "Top off water daily as flowers drink a lot"
+      "Change water every 2-3 days",
+      "Top off water daily"
     ],
-    difficulty: "Easy"
+    color: "from-blue-400 to-blue-600"
   },
   {
     id: 2,
-    title: "Strategic Trimming",
-    description: "Proper cutting technique ensures maximum water uptake and extends bloom life significantly.",
-    icon: <Scissors className="w-6 h-6" />,
-    duration: "Every 2-3 days",
+    title: "Trim",
+    description: "Cut stems properly for maximum water absorption",
+    icon: <Scissors className="w-5 h-5" />,
     tips: [
       "Cut stems at 45° angle under running water",
-      "Use sharp, clean floral shears or knife",
-      "Remove any leaves below waterline",
+      "Use sharp, clean floral shears",
+      "Remove leaves below waterline",
       "Trim 1-2 inches off stems with each water change"
     ],
-    difficulty: "Medium"
+    color: "from-green-400 to-green-600"
   },
   {
     id: 3,
-    title: "Optimal Placement",
-    description: "Environmental factors play a crucial role in maintaining flower freshness and vibrancy.",
-    icon: <Sun className="w-6 h-6" />,
-    duration: "One-time setup",
+    title: "Place",
+    description: "Find the perfect spot for your flowers to thrive",
+    icon: <Sun className="w-5 h-5" />,
     tips: [
-      "Keep away from direct sunlight and heat sources",
-      "Maintain room temperature around 65-70°F",
-      "Ensure good air circulation but avoid drafts",
-      "Place in areas with consistent temperature"
+      "Keep away from direct sunlight",
+      "Maintain room temperature 65-70°F",
+      "Ensure good air circulation",
+      "Avoid heat sources and drafts"
     ],
-    difficulty: "Easy"
+    color: "from-yellow-400 to-yellow-600"
   },
   {
     id: 4,
-    title: "Gentle Maintenance",
-    description: "Regular care and attention to detail will keep your arrangement looking professionally fresh.",
-    icon: <Heart className="w-6 h-6" />,
-    duration: "Daily check",
+    title: "Maintain",
+    description: "Daily care keeps your flowers looking fresh",
+    icon: <Heart className="w-5 h-5" />,
     tips: [
-      "Remove wilted flowers and yellowing leaves immediately",
-      "Gently mist petals (avoid fuzzy flowers like roses)",
-      "Rotate vase occasionally for even light exposure",
-      "Clean vase thoroughly between arrangements"
+      "Remove wilted flowers immediately",
+      "Gently mist petals (avoid fuzzy flowers)",
+      "Rotate vase for even light exposure",
+      "Clean vase between arrangements"
     ],
-    difficulty: "Advanced"
+    color: "from-pink-400 to-pink-600"
   }
 ];
 
 const FlowerCareGuide = () => {
   const [activeStep, setActiveStep] = useState<number>(1);
-  const [isPlaying, setIsPlaying] = useState<boolean>(false);
-  const sectionRef = useRef<HTMLElement>(null);
-  const stepsRef = useRef<HTMLDivElement[]>([]);
-  const progressRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const section = sectionRef.current;
-    const steps = stepsRef.current;
-    const progress = progressRef.current;
-
-    if (!section || !steps.length || !progress) return;
-
-    // Animate steps on scroll
-    steps.forEach((step, index) => {
-      gsap.fromTo(step,
-        { x: index % 2 === 0 ? -100 : 100, opacity: 0, rotateY: 15 },
-        {
-          x: 0,
-          opacity: 1,
-          rotateY: 0,
-          duration: 1,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: step,
-            start: "top 80%",
-            end: "bottom 20%",
-            toggleActions: "play none none reverse"
-          }
-        }
-      );
-    });
-
-    // Progress bar animation
-    gsap.to(progress, {
-      scaleX: activeStep / careSteps.length,
-      duration: 0.5,
-      ease: "power2.out"
-    });
-
-    return () => {
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
-    };
-  }, [activeStep]);
-
-  const playAllSteps = async () => {
-    setIsPlaying(true);
-    for (let i = 1; i <= careSteps.length; i++) {
-      setActiveStep(i);
-      await new Promise(resolve => setTimeout(resolve, 2000));
-    }
-    setIsPlaying(false);
-  };
-
-  const difficultyColors = {
-    Easy: 'bg-green-500/20 text-green-400 border-green-500/30',
-    Medium: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
-    Advanced: 'bg-red-500/20 text-red-400 border-red-500/30'
-  };
-
-  const addToStepsRefs = (el: HTMLDivElement | null) => {
-    if (el && !stepsRef.current.includes(el)) {
-      stepsRef.current.push(el);
-    }
-  };
 
   return (
-    <section ref={sectionRef} className="py-24 bg-gradient-to-b from-background to-muted/10">
-      <div className="container mx-auto px-4">
+    <section className="py-20 px-4" style={{ background: 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 50%, #ffffff 100%)' }}>
+      <div className="max-w-6xl mx-auto">
+        {/* Simple Header */}
         <motion.div
+          className="text-center mb-16"
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="text-center mb-16"
+          viewport={{ once: true }}
         >
-          <Badge variant="outline" className="mb-4 text-primary border-primary/20">
-            <Heart className="w-4 h-4 mr-2" />
-            Care Guide
-          </Badge>
-          <h2 className="font-luxury text-4xl md:text-6xl font-bold text-foreground mb-4">
+          <h2 className="font-luxury text-4xl md:text-5xl font-bold text-slate-800 mb-4">
             Master Flower Care
           </h2>
-          <p className="text-muted-foreground text-xl max-w-3xl mx-auto mb-8">
-            Learn the professional techniques that will extend your flowers' beauty and create lasting arrangements
+          <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+            Simple steps to keep your flowers fresh and beautiful for longer
           </p>
-          
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <LiquidButton
-              variant="gold"
-              size="lg"
-              onClick={playAllSteps}
-              disabled={isPlaying}
+        </motion.div>
+
+        {/* Step Navigation */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
+          {careSteps.map((step) => (
+            <motion.button
+              key={step.id}
+              onClick={() => setActiveStep(step.id)}
+              className={`p-4 rounded-2xl border-2 transition-all duration-300 ${
+                activeStep === step.id
+                  ? 'border-amber-400 bg-amber-50 shadow-lg'
+                  : 'border-slate-200 bg-white hover:border-amber-200 hover:bg-amber-25'
+              }`}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
             >
-              <PlayCircle className="w-5 h-5 mr-2" />
-              {isPlaying ? 'Playing Guide...' : 'Play Full Guide'}
-            </LiquidButton>
-            
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <span className="text-sm">Step {activeStep} of {careSteps.length}</span>
-              <div className="w-32 h-2 bg-muted/20 rounded-full overflow-hidden">
-                <div
-                  ref={progressRef}
-                  className="h-full bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-600 origin-left scale-x-0 shadow-lg shadow-amber-500/50"
-                />
+              <div className="text-center">
+                <div className={`w-12 h-12 mx-auto mb-3 rounded-xl flex items-center justify-center ${
+                  activeStep === step.id 
+                    ? `bg-gradient-to-r ${step.color} text-white` 
+                    : 'bg-slate-100 text-slate-600'
+                }`}>
+                  {activeStep >= step.id ? <CheckCircle className="w-6 h-6" /> : step.icon}
+                </div>
+                <h3 className="font-semibold text-slate-800 mb-1">{step.title}</h3>
+                <p className="text-xs text-slate-500">{step.description}</p>
+              </div>
+            </motion.button>
+          ))}
+        </div>
+
+        {/* Active Step Content */}
+        <motion.div
+          key={activeStep}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="bg-white rounded-3xl shadow-lg border border-slate-200 p-8 mb-12"
+        >
+          <div className="grid md:grid-cols-2 gap-8 items-center">
+            <div>
+              <div className="flex items-center gap-4 mb-6">
+                <div className={`w-16 h-16 bg-gradient-to-r ${careSteps[activeStep - 1].color} rounded-2xl flex items-center justify-center text-white`}>
+                  {careSteps[activeStep - 1].icon}
+                </div>
+                <div>
+                  <h3 className="font-luxury text-2xl font-bold text-slate-800">
+                    {careSteps[activeStep - 1].title}
+                  </h3>
+                  <p className="text-slate-600">
+                    {careSteps[activeStep - 1].description}
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <h4 className="font-semibold text-slate-800 text-lg">Step-by-Step Guide:</h4>
+                {careSteps[activeStep - 1].tips.map((tip, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    className="flex items-start gap-3 p-3 bg-slate-50 rounded-xl"
+                  >
+                    <div className="w-6 h-6 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <span className="text-amber-600 text-sm font-bold">{index + 1}</span>
+                    </div>
+                    <span className="text-slate-700">{tip}</span>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+
+            <div className="text-center">
+              <motion.div
+                animate={{ 
+                  scale: [1, 1.05, 1],
+                  rotate: [0, 2, -2, 0]
+                }}
+                transition={{ 
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+                className="text-8xl mb-6"
+              >
+                {activeStep === 1 ? '💧' : activeStep === 2 ? '✂️' : activeStep === 3 ? '🌞' : '💖'}
+              </motion.div>
+              <div className="text-sm text-slate-500">
+                Step {activeStep} of {careSteps.length}
               </div>
             </div>
           </div>
         </motion.div>
 
-        {/* Interactive Step Navigation */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-16">
-          {careSteps.map((step) => (
-            <motion.div
-              key={step.id}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <Card
-                className={`p-4 cursor-pointer transition-all duration-300 ${
-                  activeStep === step.id
-                    ? 'border-primary/50 bg-primary/10'
-                    : 'border-primary/10 bg-background/50 hover:border-primary/30'
-                }`}
-                onClick={() => setActiveStep(step.id)}
-              >
-                <div className="text-center">
-                  <div className={`w-12 h-12 mx-auto mb-3 rounded-full flex items-center justify-center ${
-                    activeStep === step.id ? 'bg-primary text-background' : 'bg-muted/20 text-primary'
-                  }`}>
-                    {activeStep >= step.id ? <CheckCircle className="w-6 h-6" /> : step.icon}
-                  </div>
-                  <h3 className="font-semibold text-sm text-foreground">{step.title}</h3>
-                  <Badge className={`mt-2 text-xs ${difficultyColors[step.difficulty]}`}>
-                    {step.difficulty}
-                  </Badge>
-                </div>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
-
-        {/* Active Step Details */}
-        <AnimatePresence mode="wait">
-          {careSteps.map((step) => (
-            activeStep === step.id && (
-              <motion.div
-                key={step.id}
-                initial={{ opacity: 0, x: 100, scale: 0.9 }}
-                animate={{ opacity: 1, x: 0, scale: 1 }}
-                exit={{ opacity: 0, x: -100, scale: 0.9 }}
-                transition={{ duration: 0.5 }}
-                ref={addToStepsRefs}
-                className="mb-16"
-              >
-                <Card className="p-8 bg-gradient-glass backdrop-blur-md border-primary/20">
-                  <div className="grid md:grid-cols-2 gap-8">
-                    <div>
-                      <div className="flex items-center gap-4 mb-6">
-                        <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center text-background">
-                          {step.icon}
-                        </div>
-                        <div>
-                          <h3 className="font-luxury text-2xl font-bold text-foreground">
-                            {step.title}
-                          </h3>
-                          <div className="flex items-center gap-2 mt-2">
-                            <Badge className={difficultyColors[step.difficulty]}>
-                              {step.difficulty}
-                            </Badge>
-                            <Badge variant="outline">
-                              {step.duration}
-                            </Badge>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <p className="text-muted-foreground text-lg leading-relaxed mb-6">
-                        {step.description}
-                      </p>
-
-                      <div className="space-y-3">
-                        <h4 className="font-semibold text-foreground">Professional Tips:</h4>
-                        {step.tips.map((tip, index) => (
-                          <motion.div
-                            key={index}
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: index * 0.1 }}
-                            className="flex items-start gap-3"
-                          >
-                            <div className="w-6 h-6 bg-primary/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                              <span className="text-primary text-xs font-bold">{index + 1}</span>
-                            </div>
-                            <span className="text-muted-foreground">{tip}</span>
-                          </motion.div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-center">
-                      <div className="text-center">
-                        <motion.div
-                          animate={{ 
-                            scale: [1, 1.1, 1],
-                            rotate: [0, 5, -5, 0]
-                          }}
-                          transition={{ 
-                            duration: 2,
-                            repeat: Infinity,
-                            repeatType: "reverse"
-                          }}
-                          className="text-8xl mb-6"
-                        >
-                          {step.id === 1 ? '💧' : step.id === 2 ? '✂️' : step.id === 3 ? '🌞' : '💖'}
-                        </motion.div>
-                        <Badge className="bg-primary/10 text-primary">
-                          Step {step.id} of {careSteps.length}
-                        </Badge>
-                      </div>
-                    </div>
-                  </div>
-                </Card>
-              </motion.div>
-            )
-          ))}
-        </AnimatePresence>
-
-        {/* Quick Reference Card */}
+        {/* Quick Reference */}
         <motion.div
-          initial={{ opacity: 0, y: 50 }}
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="text-center"
+          className="bg-gradient-to-r from-slate-800 to-slate-700 rounded-3xl p-8 text-white"
         >
-          <Card className="inline-block p-8 bg-gradient-luxury backdrop-blur-md border-primary/20">
-            <h3 className="font-luxury text-2xl font-bold mb-4 text-background">
-              Quick Reference
-            </h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-background/90">
-              <div className="text-center">
-                <Droplets className="w-8 h-8 mx-auto mb-2" />
-                <div className="text-sm font-semibold">Water</div>
-                <div className="text-xs">Every 2-3 days</div>
-              </div>
-              <div className="text-center">
-                <Scissors className="w-8 h-8 mx-auto mb-2" />
-                <div className="text-sm font-semibold">Trim</div>
-                <div className="text-xs">45° angle</div>
-              </div>
-              <div className="text-center">
-                <Sun className="w-8 h-8 mx-auto mb-2" />
-                <div className="text-sm font-semibold">Light</div>
-                <div className="text-xs">Indirect sun</div>
-              </div>
-              <div className="text-center">
-                <Heart className="w-8 h-8 mx-auto mb-2" />
-                <div className="text-sm font-semibold">Care</div>
-                <div className="text-xs">Daily check</div>
-              </div>
-            </div>
-          </Card>
+          <h3 className="font-luxury text-2xl font-bold text-center mb-8">
+            Quick Reference
+          </h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {careSteps.map((step, index) => (
+              <motion.div
+                key={index}
+                className="text-center group"
+                whileHover={{ scale: 1.05 }}
+                transition={{ duration: 0.3 }}
+              >
+                <div className={`w-12 h-12 bg-gradient-to-r ${step.color} rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:shadow-lg transition-all duration-300`}>
+                  {step.icon}
+                </div>
+                <div className="font-semibold text-white mb-1">{step.title}</div>
+                <div className="text-sm text-slate-300">{step.description}</div>
+              </motion.div>
+            ))}
+          </div>
         </motion.div>
       </div>
     </section>

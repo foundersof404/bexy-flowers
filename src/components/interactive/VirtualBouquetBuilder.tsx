@@ -168,223 +168,384 @@ const VirtualBouquetBuilder = () => {
   ];
 
   return (
-    <section className="py-24 bg-gradient-to-b from-background to-muted/20">
-      <div className="container mx-auto px-4">
+    <section className="py-32 px-4 relative overflow-hidden min-h-screen" style={{ background: 'rgb(211, 211, 209)' }}>
+      {/* Background Pattern */}
+      <div className="absolute inset-0 opacity-5">
+        <div className="absolute inset-0" style={{
+          backgroundImage: `radial-gradient(circle at 25% 25%, hsl(51 100% 50% / 0.1) 0%, transparent 50%),
+                           radial-gradient(circle at 75% 75%, hsl(51 100% 50% / 0.1) 0%, transparent 50%)`
+        }} />
+      </div>
+
+      <div className="max-w-8xl mx-auto relative z-10">
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="text-center mb-16"
+          transition={{ duration: 1, ease: [0.23, 1, 0.32, 1] }}
+          className="text-center mb-20 relative"
+          viewport={{ once: true }}
         >
-          <Badge variant="outline" className="mb-4 text-primary border-primary/20">
-            <Sparkles className="w-4 h-4 mr-2" />
-            Virtual Builder
-          </Badge>
-          <h2 className="font-luxury text-4xl md:text-6xl font-bold text-foreground mb-4">
+          {/* Modern Floating Badge */}
+          <motion.div 
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-slate-800/10 to-slate-700/10 backdrop-blur-xl border border-slate-600/20 mb-8"
+            initial={{ scale: 0.8, opacity: 0 }}
+            whileInView={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            viewport={{ once: true }}
+          >
+            <div className="w-2 h-2 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 animate-pulse" />
+            <span className="text-sm font-medium text-slate-700 tracking-wider uppercase">Interactive Designer</span>
+          </motion.div>
+
+          {/* Luxury Typography with Gold Accent */}
+          <motion.h2 
+            className="font-luxury text-6xl md:text-8xl font-bold mb-6 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 bg-clip-text text-transparent relative"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            viewport={{ once: true }}
+            style={{
+              filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))',
+              letterSpacing: '0.05em'
+            }}
+          >
             Design Your Perfect Bouquet
-          </h2>
-          <p className="text-muted-foreground text-xl max-w-3xl mx-auto">
-            Create a custom arrangement in real-time with our interactive 3D bouquet builder
-          </p>
+            {/* Animated Gold Underline */}
+            <motion.div 
+              className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 h-1 bg-gradient-to-r from-amber-400 to-yellow-500 rounded-full"
+              initial={{ width: 0 }}
+              whileInView={{ width: '180px' }}
+              transition={{ duration: 1.2, delay: 0.8, ease: "easeOut" }}
+              viewport={{ once: true }}
+            />
+          </motion.h2>
+
+          {/* Enhanced Decorative Elements */}
+          <div className="relative mb-8">
+            <div className="w-32 h-0.5 bg-gradient-to-r from-transparent via-amber-500/60 to-transparent mx-auto" />
+            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-amber-500 rotate-45 shadow-lg shadow-amber-500/50" />
+          </div>
+
+          {/* Enhanced Description */}
+          <motion.p 
+            className="font-body text-lg md:text-xl text-slate-600 max-w-4xl mx-auto leading-relaxed font-light"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+            viewport={{ once: true }}
+          >
+            Create a custom arrangement in real-time with our interactive 3D bouquet builder. 
+            Experience the future of floral design with cutting-edge technology and unlimited creativity.
+          </motion.p>
         </motion.div>
 
-        <div className="grid lg:grid-cols-2 gap-12 items-start">
-          {/* 3D Preview */}
+        <div className="grid lg:grid-cols-2 gap-16 items-start">
+          {/* Enhanced 3D Preview */}
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             whileInView={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8 }}
+            transition={{ duration: 1, delay: 0.2 }}
+            viewport={{ once: true }}
           >
-            <Card className="p-6 bg-background/50 backdrop-blur-sm border-primary/10">
-              <h3 className="font-luxury text-2xl font-bold text-foreground mb-4">
-                Live Preview
-              </h3>
-              <BouquetPreview configuration={configuration} />
+            <div className="relative bg-gradient-to-br from-white/95 via-slate-50/90 to-slate-100/95 backdrop-blur-xl border border-slate-200/50 rounded-[25px] shadow-[0_20px_60px_rgba(198,161,81,0.15)] hover:shadow-[0_30px_80px_rgba(198,161,81,0.25)] transition-all duration-700 ease-out overflow-hidden p-8">
               
-              <div className="mt-6 space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-foreground font-semibold">Total Flowers:</span>
-                  <Badge variant="outline">{configuration.flowers.length}</Badge>
+              {/* Modern Header */}
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gradient-to-br from-amber-400/20 to-yellow-500/20 backdrop-blur-xl rounded-2xl flex items-center justify-center border border-amber-300/30">
+                    <Sparkles className="w-5 h-5 text-amber-600" />
+                  </div>
+                  <h3 className="font-luxury text-2xl font-bold text-slate-800">
+                    Live Preview
+                  </h3>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-foreground font-semibold">Estimated Price:</span>
-                  <Badge className="bg-primary/20 text-primary font-bold">
-                    ${configuration.totalPrice}
-                  </Badge>
+                <div className="w-2 h-2 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 animate-pulse" />
+              </div>
+
+              {/* Enhanced 3D Canvas */}
+              <div className="relative rounded-2xl overflow-hidden mb-6 bg-gradient-to-br from-slate-100/50 to-slate-200/30 border border-slate-300/30">
+                <BouquetPreview configuration={configuration} />
+                
+                {/* Floating Stats Overlay */}
+                <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-xl text-slate-800 px-4 py-2 rounded-xl border border-slate-300/30 shadow-lg">
+                  <div className="text-sm font-medium">3D Model</div>
+                </div>
+                
+                <div className="absolute top-4 right-4 bg-gradient-to-r from-amber-400/90 to-yellow-500/90 backdrop-blur-xl text-slate-900 px-4 py-2 rounded-xl border border-amber-300/50 shadow-lg">
+                  <div className="text-sm font-bold">Interactive</div>
+                </div>
+              </div>
+              
+              {/* Modern Stats */}
+              <div className="grid grid-cols-2 gap-4 mb-6">
+                <div className="bg-gradient-to-br from-slate-100/50 to-slate-200/30 backdrop-blur-xl border border-slate-300/30 rounded-2xl p-4">
+                  <div className="text-sm text-slate-600 font-medium mb-1">Total Flowers</div>
+                  <div className="text-2xl font-luxury font-bold text-slate-800">{configuration.flowers.length}</div>
+                </div>
+                <div className="bg-gradient-to-br from-amber-100/50 to-yellow-200/30 backdrop-blur-xl border border-amber-300/30 rounded-2xl p-4">
+                  <div className="text-sm text-slate-600 font-medium mb-1">Estimated Price</div>
+                  <div className="text-2xl font-luxury font-bold text-amber-700">${configuration.totalPrice}</div>
                 </div>
               </div>
 
-              <div className="mt-6 flex gap-3">
-                <LiquidButton variant="gold" size="lg" className="flex-1">
-                  <Download className="w-4 h-4 mr-2" />
+              {/* Modern Action Buttons */}
+              <div className="flex gap-3">
+                <motion.button
+                  className="flex-1 bg-gradient-to-r from-amber-500 to-yellow-600 text-white px-6 py-4 rounded-2xl font-medium text-base transition-all duration-500 ease-out hover:from-amber-600 hover:to-yellow-700 hover:shadow-[0_10px_30px_rgba(198,161,81,0.4)] flex items-center justify-center gap-3"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <Download className="w-5 h-5" />
                   Order Now
-                </LiquidButton>
-                <LiquidButton variant="glass" onClick={resetConfiguration}>
-                  <RotateCcw className="w-4 h-4" />
-                </LiquidButton>
+                </motion.button>
+                <motion.button
+                  className="bg-white/90 backdrop-blur-xl border-2 border-slate-300/50 text-slate-700 px-6 py-4 rounded-2xl font-medium text-base transition-all duration-500 ease-out hover:bg-slate-100 hover:border-slate-400/70 hover:shadow-[0_8px_25px_rgba(0,0,0,0.1)]"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={resetConfiguration}
+                >
+                  <RotateCcw className="w-5 h-5" />
+                </motion.button>
               </div>
-            </Card>
+
+              {/* Luxury Border */}
+              <div className="absolute inset-0 rounded-[25px] border border-amber-300/30 pointer-events-none" />
+              <div className="absolute inset-[1px] rounded-[25px] bg-gradient-to-br from-amber-100/20 via-transparent to-amber-900/10 opacity-0 hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+            </div>
           </motion.div>
 
-          {/* Configuration Panel */}
+          {/* Enhanced Configuration Panel */}
           <motion.div
             initial={{ opacity: 0, x: 50 }}
             whileInView={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8 }}
+            transition={{ duration: 1, delay: 0.4 }}
+            viewport={{ once: true }}
           >
-            <Card className="p-6 bg-background/50 backdrop-blur-sm border-primary/10">
-              <h3 className="font-luxury text-2xl font-bold text-foreground mb-6">
-                Customize Your Bouquet
-              </h3>
+            <div className="relative bg-gradient-to-br from-white/95 via-slate-50/90 to-slate-100/95 backdrop-blur-xl border border-slate-200/50 rounded-[25px] shadow-[0_20px_60px_rgba(198,161,81,0.15)] hover:shadow-[0_30px_80px_rgba(198,161,81,0.25)] transition-all duration-700 ease-out overflow-hidden p-8">
+              
+              {/* Modern Header */}
+              <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gradient-to-br from-amber-400/20 to-yellow-500/20 backdrop-blur-xl rounded-2xl flex items-center justify-center border border-amber-300/30">
+                    <Palette className="w-5 h-5 text-amber-600" />
+                  </div>
+                  <h3 className="font-luxury text-2xl font-bold text-slate-800">
+                    Customize Your Bouquet
+                  </h3>
+                </div>
+                <div className="w-2 h-2 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 animate-pulse" />
+              </div>
 
-              {/* Tabs */}
-              <div className="flex gap-2 mb-6">
+              {/* Modern Tabs */}
+              <div className="flex gap-3 mb-8 p-1 bg-slate-100/50 backdrop-blur-xl border border-slate-300/30 rounded-2xl">
                 {tabs.map((tab) => (
-                  <LiquidButton
+                  <motion.button
                     key={tab.id}
-                    variant={activeTab === tab.id ? "gold" : "glass"}
-                    size="sm"
+                    className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium text-sm transition-all duration-300 ${
+                      activeTab === tab.id
+                        ? 'bg-gradient-to-r from-amber-500 to-yellow-600 text-white shadow-lg'
+                        : 'text-slate-600 hover:text-slate-800 hover:bg-white/50'
+                    }`}
                     onClick={() => setActiveTab(tab.id as any)}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                   >
                     {tab.icon}
-                    <span className="ml-2">{tab.label}</span>
-                  </LiquidButton>
+                    <span>{tab.label}</span>
+                  </motion.button>
                 ))}
               </div>
 
               <AnimatePresence mode="wait">
-                {/* Flowers Tab */}
+                {/* Enhanced Flowers Tab */}
                 {activeTab === 'flowers' && (
                   <motion.div
                     key="flowers"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
-                    className="space-y-4"
+                    className="space-y-6"
                   >
-                    <h4 className="font-semibold text-foreground mb-4">Available Flowers</h4>
+                    <div className="flex items-center gap-2 mb-6">
+                      <div className="w-6 h-6 bg-gradient-to-br from-pink-400/20 to-rose-500/20 backdrop-blur-xl rounded-lg flex items-center justify-center border border-pink-300/30">
+                        <Flower2 className="w-3 h-3 text-pink-600" />
+                      </div>
+                      <h4 className="font-luxury text-xl font-bold text-slate-800">Available Flowers</h4>
+                    </div>
+                    
                     <div className="grid grid-cols-2 gap-4">
                       {flowerOptions.map((flower) => (
                         <motion.div
                           key={flower.id}
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
+                          whileHover={{ scale: 1.05, y: -2 }}
+                          whileTap={{ scale: 0.95 }}
                         >
-                          <Card 
-                            className="p-4 cursor-pointer border-primary/10 hover:border-primary/30 transition-all duration-300"
+                          <div 
+                            className="relative bg-gradient-to-br from-white/90 to-slate-50/80 backdrop-blur-xl border border-slate-300/30 rounded-2xl p-4 cursor-pointer transition-all duration-500 ease-out hover:border-amber-400/50 hover:shadow-[0_8px_25px_rgba(198,161,81,0.2)] hover:bg-gradient-to-br hover:from-amber-50/50 hover:to-yellow-50/50"
                             onClick={() => addFlower(flower)}
                           >
                             <div className="text-center">
-                              <div className="text-3xl mb-2">{flower.emoji}</div>
-                              <div className="font-semibold text-sm text-foreground">{flower.name}</div>
-                              <Badge variant="outline" className="mt-2">${flower.price}</Badge>
+                              <div className="text-3xl mb-3 transform transition-transform duration-300 hover:scale-110">{flower.emoji}</div>
+                              <div className="font-luxury font-semibold text-sm text-slate-800 mb-2">{flower.name}</div>
+                              <div className="bg-gradient-to-r from-amber-400/20 to-yellow-500/20 backdrop-blur-xl border border-amber-300/30 text-amber-700 px-3 py-1 rounded-xl text-xs font-bold">
+                                ${flower.price}
+                              </div>
                             </div>
-                          </Card>
+                            
+                            {/* Hover Effect */}
+                            <div className="absolute inset-0 bg-gradient-to-br from-amber-100/20 via-transparent to-yellow-100/20 opacity-0 hover:opacity-100 transition-opacity duration-500 rounded-2xl" />
+                          </div>
                         </motion.div>
                       ))}
                     </div>
 
                     {configuration.flowers.length > 0 && (
-                      <div className="mt-6">
-                        <h4 className="font-semibold text-foreground mb-3">Selected Flowers</h4>
+                      <motion.div 
+                        className="mt-8"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5 }}
+                      >
+                        <div className="flex items-center gap-2 mb-4">
+                          <div className="w-6 h-6 bg-gradient-to-br from-emerald-400/20 to-green-500/20 backdrop-blur-xl rounded-lg flex items-center justify-center border border-emerald-300/30">
+                            <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                          </div>
+                          <h4 className="font-luxury text-lg font-bold text-slate-800">Selected Flowers</h4>
+                        </div>
                         <div className="flex flex-wrap gap-2">
                           {configuration.flowers.map((flower, index) => (
-                            <Badge
+                            <motion.div
                               key={flower.id}
-                              variant="secondary"
-                              className="cursor-pointer hover:bg-destructive/20"
-                              onClick={() => removeFlower(flower.id)}
+                              initial={{ scale: 0.8, opacity: 0 }}
+                              animate={{ scale: 1, opacity: 1 }}
+                              exit={{ scale: 0.8, opacity: 0 }}
+                              transition={{ duration: 0.3, delay: index * 0.1 }}
                             >
-                              {flower.emoji} {flower.name} (${flower.price})
-                            </Badge>
+                              <div 
+                                className="bg-gradient-to-r from-emerald-400/90 to-green-500/90 backdrop-blur-xl text-white px-4 py-2 rounded-xl text-sm font-medium cursor-pointer hover:from-emerald-500 hover:to-green-600 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center gap-2"
+                                onClick={() => removeFlower(flower.id)}
+                              >
+                                <span>{flower.emoji}</span>
+                                <span>{flower.name}</span>
+                                <span className="opacity-80">(${flower.price})</span>
+                              </div>
+                            </motion.div>
                           ))}
                         </div>
-                      </div>
+                      </motion.div>
                     )}
                   </motion.div>
                 )}
 
-                {/* Wrapper Tab */}
+                {/* Enhanced Wrapper Tab */}
                 {activeTab === 'wrapper' && (
                   <motion.div
                     key="wrapper"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
-                    className="space-y-4"
+                    className="space-y-6"
                   >
-                    <h4 className="font-semibold text-foreground mb-4">Wrapper Options</h4>
+                    <div className="flex items-center gap-2 mb-6">
+                      <div className="w-6 h-6 bg-gradient-to-br from-amber-400/20 to-orange-500/20 backdrop-blur-xl rounded-lg flex items-center justify-center border border-amber-300/30">
+                        <Package className="w-3 h-3 text-amber-600" />
+                      </div>
+                      <h4 className="font-luxury text-xl font-bold text-slate-800">Wrapper Options</h4>
+                    </div>
                     <div className="grid grid-cols-2 gap-4">
                       {wrapperOptions.map((wrapper) => (
                         <motion.div
                           key={wrapper.id}
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
+                          whileHover={{ scale: 1.05, y: -2 }}
+                          whileTap={{ scale: 0.95 }}
                         >
-                          <Card
-                            className={`p-4 cursor-pointer transition-all duration-300 ${
+                          <div 
+                            className={`relative bg-gradient-to-br from-white/90 to-slate-50/80 backdrop-blur-xl border rounded-2xl p-4 cursor-pointer transition-all duration-500 ease-out ${
                               configuration.wrapper === wrapper.id
-                                ? 'border-primary/50 bg-primary/10'
-                                : 'border-primary/10 hover:border-primary/30'
+                                ? 'border-amber-400/50 shadow-[0_8px_25px_rgba(198,161,81,0.2)] bg-gradient-to-br from-amber-50/50 to-yellow-50/50'
+                                : 'border-slate-300/30 hover:border-amber-400/50 hover:shadow-[0_8px_25px_rgba(198,161,81,0.2)] hover:bg-gradient-to-br hover:from-amber-50/50 hover:to-yellow-50/50'
                             }`}
                             onClick={() => setConfiguration(prev => ({ ...prev, wrapper: wrapper.id }))}
                           >
                             <div className="text-center">
                               <div 
-                                className="w-12 h-12 mx-auto mb-2 rounded-lg"
+                                className="w-16 h-16 mx-auto mb-3 rounded-xl border border-slate-300/30 shadow-sm"
                                 style={{ backgroundColor: wrapper.color }}
                               />
-                              <div className="font-semibold text-sm text-foreground">{wrapper.name}</div>
-                              <Badge variant="outline" className="mt-2">${wrapper.price}</Badge>
+                              <div className="font-luxury font-semibold text-sm text-slate-800 mb-2">{wrapper.name}</div>
+                              <div className="bg-gradient-to-r from-amber-400/20 to-yellow-500/20 backdrop-blur-xl border border-amber-300/30 text-amber-700 px-3 py-1 rounded-xl text-xs font-bold">
+                                ${wrapper.price}
+                              </div>
                             </div>
-                          </Card>
+                            
+                            {/* Selection Indicator */}
+                            {configuration.wrapper === wrapper.id && (
+                              <div className="absolute top-2 right-2 w-6 h-6 bg-gradient-to-r from-amber-400 to-yellow-500 rounded-full flex items-center justify-center">
+                                <div className="w-2 h-2 bg-white rounded-full" />
+                              </div>
+                            )}
+                          </div>
                         </motion.div>
                       ))}
                     </div>
                   </motion.div>
                 )}
 
-                {/* Ribbon Tab */}
+                {/* Enhanced Ribbon Tab */}
                 {activeTab === 'ribbon' && (
                   <motion.div
                     key="ribbon"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
-                    className="space-y-4"
+                    className="space-y-6"
                   >
-                    <h4 className="font-semibold text-foreground mb-4">Ribbon Options</h4>
+                    <div className="flex items-center gap-2 mb-6">
+                      <div className="w-6 h-6 bg-gradient-to-br from-purple-400/20 to-pink-500/20 backdrop-blur-xl rounded-lg flex items-center justify-center border border-purple-300/30">
+                        <Palette className="w-3 h-3 text-purple-600" />
+                      </div>
+                      <h4 className="font-luxury text-xl font-bold text-slate-800">Ribbon Options</h4>
+                    </div>
                     <div className="grid grid-cols-2 gap-4">
                       {ribbonOptions.map((ribbon) => (
                         <motion.div
                           key={ribbon.id}
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
+                          whileHover={{ scale: 1.05, y: -2 }}
+                          whileTap={{ scale: 0.95 }}
                         >
-                          <Card
-                            className={`p-4 cursor-pointer transition-all duration-300 ${
+                          <div 
+                            className={`relative bg-gradient-to-br from-white/90 to-slate-50/80 backdrop-blur-xl border rounded-2xl p-4 cursor-pointer transition-all duration-500 ease-out ${
                               configuration.ribbon === ribbon.id
-                                ? 'border-primary/50 bg-primary/10'
-                                : 'border-primary/10 hover:border-primary/30'
+                                ? 'border-amber-400/50 shadow-[0_8px_25px_rgba(198,161,81,0.2)] bg-gradient-to-br from-amber-50/50 to-yellow-50/50'
+                                : 'border-slate-300/30 hover:border-amber-400/50 hover:shadow-[0_8px_25px_rgba(198,161,81,0.2)] hover:bg-gradient-to-br hover:from-amber-50/50 hover:to-yellow-50/50'
                             }`}
                             onClick={() => setConfiguration(prev => ({ ...prev, ribbon: ribbon.id }))}
                           >
                             <div className="text-center">
                               <div 
-                                className="w-12 h-3 mx-auto mb-2 rounded-sm"
+                                className="w-20 h-6 mx-auto mb-3 rounded-lg border border-slate-300/30 shadow-sm"
                                 style={{ backgroundColor: ribbon.color }}
                               />
-                              <div className="font-semibold text-sm text-foreground">{ribbon.name}</div>
-                              <Badge variant="outline" className="mt-2">${ribbon.price}</Badge>
+                              <div className="font-luxury font-semibold text-sm text-slate-800 mb-2">{ribbon.name}</div>
+                              <div className="bg-gradient-to-r from-amber-400/20 to-yellow-500/20 backdrop-blur-xl border border-amber-300/30 text-amber-700 px-3 py-1 rounded-xl text-xs font-bold">
+                                ${ribbon.price}
+                              </div>
                             </div>
-                          </Card>
+                            
+                            {/* Selection Indicator */}
+                            {configuration.ribbon === ribbon.id && (
+                              <div className="absolute top-2 right-2 w-6 h-6 bg-gradient-to-r from-amber-400 to-yellow-500 rounded-full flex items-center justify-center">
+                                <div className="w-2 h-2 bg-white rounded-full" />
+                              </div>
+                            )}
+                          </div>
                         </motion.div>
                       ))}
                     </div>
                   </motion.div>
                 )}
               </AnimatePresence>
-            </Card>
+            </div>
           </motion.div>
         </div>
       </div>
