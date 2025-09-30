@@ -145,11 +145,11 @@ const UltraHero = () => {
       
 
       {/* Modern Hero Content */}
-      <div className="relative z-20 max-w-7xl mx-auto px-6 lg:px-8">
-        <div className="grid lg:grid-cols-2 gap-12 items-center min-h-[80vh]">
+      <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid lg:grid-cols-2 gap-8 sm:gap-10 lg:gap-12 items-center min-h-[70vh] sm:min-h-[75vh] lg:min-h-[80vh]">
           
           {/* Left Content */}
-          <div className="space-y-8">
+          <div className="space-y-6 sm:space-y-8">
              <motion.div
                ref={titleRef}
                className="overflow-hidden"
@@ -165,7 +165,7 @@ const UltraHero = () => {
              >
                {/* Main Title with Character-by-Character Animation */}
                <motion.h1 
-                 className="font-luxury text-4xl lg:text-6xl font-black text-foreground leading-tight mb-4"
+                 className="font-luxury text-3xl sm:text-4xl lg:text-6xl font-black text-foreground leading-tight mb-4"
                  initial={{ opacity: 0 }}
                  animate={{ opacity: 1 }}
                  transition={{ duration: 0.1, delay: 0.4 }}
@@ -247,7 +247,7 @@ const UltraHero = () => {
                  transition={{ duration: 1, delay: 0.8 }}
                >
                 <motion.p 
-                  className="font-serif text-lg text-primary/100 font-light tracking-wide mb-2 relative"
+                  className="font-serif text-base sm:text-lg text-primary/100 font-light tracking-wide mb-2 relative"
                    initial={{ opacity: 0.5, x: -50 }}
                    animate={{ opacity: 1, x: 0 }}
                    transition={{ duration: 1.2, delay: 1, ease: "easeOut" }}
@@ -286,7 +286,7 @@ const UltraHero = () => {
                  transition={{ duration: 1, delay: 1.2 }}
                >
                  <motion.p 
-                   className="font-body text-base text-muted-foreground leading-relaxed max-w-2xl relative"
+                   className="font-body text-sm sm:text-base text-muted-foreground leading-relaxed max-w-2xl relative"
                    initial={{ opacity: 0 }}
                    animate={{ opacity: 1 }}
                    transition={{ duration: 0.5, delay: 1.4 }}
@@ -318,7 +318,7 @@ const UltraHero = () => {
             {/* Action Buttons */}
             <motion.div
               ref={buttonRef}
-              className="flex flex-col sm:flex-row gap-4"
+              className="flex flex-col sm:flex-row gap-3 sm:gap-4"
               initial={{ opacity: 0, y: 30, scale: 0.9 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               transition={{ 
@@ -339,7 +339,7 @@ const UltraHero = () => {
               >
                 <Button
                   size="lg"
-                  className="font-body text-lg px-8 py-4 bg-gradient-to-r from-[rgb(209,162,73)] via-[rgb(229,182,93)] to-[rgb(209,162,73)] text-white font-semibold shadow-lg hover:shadow-xl hover:shadow-[rgba(209,162,73,0.3)] transition-all duration-300 rounded-full relative overflow-hidden group"
+                  className="font-body text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-[rgb(209,162,73)] via-[rgb(229,182,93)] to-[rgb(209,162,73)] text-white font-semibold shadow-lg hover:shadow-xl hover:shadow-[rgba(209,162,73,0.3)] transition-all duration-300 rounded-full relative overflow-hidden group"
                   onClick={() => {
                     const el = document.querySelector('[data-section="signature-collection"]');
                     if (el) {
@@ -374,7 +374,7 @@ const UltraHero = () => {
                 <Button
                   size="lg"
                   variant="outline"
-                  className="font-body text-lg px-8 py-4 border-2 border-muted-foreground/30 text-muted-foreground hover:border-primary hover:bg-primary/5 hover:text-primary transition-all duration-300 rounded-full backdrop-blur-sm relative overflow-hidden group"
+                  className="font-body text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 border-2 border-muted-foreground/30 text-muted-foreground hover:border-primary hover:bg-primary/5 hover:text-primary transition-all duration-300 rounded-full backdrop-blur-sm relative overflow-hidden group"
                   onClick={() => {
                     const el = document.querySelector('[data-section="custom-bouquet"]');
                     if (el) {
@@ -401,7 +401,7 @@ const UltraHero = () => {
 
              {/* Statistics with Enhanced Animations */}
              <motion.div
-               className="grid grid-cols-3 gap-8 pt-8"
+               className="grid grid-cols-3 gap-4 sm:gap-6 lg:gap-8 pt-6 sm:pt-8"
                initial={{ opacity: 0, y: 50, scale: 0.9 }}
                animate={{ opacity: 1, y: 0, scale: 1 }}
                transition={{ 

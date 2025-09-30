@@ -436,6 +436,35 @@ All colors MUST be HSL. No rounded corners - sharp and architectural.
     scrollbar-color: hsl(42 53% 55%) hsl(42 53% 25%);
   }
 
+  /* Responsive Utilities */
+  .responsive-container {
+    @apply px-4 sm:px-6 lg:px-8;
+  }
+
+  .responsive-text {
+    @apply text-sm sm:text-base lg:text-lg;
+  }
+
+  .responsive-heading {
+    @apply text-2xl sm:text-3xl lg:text-4xl xl:text-5xl;
+  }
+
+  .responsive-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8;
+  }
+
+  .responsive-spacing {
+    @apply py-8 sm:py-12 lg:py-16 xl:py-20;
+  }
+
+  /* Touch-friendly targets */
+  @media (hover: none) and (pointer: coarse) {
+    .touch-target {
+      min-height: 44px;
+      min-width: 44px;
+    }
+  }
+
   /* Flower Button Styling */
   .flower-button {
     position: relative;
@@ -473,4 +502,4 @@ All colors MUST be HSL. No rounded corners - sharp and architectural.
     animation-duration: 1.5s;
     filter: drop-shadow(0 0 15px rgba(198, 161, 81, 0.8));
   }
-}
+} 

@@ -174,24 +174,24 @@ const UltraNavigation = () => {
            transition: 'none' // Remove transition to prevent black flash
          }}
        >
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
+          <div className="flex items-center justify-between">
             
             {/* Logo and Brand */}
             <motion.div
               ref={logoRef}
-              className="flex items-center"
+              className="flex items-center flex-shrink-0"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
               <Button
                 variant="ghost"
-                className="relative p-2 hover:bg-primary/5 transition-all duration-500 group flex items-center rounded-lg"
+                className="relative p-1 sm:p-2 hover:bg-primary/5 transition-all duration-500 group flex items-center rounded-lg"
                 onClick={() => navigate('/')}
               >
-                {/* Logo Container */}
+                {/* Logo Container - Responsive sizing */}
                 <motion.div 
-                  className="w-20 h-20 relative"
+                  className="w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 relative"
                   whileHover={{ scale: 1.05, rotate: 2 }}
                   transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
                 >
@@ -202,10 +202,10 @@ const UltraNavigation = () => {
                   />
                 </motion.div>
                 
-                {/* Brand Name */}
-                <div className="ml-2">
+                {/* Brand Name - Hidden on very small screens */}
+                <div className="ml-1 sm:ml-2 hidden xs:block">
                   <motion.h1 
-                    className="font-luxury text-2xl font-bold text-foreground drop-shadow-[0_0_8px_rgba(196,166,105,0.6)] [text-shadow:_0_0_12px_rgba(196,166,105,0.8)]"
+                    className="font-luxury text-lg sm:text-xl lg:text-2xl font-bold text-foreground drop-shadow-[0_0_8px_rgba(196,166,105,0.6)] [text-shadow:_0_0_12px_rgba(196,166,105,0.8)]"
                     whileHover={{ 
                       scale: 1.02,
                       textShadow: "0 0 20px rgba(196,166,105,1), 0 0 30px rgba(196,166,105,0.8)"
@@ -222,7 +222,7 @@ const UltraNavigation = () => {
             <div className="flex-1"></div>
 
             {/* Desktop Navigation with Advanced Hover Effects */}
-            <div className="hidden lg:flex items-center space-x-4">
+            <div className="hidden lg:flex items-center space-x-2 xl:space-x-4">
               {navigationItems.map((item, index) => (
                 <motion.div
                   key={item.name}
@@ -232,7 +232,7 @@ const UltraNavigation = () => {
                 >
                   <Button
                     variant="ghost"
-                    className={`relative group font-body font-medium px-6 py-3 transition-all duration-500 overflow-hidden ${
+                    className={`relative group font-body font-medium px-3 xl:px-6 py-2 xl:py-3 transition-all duration-500 overflow-hidden ${
                       location.pathname === item.path
                         ? 'text-primary'
                         : 'text-foreground hover:text-primary'
@@ -375,7 +375,7 @@ const UltraNavigation = () => {
             </div>
 
             {/* Cart & Menu with Enhanced Hover Effects */}
-            <div className="flex items-center space-x-4 ml-4">
+            <div className="flex items-center space-x-2 sm:space-x-4 ml-2 sm:ml-4">
               {/* Cart with Advanced Hover Effects */}
               <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
@@ -385,7 +385,7 @@ const UltraNavigation = () => {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="relative group hover:bg-primary/10 transition-all duration-500 overflow-hidden rounded-lg"
+                  className="relative group hover:bg-primary/10 transition-all duration-500 overflow-hidden rounded-lg w-10 h-10 sm:w-12 sm:h-12"
                 >
                   {/* Cart Icon with 3D Effects */}
                   <motion.div
@@ -404,7 +404,7 @@ const UltraNavigation = () => {
                       rotateX: { duration: 0.6, repeat: 1, repeatType: "reverse" }
                     }}
                   >
-                    <ShoppingCart className="w-6 h-6 text-foreground transition-all duration-500" />
+                    <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 text-foreground transition-all duration-500" />
                     
                     {/* Icon Glow Effect */}
                     <motion.div
@@ -448,7 +448,7 @@ const UltraNavigation = () => {
                   {/* Cart Badge with Enhanced Animation */}
                   {cartItems > 0 && (
                     <motion.div
-                      className="absolute -top-3 -right-0 -left-3 w-5 h-5 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-luxury font-bold text-xs shadow-gold cart-pulse relative z-20"
+                      className="absolute -top-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-luxury font-bold text-xs shadow-gold cart-pulse relative z-20"
                       initial={{ scale: 0, rotate: -180 }}
                       animate={{ scale: 1, rotate: 0 }}
                       transition={{ delay: 1.5, type: "spring", stiffness: 500 }}
@@ -502,7 +502,7 @@ const UltraNavigation = () => {
                   variant="ghost"
                   size="icon"
                   onClick={handleMenuToggle}
-                  className="relative group hover:bg-primary/10 transition-all duration-500 overflow-hidden rounded-lg"
+                  className="relative group hover:bg-primary/10 transition-all duration-500 overflow-hidden rounded-lg w-10 h-10 sm:w-12 sm:h-12"
                 >
                   {/* Background Effects */}
                   <motion.div
@@ -534,7 +534,7 @@ const UltraNavigation = () => {
                           filter: "drop-shadow(0 0 8px rgba(196,166,105,0.6))"
                         }}
                       >
-                        <X className="w-6 h-6 text-foreground transition-all duration-500" />
+                        <X className="w-5 h-5 sm:w-6 sm:h-6 text-foreground transition-all duration-500" />
                       </motion.div>
                     ) : (
                       <motion.div
@@ -550,7 +550,7 @@ const UltraNavigation = () => {
                           filter: "drop-shadow(0 0 8px rgba(196,166,105,0.6))"
                         }}
                       >
-                        <Menu className="w-6 h-6 text-foreground transition-all duration-500" />
+                        <Menu className="w-5 h-5 sm:w-6 sm:h-6 text-foreground transition-all duration-500" />
                       </motion.div>
                     )}
                   </AnimatePresence>
@@ -580,7 +580,7 @@ const UltraNavigation = () => {
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
             >
-              <div className="px-6 py-8 space-y-4">
+              <div className="px-4 sm:px-6 py-6 sm:py-8 space-y-3 sm:space-y-4">
                 {navigationItems.map((item, index) => (
                   <motion.div
                     key={item.name}
@@ -596,7 +596,7 @@ const UltraNavigation = () => {
                   >
                     <Button
                       variant="ghost"
-                      className={`w-full justify-start p-4 text-left group relative overflow-hidden rounded-xl transition-all duration-500 ${
+                      className={`w-full justify-start p-3 sm:p-4 text-left group relative overflow-hidden rounded-xl transition-all duration-500 ${
                         location.pathname === item.path
                           ? 'text-primary bg-primary/10'
                           : 'text-foreground hover:text-primary hover:bg-primary/5'
@@ -618,10 +618,10 @@ const UltraNavigation = () => {
                         transition={{ duration: 0.8, ease: "easeInOut", delay: 0.2 }}
                       />
                       
-                      <div className="flex items-center space-x-4 relative z-10">
+                      <div className="flex items-center space-x-3 sm:space-x-4 relative z-10">
                         {/* Icon with Enhanced Animation */}
                         <motion.span 
-                          className="relative"
+                          className="relative flex-shrink-0"
                           whileHover={{ 
                             scale: 1.2, 
                             rotate: [0, -10, 10, 0],
@@ -634,7 +634,9 @@ const UltraNavigation = () => {
                             rotate: { duration: 0.4, repeat: 1, repeatType: "reverse" }
                           }}
                         >
-                          {item.icon}
+                          <div className="w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center">
+                            {item.icon}
+                          </div>
                           
                           {/* Icon Glow */}
                           <motion.div
@@ -645,10 +647,10 @@ const UltraNavigation = () => {
                           />
                         </motion.span>
                         
-                        <div className="flex-1">
+                        <div className="flex-1 min-w-0">
                           {/* Title with Animation */}
                           <motion.div 
-                            className="font-luxury font-semibold relative"
+                            className="font-luxury font-semibold relative text-base sm:text-lg"
                             whileHover={{
                               scale: 1.05,
                               textShadow: "0 0 8px rgba(196,166,105,0.5)"
@@ -668,7 +670,7 @@ const UltraNavigation = () => {
                           
                           {/* Description with Fade Effect */}
                           <motion.div 
-                            className="font-body text-sm text-muted-foreground mt-1"
+                            className="font-body text-xs sm:text-sm text-muted-foreground mt-1"
                             whileHover={{
                               color: "rgba(196,166,105,0.8)",
                               scale: 1.02
@@ -723,7 +725,7 @@ const UltraNavigation = () => {
        </nav>
 
       {/* Spacer for fixed navigation */}
-      <div className="h-20" />
+      <div className="h-16 sm:h-20" />
     </>
   );
 };
