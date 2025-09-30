@@ -132,13 +132,13 @@ const UltraHero = () => {
         <motion.img
           src={heroBackground}
           alt="Luxury floral background"
-          className="w-full h-full object-cover opacity-40 transform-3d shadow-gold"
+          className="w-full h-full object-cover opacity-20 transform-3d shadow-gold"
           initial={{ scale: 1.2, rotateX: -5 }}
           whileInView={{ scale: 1, rotateX: 0 }}
           viewport={{ once: true, amount: 0.2 }}
           transition={{ duration: 20, ease: "linear", repeat: Infinity, repeatType: "reverse" }}
         />
-        <div className="absolute inset-0 -top-4 bg-gradient-to-b from-amber-50/80 via-white/70 to-amber-50/80" />
+        <div className="absolute inset-0 -top-4 bg-gradient-to-b from-background/90 via-background/70 to-background/90" />
       </div>
 
 
@@ -253,14 +253,19 @@ const UltraHero = () => {
                    transition={{ duration: 1.2, delay: 1, ease: "easeOut" }}
                 >
                   <motion.span
-                    className="inline-block bg-gradient-to-r from-yellow-300 via-amber-400 to-yellow-600 bg-clip-text text-transparent drop-shadow-[0_2px_6px_rgba(0,0,0,0.7)] drop-shadow-md"
-                    style={{ WebkitTextStroke: "1px #000", paintOrder: "stroke fill", textShadow: "0 1px 0 #000, 0 -1px 0 #000, 1px 0 0 #000, -1px 0 0 #000" }}
+                    className="inline-block drop-shadow-[0_2px_6px_rgba(0,0,0,0.7)] drop-shadow-md"
+                    style={{ 
+                      color: "rgb(198, 161, 81)", 
+                      WebkitTextStroke: "1px #000", 
+                      paintOrder: "stroke fill", 
+                      textShadow: "0 1px 0 #000, 0 -1px 0 #000, 1px 0 0 #000, -1px 0 0 #000" 
+                    }}
                     whileHover={{
                       scale: 1.03,
                       transition: { duration: 0.3 }
                     }}
                   >
-                     Crafting timeless beauty through floral artistry
+                    𝙲𝚛𝚊𝚏𝚝𝚒𝚗𝚐 𝚝𝚒𝚖𝚎𝚕𝚎𝚜𝚜 𝚋𝚎𝚊𝚞𝚝𝚢 𝚝𝚑𝚛𝚘𝚞𝚐𝚑 𝚏𝚕𝚘𝚛𝚊𝚕 𝚊𝚛𝚝𝚒𝚜𝚝𝚛𝚢
                    </motion.span>
                    
                    {/* Decorative line */}
