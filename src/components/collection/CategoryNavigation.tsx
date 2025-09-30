@@ -25,15 +25,15 @@ export const CategoryNavigation = ({
       animate={{ y: 0, opacity: 1 }}
       transition={{ delay: 4, duration: 0.8, ease: "easeOut" }}
     >
-      <div className="max-w-7xl mx-auto px-4 lg:px-8">
-        <div className="flex items-center justify-center py-6">
-          <div className="flex flex-wrap items-center justify-center gap-2 lg:gap-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-center py-4 sm:py-6">
+          <div className="flex flex-wrap items-center justify-center gap-1 sm:gap-2 lg:gap-6">
             {categories.map((category) => (
               <motion.button
                 key={category.id}
                 onClick={() => onCategoryChange(category.id)}
                 className={cn(
-                  "relative px-4 lg:px-6 py-2 lg:py-3 text-sm lg:text-base font-body transition-all duration-300",
+                  "relative px-3 sm:px-4 lg:px-6 py-2 sm:py-2 lg:py-3 text-xs sm:text-sm lg:text-base font-body transition-all duration-300",
                   "hover:text-primary focus:outline-none focus:text-primary",
                   selectedCategory === category.id 
                     ? "text-primary" 
@@ -44,7 +44,7 @@ export const CategoryNavigation = ({
               >
                 <span className="relative z-10">
                   {category.name}
-                  <span className="ml-2 text-xs opacity-70">
+                  <span className="ml-1 sm:ml-2 text-xs opacity-70">
                     ({category.count})
                   </span>
                 </span>

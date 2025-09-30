@@ -67,7 +67,7 @@ export const BouquetGrid = ({ bouquets, onBouquetClick }: BouquetGridProps) => {
   return (
     <div 
       ref={gridRef}
-      className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12"
+      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-12"
     >
       {bouquets.map((bouquet, index) => (
         <motion.div
@@ -76,7 +76,7 @@ export const BouquetGrid = ({ bouquets, onBouquetClick }: BouquetGridProps) => {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ delay: index * 0.08, duration: 0.6, ease: "easeOut" }}
           whileHover={{ y: -10 }}
-          className="group cursor-pointer"
+          className="group cursor-pointer max-w-sm mx-auto sm:max-w-none"
           onClick={() => onBouquetClick(bouquet)}
         >
           {/* Gradient border wrapper for polished edge */}
@@ -158,41 +158,42 @@ export const BouquetGrid = ({ bouquets, onBouquetClick }: BouquetGridProps) => {
             </div>
             
             {/* Card Content */}
-            <div className="p-6">
+            <div className="p-4 sm:p-6">
               <motion.h3 
-                className="text-[1.3rem] md:text-[1.35rem] font-luxury tracking-tight text-slate-900 mb-2"
+                className="text-lg sm:text-[1.3rem] lg:text-[1.35rem] font-luxury tracking-tight text-slate-900 mb-2"
                 whileHover={{ color: "hsl(var(--primary))" }}
                 transition={{ duration: 0.2 }}
               >
                 {bouquet.name}
               </motion.h3>
               
-              <p className="text-slate-600/90 text-[0.9rem] tracking-wide mb-4 line-clamp-2 font-body">
+              <p className="text-slate-600/90 text-sm sm:text-[0.9rem] tracking-wide mb-3 sm:mb-4 line-clamp-2 font-body">
                 {bouquet.description}
               </p>
               
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
                 <motion.span 
-                  className="inline-flex items-center gap-1 text-[1.2rem] font-luxury text-amber-700 rounded-md bg-gradient-to-r from-amber-100 to-zinc-100 shadow-sm px-3 py-1 border border-amber-200/60"
+                  className="inline-flex items-center gap-1 text-lg sm:text-[1.2rem] font-luxury text-amber-700 rounded-md bg-gradient-to-r from-amber-100 to-zinc-100 shadow-sm px-2 sm:px-3 py-1 border border-amber-200/60"
                   whileHover={{ y: -2, scale: 1.03 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <Crown className="w-3.5 h-3.5 text-amber-600" />
+                  <Crown className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-600" />
                   ${bouquet.price}
                 </motion.span>
                 
                 <motion.div
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
+                  className="w-full sm:w-auto"
                 >
                   <Button
-                    className="rounded-md border border-amber-300/60 bg-white text-slate-900 hover:text-white transition-all duration-300 bg-[length:200%_100%] bg-gradient-to-r from-white via-amber-400 to-amber-600 hover:bg-[position:100%_0]"
+                    className="w-full sm:w-auto rounded-md border border-amber-300/60 bg-white text-slate-900 hover:text-white transition-all duration-300 bg-[length:200%_100%] bg-gradient-to-r from-white via-amber-400 to-amber-600 hover:bg-[position:100%_0] text-sm sm:text-base"
                     onClick={(e) => {
                       e.stopPropagation();
                       // Add to cart logic
                     }}
                   >
-                    <ShoppingCart className="w-4 h-4 mr-2" />
+                    <ShoppingCart className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
                     Add to Cart
                   </Button>
                 </motion.div>

@@ -258,14 +258,14 @@ const UltraFeaturedBouquets = () => {
         </motion.div>
 
         <div className="flex justify-center">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-6xl">
           {bouquets.map((bouquet, index) => (
             <motion.div
               key={bouquet.id}
               ref={(el) => {
                 if (el) cardsRef.current[index] = el;
               }}
-              className="group cursor-pointer w-full max-w-[380px] mx-auto"
+              className="group cursor-pointer w-full max-w-[380px] mx-auto sm:max-w-none"
               initial={{ opacity: 0, y: 100 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ 
