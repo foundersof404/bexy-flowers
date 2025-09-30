@@ -2,8 +2,9 @@ import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { Heart, Eye, ShoppingCart } from "lucide-react";
+import { Heart, Eye, ShoppingCart, Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import OptimizedImage from "@/components/OptimizedImage";
 import { Card } from "@/components/ui/card";
 import type { Bouquet } from "@/pages/Collection";
 
@@ -71,65 +72,78 @@ export const BouquetGrid = ({ bouquets, onBouquetClick }: BouquetGridProps) => {
       {bouquets.map((bouquet, index) => (
         <motion.div
           key={bouquet.id}
-          initial={{ opacity: 0, y: 50, scale: 0.9 }}
+          initial={{ opacity: 0, y: 60, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ delay: index * 0.1, duration: 0.6, ease: "easeOut" }}
+          transition={{ delay: index * 0.08, duration: 0.6, ease: "easeOut" }}
+          whileHover={{ y: -10 }}
           className="group cursor-pointer"
           onClick={() => onBouquetClick(bouquet)}
         >
-          <Card className="relative overflow-hidden bg-card/50 backdrop-blur-sm border-border/20 hover:border-primary/30 transition-all duration-500">
+          {/* Gradient border wrapper for polished edge */}
+          <div className="rounded-lg p-[1px] bg-gradient-to-r from-[var(--lux-edge-from)] to-[var(--lux-edge-to)] group/card">
+          <Card className="relative overflow-hidden rounded-lg bg-white/60 backdrop-blur-sm border-transparent shadow-[0_4px_30px_rgba(0,0,0,0.1)] transition-all duration-500">
             {/* Image Container */}
             <div className="relative aspect-[4/5] overflow-hidden">
-              <motion.img
-                src={bouquet.image}
-                alt={bouquet.name}
-                className="w-full h-full object-cover"
-                whileHover={{ scale: 1.1 }}
-                transition={{ duration: 0.6, ease: "easeOut" }}
-              />
+              <motion.div whileHover={{ scale: 1.008 }} transition={{ duration: 0.7, ease: "easeOut" }} className="w-full h-full">
+                <OptimizedImage
+                  src={bouquet.image}
+                  alt={bouquet.name}
+                  className="w-full h-full object-cover ring-0 group-hover/card:ring-1 group-hover/card:ring-amber-200"
+                />
+              </motion.div>
               
               {/* Hover Overlay */}
               <motion.div
-                className="absolute inset-0 bg-black/20 backdrop-blur-[1px]"
+                className="absolute inset-0"
                 initial={{ opacity: 0 }}
                 whileHover={{ opacity: 1 }}
                 transition={{ duration: 0.3 }}
+                style={{
+                  background: "linear-gradient(180deg, rgba(0,0,0,0.0) 55%, rgba(0,0,0,0.25) 100%)"
+                }}
               />
+
+              {/* Bottom gradient to make price stand out */}
+              <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/35 to-transparent" />
+              {/* Inset border glow */}
+              <div className="pointer-events-none absolute inset-0 rounded-lg shadow-[inset_0_0_40px_rgba(251,191,36,0.12)] opacity-0 group-hover/card:opacity-100 transition-opacity duration-500" />
               
               {/* Action Buttons */}
               <motion.div
-                className="absolute top-4 right-4 flex flex-col gap-2"
-                initial={{ opacity: 0, x: 20 }}
-                whileHover={{ opacity: 1, x: 0 }}
+                className="absolute top-4 right-4"
+                initial={{ opacity: 0, y: -10, x: 10 }}
+                whileHover={{ opacity: 1, y: 0, x: 0 }}
                 transition={{ duration: 0.3 }}
               >
-                <Button
-                  size="icon"
-                  variant="secondary"
-                  className="w-10 h-10 bg-white/90 hover:bg-white text-black hover:text-primary backdrop-blur-sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    // Add to wishlist logic
-                  }}
-                >
-                  <Heart className="w-4 h-4" />
-                </Button>
-                <Button
-                  size="icon"
-                  variant="secondary"
-                  className="w-10 h-10 bg-white/90 hover:bg-white text-black hover:text-primary backdrop-blur-sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onBouquetClick(bouquet);
-                  }}
-                >
-                  <Eye className="w-4 h-4" />
-                </Button>
+                <div className="flex items-center gap-2 rounded-full bg-white/40 backdrop-blur-md shadow-sm border border-white/40 px-2 py-1">
+                  <Button
+                    size="icon"
+                    variant="secondary"
+                    className="w-9 h-9 bg-white/90 hover:bg-white text-black hover:text-primary"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      // Add to wishlist logic
+                    }}
+                  >
+                    <Heart className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    size="icon"
+                    variant="secondary"
+                    className="w-9 h-9 bg-white/90 hover:bg-white text-black hover:text-primary"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onBouquetClick(bouquet);
+                    }}
+                  >
+                    <Eye className="w-4 h-4" />
+                  </Button>
+                </div>
               </motion.div>
               
               {/* Gold Border Animation */}
               <motion.div
-                className="absolute inset-0 border-2 border-primary"
+                className="absolute inset-0 rounded-lg border border-amber-300/30"
                 initial={{ 
                   clipPath: "inset(0 100% 100% 0)" 
                 }}
@@ -146,23 +160,24 @@ export const BouquetGrid = ({ bouquets, onBouquetClick }: BouquetGridProps) => {
             {/* Card Content */}
             <div className="p-6">
               <motion.h3 
-                className="text-xl font-luxury text-foreground mb-2"
+                className="text-[1.3rem] md:text-[1.35rem] font-luxury tracking-tight text-slate-900 mb-2"
                 whileHover={{ color: "hsl(var(--primary))" }}
                 transition={{ duration: 0.2 }}
               >
                 {bouquet.name}
               </motion.h3>
               
-              <p className="text-muted-foreground text-sm mb-4 line-clamp-2 font-body">
+              <p className="text-slate-600/90 text-[0.9rem] tracking-wide mb-4 line-clamp-2 font-body">
                 {bouquet.description}
               </p>
               
               <div className="flex items-center justify-between">
                 <motion.span 
-                  className="text-2xl font-luxury text-primary"
-                  whileHover={{ scale: 1.05 }}
+                  className="inline-flex items-center gap-1 text-[1.2rem] font-luxury text-amber-700 rounded-md bg-gradient-to-r from-amber-100 to-zinc-100 shadow-sm px-3 py-1 border border-amber-200/60"
+                  whileHover={{ y: -2, scale: 1.03 }}
                   transition={{ duration: 0.2 }}
                 >
+                  <Crown className="w-3.5 h-3.5 text-amber-600" />
                   ${bouquet.price}
                 </motion.span>
                 
@@ -171,7 +186,7 @@ export const BouquetGrid = ({ bouquets, onBouquetClick }: BouquetGridProps) => {
                   whileTap={{ scale: 0.95 }}
                 >
                   <Button
-                    className="bg-primary hover:bg-primary-dark text-primary-foreground"
+                    className="rounded-md border border-amber-300/60 bg-white text-slate-900 hover:text-white transition-all duration-300 bg-[length:200%_100%] bg-gradient-to-r from-white via-amber-400 to-amber-600 hover:bg-[position:100%_0]"
                     onClick={(e) => {
                       e.stopPropagation();
                       // Add to cart logic
@@ -199,6 +214,7 @@ export const BouquetGrid = ({ bouquets, onBouquetClick }: BouquetGridProps) => {
               }}
             />
           </Card>
+          </div>
         </motion.div>
       ))}
     </div>

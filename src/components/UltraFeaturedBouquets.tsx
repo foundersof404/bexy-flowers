@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ShoppingCart, Heart, Eye } from 'lucide-react';
+import { ShoppingCart, Heart, Eye, Crown } from 'lucide-react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -275,14 +275,17 @@ const UltraFeaturedBouquets = () => {
               }}
               viewport={{ once: true }}
             >
-              <div className="relative bg-gradient-to-br from-white/95 via-slate-50/90 to-slate-100/95 backdrop-blur-xl border border-slate-200/50 rounded-[25px] shadow-[0_20px_60px_rgba(198,161,81,0.15)] hover:shadow-[0_30px_80px_rgba(198,161,81,0.25)] transition-all duration-700 ease-out overflow-hidden hover:scale-105 hover:-translate-y-6 group">
+              {/* Gradient edge wrapper for polished border */}
+              <div className="rounded-lg p-[1px] bg-gradient-to-r from-[var(--lux-edge-from)] to-[var(--lux-edge-to)] group/card">
+              <div className="relative rounded-lg bg-white/60 backdrop-blur-xl border border-transparent shadow-[0_4px_30px_rgba(0,0,0,0.1)] transition-all duration-700 ease-out overflow-hidden group hover:-translate-y-2">
                 
                 {/* Image Container with Modern Design */}
-                <div className="relative overflow-hidden aspect-[4/4.5] bg-slate-100 rounded-t-[25px]">
-                  <img
+                <div className="relative overflow-hidden aspect-[4/4.5] bg-slate-100 rounded-t-lg">
+                  <motion.img
                     src={bouquet.image}
                     alt={bouquet.name}
-                    className="w-full h-full object-cover transition-all duration-700 ease-out group-hover:scale-110 group-hover:brightness-110"
+                    className="w-full h-full object-cover transition-all duration-700 ease-out will-change-transform ring-0 group-hover/card:ring-1 group-hover/card:ring-amber-200"
+                    whileHover={{ scale: 1.08, filter: 'brightness(1.08)' }}
                   />
                   
                   {/* Modern Gradient Overlay */}
@@ -295,41 +298,44 @@ const UltraFeaturedBouquets = () => {
                                          radial-gradient(circle at 80% 20%, rgba(255,255,255,0.1) 0%, transparent 50%)`
                        }} />
 
-                  {/* Modern Floating Actions */}
-                  <div className="absolute top-4 right-4 flex flex-col gap-2 opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-700">
-                    <motion.button 
-                      className="w-10 h-10 bg-gradient-to-br from-slate-800/80 to-slate-900/90 backdrop-blur-xl rounded-2xl flex items-center justify-center border border-slate-700/50 text-slate-200 hover:text-white transition-all duration-500 shadow-lg"
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                    >
-                      <Heart className="w-4 h-4" />
-                    </motion.button>
-                    <motion.button 
-                      className="w-10 h-10 bg-gradient-to-br from-slate-800/80 to-slate-900/90 backdrop-blur-xl rounded-2xl flex items-center justify-center border border-slate-700/50 text-slate-200 hover:text-white transition-all duration-500 shadow-lg"
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                    >
-                      <Eye className="w-4 h-4" />
-                    </motion.button>
+                  {/* Floating glassmorphism actions pill */}
+                  <div className="absolute top-4 right-4 opacity-0 -translate-y-2 translate-x-2 group-hover:opacity-100 group-hover:translate-y-0 group-hover:translate-x-0 transition-all duration-500">
+                    <div className="flex items-center gap-2 rounded-full bg-white/40 backdrop-blur-md shadow-sm border border-white/40 px-2 py-1">
+                      <motion.button 
+                        className="w-9 h-9 bg-white/90 rounded-full flex items-center justify-center text-slate-800 hover:text-amber-600"
+                        whileHover={{ scale: 1.08 }}
+                        whileTap={{ scale: 0.92 }}
+                      >
+                        <Heart className="w-4 h-4" />
+                      </motion.button>
+                      <motion.button 
+                        className="w-9 h-9 bg-white/90 rounded-full flex items-center justify-center text-slate-800 hover:text-amber-600"
+                        whileHover={{ scale: 1.08 }}
+                        whileTap={{ scale: 0.92 }}
+                      >
+                        <Eye className="w-4 h-4" />
+                      </motion.button>
+                    </div>
                   </div>
 
-                  {/* Luxury Gold Price Tag */}
-                  <div className="absolute bottom-4 left-4 bg-gradient-to-r from-amber-400/90 to-yellow-500/90 backdrop-blur-xl text-slate-900 px-4 py-2 font-luxury font-bold text-base rounded-2xl border border-amber-300/50 shadow-[0_8px_25px_rgba(198,161,81,0.4)] hover:shadow-[0_12px_35px_rgba(198,161,81,0.6)] transition-all duration-500 transform hover:scale-105">
+                  {/* Luxury Price Tag */}
+                  <motion.div className="absolute bottom-4 left-4 rounded-md bg-gradient-to-r from-amber-100 to-zinc-100 text-amber-800 px-3 py-1 font-luxury font-semibold text-sm border border-amber-200/60 shadow-sm inline-flex items-center gap-1" whileHover={{ y: -2, scale: 1.03 }}>
+                    <Crown className="w-3.5 h-3.5 text-amber-600" />
                     {bouquet.price}
-                  </div>
+                  </motion.div>
                 </div>
 
                 {/* Glassmorphism Content Section */}
-                <div className="p-5 bg-white/40 backdrop-blur-xl border-t border-white/50 relative rounded-b-[25px]">
-                  <h3 className="font-serif text-xl font-bold text-slate-800 mb-3 tracking-wide group-hover:text-amber-600 transition-all duration-700 ease-out">
+                <div className="p-5 bg-white/40 backdrop-blur-xl border-t border-white/50 relative rounded-b-lg">
+                  <h3 className="font-luxury text-[1.25rem] font-bold text-slate-800 mb-3 tracking-tight group-hover:text-amber-600 transition-all duration-700 ease-out">
                     {bouquet.name}
                   </h3>
-                  <p className="font-sans text-sm text-slate-500 mb-4 leading-relaxed font-light transition-all duration-700 ease-out">
+                  <p className="font-sans text-[0.9rem] tracking-wide text-slate-600/90 mb-4 leading-relaxed font-light transition-all duration-700 ease-out">
                     {bouquet.description}
                   </p>
                   
                   <motion.button
-                    className="w-full bg-transparent border-2 border-amber-500/60 text-amber-600 px-6 py-3 rounded-2xl font-medium text-sm uppercase tracking-wider transition-all duration-500 ease-out hover:bg-gradient-to-r hover:from-amber-400 hover:to-yellow-500 hover:text-slate-900 hover:border-amber-400 hover:shadow-[0_8px_25px_rgba(198,161,81,0.4)]"
+                    className="w-full rounded-md border border-amber-300/60 bg-white text-slate-900 hover:text-white transition-all duration-300 bg-[length:200%_100%] bg-gradient-to-r from-white via-amber-400 to-amber-600 hover:bg-[position:100%_0] px-6 py-3 font-medium text-sm uppercase tracking-wider"
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                   >
@@ -340,18 +346,18 @@ const UltraFeaturedBouquets = () => {
                   </motion.button>
                 </div>
 
-                {/* Luxury Gold Border */}
-                <div className="absolute inset-0 rounded-[25px] border border-amber-300/30 group-hover:border-amber-400/60 transition-all duration-700 ease-out" />
-                <div className="absolute inset-[1px] rounded-[25px] bg-gradient-to-br from-amber-100/20 via-transparent to-amber-900/10 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-
-                {/* Gold Shimmer Effect */}
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-300/20 to-transparent opacity-0 group-hover:opacity-100 rounded-[25px] transform -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out" />
-
-                {/* Luxury Gold Glow */}
-                <div className="absolute -inset-2 bg-gradient-to-r from-amber-400/10 via-transparent to-amber-400/10 rounded-[25px] blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 ease-out" />
+                {/* Luxury Border & Glow */}
+                <div className="absolute inset-0 rounded-lg border border-amber-300/30 group-hover:border-amber-400/60 transition-all duration-700 ease-out" />
+                <div className="absolute inset-[1px] rounded-lg bg-gradient-to-br from-amber-100/20 via-transparent to-amber-900/10 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                {/* Shimmer */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-300/20 to-transparent opacity-0 group-hover:opacity-100 rounded-lg transform -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out" />
+                {/* Glow */}
+                <div className="absolute -inset-2 bg-gradient-to-r from-amber-400/10 via-transparent to-amber-400/10 rounded-lg blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 ease-out" />
+                {/* Inset image glow */}
+                <div className="pointer-events-none absolute inset-0 rounded-lg shadow-[inset_0_0_40px_rgba(251,191,36,0.12)] opacity-0 group-hover/card:opacity-100 transition-opacity duration-500" />
 
                 {/* Glitter Effect */}
-                <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-[25px]">
+                <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-lg">
                   {/* Moving glitter dots with subtle colors */}
                   <div className="absolute top-4 left-8 w-1 h-1 bg-amber-600/60 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-500 delay-100 group-hover:animate-bounce" />
                   <div className="absolute top-12 right-6 w-1 h-1 bg-amber-700/50 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-500 delay-200 group-hover:animate-ping" />
@@ -373,6 +379,7 @@ const UltraFeaturedBouquets = () => {
                   <div className="absolute top-38 right-18 w-1 h-1 bg-amber-800/40 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-500 delay-950 group-hover:animate-pulse" />
                   <div className="absolute top-40 left-18 w-1 h-1 bg-amber-600/60 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-500 delay-1000 group-hover:animate-bounce" />
                 </div>
+              </div>
               </div>
             </motion.div>
           ))}
