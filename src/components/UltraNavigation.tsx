@@ -43,7 +43,7 @@ const navigationItems: NavigationItem[] = [
   },
   {
     name: "Custom",
-    path: "/custom",
+    path: "/customize",
     icon: <Sparkles className="w-5 h-5" />,
     description: "Bespoke Creations"
   },

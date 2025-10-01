@@ -1,9 +1,7 @@
-import { motion, useScroll, useTransform, useMotionValue, useSpring, useReducedMotion } from "framer-motion";
-import { useEffect, useState } from "react";
-import { useRef } from "react";
+import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
+import { useEffect, useState, useRef } from "react";
 import { Heart, Award, Users, Star, Crown, Sparkles, Flower2, Leaf } from "lucide-react";
 import logoImage from '/assets/bexy-flowers-logo.png';
-import whoWeAreImage from '@/assets/who we-are-bexy-flowers.jpeg';
 
 const About = () => {
   const stats = [
@@ -51,13 +49,7 @@ const About = () => {
   const yPrimary = prefersReducedMotion ? 0 : (parallaxYPrimary as unknown as number | any);
   const ySecondary = prefersReducedMotion ? 0 : (parallaxYSecondary as unknown as number | any);
 
-  // Tilt-on-mouse for image frame
-  const mouseX = useMotionValue(0.5);
-  const mouseY = useMotionValue(0.5);
-  const rotateX = useSpring(useTransform(mouseY, [0, 1], [8, -8]), { stiffness: 120, damping: 12 });
-  const rotateY = useSpring(useTransform(mouseX, [0, 1], [-8, 8]), { stiffness: 120, damping: 12 });
-
-  // Powerful transitions for the "Crafting Dreams" content block
+  // Powerful transitions for the content blocks
   const sectionVariants = {
     hidden: { opacity: 0, y: 30 },
     show: {
@@ -121,20 +113,6 @@ const About = () => {
     </motion.span>
   );
 
-  // Photo enter animation (image only, not the container)
-  const photoEnter = {
-    hidden: { opacity: 0, x: 80, y: -80, scale: 1.08, rotateZ: -3, filter: "blur(10px)" },
-    show: {
-      opacity: 1,
-      x: 0,
-      y: 0,
-      scale: 1,
-      rotateZ: 0,
-      filter: "blur(0px)",
-      transition: { type: "spring", stiffness: 260, damping: 24, mass: 0.9 }
-    }
-  } as const;
-
   return (
     <section ref={sectionRef} className="relative py-28 px-4 overflow-hidden" style={{ background: 'linear-gradient(180deg, #ffffff 0%, #faf9fb 30%, #f7fbff 100%)' }}>
       {/* Premium Background Theme */}
@@ -165,7 +143,7 @@ const About = () => {
       </div>
 
       <div className="max-w-6xl mx-auto relative z-10">
-        {/* Simple Header */}
+        {/* Header */}
         <motion.div
           className="text-center mb-20"
           initial={{ opacity: 0, y: 40, scale: 0.98 }}
@@ -187,81 +165,14 @@ const About = () => {
             <div className="w-1 h-8 bg-amber-400 rounded-full" />
           </motion.div>
 
-          <h1 className="font-luxury text-5xl md:text-6xl font-bold text-slate-800 mb-6">
-            Our Story
-          </h1>
+          <h1 className="font-luxury text-5xl md:text-6xl font-bold text-slate-800 mb-6">Who We Are</h1>
           
-          <p className="text-lg text-slate-600 max-w-3xl mx-auto leading-relaxed">
-            Crafting luxury floral experiences with architectural precision and artistic excellence since 1999
-          </p>
+          <p className="text-lg text-slate-600 max-w-3xl mx-auto leading-relaxed">Crafting luxury floral experiences with architectural precision and artistic excellence since 1999.</p>
         </motion.div>
 
-        {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-16 items-center mb-24">
-          {/* Image */}
-          <motion.div
-            className="relative group -mt-8 md:-mt-19 lg:-mt-40"
-            initial={{ opacity: 0, x: -60, scale: 0.96 }}
-            whileInView={{ opacity: 1, x: 0, scale: 1 }}
-            transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-            viewport={{ once: true }}
-          >
-            {/* Compact photo frame presentation */}
-            <div className="absolute -inset-4 -z-10 -rotate-2 rounded-[1.5rem] bg-gradient-to-br from-amber-200/40 via-white to-pink-100/40 shadow-[0_0_90px_-40px_rgba(251,191,36,0.45)]" />
-            <motion.div
-              className="relative overflow-hidden rounded-[1.5rem] shadow-xl ring-1 ring-amber-100/70 transition-all duration-500 will-change-transform group/image"
-              style={{ rotateX, rotateY, transformPerspective: 1000 }}
-              onMouseMove={(e) => {
-                const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
-                const x = (e.clientX - rect.left) / rect.width;
-                const y = (e.clientY - rect.top) / rect.height;
-                mouseX.set(Math.max(0, Math.min(1, x)));
-                mouseY.set(Math.max(0, Math.min(1, y)));
-              }}
-              onMouseLeave={() => {
-                mouseX.set(0.5);
-                mouseY.set(0.5);
-              }}
-            >
-              <motion.img
-                src={whoWeAreImage}
-                alt="Who We Are - Bexy Flowers Team"
-                className="w-full h-[26rem] md:h-[32rem] object-contain object-top bg-white/70 transition-transform duration-[800ms]"
-                initial={photoEnter.hidden}
-                whileInView={photoEnter.show}
-                viewport={{ once: true, margin: "-15%" }}
-              />
-              {/* motion trail */}
-              <motion.div
-                className="pointer-events-none absolute inset-0"
-                initial={{ opacity: 0.35 }}
-                whileInView={{ opacity: 0 }}
-                transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                viewport={{ once: true, margin: "-15%" }}
-                style={{
-                  background: 'radial-gradient(60% 40% at 80% 20%, rgba(255,255,255,0.5), transparent 70%)'
-                }}
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-900/20 via-transparent to-transparent" />
-              {/* light sweep overlay */}
-              <div className="pointer-events-none absolute inset-y-0 -left-1/3 w-1/3 skew-x-12 bg-gradient-to-r from-white/0 via-white/40 to-white/0 opacity-0 transition-all duration-700 group-hover/image:translate-x-[260%] group-hover/image:opacity-60" />
-              {/* soft vignette at edges */}
-              <div className="pointer-events-none absolute inset-0" style={{
-                background: 'radial-gradient(closest-side, rgba(2,6,23,0.35), transparent 70%)'
-              }} />
-              {/* signature watermark */}
-              <div className="pointer-events-none absolute bottom-3 right-3 select-none">
-                <div className="px-2 py-1 rounded bg-white/70 backdrop-blur border border-amber-100/60 shadow-sm">
-                  <span className="text-[10px] tracking-widest text-amber-700 font-semibold">BEXY • ATELIER</span>
-                </div>
-              </div>
-            </motion.div>
-            {/* corner pins */}
-            <div className="hidden md:block absolute -top-2 -left-2 w-3 h-3 rounded-full bg-amber-300 shadow" />
-            <div className="hidden md:block absolute -bottom-2 -right-2 w-3 h-3 rounded-full bg-pink-300 shadow" />
-          </motion.div>
-
-          {/* Content */}
+        {/* Main Content (text-first layout) */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start mb-24">
+          {/* Left: Narrative */}
           <motion.div
             className="space-y-8"
             variants={sectionVariants}
@@ -270,68 +181,18 @@ const About = () => {
             viewport={{ once: true, margin: "-10%" }}
           >
             <div>
-              <motion.h2
-                className="font-luxury text-3xl md:text-4xl font-bold text-slate-800 mb-3"
-                variants={headingReveal}
-              >
-                <motion.span
-                  initial={{ letterSpacing: "0.12em" }}
-                  whileInView={{ letterSpacing: "0em" }}
-                  transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                  viewport={{ once: true }}
-                >
-                  Crafting Dreams
-                </motion.span>
-              </motion.h2>
-              <motion.div
-                className="w-20 h-1 bg-amber-400 rounded-full mb-8 origin-left"
-                initial={{ scaleX: 0 }}
-                whileInView={{ scaleX: 1 }}
-                transition={{ type: "spring", stiffness: 280, damping: 12, mass: 0.6, delay: 0.1 }}
-                viewport={{ once: true }}
-              />
+              <motion.h2 className="font-luxury text-3xl md:text-4xl font-bold text-slate-800 mb-3" variants={headingReveal}>Our Story</motion.h2>
+              <motion.div className="w-20 h-1 bg-amber-400 rounded-full mb-8 origin-left" initial={{ scaleX: 0 }} whileInView={{ scaleX: 1 }} transition={{ type: "spring", stiffness: 280, damping: 12, mass: 0.6, delay: 0.1 }} viewport={{ once: true }} />
             </div>
 
             <div className="space-y-6 text-slate-600 text-lg leading-relaxed">
-              {/* Paragraph 1: line-by-line */}
-              <motion.div variants={paragraphReveal}>
-                <motion.div variants={lineContainer} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-10%" }} className="space-y-1">
-                  <motion.p variants={lineReveal}>{renderSmokyWords("Founded with an unwavering passion for creating extraordinary floral experiences,")}</motion.p>
-                  <motion.p variants={lineReveal}>
-                    {renderSmokyWords("Bexy Flowers has become synonymous with luxury and elegance in the world of premium floristry.")}
-                  </motion.p>
-                </motion.div>
-              </motion.div>
-
-              {/* Paragraph 2: line-by-line */}
-              <motion.div variants={paragraphReveal}>
-                <motion.div variants={lineContainer} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-10%" }} className="space-y-1">
-                  <motion.p variants={lineReveal}>{renderSmokyWords("Our master florists carefully curate each arrangement using only the finest flowers sourced from renowned gardens around the world.")}</motion.p>
-                  <motion.p variants={lineReveal}>{renderSmokyWords("Every bouquet tells a story of craftsmanship, beauty, and the profound emotions that flowers can convey.")}</motion.p>
-                </motion.div>
-              </motion.div>
-
-              {/* Paragraph 3: line-by-line */}
-              <motion.div variants={paragraphReveal}>
-                <motion.div variants={lineContainer} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-10%" }} className="space-y-1">
-                  <motion.p variants={lineReveal}>{renderSmokyWords("From intimate celebrations to grand occasions, we believe that flowers have the power to transform moments into memories.")}</motion.p>
-                  <motion.p variants={lineReveal}>{renderSmokyWords("Our commitment to excellence and attention to detail ensures that every creation exceeds expectations.")}</motion.p>
-                </motion.div>
-              </motion.div>
+              <motion.p variants={paragraphReveal}>Founded in 2024, our flower boutique has quickly become a pioneer in Lebanon&apos;s floral industry. We proudly established the country&apos;s first glitter flower shop, introducing a unique and creative concept that combines beauty, artistry, and personalization. Whether for weddings, events, or personal gifting, we are committed to redefining the art of floral design in Lebanon, offering products that blend tradition with modern creativity.</motion.p>
+              <motion.p variants={paragraphReveal}>Our master florists curate each arrangement using the finest stems from renowned gardens worldwide. Every bouquet tells a story of craftsmanship, beauty, and heartfelt emotion.</motion.p>
+              <motion.p variants={paragraphReveal}>From intimate celebrations to grand occasions, we transform moments into memories through artful composition, premium quality, and meticulous detail.</motion.p>
             </div>
 
-            {/* Content cards for clarity */}
-            <div className="grid sm:grid-cols-2 gap-4 pt-4">
-              {[
-                {
-                  title: 'Our Mission',
-                  body: 'Elevate life’s moments with refined floral artistry that blends luxury with heartfelt storytelling.'
-                },
-                {
-                  title: 'Our Craft',
-                  body: 'Every stem is selected with intent; every composition balances form, texture, and fragrance.'
-                }
-              ].map((card, idx) => (
+            <div className="grid sm:grid-cols-2 gap-4 pt-2">
+              {[{ title: 'Mission', body: 'Elevate life’s moments with refined floral artistry.' }, { title: 'Vision', body: 'Lead modern luxury floristry with innovation and soul.' }].map((card, idx) => (
                 <div key={idx} className="p-5 rounded-2xl bg-white/70 backdrop-blur border border-amber-100/60 shadow-sm">
                   <div className="font-semibold text-slate-800 mb-2">{card.title}</div>
                   <div className="text-slate-600 text-sm leading-relaxed">{card.body}</div>
@@ -339,9 +200,42 @@ const About = () => {
               ))}
             </div>
           </motion.div>
+
+          {/* Right: Highlights */}
+          <motion.div
+            className="space-y-6"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+            viewport={{ once: true }}
+          >
+            <div className="p-6 rounded-2xl bg-white/70 backdrop-blur border border-amber-100/60 shadow-sm">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center text-amber-600"><Crown className="w-6 h-6" /></div>
+                <div>
+                  <div className="font-luxury text-xl font-bold text-slate-800 mb-1">Luxury Atelier</div>
+                  <p className="text-slate-600">Bespoke compositions, premium sourcing, and white-glove service from consultation to delivery.</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid sm:grid-cols-2 gap-4">
+              {[{ icon: <Heart className="w-6 h-6" />, title: 'Heartfelt Craft', body: 'Every stem placed with intention.' }, { icon: <Award className="w-6 h-6" />, title: 'Quality First', body: 'Only the finest seasonal blooms.' }, { icon: <Users className="w-6 h-6" />, title: 'Client-Centric', body: 'Personalized designs for every story.' }, { icon: <Star className="w-6 h-6" />, title: 'Signature Style', body: 'Modern elegance with timeless romance.' }].map((item, idx) => (
+                <div key={idx} className="p-5 rounded-2xl bg-white/70 backdrop-blur border border-amber-100/60 shadow-sm">
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center text-amber-600">{item.icon}</div>
+                    <div>
+                      <div className="font-semibold text-slate-800">{item.title}</div>
+                      <div className="text-slate-600 text-sm leading-relaxed">{item.body}</div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </motion.div>
         </div>
 
-        {/* Simple Statistics */}
+        {/* Statistics */}
         <motion.div
           className="grid grid-cols-2 md:grid-cols-4 gap-8"
           initial={{ opacity: 0, y: 30 }}
@@ -371,6 +265,27 @@ const About = () => {
             </motion.div>
           ))}
         </motion.div>
+
+        {/* Values */}
+        <div className="mt-24 grid md:grid-cols-3 gap-6">
+          {[{ icon: <Sparkles className="w-5 h-5" />, title: 'Innovation', body: 'Forward-thinking design techniques and trends.' }, { icon: <Flower2 className="w-5 h-5" />, title: 'Sustainability', body: 'Responsible sourcing and mindful operations.' }, { icon: <Leaf className="w-5 h-5" />, title: 'Authenticity', body: 'Honest craft that honors nature’s beauty.' }].map((v, i) => (
+            <div key={i} className="p-6 rounded-2xl bg-white/70 backdrop-blur border border-amber-100/60 shadow-sm">
+              <div className="flex items-center gap-2 mb-2 text-amber-700">
+                {v.icon}
+                <div className="font-semibold">{v.title}</div>
+              </div>
+              <div className="text-slate-600 text-sm leading-relaxed">{v.body}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Commitment */}
+        <div className="mt-16 p-6 rounded-2xl bg-gradient-to-br from-amber-50 to-pink-50 border border-amber-100/60">
+          <div className="font-luxury text-2xl font-bold text-slate-800 mb-3">Our Commitment</div>
+          <div className="text-slate-600 leading-relaxed">
+            We promise refined artistry, exceptional service, and unforgettable floral moments—every single time.
+          </div>
+        </div>
 
         {/* Wavy separator */}
         <div className="mt-24 -mb-10">

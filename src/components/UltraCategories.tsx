@@ -103,6 +103,9 @@ const UltraCategories = () => {
   const sectionRef = useRef<HTMLElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const mobileRow1Ref = useRef<HTMLDivElement>(null);
+  const mobileRow2Ref = useRef<HTMLDivElement>(null);
+  const [isAutoScroll, setIsAutoScroll] = useState(true);
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -141,36 +144,101 @@ const UltraCategories = () => {
     };
   }, []);
 
-  // Seamless infinite scroll effect
+  // Seamless infinite scroll effect for desktop (single row)
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
     // Create seamless infinite loop animation
-    const infiniteScroll = () => {
       const singleSetWidth = categories.length * 352; // Width of one complete set
       
       gsap.to(container, {
         x: -singleSetWidth, // Move exactly one set width
-        duration: 25, // 25 seconds to complete one full cycle
+      duration: 30, // 30 seconds to complete one full cycle (slower)
         ease: "none",
         force3D: true, // Force hardware acceleration
-        onComplete: () => {
-          // When we've scrolled through one complete set, reset to start of second set
-          // This creates the illusion of infinite scroll
-          gsap.set(container, { x: 0, force3D: true });
-          infiniteScroll(); // Start the animation again
+      repeat: -1, // Infinite repeat
+      repeatDelay: 0,
+      modifiers: {
+        x: (x) => {
+          const val = parseFloat(x);
+          return `${val % singleSetWidth}px`;
         }
-      });
-    };
-
-    // Start the infinite scroll
-    infiniteScroll();
+      }
+    });
 
     return () => {
       gsap.killTweensOf(container);
     };
   }, []);
+
+  // Mobile: Two rows with opposite scroll directions
+  useEffect(() => {
+    const row1 = mobileRow1Ref.current;
+    const row2 = mobileRow2Ref.current;
+    
+    if (!row1 || !row2) return;
+
+    const cardWidth = 196; // Reduced by 30% (280 * 0.7 = 196)
+    const gap = 12; // gap-3 = 12px
+    const cardTotalWidth = cardWidth + gap;
+    const row1Cards = 5; // First 5 categories
+    const row2Cards = 5; // Last 5 categories
+    
+    // Calculate the exact width of one complete set
+    const singleSetWidth1 = row1Cards * cardTotalWidth;
+    const singleSetWidth2 = row2Cards * cardTotalWidth;
+
+    let tween1: gsap.core.Tween | null = null;
+    let tween2: gsap.core.Tween | null = null;
+
+    // Row 1: Scrolls left (normal direction) - infinite seamless loop
+    if (isAutoScroll) {
+      tween1 = gsap.to(row1, {
+        x: -singleSetWidth1,
+        duration: 15,
+        ease: "none",
+        force3D: true,
+        repeat: -1,
+        repeatDelay: 0,
+        modifiers: {
+          x: (x) => {
+            const val = parseFloat(x);
+            return `${val % singleSetWidth1}px`;
+          }
+        }
+      });
+
+      // Row 2: Scrolls right (opposite direction) - infinite seamless loop
+      // Start from negative position for right scroll
+      gsap.set(row2, { x: -singleSetWidth2 });
+      tween2 = gsap.to(row2, {
+        x: 0,
+        duration: 25,
+        ease: "none",
+        force3D: true,
+        repeat: -1,
+        repeatDelay: 0,
+        modifiers: {
+          x: (x) => {
+            const val = parseFloat(x);
+            return `${val % singleSetWidth2}px`;
+          }
+        }
+      });
+    } else {
+      // Pause animations
+      if (tween1) tween1.pause();
+      if (tween2) tween2.pause();
+    }
+
+    return () => {
+      if (tween1) tween1.kill();
+      if (tween2) tween2.kill();
+      gsap.killTweensOf(row1);
+      gsap.killTweensOf(row2);
+    };
+  }, [isAutoScroll]);
 
   const scrollLeft = () => {
     const container = containerRef.current;
@@ -200,6 +268,7 @@ const UltraCategories = () => {
       });
     }
   };
+
 
   return (
     <section 
@@ -286,15 +355,17 @@ const UltraCategories = () => {
           </motion.p>
         </motion.div>
 
-        {/* Cards Container */}
-        <div className="w-full overflow-hidden">
+        {/* Desktop: Single Row Cards Container */}
+        <div className="w-full overflow-hidden hidden lg:block">
           <div 
             ref={containerRef} 
             className="flex gap-8" 
             style={{ 
               width: `${categories.length * 2 * 352}px`,
               willChange: 'transform',
-              transform: 'translateZ(0)'
+              transform: 'translateZ(0)',
+              backfaceVisibility: 'hidden',
+              perspective: '1000px'
             }}
           >
             {/* Duplicate categories for seamless infinite scroll */}
@@ -302,11 +373,15 @@ const UltraCategories = () => {
               <div
                 key={`${category.id}-${index}`}
                 className="flex-shrink-0 w-80 h-96 group cursor-pointer"
-                style={{ willChange: 'transform' }}
+                  style={{ 
+                    willChange: 'transform',
+                    backfaceVisibility: 'hidden',
+                    transform: 'translateZ(0)'
+                  }}
               >
                 <div className="relative h-full w-full">
                   {/* Ultra-Modern Glassmorphism Card */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-white/95 via-slate-50/90 to-slate-100/95 backdrop-blur-xl border border-slate-200/50 rounded-[30px] shadow-[0_20px_60px_rgba(198,161,81,0.15)] hover:shadow-[0_30px_80px_rgba(198,161,81,0.25)] transition-all duration-700 ease-out overflow-hidden hover:scale-105 hover:-translate-y-6">
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/95 via-slate-50/90 to-slate-100/95 backdrop-blur-xl border border-slate-200/50 rounded-[30px] shadow-[0_20px_60px_rgba(198,161,81,0.15)] hover:shadow-[0_30px_80px_rgba(198,161,81,0.25)] transition-all duration-700 ease-out overflow-hidden hover:scale-95 hover:-translate-y-2">
                     
                     {/* Enhanced Background Image */}
                     <div className="absolute inset-0 overflow-hidden rounded-[30px]">
@@ -387,9 +462,255 @@ const UltraCategories = () => {
           </div>
         </div>
 
-        {/* Modern Navigation Buttons */}
+        {/* Mobile: Two Rows with Opposite Scroll Directions */}
+        <div className="w-full overflow-hidden lg:hidden space-y-4">
+          {/* Enhanced Toggle Switch for Auto/Manual Scroll */}
+          <div className="flex flex-col items-center mb-8 space-y-4">
+            {/* Toggle Switch */}
+            <motion.button
+              onClick={() => setIsAutoScroll(!isAutoScroll)}
+              className={`relative inline-flex items-center gap-4 px-8 py-4 rounded-2xl backdrop-blur-xl border-2 transition-all duration-500 shadow-lg ${
+                isAutoScroll 
+                  ? 'bg-gradient-to-r from-amber-500/25 to-yellow-500/25 border-amber-400/60 shadow-amber-500/20' 
+                  : 'bg-gradient-to-r from-slate-800/15 to-slate-700/15 border-slate-600/40 shadow-slate-500/10'
+              }`}
+              whileHover={{ 
+                scale: 1.05, 
+                boxShadow: isAutoScroll 
+                  ? "0 20px 40px rgba(245, 158, 11, 0.3)" 
+                  : "0 20px 40px rgba(71, 85, 105, 0.2)"
+              }}
+              whileTap={{ scale: 0.95 }}
+            >
+              {/* Enhanced Toggle Switch */}
+              <motion.div
+                className={`w-14 h-7 rounded-full relative transition-all duration-300 shadow-inner ${
+                  isAutoScroll 
+                    ? 'bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500' 
+                    : 'bg-gradient-to-r from-slate-300 to-slate-400'
+                }`}
+              >
+                {/* Toggle Knob */}
+                <motion.div
+                  className="absolute top-0.5 left-0.5 w-6 h-6 bg-white rounded-full shadow-lg border border-gray-200"
+                  animate={{ x: isAutoScroll ? 28 : 0 }}
+                  transition={{ 
+                    type: "spring", 
+                    stiffness: 600, 
+                    damping: 30,
+                    mass: 0.8
+                  }}
+                />
+                {/* Glow effect */}
+                <motion.div
+                  className={`absolute inset-0 rounded-full blur-sm ${
+                    isAutoScroll ? 'bg-amber-400/50' : 'bg-slate-300/30'
+                  }`}
+                  animate={{ opacity: isAutoScroll ? 1 : 0 }}
+                  transition={{ duration: 0.3 }}
+                />
+              </motion.div>
+              
+              {/* Status Text */}
+              <div className="flex flex-col items-start">
+                <span className={`text-base font-semibold tracking-wide ${
+                  isAutoScroll ? 'text-amber-700' : 'text-slate-700'
+                }`}>
+                  {isAutoScroll ? 'AUTO SCROLL' : 'MANUAL CONTROL'}
+                </span>
+                <span className={`text-xs font-medium ${
+                  isAutoScroll ? 'text-amber-600/80' : 'text-slate-600/80'
+                }`}>
+                  {isAutoScroll ? 'Cards flow automatically' : 'Pause to swipe manually'}
+                </span>
+              </div>
+
+              {/* Icon indicator */}
+              <motion.div
+                className={`p-2 rounded-lg transition-all duration-300 ${
+                  isAutoScroll ? 'bg-amber-500/20' : 'bg-slate-500/20'
+                }`}
+                animate={{ rotate: isAutoScroll ? 0 : 180 }}
+                transition={{ duration: 0.5 }}
+              >
+                {isAutoScroll ? (
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                  >
+                    <Sparkles className={`w-5 h-5 ${isAutoScroll ? 'text-amber-600' : 'text-slate-600'}`} />
+                  </motion.div>
+                ) : (
+                  <ChevronLeft className={`w-5 h-5 ${isAutoScroll ? 'text-amber-600' : 'text-slate-600'}`} />
+                )}
+              </motion.div>
+            </motion.button>
+
+            {/* Helpful Note */}
+            <motion.div 
+              className="text-center max-w-md"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <p className="text-sm text-slate-500 leading-relaxed">
+                💡 <strong>Tip:</strong> Switch to manual mode to pause the auto-scrolling and swipe through the collections at your own pace.
+              </p>
+            </motion.div>
+          </div>
+
+          {/* Row 1: Scrolls Left */}
+          <div className="w-full overflow-hidden">
+              <div 
+                ref={mobileRow1Ref} 
+                className="flex gap-3" 
+                style={{ 
+                  willChange: 'transform',
+                  transform: 'translateZ(0)',
+                  backfaceVisibility: 'hidden',
+                  perspective: '1000px'
+                }}
+              >
+              {/* First 5 categories, tripled for seamless infinite scroll */}
+              {[...categories.slice(0, 5), ...categories.slice(0, 5), ...categories.slice(0, 5)].map((category, index) => (
+                <div
+                  key={`row1-${category.id}-${index}`}
+                  className="flex-shrink-0 w-[196px] h-56 group cursor-pointer"
+                  style={{ 
+                    willChange: 'transform',
+                    backfaceVisibility: 'hidden',
+                    transform: 'translateZ(0)'
+                  }}
+                >
+                  <div className="relative h-full w-full">
+                    {/* Ultra-Modern Glassmorphism Card - Mobile */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-white/95 via-slate-50/90 to-slate-100/95 backdrop-blur-xl border border-slate-200/50 rounded-[24px] shadow-[0_15px_45px_rgba(198,161,81,0.15)] active:shadow-[0_20px_60px_rgba(198,161,81,0.25)] transition-all duration-700 ease-out overflow-hidden active:scale-95">
+                      
+                      {/* Enhanced Background Image */}
+                      <div className="absolute inset-0 overflow-hidden rounded-[24px]">
+                        <img
+                          src={category.image}
+                          alt={category.name}
+                          className="w-full h-full object-cover transition-all duration-700 ease-out"
+                        />
+                        
+                        {/* Modern Gradient Overlay */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/70 via-slate-800/40 to-transparent transition-all duration-700 ease-out" />
+                        
+                        {/* Sophisticated Pattern Overlay */}
+                        <div className="absolute inset-0 opacity-20 transition-opacity duration-700" 
+                             style={{
+                               backgroundImage: `radial-gradient(circle at 20% 80%, rgba(255,255,255,0.1) 0%, transparent 50%),
+                                               radial-gradient(circle at 80% 20%, rgba(255,255,255,0.1) 0%, transparent 50%)`
+                             }} />
+                      </div>
+
+                      {/* Luxury Gold Border System */}
+                      <div className="absolute inset-0 rounded-[24px] border border-amber-300/30 transition-all duration-700 ease-out" />
+
+                      {/* Enhanced Content Layout */}
+                      <div className="absolute inset-0 flex flex-col justify-between p-6">
+                        
+                        {/* Top Icon with Modern Design */}
+                        <div className="flex justify-end">
+                          <div className="w-12 h-12 bg-gradient-to-br from-slate-800/80 to-slate-900/90 backdrop-blur-xl rounded-xl flex items-center justify-center border border-slate-700/50 transition-all duration-700 ease-out shadow-lg">
+                            <category.icon className="w-6 h-6 text-slate-200 transition-all duration-700 ease-out" />
+                          </div>
+                        </div>
+
+                        {/* Bottom Content with Modern Typography */}
+                        <div className="space-y-3">
+                          {/* Category Name - Modern Typography */}
+                          <h3 className="font-luxury text-2xl font-bold text-white transition-all duration-700 ease-out tracking-wide">
+                            {category.name}
+                          </h3>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              </div>
+          </div>
+
+          {/* Row 2: Scrolls Right (Opposite Direction) */}
+          <div className="w-full overflow-hidden">
+              <div 
+                ref={mobileRow2Ref} 
+                className="flex gap-3" 
+                style={{ 
+                  willChange: 'transform',
+                  transform: 'translateZ(0)',
+                  backfaceVisibility: 'hidden',
+                  perspective: '1000px'
+                }}
+              >
+              {/* Last 5 categories, tripled for seamless infinite scroll */}
+              {[...categories.slice(5, 10), ...categories.slice(5, 10), ...categories.slice(5, 10)].map((category, index) => (
+                <div
+                  key={`row2-${category.id}-${index}`}
+                  className="flex-shrink-0 w-[196px] h-56 group cursor-pointer"
+                  style={{ 
+                    willChange: 'transform',
+                    backfaceVisibility: 'hidden',
+                    transform: 'translateZ(0)'
+                  }}
+                >
+                  <div className="relative h-full w-full">
+                    {/* Ultra-Modern Glassmorphism Card - Mobile */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-white/95 via-slate-50/90 to-slate-100/95 backdrop-blur-xl border border-slate-200/50 rounded-[24px] shadow-[0_15px_45px_rgba(198,161,81,0.15)] active:shadow-[0_20px_60px_rgba(198,161,81,0.25)] transition-all duration-700 ease-out overflow-hidden active:scale-95">
+                      
+                      {/* Enhanced Background Image */}
+                      <div className="absolute inset-0 overflow-hidden rounded-[24px]">
+                        <img
+                          src={category.image}
+                          alt={category.name}
+                          className="w-full h-full object-cover transition-all duration-700 ease-out"
+                        />
+                        
+                        {/* Modern Gradient Overlay */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/70 via-slate-800/40 to-transparent transition-all duration-700 ease-out" />
+                        
+                        {/* Sophisticated Pattern Overlay */}
+                        <div className="absolute inset-0 opacity-20 transition-opacity duration-700" 
+                             style={{
+                               backgroundImage: `radial-gradient(circle at 20% 80%, rgba(255,255,255,0.1) 0%, transparent 50%),
+                                               radial-gradient(circle at 80% 20%, rgba(255,255,255,0.1) 0%, transparent 50%)`
+                             }} />
+                      </div>
+
+                      {/* Luxury Gold Border System */}
+                      <div className="absolute inset-0 rounded-[24px] border border-amber-300/30 transition-all duration-700 ease-out" />
+
+                      {/* Enhanced Content Layout */}
+                      <div className="absolute inset-0 flex flex-col justify-between p-6">
+                        
+                        {/* Top Icon with Modern Design */}
+                        <div className="flex justify-end">
+                          <div className="w-12 h-12 bg-gradient-to-br from-slate-800/80 to-slate-900/90 backdrop-blur-xl rounded-xl flex items-center justify-center border border-slate-700/50 transition-all duration-700 ease-out shadow-lg">
+                            <category.icon className="w-6 h-6 text-slate-200 transition-all duration-700 ease-out" />
+                          </div>
+                        </div>
+
+                        {/* Bottom Content with Modern Typography */}
+                        <div className="space-y-3">
+                          {/* Category Name - Modern Typography */}
+                          <h3 className="font-luxury text-2xl font-bold text-white transition-all duration-700 ease-out tracking-wide">
+                            {category.name}
+                          </h3>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              </div>
+          </div>
+        </div>
+
+        {/* Modern Navigation Buttons - Desktop Only */}
         <motion.div 
-          className="flex justify-center items-center mt-16 space-x-10"
+          className="hidden lg:flex justify-center items-center mt-16 space-x-10"
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.6 }}
