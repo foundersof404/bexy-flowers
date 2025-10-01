@@ -95,7 +95,6 @@ const UltraFeaturedBouquets = () => {
       cards.forEach((card, index) => {
         const image = card.querySelector('img');
         const actionButtons = card.querySelector('[class*="absolute top-4 right-4"]');
-        const priceTag = card.querySelector('[class*="absolute bottom-4 left-4"]');
         const button = card.querySelector('button');
         const glitterContainer = card.querySelector('[class*="Modern Dynamic Glitter Effect"]');
 
@@ -106,39 +105,33 @@ const UltraFeaturedBouquets = () => {
           
           hoverTl
             .to(card, {
-              duration: 0.5,
-              rotateX: 3,
-              rotateY: 3,
-              z: 30,
-              scale: 1.02,
+              duration: 0.3,
+              rotateX: 0,
+              rotateY: 0,
+              z: 0,
+              scale: 1.03,
               ease: "power2.out"
             })
             .to(image, {
-              duration: 0.6,
+              duration: 0.3,
               scale: 1.08,
-              filter: "brightness(1.1) saturate(1.1)",
+              filter: "brightness(1.05) saturate(1.05)",
               ease: "power2.out"
             }, 0)
             .to(actionButtons, {
-              duration: 0.4,
+              duration: 0.25,
               y: 0,
               opacity: 1,
               ease: "back.out(1.7)"
             }, 0.1)
-            .to(priceTag, {
-              duration: 0.3,
-              y: -3,
-              scale: 1.05,
-              ease: "power2.out"
-            }, 0.2)
             .to(button, {
-              duration: 0.4,
+              duration: 0.25,
               y: -1,
               scale: 1.02,
               ease: "power2.out"
             }, 0.2)
             .to(glitterContainer, {
-              duration: 0.8,
+              duration: 0.4,
               opacity: 1,
               ease: "power2.out"
             }, 0);
@@ -148,7 +141,7 @@ const UltraFeaturedBouquets = () => {
           if (hoverTl) hoverTl.kill();
           
           gsap.to(card, {
-            duration: 0.4,
+            duration: 0.25,
             rotateX: 0,
             rotateY: 0,
             z: 0,
@@ -156,31 +149,25 @@ const UltraFeaturedBouquets = () => {
             ease: "power2.out"
           });
           gsap.to(image, {
-            duration: 0.4,
+            duration: 0.25,
             scale: 1,
             filter: "brightness(1) saturate(1)",
             ease: "power2.out"
           });
           gsap.to(actionButtons, {
-            duration: 0.3,
+            duration: 0.2,
             y: -8,
             opacity: 0,
             ease: "power2.out"
           });
-          gsap.to(priceTag, {
-            duration: 0.3,
-            y: 0,
-            scale: 1,
-            ease: "power2.out"
-          });
           gsap.to(button, {
-            duration: 0.3,
+            duration: 0.2,
             y: 0,
             scale: 1,
             ease: "power2.out"
           });
           gsap.to(glitterContainer, {
-            duration: 0.5,
+            duration: 0.3,
             opacity: 0,
             ease: "power2.out"
           });
@@ -298,32 +285,32 @@ const UltraFeaturedBouquets = () => {
                 <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 rounded-2xl opacity-0 group-hover/card:opacity-100 transition-opacity duration-500 blur-sm"></div>
                 <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 rounded-2xl opacity-0 group-hover/card:opacity-100 transition-opacity duration-500"></div>
                 
-                <div className="relative rounded-2xl bg-white/80 backdrop-blur-2xl border border-white/30 shadow-[0_8px_32px_rgba(0,0,0,0.12)] transition-all duration-700 ease-out overflow-hidden group hover:-translate-y-3 hover:shadow-[0_20px_60px_rgba(0,0,0,0.2)] hover:scale-[1.02]">
+                <div className="relative rounded-2xl bg-white/80 backdrop-blur-2xl border border-white/30 shadow-[0_8px_32px_rgba(0,0,0,0.12)] transition-all duration-300 ease-out overflow-hidden group hover:-translate-y-2 hover:shadow-[0_16px_48px_rgba(0,0,0,0.18)] hover:scale-[1.03] hover:ring-2 hover:ring-amber-400/80">
                 
                 {/* Modern Image Container with Enhanced Design */}
                 <div className="relative overflow-hidden aspect-[4/4.5] bg-gradient-to-br from-slate-50 to-slate-100 rounded-t-2xl">
                   <motion.img
                     src={bouquet.image}
                     alt={bouquet.name}
-                    className="w-full h-full object-cover transition-all duration-700 ease-out will-change-transform group-hover/card:scale-110 group-hover/card:brightness-110"
-                    whileHover={{ scale: 1.05 }}
+                    className="w-full h-full object-cover transition-all duration-300 ease-out will-change-transform group-hover/card:scale-105 group-hover/card:brightness-105"
+                    whileHover={{ scale: 1.03 }}
                   />
                   
                   {/* Enhanced Gradient Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900/70 via-slate-800/20 to-transparent transition-all duration-700 ease-out group-hover/card:from-slate-900/50 group-hover/card:via-slate-800/10" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-slate-800/20 to-transparent transition-all duration-300 ease-out group-hover/card:from-slate-900/45 group-hover/card:via-slate-800/10" />
                   
                   {/* Dynamic Pattern Overlay */}
-                  <div className="absolute inset-0 opacity-30 group-hover/card:opacity-50 transition-opacity duration-700" 
+                  <div className="absolute inset-0 opacity-20 group-hover/card:opacity-40 transition-opacity duration-300" 
                        style={{
                          backgroundImage: `radial-gradient(circle at 20% 80%, rgba(251,191,36,0.15) 0%, transparent 50%),
                                          radial-gradient(circle at 80% 20%, rgba(245,158,11,0.15) 0%, transparent 50%)`
                        }} />
                   
                   {/* Floating light effect */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 group-hover/card:opacity-100 group-hover/card:animate-pulse transition-opacity duration-700" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity duration-300" />
 
                   {/* Modern floating action buttons */}
-                  <div className="absolute top-4 right-4 opacity-0 -translate-y-2 translate-x-2 group-hover/card:opacity-100 group-hover/card:translate-y-0 group-hover/card:translate-x-0 transition-all duration-500">
+                  <div className="absolute top-4 right-4 opacity-0 -translate-y-2 translate-x-2 group-hover/card:opacity-100 group-hover/card:translate-y-0 group-hover/card:translate-x-0 transition-all duration-300">
                     <div className="flex items-center gap-2 rounded-full bg-white/80 backdrop-blur-xl shadow-lg border border-white/50 px-1 py-1">
                       <motion.button 
                         className="w-10 h-10 bg-gradient-to-br from-white to-amber-50 rounded-full flex items-center justify-center text-slate-700 hover:text-amber-600 shadow-sm hover:shadow-md transition-all duration-300"
@@ -342,28 +329,25 @@ const UltraFeaturedBouquets = () => {
                     </div>
                   </div>
 
-                  {/* Modern luxury price tag */}
-                  <motion.div 
-                    className="absolute bottom-4 left-4 rounded-xl bg-gradient-to-r from-amber-500/90 to-yellow-400/90 backdrop-blur-sm text-white px-4 py-2 font-luxury font-bold text-sm shadow-lg border border-amber-300/30 inline-flex items-center gap-2" 
-                    whileHover={{ y: -3, scale: 1.05 }}
-                    transition={{ type: "spring", stiffness: 300 }}
-                  >
-                    <Crown className="w-4 h-4 text-white" />
-                    {bouquet.price}
-                  </motion.div>
+                  {/* Price badge removed; price moved below title */}
                 </div>
 
                 {/* Enhanced glassmorphism content section */}
                 <div className="p-6 bg-white/60 backdrop-blur-2xl border-t border-white/40 relative rounded-b-2xl">
-                  <h3 className="font-luxury text-xl font-bold text-slate-800 mb-3 tracking-tight group-hover/card:text-amber-600 transition-all duration-700 ease-out">
+                  <h3 className="font-luxury text-2xl font-extrabold text-slate-800 mb-2 tracking-tight group-hover/card:text-amber-600 transition-all duration-300 ease-out">
                     {bouquet.name}
                   </h3>
-                  <p className="font-sans text-sm tracking-wide text-slate-600/90 mb-5 leading-relaxed font-light transition-all duration-700 ease-out">
+                  <div className="mb-3">
+                    <span className="text-base font-semibold bg-gradient-to-r from-amber-600 to-yellow-500 bg-clip-text text-transparent">
+                      {bouquet.price}
+                    </span>
+                  </div>
+                  <p className="font-sans text-sm tracking-wide text-slate-500 mb-5 leading-relaxed font-light transition-all duration-300 ease-out" style={{ display: '-webkit-box', WebkitLineClamp: 2 as any, WebkitBoxOrient: 'vertical' as any, overflow: 'hidden' }}>
                     {bouquet.description}
                   </p>
                   
                   <motion.button
-                    className="w-full rounded-xl border border-amber-300/50 bg-gradient-to-r from-amber-500 to-yellow-500 text-white hover:from-amber-600 hover:to-yellow-600 transition-all duration-300 px-6 py-3.5 font-semibold text-sm uppercase tracking-wider shadow-lg hover:shadow-xl hover:shadow-amber-500/25 group/btn"
+                    className="w-full rounded-xl border border-amber-400 bg-gradient-to-r from-amber-500 to-yellow-500 text-white hover:from-black hover:to-black transition-colors duration-300 px-6 py-3.5 font-semibold text-sm uppercase tracking-wider shadow-lg hover:shadow-xl hover:shadow-amber-500/25 group/btn"
                     whileHover={{ scale: 1.02, y: -1 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={(e) => {
