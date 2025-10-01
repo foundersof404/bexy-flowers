@@ -6,6 +6,7 @@ import { Heart, Eye, ShoppingCart, Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import OptimizedImage from "@/components/OptimizedImage";
 import { Card } from "@/components/ui/card";
+import { useCartWithToast } from "@/hooks/useCartWithToast";
 import type { Bouquet } from "@/pages/Collection";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -17,9 +18,10 @@ interface BouquetGridProps {
 
 export const BouquetGrid = ({ bouquets, onBouquetClick }: BouquetGridProps) => {
   const gridRef = useRef<HTMLDivElement>(null);
+  const { addToCart } = useCartWithToast();
 
   useEffect(() => {
-    if (gridRef.current) {
+    if (gridRef.current && gridRef.current.children.length > 0) {
       const cards = gridRef.current.children;
       
       // Reset previous animations
@@ -49,6 +51,11 @@ export const BouquetGrid = ({ bouquets, onBouquetClick }: BouquetGridProps) => {
         }
       );
     }
+
+    // Cleanup function
+    return () => {
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+    };
   }, [bouquets]);
 
   const cardVariants = {
@@ -83,21 +90,19 @@ export const BouquetGrid = ({ bouquets, onBouquetClick }: BouquetGridProps) => {
           <div className="rounded-lg p-[1px] bg-gradient-to-r from-[var(--lux-edge-from)] to-[var(--lux-edge-to)] group/card">
           <Card className="relative overflow-hidden rounded-lg bg-white/60 backdrop-blur-sm border-transparent shadow-[0_4px_30px_rgba(0,0,0,0.1)] transition-all duration-500">
             {/* Image Container */}
-            <div className="relative aspect-[4/5] overflow-hidden">
-              <motion.div whileHover={{ scale: 1.008 }} transition={{ duration: 0.7, ease: "easeOut" }} className="w-full h-full">
+            <div className="relative aspect-[4/5] overflow-hidden transform-gpu">
+              <motion.div transition={{ duration: 0.7, ease: "easeOut" }} className="w-full h-full">
                 <OptimizedImage
                   src={bouquet.image}
                   alt={bouquet.name}
                   className="w-full h-full object-cover ring-0 group-hover/card:ring-1 group-hover/card:ring-amber-200"
+                  style={{ backfaceVisibility: 'hidden', transform: 'translateZ(0)', WebkitTransform: 'translateZ(0)' }}
                 />
               </motion.div>
               
               {/* Hover Overlay */}
-              <motion.div
-                className="absolute inset-0"
-                initial={{ opacity: 0 }}
-                whileHover={{ opacity: 1 }}
-                transition={{ duration: 0.3 }}
+              <div
+                className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                 style={{
                   background: "linear-gradient(180deg, rgba(0,0,0,0.0) 55%, rgba(0,0,0,0.25) 100%)"
                 }}
@@ -190,7 +195,12 @@ export const BouquetGrid = ({ bouquets, onBouquetClick }: BouquetGridProps) => {
                     className="w-full sm:w-auto rounded-md border border-amber-300/60 bg-white text-slate-900 hover:text-white transition-all duration-300 bg-[length:200%_100%] bg-gradient-to-r from-white via-amber-400 to-amber-600 hover:bg-[position:100%_0] text-sm sm:text-base"
                     onClick={(e) => {
                       e.stopPropagation();
-                      // Add to cart logic
+                      addToCart({
+                        id: parseInt(bouquet.id),
+                        title: bouquet.name,
+                        price: bouquet.price,
+                        image: bouquet.image
+                      });
                     }}
                   >
                     <ShoppingCart className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />

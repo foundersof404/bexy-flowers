@@ -11,6 +11,8 @@ import NotFound from "./pages/NotFound";
 import Customize from "./pages/Customize";
 import ScrollToTop from "@/components/ScrollToTop";
 import { ThemeProvider } from "@/hooks/useTheme";
+import { CartProvider } from "@/contexts/CartContext";
+import CartTest from "@/pages/CartTest";
 
 const queryClient = new QueryClient();
 
@@ -22,19 +24,22 @@ const App = () => {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <ThemeProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <ScrollToTop />
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/collection" element={<Collection />} />
-              <Route path="/about" element={<AboutPage />} />
-              <Route path="/customize" element={<Customize />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
+          <CartProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <ScrollToTop />
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/collection" element={<Collection />} />
+                <Route path="/about" element={<AboutPage />} />
+                <Route path="/customize" element={<Customize />} />
+                <Route path="/cart-test" element={<CartTest />} />
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </CartProvider>
         </ThemeProvider>
       </TooltipProvider>
     </QueryClientProvider>

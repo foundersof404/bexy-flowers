@@ -15,6 +15,8 @@ import {
   Star
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useCart } from '@/contexts/CartContext';
+import CartDashboard from '@/components/cart/CartDashboard';
 import logoImage from '/assets/bexy-flowers-logo.png';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -61,7 +63,9 @@ const UltraNavigation = () => {
   const menuRef = useRef<HTMLDivElement>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [cartItems, setCartItems] = useState(3); // Mock cart count
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const { getTotalItems } = useCart();
+  const cartItems = getTotalItems();
 
   useEffect(() => {
     const nav = navRef.current;
@@ -385,6 +389,7 @@ const UltraNavigation = () => {
                 <Button
                   variant="ghost"
                   size="icon"
+                  onClick={() => setIsCartOpen(true)}
                   className="relative group hover:bg-primary/10 transition-all duration-500 overflow-hidden rounded-lg w-10 h-10 sm:w-12 sm:h-12"
                 >
                   {/* Cart Icon with 3D Effects */}
@@ -726,6 +731,12 @@ const UltraNavigation = () => {
 
       {/* Spacer for fixed navigation */}
       <div className="h-16 sm:h-20" />
+
+      {/* Cart Dashboard */}
+      <CartDashboard 
+        isOpen={isCartOpen} 
+        onClose={() => setIsCartOpen(false)} 
+      />
     </>
   );
 };

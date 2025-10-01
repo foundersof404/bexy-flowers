@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ShoppingCart, Heart, Eye, Crown } from 'lucide-react';
+import { useCartWithToast } from '@/hooks/useCartWithToast';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -62,6 +63,7 @@ const bouquets = [
 
 const UltraFeaturedBouquets = () => {
   const navigate = useNavigate();
+  const { addToCart } = useCartWithToast();
   const sectionRef = useRef<HTMLElement>(null);
   const cardsRef = useRef<HTMLDivElement[]>([]);
 
@@ -280,19 +282,20 @@ const UltraFeaturedBouquets = () => {
               <div className="relative rounded-lg bg-white/60 backdrop-blur-xl border border-transparent shadow-[0_4px_30px_rgba(0,0,0,0.1)] transition-all duration-700 ease-out overflow-hidden group hover:-translate-y-2">
                 
                 {/* Image Container with Modern Design */}
-                <div className="relative overflow-hidden aspect-[4/4.5] bg-slate-100 rounded-t-lg">
+                <div className="relative overflow-hidden aspect-[4/4.5] bg-slate-100 rounded-t-lg transform-gpu">
                   <motion.img
                     src={bouquet.image}
                     alt={bouquet.name}
                     className="w-full h-full object-cover transition-all duration-700 ease-out will-change-transform ring-0 group-hover/card:ring-1 group-hover/card:ring-amber-200"
-                    whileHover={{ scale: 1.08, filter: 'brightness(1.08)' }}
+                    style={{ backfaceVisibility: 'hidden', transform: 'translateZ(0)', WebkitTransform: 'translateZ(0)' }}
+                    whileHover={{ scale: 1.02 }}
                   />
                   
                   {/* Modern Gradient Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-slate-800/30 to-transparent transition-all duration-700 ease-out group-hover:from-slate-900/40 group-hover:via-slate-800/10" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-slate-800/30 to-transparent transition-all duration-700 ease-out group-hover:from-slate-900/40 group-hover:via-slate-800/10 pointer-events-none" />
                   
                   {/* Sophisticated Pattern Overlay */}
-                  <div className="absolute inset-0 opacity-20 group-hover:opacity-30 transition-opacity duration-700" 
+                  <div className="absolute inset-0 opacity-20 group-hover:opacity-30 transition-opacity duration-700 pointer-events-none" 
                        style={{
                          backgroundImage: `radial-gradient(circle at 20% 80%, rgba(255,255,255,0.1) 0%, transparent 50%),
                                          radial-gradient(circle at 80% 20%, rgba(255,255,255,0.1) 0%, transparent 50%)`
@@ -338,6 +341,17 @@ const UltraFeaturedBouquets = () => {
                     className="w-full rounded-md border border-amber-300/60 bg-white text-slate-900 hover:text-white transition-all duration-300 bg-[length:200%_100%] bg-gradient-to-r from-white via-amber-400 to-amber-600 hover:bg-[position:100%_0] px-6 py-3 font-medium text-sm uppercase tracking-wider"
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      // Convert price string to number (remove $ and convert to number)
+                      const priceNumber = parseFloat(bouquet.price.replace('$', ''));
+                      addToCart({
+                        id: bouquet.id,
+                        title: bouquet.name,
+                        price: priceNumber,
+                        image: bouquet.image
+                      });
+                    }}
                   >
                     <div className="flex items-center justify-center gap-2">
                       <ShoppingCart className="w-4 h-4 transition-all duration-300 group-hover:text-amber-600" />
@@ -347,12 +361,12 @@ const UltraFeaturedBouquets = () => {
                 </div>
 
                 {/* Luxury Border & Glow */}
-                <div className="absolute inset-0 rounded-lg border border-amber-300/30 group-hover:border-amber-400/60 transition-all duration-700 ease-out" />
-                <div className="absolute inset-[1px] rounded-lg bg-gradient-to-br from-amber-100/20 via-transparent to-amber-900/10 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                <div className="absolute inset-0 rounded-lg border border-amber-300/30 group-hover:border-amber-400/60 transition-all duration-700 ease-out pointer-events-none" />
+                <div className="absolute inset-[1px] rounded-lg bg-gradient-to-br from-amber-100/20 via-transparent to-amber-900/10 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
                 {/* Shimmer */}
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-300/20 to-transparent opacity-0 group-hover:opacity-100 rounded-lg transform -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out" />
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-300/20 to-transparent opacity-0 group-hover:opacity-100 rounded-lg transform -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out pointer-events-none" />
                 {/* Glow */}
-                <div className="absolute -inset-2 bg-gradient-to-r from-amber-400/10 via-transparent to-amber-400/10 rounded-lg blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 ease-out" />
+                <div className="absolute -inset-2 bg-gradient-to-r from-amber-400/10 via-transparent to-amber-400/10 rounded-lg blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 ease-out pointer-events-none" />
                 {/* Inset image glow */}
                 <div className="pointer-events-none absolute inset-0 rounded-lg shadow-[inset_0_0_40px_rgba(251,191,36,0.12)] opacity-0 group-hover/card:opacity-100 transition-opacity duration-500" />
 

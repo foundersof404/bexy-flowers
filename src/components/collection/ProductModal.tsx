@@ -5,6 +5,7 @@ import { X, Heart, ShoppingCart, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import type { Bouquet } from "@/pages/Collection";
+import { useCartWithToast } from "@/hooks/useCartWithToast";
 
 interface ProductModalProps {
   bouquet: Bouquet;
@@ -14,6 +15,7 @@ interface ProductModalProps {
 export const ProductModal = ({ bouquet, onClose }: ProductModalProps) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
+  const { addToCart } = useCartWithToast();
 
   useEffect(() => {
     // Prevent body scroll
@@ -87,8 +89,14 @@ export const ProductModal = ({ bouquet, onClose }: ProductModalProps) => {
         });
     }
     
-    // Add to cart logic here
-    console.log(`Added ${bouquet.name} to cart`);
+    // Add to cart logic
+    const numericPrice = typeof bouquet.price === 'string' ? parseFloat(bouquet.price.replace('$','')) : bouquet.price;
+    addToCart({
+      id: typeof bouquet.id === 'string' ? parseInt(bouquet.id) : bouquet.id,
+      title: bouquet.name,
+      price: numericPrice,
+      image: bouquet.image
+    });
   };
 
   return (

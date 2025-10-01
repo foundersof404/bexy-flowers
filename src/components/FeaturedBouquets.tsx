@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { useCartWithToast } from "@/hooks/useCartWithToast";
 import { Card, CardContent } from "@/components/ui/card";
 import bouquet1 from "@/assets/bouquet-1.jpg";
 import bouquet2 from "@/assets/bouquet-2.jpg";
@@ -54,6 +55,8 @@ const bouquets = [
 ];
 
 const FeaturedBouquets = () => {
+  const { addToCart } = useCartWithToast();
+
   return (
     <section className="py-20 px-4 bg-gradient-platinum">
       <div className="max-w-7xl mx-auto">
@@ -121,6 +124,15 @@ const FeaturedBouquets = () => {
                       variant="outline"
                       size="sm"
                       className="border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-luxury"
+                      onClick={() => {
+                        const priceNumber = parseFloat(String(bouquet.price).replace("$", ""));
+                        addToCart({
+                          id: bouquet.id as number,
+                          title: bouquet.name,
+                          price: priceNumber,
+                          image: bouquet.image
+                        });
+                      }}
                     >
                       Add to Cart
                     </Button>
