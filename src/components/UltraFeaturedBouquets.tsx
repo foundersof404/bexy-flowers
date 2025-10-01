@@ -91,12 +91,13 @@ const UltraFeaturedBouquets = () => {
       // Set initial states
       gsap.set(cards, { y: 100, opacity: 0, rotateX: -15 });
 
-      // 3D hover effects for each card
+      // Enhanced 3D hover effects for modern cards
       cards.forEach((card, index) => {
-        const image = card.querySelector('.bouquet-image');
-        const overlay = card.querySelector('.card-overlay');
-        const actions = card.querySelector('.card-actions');
-        const border = card.querySelector('.gold-border');
+        const image = card.querySelector('img');
+        const actionButtons = card.querySelector('[class*="absolute top-4 right-4"]');
+        const priceTag = card.querySelector('[class*="absolute bottom-4 left-4"]');
+        const button = card.querySelector('button');
+        const glitterContainer = card.querySelector('[class*="Modern Dynamic Glitter Effect"]');
 
         let hoverTl: gsap.core.Timeline;
 
@@ -105,34 +106,41 @@ const UltraFeaturedBouquets = () => {
           
           hoverTl
             .to(card, {
-              duration: 0.6,
-              rotateX: 5,
-              rotateY: 5,
-              z: 50,
+              duration: 0.5,
+              rotateX: 3,
+              rotateY: 3,
+              z: 30,
               scale: 1.02,
               ease: "power2.out"
             })
             .to(image, {
               duration: 0.6,
-              scale: 1.1,
-              rotateZ: 2,
+              scale: 1.08,
+              filter: "brightness(1.1) saturate(1.1)",
               ease: "power2.out"
             }, 0)
-            .to(overlay, {
+            .to(actionButtons, {
               duration: 0.4,
-              opacity: 1,
-              ease: "power2.out"
-            }, 0.2)
-            .to(actions, {
-              duration: 0.5,
               y: 0,
               opacity: 1,
+              ease: "back.out(1.7)"
+            }, 0.1)
+            .to(priceTag, {
+              duration: 0.3,
+              y: -3,
+              scale: 1.05,
               ease: "power2.out"
-            }, 0.3)
-            .to(border, {
+            }, 0.2)
+            .to(button, {
+              duration: 0.4,
+              y: -1,
+              scale: 1.02,
+              ease: "power2.out"
+            }, 0.2)
+            .to(glitterContainer, {
               duration: 0.8,
-              strokeDasharray: "0, 1000",
-              ease: "power2.inOut"
+              opacity: 1,
+              ease: "power2.out"
             }, 0);
         });
 
@@ -150,23 +158,30 @@ const UltraFeaturedBouquets = () => {
           gsap.to(image, {
             duration: 0.4,
             scale: 1,
-            rotateZ: 0,
+            filter: "brightness(1) saturate(1)",
             ease: "power2.out"
           });
-          gsap.to(overlay, {
+          gsap.to(actionButtons, {
             duration: 0.3,
+            y: -8,
             opacity: 0,
             ease: "power2.out"
           });
-          gsap.to(actions, {
+          gsap.to(priceTag, {
             duration: 0.3,
-            y: 20,
-            opacity: 0,
+            y: 0,
+            scale: 1,
             ease: "power2.out"
           });
-          gsap.to(border, {
+          gsap.to(button, {
+            duration: 0.3,
+            y: 0,
+            scale: 1,
+            ease: "power2.out"
+          });
+          gsap.to(glitterContainer, {
             duration: 0.5,
-            strokeDasharray: "1000, 1000",
+            opacity: 0,
             ease: "power2.out"
           });
         });
@@ -260,14 +275,14 @@ const UltraFeaturedBouquets = () => {
         </motion.div>
 
         <div className="flex justify-center">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-6xl">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6 sm:gap-8 lg:gap-10 max-w-7xl px-4 sm:px-6">
           {bouquets.map((bouquet, index) => (
             <motion.div
               key={bouquet.id}
               ref={(el) => {
                 if (el) cardsRef.current[index] = el;
               }}
-              className="group cursor-pointer w-full max-w-[380px] mx-auto sm:max-w-none"
+              className="group cursor-pointer w-full max-w-[350px] mx-auto sm:max-w-none lg:max-w-[400px] xl:max-w-none"
               initial={{ opacity: 0, y: 100 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ 
@@ -277,69 +292,79 @@ const UltraFeaturedBouquets = () => {
               }}
               viewport={{ once: true }}
             >
-              {/* Gradient edge wrapper for polished border */}
-              <div className="rounded-lg p-[1px] bg-gradient-to-r from-[var(--lux-edge-from)] to-[var(--lux-edge-to)] group/card">
-              <div className="relative rounded-lg bg-white/60 backdrop-blur-xl border border-transparent shadow-[0_4px_30px_rgba(0,0,0,0.1)] transition-all duration-700 ease-out overflow-hidden group hover:-translate-y-2">
+              {/* Modern glassmorphism card with enhanced border */}
+              <div className="relative group/card">
+                {/* Animated gradient border */}
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 rounded-2xl opacity-0 group-hover/card:opacity-100 transition-opacity duration-500 blur-sm"></div>
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 rounded-2xl opacity-0 group-hover/card:opacity-100 transition-opacity duration-500"></div>
                 
-                {/* Image Container with Modern Design */}
-                <div className="relative overflow-hidden aspect-[4/4.5] bg-slate-100 rounded-t-lg transform-gpu">
+                <div className="relative rounded-2xl bg-white/80 backdrop-blur-2xl border border-white/30 shadow-[0_8px_32px_rgba(0,0,0,0.12)] transition-all duration-700 ease-out overflow-hidden group hover:-translate-y-3 hover:shadow-[0_20px_60px_rgba(0,0,0,0.2)] hover:scale-[1.02]">
+                
+                {/* Modern Image Container with Enhanced Design */}
+                <div className="relative overflow-hidden aspect-[4/4.5] bg-gradient-to-br from-slate-50 to-slate-100 rounded-t-2xl">
                   <motion.img
                     src={bouquet.image}
                     alt={bouquet.name}
-                    className="w-full h-full object-cover transition-all duration-700 ease-out will-change-transform ring-0 group-hover/card:ring-1 group-hover/card:ring-amber-200"
-                    style={{ backfaceVisibility: 'hidden', transform: 'translateZ(0)', WebkitTransform: 'translateZ(0)' }}
-                    whileHover={{ scale: 1.02 }}
+                    className="w-full h-full object-cover transition-all duration-700 ease-out will-change-transform group-hover/card:scale-110 group-hover/card:brightness-110"
+                    whileHover={{ scale: 1.05 }}
                   />
                   
-                  {/* Modern Gradient Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-slate-800/30 to-transparent transition-all duration-700 ease-out group-hover:from-slate-900/40 group-hover:via-slate-800/10 pointer-events-none" />
+                  {/* Enhanced Gradient Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900/70 via-slate-800/20 to-transparent transition-all duration-700 ease-out group-hover/card:from-slate-900/50 group-hover/card:via-slate-800/10" />
                   
-                  {/* Sophisticated Pattern Overlay */}
-                  <div className="absolute inset-0 opacity-20 group-hover:opacity-30 transition-opacity duration-700 pointer-events-none" 
+                  {/* Dynamic Pattern Overlay */}
+                  <div className="absolute inset-0 opacity-30 group-hover/card:opacity-50 transition-opacity duration-700" 
                        style={{
-                         backgroundImage: `radial-gradient(circle at 20% 80%, rgba(255,255,255,0.1) 0%, transparent 50%),
-                                         radial-gradient(circle at 80% 20%, rgba(255,255,255,0.1) 0%, transparent 50%)`
+                         backgroundImage: `radial-gradient(circle at 20% 80%, rgba(251,191,36,0.15) 0%, transparent 50%),
+                                         radial-gradient(circle at 80% 20%, rgba(245,158,11,0.15) 0%, transparent 50%)`
                        }} />
+                  
+                  {/* Floating light effect */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 group-hover/card:opacity-100 group-hover/card:animate-pulse transition-opacity duration-700" />
 
-                  {/* Floating glassmorphism actions pill */}
-                  <div className="absolute top-4 right-4 opacity-0 -translate-y-2 translate-x-2 group-hover:opacity-100 group-hover:translate-y-0 group-hover:translate-x-0 transition-all duration-500">
-                    <div className="flex items-center gap-2 rounded-full bg-white/40 backdrop-blur-md shadow-sm border border-white/40 px-2 py-1">
+                  {/* Modern floating action buttons */}
+                  <div className="absolute top-4 right-4 opacity-0 -translate-y-2 translate-x-2 group-hover/card:opacity-100 group-hover/card:translate-y-0 group-hover/card:translate-x-0 transition-all duration-500">
+                    <div className="flex items-center gap-2 rounded-full bg-white/80 backdrop-blur-xl shadow-lg border border-white/50 px-1 py-1">
                       <motion.button 
-                        className="w-9 h-9 bg-white/90 rounded-full flex items-center justify-center text-slate-800 hover:text-amber-600"
-                        whileHover={{ scale: 1.08 }}
-                        whileTap={{ scale: 0.92 }}
+                        className="w-10 h-10 bg-gradient-to-br from-white to-amber-50 rounded-full flex items-center justify-center text-slate-700 hover:text-amber-600 shadow-sm hover:shadow-md transition-all duration-300"
+                        whileHover={{ scale: 1.1, rotate: 5 }}
+                        whileTap={{ scale: 0.9 }}
                       >
                         <Heart className="w-4 h-4" />
                       </motion.button>
                       <motion.button 
-                        className="w-9 h-9 bg-white/90 rounded-full flex items-center justify-center text-slate-800 hover:text-amber-600"
-                        whileHover={{ scale: 1.08 }}
-                        whileTap={{ scale: 0.92 }}
+                        className="w-10 h-10 bg-gradient-to-br from-white to-amber-50 rounded-full flex items-center justify-center text-slate-700 hover:text-amber-600 shadow-sm hover:shadow-md transition-all duration-300"
+                        whileHover={{ scale: 1.1, rotate: -5 }}
+                        whileTap={{ scale: 0.9 }}
                       >
                         <Eye className="w-4 h-4" />
                       </motion.button>
                     </div>
                   </div>
 
-                  {/* Luxury Price Tag */}
-                  <motion.div className="absolute bottom-4 left-4 rounded-md bg-gradient-to-r from-amber-100 to-zinc-100 text-amber-800 px-3 py-1 font-luxury font-semibold text-sm border border-amber-200/60 shadow-sm inline-flex items-center gap-1" whileHover={{ y: -2, scale: 1.03 }}>
-                    <Crown className="w-3.5 h-3.5 text-amber-600" />
+                  {/* Modern luxury price tag */}
+                  <motion.div 
+                    className="absolute bottom-4 left-4 rounded-xl bg-gradient-to-r from-amber-500/90 to-yellow-400/90 backdrop-blur-sm text-white px-4 py-2 font-luxury font-bold text-sm shadow-lg border border-amber-300/30 inline-flex items-center gap-2" 
+                    whileHover={{ y: -3, scale: 1.05 }}
+                    transition={{ type: "spring", stiffness: 300 }}
+                  >
+                    <Crown className="w-4 h-4 text-white" />
                     {bouquet.price}
                   </motion.div>
                 </div>
 
-                {/* Glassmorphism Content Section */}
-                <div className="p-5 bg-white/40 backdrop-blur-xl border-t border-white/50 relative rounded-b-lg">
-                  <h3 className="font-luxury text-[1.25rem] font-bold text-slate-800 mb-3 tracking-tight group-hover:text-amber-600 transition-all duration-700 ease-out">
+                {/* Enhanced glassmorphism content section */}
+                <div className="p-6 bg-white/60 backdrop-blur-2xl border-t border-white/40 relative rounded-b-2xl">
+                  <h3 className="font-luxury text-xl font-bold text-slate-800 mb-3 tracking-tight group-hover/card:text-amber-600 transition-all duration-700 ease-out">
                     {bouquet.name}
                   </h3>
-                  <p className="font-sans text-[0.9rem] tracking-wide text-slate-600/90 mb-4 leading-relaxed font-light transition-all duration-700 ease-out">
+                  <p className="font-sans text-sm tracking-wide text-slate-600/90 mb-5 leading-relaxed font-light transition-all duration-700 ease-out">
                     {bouquet.description}
                   </p>
                   
                   <motion.button
-                    className="w-full rounded-md border border-amber-300/60 bg-white text-slate-900 hover:text-white transition-all duration-300 bg-[length:200%_100%] bg-gradient-to-r from-white via-amber-400 to-amber-600 hover:bg-[position:100%_0] px-6 py-3 font-medium text-sm uppercase tracking-wider"
-                    whileHover={{ scale: 1.02 }}
+                    className="w-full rounded-xl border border-amber-300/50 bg-gradient-to-r from-amber-500 to-yellow-500 text-white hover:from-amber-600 hover:to-yellow-600 transition-all duration-300 px-6 py-3.5 font-semibold text-sm uppercase tracking-wider shadow-lg hover:shadow-xl hover:shadow-amber-500/25 group/btn"
+                    whileHover={{ scale: 1.02, y: -1 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={(e) => {
                       e.stopPropagation();
@@ -354,44 +379,50 @@ const UltraFeaturedBouquets = () => {
                     }}
                   >
                     <div className="flex items-center justify-center gap-2">
-                      <ShoppingCart className="w-4 h-4 transition-all duration-300 group-hover:text-amber-600" />
+                      <ShoppingCart className="w-4 h-4 transition-all duration-300 group-hover/btn:scale-110" />
                       ADD TO COLLECTION
                     </div>
                   </motion.button>
                 </div>
 
-                {/* Luxury Border & Glow */}
-                <div className="absolute inset-0 rounded-lg border border-amber-300/30 group-hover:border-amber-400/60 transition-all duration-700 ease-out pointer-events-none" />
-                <div className="absolute inset-[1px] rounded-lg bg-gradient-to-br from-amber-100/20 via-transparent to-amber-900/10 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
-                {/* Shimmer */}
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-300/20 to-transparent opacity-0 group-hover:opacity-100 rounded-lg transform -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out pointer-events-none" />
-                {/* Glow */}
-                <div className="absolute -inset-2 bg-gradient-to-r from-amber-400/10 via-transparent to-amber-400/10 rounded-lg blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 ease-out pointer-events-none" />
-                {/* Inset image glow */}
-                <div className="pointer-events-none absolute inset-0 rounded-lg shadow-[inset_0_0_40px_rgba(251,191,36,0.12)] opacity-0 group-hover/card:opacity-100 transition-opacity duration-500" />
+                {/* Modern enhanced effects */}
+                {/* Animated shimmer sweep */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent opacity-0 group-hover/card:opacity-100 rounded-2xl transform -translate-x-full group-hover/card:translate-x-full transition-all duration-1000 ease-in-out" />
+                
+                {/* Enhanced glow effect */}
+                <div className="absolute -inset-3 bg-gradient-to-r from-amber-400/20 via-yellow-300/15 to-amber-400/20 rounded-2xl blur-xl opacity-0 group-hover/card:opacity-100 transition-opacity duration-700 ease-out" />
+                
+                {/* Inset glow */}
+                <div className="pointer-events-none absolute inset-0 rounded-2xl shadow-[inset_0_0_50px_rgba(251,191,36,0.15)] opacity-0 group-hover/card:opacity-100 transition-opacity duration-500" />
 
-                {/* Glitter Effect */}
-                <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-lg">
-                  {/* Moving glitter dots with subtle colors */}
-                  <div className="absolute top-4 left-8 w-1 h-1 bg-amber-600/60 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-500 delay-100 group-hover:animate-bounce" />
-                  <div className="absolute top-12 right-6 w-1 h-1 bg-amber-700/50 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-500 delay-200 group-hover:animate-ping" />
-                  <div className="absolute top-20 left-12 w-1 h-1 bg-amber-800/40 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-500 delay-300 group-hover:animate-pulse" />
-                  <div className="absolute top-8 right-12 w-1 h-1 bg-amber-600/60 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-500 delay-150 group-hover:animate-bounce" />
-                  <div className="absolute top-16 left-6 w-1 h-1 bg-amber-700/50 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-500 delay-250 group-hover:animate-ping" />
-                  <div className="absolute top-24 right-8 w-1 h-1 bg-amber-800/40 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-500 delay-350 group-hover:animate-pulse" />
-                  <div className="absolute top-32 left-10 w-1 h-1 bg-amber-600/60 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-500 delay-400 group-hover:animate-bounce" />
-                  <div className="absolute top-6 right-4 w-1 h-1 bg-amber-700/50 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-500 delay-500 group-hover:animate-ping" />
-                  <div className="absolute top-28 left-4 w-1 h-1 bg-amber-800/40 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-500 delay-450 group-hover:animate-pulse" />
-                  <div className="absolute top-14 right-10 w-1 h-1 bg-amber-600/60 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-500 delay-550 group-hover:animate-bounce" />
-                  <div className="absolute top-36 left-8 w-1 h-1 bg-amber-700/50 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-500 delay-600 group-hover:animate-ping" />
-                  <div className="absolute top-10 right-14 w-1 h-1 bg-amber-800/40 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-500 delay-650 group-hover:animate-pulse" />
-                  <div className="absolute top-22 left-14 w-1 h-1 bg-amber-600/60 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-500 delay-700 group-hover:animate-bounce" />
-                  <div className="absolute top-18 right-2 w-1 h-1 bg-amber-700/50 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-500 delay-750 group-hover:animate-ping" />
-                  <div className="absolute top-30 left-2 w-1 h-1 bg-amber-800/40 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-500 delay-800 group-hover:animate-pulse" />
-                  <div className="absolute top-26 right-16 w-1 h-1 bg-amber-600/60 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-500 delay-850 group-hover:animate-bounce" />
-                  <div className="absolute top-34 left-16 w-1 h-1 bg-amber-700/50 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-500 delay-900 group-hover:animate-ping" />
-                  <div className="absolute top-38 right-18 w-1 h-1 bg-amber-800/40 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-500 delay-950 group-hover:animate-pulse" />
-                  <div className="absolute top-40 left-18 w-1 h-1 bg-amber-600/60 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-500 delay-1000 group-hover:animate-bounce" />
+                {/* Modern Dynamic Glitter Effect - Responsive */}
+                <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-2xl sm:block hidden">
+                  {/* Large floating sparkles */}
+                  <div className="absolute top-6 left-6 w-2 h-2 bg-gradient-to-br from-yellow-300 to-amber-500 rounded-full opacity-0 group-hover/card:opacity-100 transition-all duration-700 delay-100 group-hover/card:animate-bounce group-hover/card:shadow-lg group-hover/card:shadow-yellow-300/50" />
+                  <div className="absolute top-12 right-8 w-1.5 h-1.5 bg-gradient-to-br from-amber-400 to-yellow-400 rounded-full opacity-0 group-hover/card:opacity-100 transition-all duration-700 delay-200 group-hover/card:animate-ping" />
+                  <div className="absolute top-20 left-12 w-2 h-2 bg-gradient-to-br from-yellow-200 to-amber-300 rounded-full opacity-0 group-hover/card:opacity-100 transition-all duration-700 delay-300 group-hover/card:animate-pulse group-hover/card:shadow-lg group-hover/card:shadow-amber-300/50" />
+                  <div className="absolute top-8 right-14 w-1 h-1 bg-gradient-to-br from-amber-500 to-yellow-600 rounded-full opacity-0 group-hover/card:opacity-100 transition-all duration-700 delay-150 group-hover/card:animate-bounce" />
+                  <div className="absolute top-16 left-8 w-1.5 h-1.5 bg-gradient-to-br from-yellow-300 to-amber-400 rounded-full opacity-0 group-hover/card:opacity-100 transition-all duration-700 delay-250 group-hover/card:animate-ping" />
+                  <div className="absolute top-24 right-10 w-2 h-2 bg-gradient-to-br from-amber-300 to-yellow-500 rounded-full opacity-0 group-hover/card:opacity-100 transition-all duration-700 delay-350 group-hover/card:animate-pulse group-hover/card:shadow-lg group-hover/card:shadow-yellow-400/50" />
+                  <div className="absolute top-32 left-10 w-1 h-1 bg-gradient-to-br from-yellow-400 to-amber-600 rounded-full opacity-0 group-hover/card:opacity-100 transition-all duration-700 delay-400 group-hover/card:animate-bounce" />
+                  <div className="absolute top-4 right-6 w-1.5 h-1.5 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-full opacity-0 group-hover/card:opacity-100 transition-all duration-700 delay-500 group-hover/card:animate-ping" />
+                  <div className="absolute top-28 left-6 w-2 h-2 bg-gradient-to-br from-yellow-200 to-amber-400 rounded-full opacity-0 group-hover/card:opacity-100 transition-all duration-700 delay-450 group-hover/card:animate-pulse group-hover/card:shadow-lg group-hover/card:shadow-amber-200/50" />
+                  <div className="absolute top-14 right-12 w-1 h-1 bg-gradient-to-br from-amber-500 to-yellow-600 rounded-full opacity-0 group-hover/card:opacity-100 transition-all duration-700 delay-550 group-hover/card:animate-bounce" />
+                  <div className="absolute top-36 left-12 w-1.5 h-1.5 bg-gradient-to-br from-yellow-300 to-amber-500 rounded-full opacity-0 group-hover/card:opacity-100 transition-all duration-700 delay-600 group-hover/card:animate-ping" />
+                  <div className="absolute top-10 right-16 w-2 h-2 bg-gradient-to-br from-amber-300 to-yellow-400 rounded-full opacity-0 group-hover/card:opacity-100 transition-all duration-700 delay-650 group-hover/card:animate-pulse group-hover/card:shadow-lg group-hover/card:shadow-yellow-300/50" />
+                  <div className="absolute top-22 left-14 w-1 h-1 bg-gradient-to-br from-yellow-400 to-amber-600 rounded-full opacity-0 group-hover/card:opacity-100 transition-all duration-700 delay-700 group-hover/card:animate-bounce" />
+                  <div className="absolute top-18 right-4 w-1.5 h-1.5 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-full opacity-0 group-hover/card:opacity-100 transition-all duration-700 delay-750 group-hover/card:animate-ping" />
+                  <div className="absolute top-30 left-4 w-2 h-2 bg-gradient-to-br from-yellow-200 to-amber-300 rounded-full opacity-0 group-hover/card:opacity-100 transition-all duration-700 delay-800 group-hover/card:animate-pulse group-hover/card:shadow-lg group-hover/card:shadow-amber-200/50" />
+                  <div className="absolute top-26 right-18 w-1 h-1 bg-gradient-to-br from-amber-500 to-yellow-600 rounded-full opacity-0 group-hover/card:opacity-100 transition-all duration-700 delay-850 group-hover/card:animate-bounce" />
+                  <div className="absolute top-34 left-16 w-1.5 h-1.5 bg-gradient-to-br from-yellow-300 to-amber-400 rounded-full opacity-0 group-hover/card:opacity-100 transition-all duration-700 delay-900 group-hover/card:animate-ping" />
+                  <div className="absolute top-38 right-20 w-2 h-2 bg-gradient-to-br from-amber-300 to-yellow-500 rounded-full opacity-0 group-hover/card:opacity-100 transition-all duration-700 delay-950 group-hover/card:animate-pulse group-hover/card:shadow-lg group-hover/card:shadow-yellow-400/50" />
+                  <div className="absolute top-40 left-18 w-1 h-1 bg-gradient-to-br from-yellow-400 to-amber-600 rounded-full opacity-0 group-hover/card:opacity-100 transition-all duration-700 delay-1000 group-hover/card:animate-bounce" />
+                  
+                  {/* Medium sparkles */}
+                  <div className="absolute top-15 left-20 w-1 h-1 bg-yellow-300 rounded-full opacity-0 group-hover/card:opacity-80 transition-all duration-600 delay-120 group-hover/card:animate-spin" />
+                  <div className="absolute top-25 right-22 w-1 h-1 bg-amber-400 rounded-full opacity-0 group-hover/card:opacity-80 transition-all duration-600 delay-320 group-hover/card:animate-spin" />
+                  <div className="absolute top-35 left-22 w-1 h-1 bg-yellow-500 rounded-full opacity-0 group-hover/card:opacity-80 transition-all duration-600 delay-520 group-hover/card:animate-spin" />
+                  <div className="absolute top-45 right-24 w-1 h-1 bg-amber-300 rounded-full opacity-0 group-hover/card:opacity-80 transition-all duration-600 delay-720 group-hover/card:animate-spin" />
                 </div>
               </div>
               </div>
