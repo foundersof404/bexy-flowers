@@ -269,7 +269,7 @@ const UltraFeaturedBouquets = () => {
               ref={(el) => {
                 if (el) cardsRef.current[index] = el;
               }}
-              className="group cursor-pointer w-full max-w-[350px] mx-auto sm:max-w-none lg:max-w-[400px] xl:max-w-none"
+              className="group cursor-pointer w-full max-w-[300px] mx-auto sm:max-w-none lg:max-w-[340px] xl:max-w-none"
               initial={{ opacity: 0, y: 100 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ 
@@ -333,7 +333,7 @@ const UltraFeaturedBouquets = () => {
                 </div>
 
                 {/* Enhanced glassmorphism content section */}
-                <div className="p-6 bg-white/60 backdrop-blur-2xl border-t border-white/40 relative rounded-b-2xl">
+                <div className="p-5 bg-white/60 backdrop-blur-2xl border-t border-white/40 relative rounded-b-2xl">
                   <h3 className="font-luxury text-2xl font-extrabold text-slate-800 mb-2 tracking-tight group-hover/card:text-amber-600 transition-all duration-300 ease-out">
                     {bouquet.name}
                   </h3>
@@ -342,12 +342,12 @@ const UltraFeaturedBouquets = () => {
                       {bouquet.price}
                     </span>
                   </div>
-                  <p className="font-sans text-sm tracking-wide text-slate-500 mb-5 leading-relaxed font-light transition-all duration-300 ease-out" style={{ display: '-webkit-box', WebkitLineClamp: 2 as any, WebkitBoxOrient: 'vertical' as any, overflow: 'hidden' }}>
+                  <p className="font-sans text-sm tracking-wide text-slate-500 mb-4 leading-relaxed font-light transition-all duration-300 ease-out" style={{ display: '-webkit-box', WebkitLineClamp: 2 as any, WebkitBoxOrient: 'vertical' as any, overflow: 'hidden' }}>
                     {bouquet.description}
                   </p>
                   
                   <motion.button
-                    className="w-full rounded-xl border border-amber-400 bg-gradient-to-r from-amber-500 to-yellow-500 text-white hover:from-black hover:to-black transition-colors duration-300 px-6 py-3.5 font-semibold text-sm uppercase tracking-wider shadow-lg hover:shadow-xl hover:shadow-amber-500/25 group/btn"
+                    className="w-full rounded-xl border border-amber-400 bg-gradient-to-r from-amber-500 to-yellow-500 text-white hover:from-black hover:to-black transition-colors duration-300 px-5 py-3 font-semibold text-sm uppercase tracking-wider shadow-lg hover:shadow-xl hover:shadow-amber-500/25 group/btn"
                     whileHover={{ scale: 1.02, y: -1 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={(e) => {
