@@ -33,82 +33,51 @@ const Index = () => {
             <UltraCategories />
           </Suspense>
         </LazySection>
-        {/* Lightweight CTA replacing the heavy builder on home */}
+        {/* Simple and Modern Design Your Perfect Bouquet Section */}
         <LazySection rootMargin="400px 0px">
-          <section className="relative py-28 px-6">
-            <div className="absolute inset-0 bg-gradient-to-b from-amber-50/40 via-transparent to-transparent pointer-events-none" aria-hidden></div>
+          <section className="py-20 px-6 bg-white">
             <div className="max-w-6xl mx-auto">
-              <div className="grid md:grid-cols-12 gap-10 items-center">
-                <div className="md:col-span-7 text-center md:text-left">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100/60 text-amber-800 text-sm font-medium ring-1 ring-amber-200">
-                    <Sparkles className="h-4 w-4" />
-                    Live Customization
+              <div className="text-center mb-16">
+                <h2 className="font-luxury text-5xl md:text-6xl font-bold text-slate-800 mb-6">
+                  Design Your Perfect Bouquet
+                </h2>
+                <div className="w-24 h-1 bg-gradient-to-r from-amber-400 to-yellow-500 mx-auto mb-6"></div>
+                <p className="font-body text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
+                  Create a custom arrangement with unlimited creativity. Choose from premium flowers and design something uniquely yours.
+                </p>
+              </div>
+
+              <div className="grid md:grid-cols-3 gap-8 mb-12">
+                <div className="text-center p-8 rounded-2xl bg-slate-50 hover:bg-slate-100 transition-colors duration-300">
+                  <div className="w-16 h-16 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <Wand2 className="h-8 w-8 text-white" />
                   </div>
-                  <div className="relative mt-4 inline-block">
-                    <span className="absolute -inset-3 blur-2xl bg-gradient-to-r from-yellow-300/20 via-amber-400/20 to-yellow-600/20 rounded-full" aria-hidden></span>
-                    <h2 className="relative font-luxury text-4xl md:text-6xl font-bold bg-gradient-to-r from-yellow-300 via-amber-400 to-yellow-600 bg-clip-text text-transparent tracking-tight">
-                      Design Your Perfect Bouquet
-                    </h2>
-                  </div>
-                  <p className="mt-6 font-body text-lg md:text-xl text-muted-foreground max-w-2xl md:max-w-none">
-                    Create a custom arrangement with unlimited creativity. Explore curated palettes, blend textures and tones, and preview your bouquet in luxurious detail—before a single stem is cut.
-                  </p>
-                  <ul className="mt-8 grid sm:grid-cols-2 gap-4 text-left">
-                    <li className="flex items-start gap-3">
-                      <Wand2 className="h-5 w-5 mt-1 text-amber-600" />
-                      <div>
-                        <p className="font-medium">Instant style presets</p>
-                        <p className="text-sm text-muted-foreground">Romantic, modern, boho, and more—start fast and personalize.</p>
-                      </div>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <Palette className="h-5 w-5 mt-1 text-amber-600" />
-                      <div>
-                        <p className="font-medium">Curated color stories</p>
-                        <p className="text-sm text-muted-foreground">Handpicked tones for weddings, events, and everyday elegance.</p>
-                      </div>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <Flower2 className="h-5 w-5 mt-1 text-amber-600" />
-                      <div>
-                        <p className="font-medium">Premium blooms</p>
-                        <p className="text-sm text-muted-foreground">Only the finest stems sourced seasonally and responsibly.</p>
-                      </div>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <Sparkles className="h-5 w-5 mt-1 text-amber-600" />
-                      <div>
-                        <p className="font-medium">HD previews</p>
-                        <p className="text-sm text-muted-foreground">See nuanced lighting and texture before you place your order.</p>
-                      </div>
-                    </li>
-                  </ul>
-                  <div className="mt-10 flex flex-col sm:flex-row gap-4 sm:items-center">
-                    <a href="/customize" className="group inline-flex items-center justify-center px-8 py-4 rounded-full text-lg font-semibold bg-gradient-to-r from-[rgb(209,162,73)] via-[rgb(229,182,93)] to-[rgb(209,162,73)] text-white shadow-lg hover:shadow-[0_10px_30px_rgba(209,162,73,0.35)] transition-all">
-                      Start Customizing
-                      <ChevronRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-0.5" />
-                    </a>
-                    <a href="/collection" className="inline-flex items-center justify-center px-6 py-3 rounded-full text-base font-medium border border-muted-foreground/30 text-muted-foreground hover:text-primary hover:border-primary/60 hover:bg-primary/5 transition-colors">
-                      Explore inspiration
-                    </a>
-                  </div>
+                  <h3 className="text-xl font-semibold text-slate-800 mb-4">Style Presets</h3>
+                  <p className="text-slate-600 leading-relaxed">Start with romantic, modern, or boho styles and personalize to your taste.</p>
                 </div>
-                <div className="md:col-span-5">
-                  <div className="relative mx-auto max-w-md">
-                    <div className="absolute -inset-6 rounded-3xl bg-gradient-to-tr from-amber-200/30 via-yellow-100/20 to-transparent blur-2xl" aria-hidden></div>
-                    <div className="relative rounded-3xl border border-amber-200/40 bg-gradient-to-br from-white/60 to-amber-50/40 backdrop-blur-sm shadow-xl p-6">
-                      <div className="grid grid-cols-3 gap-3">
-                        <div className="h-24 rounded-xl bg-gradient-to-br from-rose-200 to-rose-100" />
-                        <div className="h-24 rounded-xl bg-gradient-to-br from-emerald-200 to-emerald-100" />
-                        <div className="h-24 rounded-xl bg-gradient-to-br from-indigo-200 to-indigo-100" />
-                        <div className="h-24 rounded-xl bg-gradient-to-br from-amber-200 to-amber-100" />
-                        <div className="h-24 rounded-xl bg-gradient-to-br from-pink-200 to-pink-100" />
-                        <div className="h-24 rounded-xl bg-gradient-to-br from-sky-200 to-sky-100" />
-                      </div>
-                      <p className="mt-4 text-sm text-muted-foreground text-center">Preview palettes and textures in a clean, modern canvas.</p>
-                    </div>
+
+                <div className="text-center p-8 rounded-2xl bg-slate-50 hover:bg-slate-100 transition-colors duration-300">
+                  <div className="w-16 h-16 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <Palette className="h-8 w-8 text-white" />
                   </div>
+                  <h3 className="text-xl font-semibold text-slate-800 mb-4">Color Stories</h3>
+                  <p className="text-slate-600 leading-relaxed">Explore curated color palettes perfect for any occasion or mood.</p>
                 </div>
+
+                <div className="text-center p-8 rounded-2xl bg-slate-50 hover:bg-slate-100 transition-colors duration-300">
+                  <div className="w-16 h-16 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <Flower2 className="h-8 w-8 text-white" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-slate-800 mb-4">Premium Blooms</h3>
+                  <p className="text-slate-600 leading-relaxed">Only the finest flowers sourced seasonally and responsibly.</p>
+                </div>
+              </div>
+
+              <div className="text-center">
+                <a href="/customize" className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-amber-500 to-yellow-500 text-white font-semibold text-lg rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
+                  Start Designing
+                  <ChevronRight className="h-5 w-5" />
+                </a>
               </div>
             </div>
           </section>

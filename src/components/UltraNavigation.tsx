@@ -453,14 +453,14 @@ const UltraNavigation = () => {
                   {/* Cart Badge with Enhanced Animation */}
                   {cartItems > 0 && (
                     <motion.div
-                      className="absolute -top-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-luxury font-bold text-xs shadow-gold cart-pulse relative z-20"
+                        className="absolute -top-3 -right-0 -left-3 w-4 h-4 sm:w-4 sm:h-5 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs shadow-gold cart-pulse relative z-20"
                       initial={{ scale: 0, rotate: -180 }}
                       animate={{ scale: 1, rotate: 0 }}
                       transition={{ delay: 1.5, type: "spring", stiffness: 500 }}
                       whileHover={{ 
                         scale: 1.1, 
                         rotate: 360,
-                        boxShadow: "0 0 20px rgba(196,166,105,0.8)"
+                        boxShadow: "0 0 10px rgba(196,166,105,0.8)"
                       }}
                     >
                       <motion.span

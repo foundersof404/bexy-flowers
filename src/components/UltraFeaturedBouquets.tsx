@@ -181,44 +181,27 @@ const UltraFeaturedBouquets = () => {
   }, []);
 
   return (
+    <>
+      {/* Google Fonts Import */}
+      <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet" />
+      
     <section 
       ref={sectionRef}
-      className="py-32 px-4 relative overflow-hidden min-h-screen"
+        className="py-24 px-4 relative overflow-hidden"
       data-section="signature-collection"
       style={{
-        background: 'rgb(211, 211, 209)',
-        backgroundAttachment: 'fixed',
-        backgroundSize: 'cover'
-      }}
-    >
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-5">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `radial-gradient(circle at 25% 25%, hsl(51 100% 50% / 0.1) 0%, transparent 50%),
-                           radial-gradient(circle at 75% 75%, hsl(51 100% 50% / 0.1) 0%, transparent 50%)`
-        }} />
-      </div>
-
-      <div className="max-w-8xl mx-auto relative z-10">
+          background: '#fff',
+          fontFamily: '"Lato", sans-serif'
+        }}
+      >
+      <div className="max-w-7xl mx-auto relative z-10">
         <motion.div
-          className="text-center mb-20 relative"
+          className="text-center mb-16 relative"
           initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, ease: [0.23, 1, 0.32, 1] }}
           viewport={{ once: true }}
         >
-          {/* Modern Floating Badge */}
-          <motion.div 
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-slate-800/10 to-slate-700/10 backdrop-blur-xl border border-slate-600/20 mb-8"
-            initial={{ scale: 0.8, opacity: 0 }}
-            whileInView={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            viewport={{ once: true }}
-          >
-            <div className="w-2 h-2 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 animate-pulse" />
-            <span className="text-sm font-medium text-slate-700 tracking-wider uppercase">Signature Excellence</span>
-          </motion.div>
-
           {/* Luxury Typography with Gold Accent */}
           <motion.h2 
             className="font-luxury text-6xl md:text-8xl font-bold mb-6 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 bg-clip-text text-transparent relative"
@@ -236,7 +219,7 @@ const UltraFeaturedBouquets = () => {
             <motion.div 
               className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 h-1 bg-gradient-to-r from-amber-400 to-yellow-500 rounded-full"
               initial={{ width: 0 }}
-              whileInView={{ width: '120px' }}
+              whileInView={{ width: '200px' }}
               transition={{ duration: 1.2, delay: 0.8, ease: "easeOut" }}
               viewport={{ once: true }}
             />
@@ -244,32 +227,72 @@ const UltraFeaturedBouquets = () => {
 
           {/* Enhanced Decorative Elements */}
           <div className="relative mb-8">
-            <div className="w-32 h-0.5 bg-gradient-to-r from-transparent via-amber-500/60 to-transparent mx-auto" />
-            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-amber-500 rotate-45 shadow-lg shadow-amber-500/50" />
+            <div className="w-40 h-0.5 bg-gradient-to-r from-transparent via-amber-500/60 to-transparent mx-auto" />
+            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-amber-500 rotate-45 shadow-lg shadow-amber-500/50" />
           </div>
 
           {/* Enhanced Description */}
           <motion.p 
-            className="font-body text-base md:text-lg text-slate-500 max-w-4xl mx-auto leading-relaxed font-light"
+            className="font-body text-lg md:text-xl text-slate-600 max-w-4xl mx-auto leading-relaxed font-light"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
             viewport={{ once: true }}
           >
-            Immerse yourself in our signature arrangements, where each piece represents 
-            the pinnacle of floral artistry and architectural design excellence.
+            Discover our curated selection of premium floral arrangements designed to elevate any space.
           </motion.p>
         </motion.div>
 
         <div className="flex justify-center">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6 sm:gap-8 lg:gap-10 max-w-7xl px-4 sm:px-6">
-          {bouquets.map((bouquet, index) => (
+          <div 
+            className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl px-4"
+            style={{ marginTop: '5em' }}
+          >
+          {bouquets.map((bouquet, index) => {
+            // Define consistent gold color for all cards
+            const currentColor = 'rgb(199, 158, 72)';
+
+            // Define tag configurations for each card
+            const tagConfigurations = [
+              // Card 1
+              [
+                { text: 'VALENTINE', color: '#d3b19a' },
+                { text: 'ROMANTIC', color: '#70b3b1' }
+              ],
+              // Card 2
+              [
+                { text: 'MOTHER\'S DAY', color: '#d05fa2' },
+                { text: 'SPECIAL GIFT', color: '#d3b19a' }
+              ],
+              // Card 3
+              [
+                { text: 'BEST SELLING', color: '#70b3b1' },
+                { text: 'POPULAR', color: '#d05fa2' }
+              ],
+              // Card 4
+              [
+                { text: 'BEST GIFT', color: '#d3b19a' },
+                { text: 'LUXURY', color: '#70b3b1' }
+              ],
+              // Card 5
+              [
+                { text: 'ANNIVERSARY', color: '#d05fa2' },
+                { text: 'CELEBRATION', color: '#d3b19a' }
+              ],
+              // Card 6
+              [
+                { text: 'NEW ARRIVAL', color: '#70b3b1' },
+                { text: 'EXCLUSIVE', color: '#d05fa2' }
+              ]
+            ];
+            
+            return (
             <motion.div
               key={bouquet.id}
               ref={(el) => {
                 if (el) cardsRef.current[index] = el;
               }}
-              className="group cursor-pointer w-full max-w-[300px] mx-auto sm:max-w-none lg:max-w-[340px] xl:max-w-none"
+                className="group cursor-pointer w-full"
               initial={{ opacity: 0, y: 100 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ 
@@ -279,80 +302,97 @@ const UltraFeaturedBouquets = () => {
               }}
               viewport={{ once: true }}
             >
-              {/* Modern glassmorphism card with enhanced border */}
-              <div className="relative group/card">
-                {/* Animated gradient border */}
-                <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 rounded-2xl opacity-0 group-hover/card:opacity-100 transition-opacity duration-500 blur-sm"></div>
-                <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 rounded-2xl opacity-0 group-hover/card:opacity-100 transition-opacity duration-500"></div>
-                
-                <div className="relative rounded-2xl bg-white/80 backdrop-blur-2xl border border-white/30 shadow-[0_8px_32px_rgba(0,0,0,0.12)] transition-all duration-300 ease-out overflow-hidden group hover:-translate-y-2 hover:shadow-[0_16px_48px_rgba(0,0,0,0.18)] hover:scale-[1.03] hover:ring-2 hover:ring-amber-400/80">
-                
-                {/* Modern Image Container with Enhanced Design */}
-                <div className="relative overflow-hidden aspect-[4/4.5] bg-gradient-to-br from-slate-50 to-slate-100 rounded-t-2xl">
+                 {/* Card structure with fully rounded corners */}
+                 <div 
+                   className="card"
+                   style={{
+                     position: 'relative',
+                     width: 'inherit',
+                     height: 'auto',
+                     background: '#fff',
+                     borderRadius: '1.25rem'
+                   }}
+                 >
+                     {/* Image */}
+                     <div 
+                       className="imgBox"
+                       style={{
+                         position: 'relative',
+                         width: '100%',
+                         height: '18.75rem',
+                         borderRadius: '1.25rem 1.25rem 0 0',
+                         overflow: 'hidden'
+                       }}
+                     >
                   <motion.img
                     src={bouquet.image}
                     alt={bouquet.name}
-                    className="w-full h-full object-cover transition-all duration-300 ease-out will-change-transform group-hover/card:scale-105 group-hover/card:brightness-105"
-                    whileHover={{ scale: 1.03 }}
-                  />
-                  
-                  {/* Enhanced Gradient Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-slate-800/20 to-transparent transition-all duration-300 ease-out group-hover/card:from-slate-900/45 group-hover/card:via-slate-800/10" />
-                  
-                  {/* Dynamic Pattern Overlay */}
-                  <div className="absolute inset-0 opacity-20 group-hover/card:opacity-40 transition-opacity duration-300" 
+                         style={{
+                           width: '100%',
+                           height: '100%',
+                           objectFit: 'cover'
+                         }}
+                         className="transition-all duration-300 ease-out group-hover:scale-105"
+                       />
+
+                       {/* Icon with sophisticated cut-out effect */}
+                       <div 
+                         className="icon"
+                         style={{
+                           position: 'absolute',
+                           bottom: '-0.375rem',
+                           right: '-0.375rem',
+                           width: '6rem',
+                           height: '6rem',
+                           background:'#fff',
+                           borderTopLeftRadius: '50%'
+                         }}
+                       >
+                         {/* Pseudo-element simulation with divs */}
+                         <div 
+                           style={{
+                             position: 'absolute',
+                             content: '""',
+                             bottom: '0.375rem',
+                             left: '-1.25rem',
+                             background: 'transparent',
+                             width: '1.25rem',
+                             height: '1.25rem',
+                             borderBottomRightRadius: '1.25rem',
+                             boxShadow: '0.313rem 0.313rem 0 0.313rem #fff'
+                           }}
+                         />
+                         <div 
                        style={{
-                         backgroundImage: `radial-gradient(circle at 20% 80%, rgba(251,191,36,0.15) 0%, transparent 50%),
-                                         radial-gradient(circle at 80% 20%, rgba(245,158,11,0.15) 0%, transparent 50%)`
-                       }} />
-                  
-                  {/* Floating light effect */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity duration-300" />
+                             position: 'absolute',
+                             content: '""',
+                             top: '-1.25rem',
+                             right: '0.375rem',
+                             background: 'transparent',
+                             width: '1.25rem',
+                             height: '1.25rem',
+                             borderBottomRightRadius: '1.25rem',
+                             boxShadow: "0.313rem 0.313rem 0 0.313rem #fff"
 
-                  {/* Modern floating action buttons */}
-                  <div className="absolute top-4 right-4 opacity-0 -translate-y-2 translate-x-2 group-hover/card:opacity-100 group-hover/card:translate-y-0 group-hover/card:translate-x-0 transition-all duration-300">
-                    <div className="flex items-center gap-2 rounded-full bg-white/80 backdrop-blur-xl shadow-lg border border-white/50 px-1 py-1">
-                      <motion.button 
-                        className="w-10 h-10 bg-gradient-to-br from-white to-amber-50 rounded-full flex items-center justify-center text-slate-700 hover:text-amber-600 shadow-sm hover:shadow-md transition-all duration-300"
-                        whileHover={{ scale: 1.1, rotate: 5 }}
+                           }}
+                         />
+                         
+                         <motion.div 
+                           className="iconBox"
+                       style={{
+                             position: 'absolute',
+                             inset: '0.725rem',
+                             background: currentColor,
+                             borderRadius: '50%',
+                             display: 'flex',
+                             justifyContent: 'center',
+                             alignItems: 'center',
+                             transition: '0.3s'
+                           }}
+                           whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
-                      >
-                        <Heart className="w-4 h-4" />
-                      </motion.button>
-                      <motion.button 
-                        className="w-10 h-10 bg-gradient-to-br from-white to-amber-50 rounded-full flex items-center justify-center text-slate-700 hover:text-amber-600 shadow-sm hover:shadow-md transition-all duration-300"
-                        whileHover={{ scale: 1.1, rotate: -5 }}
-                        whileTap={{ scale: 0.9 }}
-                      >
-                        <Eye className="w-4 h-4" />
-                      </motion.button>
-                    </div>
-                  </div>
-
-                  {/* Price badge removed; price moved below title */}
-                </div>
-
-                {/* Enhanced glassmorphism content section */}
-                <div className="p-5 bg-white/60 backdrop-blur-2xl border-t border-white/40 relative rounded-b-2xl">
-                  <h3 className="font-luxury text-2xl font-extrabold text-slate-800 mb-2 tracking-tight group-hover/card:text-amber-600 transition-all duration-300 ease-out">
-                    {bouquet.name}
-                  </h3>
-                  <div className="mb-3">
-                    <span className="text-base font-semibold bg-gradient-to-r from-amber-600 to-yellow-500 bg-clip-text text-transparent">
-                      {bouquet.price}
-                    </span>
-                  </div>
-                  <p className="font-sans text-sm tracking-wide text-slate-500 mb-4 leading-relaxed font-light transition-all duration-300 ease-out" style={{ display: '-webkit-box', WebkitLineClamp: 2 as any, WebkitBoxOrient: 'vertical' as any, overflow: 'hidden' }}>
-                    {bouquet.description}
-                  </p>
-                  
-                  <motion.button
-                    className="w-full rounded-xl border border-amber-400 bg-gradient-to-r from-amber-500 to-yellow-500 text-white hover:from-black hover:to-black transition-colors duration-300 px-5 py-3 font-semibold text-sm uppercase tracking-wider shadow-lg hover:shadow-xl hover:shadow-amber-500/25 group/btn"
-                    whileHover={{ scale: 1.02, y: -1 }}
-                    whileTap={{ scale: 0.98 }}
                     onClick={(e) => {
                       e.stopPropagation();
-                      // Convert price string to number (remove $ and convert to number)
                       const priceNumber = parseFloat(bouquet.price.replace('$', ''));
                       addToCart({
                         id: bouquet.id,
@@ -362,70 +402,100 @@ const UltraFeaturedBouquets = () => {
                       });
                     }}
                   >
-                    <div className="flex items-center justify-center gap-2">
-                      <ShoppingCart className="w-4 h-4 transition-all duration-300 group-hover/btn:scale-110" />
-                      ADD TO COLLECTION
+                           <span style={{ color: '#fff', fontSize: '1.5rem' }}>
+                             ↗
+                           </span>
+                         </motion.div>
                     </div>
-                  </motion.button>
                 </div>
 
-                {/* Modern enhanced effects */}
-                {/* Animated shimmer sweep */}
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent opacity-0 group-hover/card:opacity-100 rounded-2xl transform -translate-x-full group-hover/card:translate-x-full transition-all duration-1000 ease-in-out" />
-                
-                {/* Enhanced glow effect */}
-                <div className="absolute -inset-3 bg-gradient-to-r from-amber-400/20 via-yellow-300/15 to-amber-400/20 rounded-2xl blur-xl opacity-0 group-hover/card:opacity-100 transition-opacity duration-700 ease-out" />
-                
-                {/* Inset glow */}
-                <div className="pointer-events-none absolute inset-0 rounded-2xl shadow-[inset_0_0_50px_rgba(251,191,36,0.15)] opacity-0 group-hover/card:opacity-100 transition-opacity duration-500" />
-
-                {/* Modern Dynamic Glitter Effect - Responsive */}
-                <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-2xl sm:block hidden">
-                  {/* Large floating sparkles */}
-                  <div className="absolute top-6 left-6 w-2 h-2 bg-gradient-to-br from-yellow-300 to-amber-500 rounded-full opacity-0 group-hover/card:opacity-100 transition-all duration-700 delay-100 group-hover/card:animate-bounce group-hover/card:shadow-lg group-hover/card:shadow-yellow-300/50" />
-                  <div className="absolute top-12 right-8 w-1.5 h-1.5 bg-gradient-to-br from-amber-400 to-yellow-400 rounded-full opacity-0 group-hover/card:opacity-100 transition-all duration-700 delay-200 group-hover/card:animate-ping" />
-                  <div className="absolute top-20 left-12 w-2 h-2 bg-gradient-to-br from-yellow-200 to-amber-300 rounded-full opacity-0 group-hover/card:opacity-100 transition-all duration-700 delay-300 group-hover/card:animate-pulse group-hover/card:shadow-lg group-hover/card:shadow-amber-300/50" />
-                  <div className="absolute top-8 right-14 w-1 h-1 bg-gradient-to-br from-amber-500 to-yellow-600 rounded-full opacity-0 group-hover/card:opacity-100 transition-all duration-700 delay-150 group-hover/card:animate-bounce" />
-                  <div className="absolute top-16 left-8 w-1.5 h-1.5 bg-gradient-to-br from-yellow-300 to-amber-400 rounded-full opacity-0 group-hover/card:opacity-100 transition-all duration-700 delay-250 group-hover/card:animate-ping" />
-                  <div className="absolute top-24 right-10 w-2 h-2 bg-gradient-to-br from-amber-300 to-yellow-500 rounded-full opacity-0 group-hover/card:opacity-100 transition-all duration-700 delay-350 group-hover/card:animate-pulse group-hover/card:shadow-lg group-hover/card:shadow-yellow-400/50" />
-                  <div className="absolute top-32 left-10 w-1 h-1 bg-gradient-to-br from-yellow-400 to-amber-600 rounded-full opacity-0 group-hover/card:opacity-100 transition-all duration-700 delay-400 group-hover/card:animate-bounce" />
-                  <div className="absolute top-4 right-6 w-1.5 h-1.5 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-full opacity-0 group-hover/card:opacity-100 transition-all duration-700 delay-500 group-hover/card:animate-ping" />
-                  <div className="absolute top-28 left-6 w-2 h-2 bg-gradient-to-br from-yellow-200 to-amber-400 rounded-full opacity-0 group-hover/card:opacity-100 transition-all duration-700 delay-450 group-hover/card:animate-pulse group-hover/card:shadow-lg group-hover/card:shadow-amber-200/50" />
-                  <div className="absolute top-14 right-12 w-1 h-1 bg-gradient-to-br from-amber-500 to-yellow-600 rounded-full opacity-0 group-hover/card:opacity-100 transition-all duration-700 delay-550 group-hover/card:animate-bounce" />
-                  <div className="absolute top-36 left-12 w-1.5 h-1.5 bg-gradient-to-br from-yellow-300 to-amber-500 rounded-full opacity-0 group-hover/card:opacity-100 transition-all duration-700 delay-600 group-hover/card:animate-ping" />
-                  <div className="absolute top-10 right-16 w-2 h-2 bg-gradient-to-br from-amber-300 to-yellow-400 rounded-full opacity-0 group-hover/card:opacity-100 transition-all duration-700 delay-650 group-hover/card:animate-pulse group-hover/card:shadow-lg group-hover/card:shadow-yellow-300/50" />
-                  <div className="absolute top-22 left-14 w-1 h-1 bg-gradient-to-br from-yellow-400 to-amber-600 rounded-full opacity-0 group-hover/card:opacity-100 transition-all duration-700 delay-700 group-hover/card:animate-bounce" />
-                  <div className="absolute top-18 right-4 w-1.5 h-1.5 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-full opacity-0 group-hover/card:opacity-100 transition-all duration-700 delay-750 group-hover/card:animate-ping" />
-                  <div className="absolute top-30 left-4 w-2 h-2 bg-gradient-to-br from-yellow-200 to-amber-300 rounded-full opacity-0 group-hover/card:opacity-100 transition-all duration-700 delay-800 group-hover/card:animate-pulse group-hover/card:shadow-lg group-hover/card:shadow-amber-200/50" />
-                  <div className="absolute top-26 right-18 w-1 h-1 bg-gradient-to-br from-amber-500 to-yellow-600 rounded-full opacity-0 group-hover/card:opacity-100 transition-all duration-700 delay-850 group-hover/card:animate-bounce" />
-                  <div className="absolute top-34 left-16 w-1.5 h-1.5 bg-gradient-to-br from-yellow-300 to-amber-400 rounded-full opacity-0 group-hover/card:opacity-100 transition-all duration-700 delay-900 group-hover/card:animate-ping" />
-                  <div className="absolute top-38 right-20 w-2 h-2 bg-gradient-to-br from-amber-300 to-yellow-500 rounded-full opacity-0 group-hover/card:opacity-100 transition-all duration-700 delay-950 group-hover/card:animate-pulse group-hover/card:shadow-lg group-hover/card:shadow-yellow-400/50" />
-                  <div className="absolute top-40 left-18 w-1 h-1 bg-gradient-to-br from-yellow-400 to-amber-600 rounded-full opacity-0 group-hover/card:opacity-100 transition-all duration-700 delay-1000 group-hover/card:animate-bounce" />
-                  
-                  {/* Medium sparkles */}
-                  <div className="absolute top-15 left-20 w-1 h-1 bg-yellow-300 rounded-full opacity-0 group-hover/card:opacity-80 transition-all duration-600 delay-120 group-hover/card:animate-spin" />
-                  <div className="absolute top-25 right-22 w-1 h-1 bg-amber-400 rounded-full opacity-0 group-hover/card:opacity-80 transition-all duration-600 delay-320 group-hover/card:animate-spin" />
-                  <div className="absolute top-35 left-22 w-1 h-1 bg-yellow-500 rounded-full opacity-0 group-hover/card:opacity-80 transition-all duration-600 delay-520 group-hover/card:animate-spin" />
-                  <div className="absolute top-45 right-24 w-1 h-1 bg-amber-300 rounded-full opacity-0 group-hover/card:opacity-80 transition-all duration-600 delay-720 group-hover/card:animate-spin" />
-                </div>
+                     {/* Content section */}
+                     <div 
+                       className="content"
+                       style={{
+                         padding: '0.938rem 0.625rem',
+                         borderRadius: '0 0 1.25rem 1.25rem'
+                       }}
+                     >
+                    <h3 
+                      style={{
+                        textTransform: 'capitalize',
+                        fontSize: 'clamp(1.5rem, 1.3909rem + 0.4364vw, 1.8rem)',
+                        color: '#111',
+                        fontWeight: '700'
+                      }}
+                    >
+                      {bouquet.name}
+                    </h3>
+                    <p 
+                      style={{
+                        margin: '0.625rem 0 1.25rem',
+                        color: '#565656'
+                      }}
+                    >
+                      Fill out the form and the algorithm will offer the right team of experts
+                    </p>
+                    
+                     {/* Tags */}
+                     <ul 
+                       style={{
+                         margin: '0',
+                         padding: '0',
+                         listStyleType: 'none',
+                         display: 'flex',
+                         alignItems: 'center',
+                         flexWrap: 'wrap',
+                         gap: '0.625rem'
+                       }}
+                     >
+                       {tagConfigurations[index].map((tag, tagIndex) => (
+                         <li 
+                           key={tagIndex}
+                           style={{
+                             textTransform: 'uppercase',
+                             background: '#f0f0f0',
+                             color: tag.color,
+                             fontWeight: '700',
+                             fontSize: '0.8rem',
+                             padding: '0.375rem 0.625rem',
+                             borderRadius: '0.188rem'
+                           }}
+                         >
+                           {tag.text}
+                         </li>
+                       ))}
+                     </ul>
               </div>
               </div>
             </motion.div>
-          ))}
+             );
+           })}
           </div>
         </div>
 
         <motion.div
-          className="text-center mt-20"
+          className="text-center mt-16"
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.4 }}
           viewport={{ once: true }}
         >
           <motion.button
-            className="inline-flex items-center gap-4 px-12 py-6 bg-gradient-to-r from-slate-800/90 to-slate-900/95 backdrop-blur-xl border border-slate-600/50 text-slate-100 rounded-2xl font-medium text-lg transition-all duration-500 ease-out hover:from-slate-700/90 hover:to-slate-800/90 hover:text-white hover:border-slate-500/70 hover:shadow-[0_15px_40px_rgba(0,0,0,0.3)] group"
-            whileHover={{ scale: 1.05, y: -2 }}
-            whileTap={{ scale: 0.95 }}
+         className="
+         inline-flex items-center justify-center gap-3
+         px-12 py-4
+         bg-gradient-to-r from-[rgb(160,120,40)] via-[rgb(199,158,72)] to-[rgb(240,210,150)]
+         text-white
+         rounded-2xl
+         font-semibold text-sm tracking-wide uppercase
+         shadow-md shadow-yellow-600/30
+         transition-all duration-300 ease-out
+         hover:shadow-lg hover:shadow-yellow-500/40 hover:scale-[1.02]
+         active:scale-[0.98]
+         group
+       "
+       whileHover={{ scale: 1.03 }}
+       whileTap={{ scale: 0.97 }}
             onClick={() => {
               window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
               navigate('/collection');
@@ -438,9 +508,7 @@ const UltraFeaturedBouquets = () => {
           >
             <span>VIEW COMPLETE COLLECTION</span>
             <motion.div
-              className="group-hover:translate-x-2 transition-transform duration-300"
-              animate={{ x: [0, 5, 0] }}
-              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              className="group-hover:translate-x-1 transition-transform duration-300"
             >
               →
             </motion.div>
@@ -448,6 +516,7 @@ const UltraFeaturedBouquets = () => {
         </motion.div>
       </div>
     </section>
+    </>
   );
 };
 
