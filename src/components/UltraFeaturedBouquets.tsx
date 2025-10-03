@@ -1,9 +1,10 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ShoppingCart, Heart, Eye, Crown } from 'lucide-react';
 import { useCartWithToast } from '@/hooks/useCartWithToast';
+import SignatureQuickView from '@/components/SignatureQuickView';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -66,6 +67,8 @@ const UltraFeaturedBouquets = () => {
   const { addToCart } = useCartWithToast();
   const sectionRef = useRef<HTMLElement>(null);
   const cardsRef = useRef<HTMLDivElement[]>([]);
+  const [quickOpen, setQuickOpen] = useState(false);
+  const [quickItem, setQuickItem] = useState<any>(null);
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -374,23 +377,58 @@ const UltraFeaturedBouquets = () => {
                              borderBottomRightRadius: '1.25rem',
                              boxShadow: "0.313rem 0.313rem 0 0.313rem #fff"
 
-                           }}
-                         />
-                         
-                         <motion.div 
-                           className="iconBox"
-                       style={{
-                             position: 'absolute',
-                             inset: '0.725rem',
-                             background: currentColor,
-                             borderRadius: '50%',
-                             display: 'flex',
-                             justifyContent: 'center',
-                             alignItems: 'center',
-                             transition: '0.3s'
-                           }}
-                           whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
+                  {/* Floating glassmorphism actions pill */}
+                  <div className="absolute top-4 right-4 opacity-0 -translate-y-2 translate-x-2 group-hover:opacity-100 group-hover:translate-y-0 group-hover:translate-x-0 transition-all duration-500">
+                    <div className="flex items-center gap-2 rounded-full bg-white/40 backdrop-blur-md shadow-sm border border-white/40 px-2 py-1">
+                      <motion.button 
+                        className="w-9 h-9 bg-white/90 rounded-full flex items-center justify-center text-slate-800 hover:text-amber-600"
+                        whileHover={{ scale: 1.08 }}
+                        whileTap={{ scale: 0.92 }}
+                      >
+                        <Heart className="w-4 h-4" />
+                      </motion.button>
+                      <motion.button 
+                        aria-label="Quick view"
+                        className="w-10 h-10 rounded-full flex items-center justify-center bg-white/90 text-slate-800 shadow-sm hover:shadow-md border border-white/60 hover:text-amber-700 hover:border-amber-200 transition-colors"
+                        whileHover={{ scale: 1.06 }}
+                        whileTap={{ scale: 0.94 }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setQuickItem({
+                            id: bouquet.id,
+                            name: bouquet.name,
+                            price: bouquet.price,
+                            image: bouquet.image,
+                            description: bouquet.description
+                          });
+                          setQuickOpen(true);
+                        }}
+                      >
+                        <Eye className="w-4 h-4" />
+                      </motion.button>
+                    </div>
+                  </div>
+
+                  {/* Luxury Price Tag */}
+                  <motion.div className="absolute bottom-4 left-4 rounded-md bg-gradient-to-r from-amber-100 to-zinc-100 text-amber-800 px-3 py-1 font-luxury font-semibold text-sm border border-amber-200/60 shadow-sm inline-flex items-center gap-1" whileHover={{ y: -2, scale: 1.03 }}>
+                    <Crown className="w-3.5 h-3.5 text-amber-600" />
+                    {bouquet.price}
+                  </motion.div>
+                </div>
+
+                {/* Glassmorphism Content Section */}
+                <div className="p-5 bg-white/40 backdrop-blur-xl border-t border-white/50 relative rounded-b-lg">
+                  <h3 className="font-luxury text-[1.25rem] font-bold text-slate-800 mb-3 tracking-tight group-hover:text-amber-600 transition-all duration-700 ease-out">
+                    {bouquet.name}
+                  </h3>
+                  <p className="font-sans text-[0.9rem] tracking-wide text-slate-600/90 mb-4 leading-relaxed font-light transition-all duration-700 ease-out">
+                    {bouquet.description}
+                  </p>
+                  
+                  <motion.button
+                    className="w-full rounded-md border border-amber-300/60 bg-white text-slate-900 hover:text-white transition-all duration-300 bg-[length:200%_100%] bg-gradient-to-r from-white via-amber-400 to-amber-600 hover:bg-[position:100%_0] px-6 py-3 font-medium text-sm uppercase tracking-wider"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                     onClick={(e) => {
                       e.stopPropagation();
                       const priceNumber = parseFloat(bouquet.price.replace('$', ''));
@@ -402,12 +440,11 @@ const UltraFeaturedBouquets = () => {
                       });
                     }}
                   >
-                           <span style={{ color: '#fff', fontSize: '1.5rem' }}>
-                             ↗
-                           </span>
-                         </motion.div>
-                    </div>
+                    <ShoppingCart className="w-4 h-4 mr-2" />
+                    ADD TO COLLECTION
+                  </motion.button>
                 </div>
+              </motion.div>
 
                      {/* Content section */}
                      <div 
@@ -515,6 +552,7 @@ const UltraFeaturedBouquets = () => {
           </motion.button>
         </motion.div>
       </div>
+      <SignatureQuickView open={quickOpen} item={quickItem} onClose={() => setQuickOpen(false)} />
     </section>
     </>
   );
