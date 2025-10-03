@@ -37,17 +37,23 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
    */
   const addToCart = (product: Product): void => {
     setCartItems(prevItems => {
-      const existingItem = prevItems.find(item => item.id === product.id);
+      const existingItem = prevItems.find(item => 
+        item.id === product.id && 
+        item.size === product.size && 
+        item.personalNote === product.personalNote
+      );
       
       if (existingItem) {
-        // If item exists, increment quantity
+        // If item exists with same size and note, increment quantity
         return prevItems.map(item =>
-          item.id === product.id
+          item.id === product.id && 
+          item.size === product.size && 
+          item.personalNote === product.personalNote
             ? { ...item, quantity: item.quantity + 1 }
             : item
         );
       } else {
-        // If item doesn't exist, add it with quantity 1
+        // If item doesn't exist with this combination, add it with quantity 1
         return [...prevItems, { ...product, quantity: 1 }];
       }
     });
@@ -56,8 +62,14 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   /**
    * Remove a product completely from the cart
    */
-  const removeFromCart = (productId: number): void => {
-    setCartItems(prevItems => prevItems.filter(item => item.id !== productId));
+  const removeFromCart = (productId: number | string, size?: string, personalNote?: string): void => {
+    setCartItems(prevItems => 
+      prevItems.filter(item => 
+        !(item.id === productId && 
+          item.size === size && 
+          item.personalNote === personalNote)
+      )
+    );
   };
 
   /**

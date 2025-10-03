@@ -152,6 +152,22 @@ const CartDashboard: React.FC<CartDashboardProps> = ({ isOpen, onClose }) => {
                                 ${item.price} each
                               </p>
                               
+                              {/* Size and Personal Note */}
+                              {item.size && (
+                                <p className="text-xs text-amber-600 font-medium">
+                                  Size: {item.size}
+                                </p>
+                              )}
+                              
+                              {item.personalNote && (
+                                <div className="mt-2 p-2 bg-white/60 rounded-lg border border-amber-200/60">
+                                  <p className="text-xs text-slate-500 mb-1">Personal Note:</p>
+                                  <p className="text-xs text-slate-700 leading-relaxed">
+                                    "{item.personalNote}"
+                                  </p>
+                                </div>
+                              )}
+                              
                               {/* Quantity Controls */}
                               <div className="flex items-center space-x-2 mt-2">
                                 <span className="text-sm text-slate-600">Qty: {item.quantity}</span>
@@ -164,7 +180,7 @@ const CartDashboard: React.FC<CartDashboardProps> = ({ isOpen, onClose }) => {
                                 ${(item.price * item.quantity).toFixed(2)}
                               </p>
                               <Button
-                                onClick={() => removeFromCart(item.id)}
+                                onClick={() => removeFromCart(item.id, item.size, item.personalNote)}
                                 variant="ghost"
                                 size="sm"
                                 className="text-red-600 hover:text-red-700 hover:bg-red-50 mt-1"

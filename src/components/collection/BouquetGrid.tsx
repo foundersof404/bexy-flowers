@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import OptimizedImage from "@/components/OptimizedImage";
 import { Card } from "@/components/ui/card";
 import { useCartWithToast } from "@/hooks/useCartWithToast";
+import { useNavigate } from "react-router-dom";
 import type { Bouquet } from "@/pages/Collection";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -19,6 +20,7 @@ interface BouquetGridProps {
 export const BouquetGrid = ({ bouquets, onBouquetClick }: BouquetGridProps) => {
   const gridRef = useRef<HTMLDivElement>(null);
   const { addToCart } = useCartWithToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (gridRef.current && gridRef.current.children.length > 0) {
@@ -84,7 +86,21 @@ export const BouquetGrid = ({ bouquets, onBouquetClick }: BouquetGridProps) => {
           transition={{ delay: index * 0.08, duration: 0.6, ease: "easeOut" }}
           whileHover={{ y: -10 }}
           className="group cursor-pointer max-w-sm mx-auto sm:max-w-none"
-          onClick={() => onBouquetClick(bouquet)}
+          onClick={() => {
+            navigate(`/product/${bouquet.id}`, { 
+              state: { 
+                product: {
+                  id: bouquet.id,
+                  title: bouquet.name,
+                  price: bouquet.price,
+                  description: bouquet.description,
+                  imageUrl: bouquet.image,
+                  images: [bouquet.image, bouquet.image, bouquet.image], // Using same image for demo
+                  category: 'Premium Bouquets'
+                }
+              }
+            });
+          }}
         >
           {/* Gradient border wrapper for polished edge */}
           <div className="rounded-lg p-[1px] bg-gradient-to-r from-[var(--lux-edge-from)] to-[var(--lux-edge-to)] group/card">
@@ -138,7 +154,19 @@ export const BouquetGrid = ({ bouquets, onBouquetClick }: BouquetGridProps) => {
                     className="w-9 h-9 bg-white/90 hover:bg-white text-black hover:text-primary"
                     onClick={(e) => {
                       e.stopPropagation();
-                      onBouquetClick(bouquet);
+                      navigate(`/product/${bouquet.id}`, { 
+                        state: { 
+                          product: {
+                            id: bouquet.id,
+                            title: bouquet.name,
+                            price: bouquet.price,
+                            description: bouquet.description,
+                            imageUrl: bouquet.image,
+                            images: [bouquet.image, bouquet.image, bouquet.image],
+                            category: 'Premium Bouquets'
+                          }
+                        }
+                      });
                     }}
                   >
                     <Eye className="w-4 h-4" />

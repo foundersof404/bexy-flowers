@@ -9,6 +9,8 @@ import Collection from "./pages/Collection";
 import AboutPage from "./pages/About";
 import NotFound from "./pages/NotFound";
 import Customize from "./pages/Customize";
+import ProductDetailPage from "./pages/ProductDetailPage";
+import Checkout from "./pages/Checkout";
 import ScrollToTop from "@/components/ScrollToTop";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { CartProvider } from "@/contexts/CartContext";
@@ -32,6 +34,8 @@ const App = () => {
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/collection" element={<Collection />} />
+                <Route path="/product/:id" element={<ProductDetailPage />} />
+                <Route path="/checkout" element={<Checkout />} />
                 <Route path="/about" element={<AboutPage />} />
                 <Route path="/customize" element={<Customize />} />
                 <Route path="/cart-test" element={<CartTest />} />

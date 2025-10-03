@@ -3,10 +3,12 @@
  */
 
 export interface Product {
-  id: number;
+  id: number | string;
   title: string;
   price: number;
   image: string;
+  size?: string;
+  personalNote?: string;
 }
 
 export interface CartItem extends Product {
@@ -16,7 +18,7 @@ export interface CartItem extends Product {
 export interface CartContextType {
   cartItems: CartItem[];
   addToCart: (product: Product) => void;
-  removeFromCart: (productId: number) => void;
+  removeFromCart: (productId: number | string, size?: string, personalNote?: string) => void;
   getTotalItems: () => number;
   getTotalPrice: () => number;
   clearCart: () => void;
