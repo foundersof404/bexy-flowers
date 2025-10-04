@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -6,6 +6,7 @@ import { ShoppingCart, Heart, Eye, Crown } from 'lucide-react';
 import { useCartWithToast } from '@/hooks/useCartWithToast';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import SignatureQuickView from './SignatureQuickView';
 
 import bouquet1 from '@/assets/bouquet-1.jpg';
 import bouquet2 from '@/assets/bouquet-2.jpg';
@@ -66,6 +67,8 @@ const UltraFeaturedBouquets = () => {
   const { addToCart } = useCartWithToast();
   const sectionRef = useRef<HTMLElement>(null);
   const cardsRef = useRef<HTMLDivElement[]>([]);
+  const [selectedBouquet, setSelectedBouquet] = useState<any>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -393,13 +396,8 @@ const UltraFeaturedBouquets = () => {
                         whileTap={{ scale: 0.9 }}
                     onClick={(e) => {
                       e.stopPropagation();
-                      const priceNumber = parseFloat(bouquet.price.replace('$', ''));
-                      addToCart({
-                        id: bouquet.id,
-                        title: bouquet.name,
-                        price: priceNumber,
-                        image: bouquet.image
-                      });
+                      setSelectedBouquet(bouquet);
+                      setIsModalOpen(true);
                     }}
                   >
                            <span style={{ color: '#fff', fontSize: '1.5rem' }}>
@@ -516,6 +514,16 @@ const UltraFeaturedBouquets = () => {
         </motion.div>
       </div>
     </section>
+
+    {/* Signature Quick View Modal */}
+    <SignatureQuickView
+      open={isModalOpen}
+      item={selectedBouquet}
+      onClose={() => {
+        setIsModalOpen(false);
+        setSelectedBouquet(null);
+      }}
+    />
     </>
   );
 };

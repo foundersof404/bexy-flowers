@@ -7,10 +7,20 @@ export interface Product {
   title: string;
   price: number;
   image: string;
+  size?: string;
+  description?: string;
+  accessories?: string[];
+  giftInfo?: {
+    recipient: string;
+    deliveryDate: string;
+    message: string;
+  };
 }
 
 export interface CartItem extends Product {
   quantity: number;
+  size?: string;
+  description?: string;
 }
 
 export interface CartContextType {

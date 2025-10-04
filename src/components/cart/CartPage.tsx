@@ -114,6 +114,20 @@ const CartPage: React.FC = () => {
                       <p className="text-slate-600 font-body text-sm">
                         ${item.price} each
                       </p>
+                      {item.size && (
+                        <div className="mt-2">
+                          <span className="inline-block bg-amber-100 text-amber-800 text-xs font-semibold px-2 py-1 rounded-full">
+                            Size: {item.size}
+                          </span>
+                        </div>
+                      )}
+                      {item.description && (
+                        <div className="mt-2">
+                          <p className="text-slate-500 text-xs italic max-w-md">
+                            "{item.description}"
+                          </p>
+                        </div>
+                      )}
                     </div>
 
                     {/* Quantity and Price */}

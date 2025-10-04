@@ -11,7 +11,7 @@ const categories = [
     id: 1,
     name: "WEDDINGS",
     description: "Architectural bridal arrangements",
-    image: "https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=800&h=1000&fit=crop",
+    image: "/src/assets/bouquet-3.jpg",
     gradient: "from-rose-200/20 via-amber-100/30 to-yellow-200/20",
     icon: Crown,
     color: "from-rose-400/80 to-amber-300/90"
@@ -20,7 +20,7 @@ const categories = [
     id: 2,
     name: "VALENTINE'S",
     description: "Romantic luxury collections",
-    image: "https://images.unsplash.com/photo-1518895949257-7621c3c786d7?w=800&h=1000&fit=crop",
+    image: "/src/assets/bouquet-2.jpg",
     gradient: "from-red-200/20 via-pink-100/30 to-rose-200/20",
     icon: Heart,
     color: "from-red-400/80 to-pink-300/90"
@@ -29,7 +29,7 @@ const categories = [
     id: 3,
     name: "MOTHER'S DAY",
     description: "Elegant tribute arrangements",
-    image: "https://images.unsplash.com/photo-1563241527-3004b7be0ffd?w=800&h=1000&fit=crop",
+    image: "/src/assets/bouquet-4.jpg",
     gradient: "from-pink-200/20 via-rose-100/30 to-lavender-200/20",
     icon: Flower2,
     color: "from-pink-400/80 to-rose-300/90"
@@ -38,7 +38,7 @@ const categories = [
     id: 4,
     name: "BIRTHDAYS",
     description: "Celebration masterpieces",
-    image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&h=1000&fit=crop",
+    image: "/src/assets/bouquet-5.jpg",
     gradient: "from-purple-200/20 via-violet-100/30 to-indigo-200/20",
     icon: Cake,
     color: "from-purple-400/80 to-violet-300/90"
@@ -47,7 +47,7 @@ const categories = [
     id: 5,
     name: "ANNIVERSARIES",
     description: "Timeless love expressions",
-    image: "https://images.unsplash.com/photo-1606041011872-596597976b25?w=800&h=1000&fit=crop",
+    image: "/src/assets/bouquet-6.jpg",
     gradient: "from-amber-200/20 via-yellow-100/30 to-gold-200/20",
     icon: Star,
     color: "from-amber-400/80 to-yellow-300/90"
@@ -56,7 +56,7 @@ const categories = [
     id: 6,
     name: "CORPORATE",
     description: "Professional luxury designs",
-    image: "https://images.unsplash.com/photo-1574684891174-df0693e82998?w=800&h=1000&fit=crop",
+    image: "/src/assets/bouquet-1.jpg",
     gradient: "from-slate-200/20 via-gray-100/30 to-zinc-200/20",
     icon: Briefcase,
     color: "from-slate-400/80 to-gray-300/90"
@@ -65,7 +65,7 @@ const categories = [
     id: 7,
     name: "SYMPATHY",
     description: "Respectful memorial arrangements",
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&h=1000&fit=crop",
+    image: "/src/assets/bouquet-3.jpg",
     gradient: "from-slate-200/20 via-gray-100/30 to-blue-200/20",
     icon: Flower2,
     color: "from-slate-400/80 to-blue-300/90"
@@ -74,7 +74,7 @@ const categories = [
     id: 8,
     name: "SEASONAL",
     description: "Limited edition collections",
-    image: "https://images.unsplash.com/photo-1490750967868-88aa4486c946?w=800&h=1000&fit=crop",
+    image: "/src/assets/bouquet-5.jpg",
     gradient: "from-emerald-200/20 via-green-100/30 to-teal-200/20",
     icon: Sparkles,
     color: "from-emerald-400/80 to-green-300/90"
@@ -83,7 +83,7 @@ const categories = [
     id: 9,
     name: "GRADUATIONS",
     description: "Achievement celebrations",
-    image: "https://images.unsplash.com/photo-1606041008023-472dfb5e530f?w=800&h=1000&fit=crop",
+    image: "/src/assets/bouquet-6.jpg",
     gradient: "from-blue-200/20 via-indigo-100/30 to-purple-200/20",
     icon: Star,
     color: "from-blue-400/80 to-indigo-300/90"
@@ -92,7 +92,7 @@ const categories = [
     id: 10,
     name: "LUXURY GIFTS",
     description: "Premium gift arrangements",
-    image: "https://images.unsplash.com/photo-1584464491033-06628f3a6b7b?w=800&h=1000&fit=crop",
+    image: "/src/assets/bouquet-1.jpg",
     gradient: "from-orange-200/20 via-amber-100/30 to-yellow-200/20",
     icon: Gift,
     color: "from-orange-400/80 to-amber-300/90"

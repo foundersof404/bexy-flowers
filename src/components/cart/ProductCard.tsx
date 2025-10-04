@@ -63,6 +63,21 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => {
             {product.title}
           </h3>
           
+          {/* Size and Description if available */}
+          {'size' in product && product.size && (
+            <div className="mb-2">
+              <span className="inline-block bg-amber-100 text-amber-800 text-xs font-semibold px-2 py-1 rounded-full">
+                Size: {product.size}
+              </span>
+            </div>
+          )}
+          
+          {'description' in product && product.description && (
+            <p className="text-slate-500 text-xs italic mb-3 line-clamp-2">
+              "{product.description}"
+            </p>
+          )}
+          
           <div className="flex items-center justify-between">
             <span className="text-xl sm:text-2xl font-luxury font-bold text-amber-700">
               ${product.price}
