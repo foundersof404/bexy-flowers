@@ -40,15 +40,17 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       const existingItem = prevItems.find(item => 
         item.id === product.id && 
         item.size === product.size && 
-        item.personalNote === product.personalNote
+        item.personalNote === product.personalNote &&
+        item.description === product.description
       );
       
       if (existingItem) {
-        // If item exists with same size and note, increment quantity
+        // If item exists with same size, note, and description, increment quantity
         return prevItems.map(item =>
           item.id === product.id && 
           item.size === product.size && 
-          item.personalNote === product.personalNote
+          item.personalNote === product.personalNote &&
+          item.description === product.description
             ? { ...item, quantity: item.quantity + 1 }
             : item
         );

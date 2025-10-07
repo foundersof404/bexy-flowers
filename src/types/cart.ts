@@ -9,10 +9,19 @@ export interface Product {
   image: string;
   size?: string;
   personalNote?: string;
+  description?: string;
+  accessories?: string[];
+  giftInfo?: {
+    recipient: string;
+    deliveryDate: string;
+    message: string;
+  };
 }
 
 export interface CartItem extends Product {
   quantity: number;
+  size?: string;
+  description?: string;
 }
 
 export interface CartContextType {
