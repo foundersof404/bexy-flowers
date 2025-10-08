@@ -121,7 +121,7 @@ export const FeaturedCarousel = ({ bouquets, onBouquetClick }: FeaturedCarouselP
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                       
                       {/* Action Buttons */}
-                      <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-4 group-hover:translate-x-0">
+                      <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-3 group-hover:translate-x-0">
                         <Button
                           size="icon"
                           variant="secondary"
@@ -148,18 +148,18 @@ export const FeaturedCarousel = ({ bouquets, onBouquetClick }: FeaturedCarouselP
                     </div>
                     
                     {/* Content */}
-                    <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-card/95 to-transparent backdrop-blur-sm">
-                      <h3 className="text-xl font-luxury text-foreground mb-2">
+                    <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-card/95 to-transparent backdrop-blur-sm">
+                      <h3 className="text-lg font-luxury text-foreground mb-2">
                         {bouquet.name}
                       </h3>
                       <p className="text-sm text-muted-foreground mb-3 line-clamp-2 font-body">
                         {bouquet.description}
                       </p>
                       <div className="flex items-center justify-between">
-                        <span className="text-2xl font-luxury text-primary">
+                        <span className="text-xl font-luxury text-primary">
                           ${bouquet.price}
                         </span>
-                        <div className="w-8 h-px bg-primary" />
+                        <div className="w-6 h-px bg-primary" />
                       </div>
                     </div>
                     

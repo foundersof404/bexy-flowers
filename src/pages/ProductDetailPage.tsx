@@ -527,6 +527,13 @@ const ProductDetailPage = () => {
   const selectedSizeOption = sizeOptions.find(option => option.id === selectedSize);
   const currentPrice = productData.price + (selectedSizeOption?.priceModifier || 0);
 
+  // Ensure page always loads from the top
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }, []);
+
   // Handle add to cart
   const handleAddToCart = async () => {
     if (isLoading) return;

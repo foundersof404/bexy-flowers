@@ -76,7 +76,7 @@ export const BouquetGrid = ({ bouquets, onBouquetClick }: BouquetGridProps) => {
   return (
     <div 
       ref={gridRef}
-      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-12"
+      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-5"
     >
       {bouquets.map((bouquet, index) => (
         <motion.div
@@ -85,7 +85,7 @@ export const BouquetGrid = ({ bouquets, onBouquetClick }: BouquetGridProps) => {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ delay: index * 0.08, duration: 0.6, ease: "easeOut" }}
           whileHover={{ y: -10 }}
-          className="group cursor-pointer max-w-sm mx-auto sm:max-w-none"
+          className="group cursor-pointer max-w-[280px] mx-auto sm:max-w-none"
           onClick={() => {
             navigate(`/product/${bouquet.id}`, { 
               state: { 
@@ -106,7 +106,7 @@ export const BouquetGrid = ({ bouquets, onBouquetClick }: BouquetGridProps) => {
           <div className="rounded-lg p-[1px] bg-gradient-to-r from-[var(--lux-edge-from)] to-[var(--lux-edge-to)] group/card">
           <Card className="relative overflow-hidden rounded-lg bg-white/60 backdrop-blur-sm border-transparent shadow-[0_4px_30px_rgba(0,0,0,0.1)] transition-all duration-500">
             {/* Image Container */}
-            <div className="relative aspect-[4/5] overflow-hidden transform-gpu">
+            <div className="relative aspect-[3/4] overflow-hidden transform-gpu">
               <motion.div transition={{ duration: 0.7, ease: "easeOut" }} className="w-full h-full">
                 <OptimizedImage
                   src={bouquet.image}
@@ -191,26 +191,26 @@ export const BouquetGrid = ({ bouquets, onBouquetClick }: BouquetGridProps) => {
             </div>
             
             {/* Card Content */}
-            <div className="p-4 sm:p-6">
+            <div className="p-2.5 sm:p-3">
               <motion.h3 
-                className="text-lg sm:text-[1.3rem] lg:text-[1.35rem] font-luxury tracking-tight text-slate-900 mb-2"
+                className="text-sm sm:text-base lg:text-lg font-luxury tracking-tight text-slate-900 mb-1"
                 whileHover={{ color: "hsl(var(--primary))" }}
                 transition={{ duration: 0.2 }}
               >
                 {bouquet.name}
               </motion.h3>
               
-              <p className="text-slate-600/90 text-sm sm:text-[0.9rem] tracking-wide mb-3 sm:mb-4 line-clamp-2 font-body">
+              <p className="text-slate-600/90 text-xs tracking-wide mb-2 line-clamp-2 font-body">
                 {bouquet.description}
               </p>
               
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
                 <motion.span 
-                  className="inline-flex items-center gap-1 text-lg sm:text-[1.2rem] font-luxury text-amber-700 rounded-md bg-gradient-to-r from-amber-100 to-zinc-100 shadow-sm px-2 sm:px-3 py-1 border border-amber-200/60"
+                  className="inline-flex items-center gap-1 text-sm sm:text-base font-luxury text-amber-700 rounded-md bg-gradient-to-r from-amber-100 to-zinc-100 shadow-sm px-1.5 sm:px-2 py-0.5 border border-amber-200/60"
                   whileHover={{ y: -2, scale: 1.03 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <Crown className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-600" />
+                  <Crown className="w-3 h-3 text-amber-600" />
                   ${bouquet.price}
                 </motion.span>
                 
@@ -220,7 +220,7 @@ export const BouquetGrid = ({ bouquets, onBouquetClick }: BouquetGridProps) => {
                   className="w-full sm:w-auto"
                 >
                   <Button
-                    className="w-full sm:w-auto rounded-md border border-amber-300/60 bg-white text-slate-900 hover:text-white transition-all duration-300 bg-[length:200%_100%] bg-gradient-to-r from-white via-amber-400 to-amber-600 hover:bg-[position:100%_0] text-sm sm:text-base"
+                    className="w-full sm:w-auto rounded-md border border-amber-300/60 bg-white text-slate-900 hover:text-white transition-all duration-300 bg-[length:200%_100%] bg-gradient-to-r from-white via-amber-400 to-amber-600 hover:bg-[position:100%_0] text-xs"
                     onClick={(e) => {
                       e.stopPropagation();
                       addToCart({
@@ -231,7 +231,7 @@ export const BouquetGrid = ({ bouquets, onBouquetClick }: BouquetGridProps) => {
                       });
                     }}
                   >
-                    <ShoppingCart className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
+                    <ShoppingCart className="w-3 h-3 mr-1" />
                     Add to Cart
                   </Button>
                 </motion.div>
