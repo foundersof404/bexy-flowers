@@ -187,7 +187,7 @@ const UltraHero = () => {
                    
                    {/* Text with staggered character animation */}
                    <span className="relative z-10">
-                     {"Elegant Flowers for Every Occasion".split("").map((char, index) => (
+                     {"Elegant Flowers for   Every Occasion".split("").map((char, index) => (
                        <motion.span
                          key={index}
                          className="inline-block"

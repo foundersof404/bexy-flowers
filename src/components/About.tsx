@@ -1,10 +1,11 @@
 import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
 import { useEffect, useState, useRef } from "react";
 import { Heart, Award, Users, Star, Crown, Sparkles, Flower2, Leaf } from "lucide-react";
-import logoImage from '@/assets/bexy-flowers-logo.png';
 // SUGGESTION: Import a high-quality image of your signature product.
 // For now, using a placeholder - you should add your actual signature glitter flower image
-import signatureGlitterFlower from '@/assets/bouquet-1.jpg'; // Placeholder - replace with actual signature glitter flower
+import signatureGlitterFlower from '@/assets/about-image.jpg'; // Updated to about page image
+import pinkFlower from '@/assets/flowers/pink.png';
+import redFlower from '@/assets/flowers/red.png';
 
 const About = () => {
   // SUGGESTION: Refined and consolidated stats for clarity and credibility.
@@ -253,64 +254,12 @@ const About = () => {
     <motion.section 
       ref={sectionRef} 
       className="relative py-28 px-4 overflow-hidden" 
-      style={{ background: 'linear-gradient(180deg, #ffffff 0%, #faf9fb 30%, #f7fbff 100%)' }}
+      style={{ background: 'linear-gradient(180deg, #ffffff 0%, #fff6f9 50%, #fdecef 100%)' }}
       variants={pageTransitionVariants}
       initial="hidden"
       animate="visible"
     >
-      {/* Luxury Page Transition Overlay */}
-      <motion.div
-        className="fixed inset-0 z-50 pointer-events-none"
-        style={{ backgroundColor: '#F5F1EB' }}
-        variants={overlayVariants}
-        initial="hidden"
-        animate="visible"
-      />
-      {/* Enhanced Background Elements with Powerful Animations */}
-      <motion.div 
-        className="pointer-events-none absolute inset-0"
-        variants={backgroundVariants}
-        initial="hidden"
-        animate="visible"
-      >
-        <motion.svg 
-          style={{ y: yPrimary }} 
-          className="absolute -top-56 -left-40 w-[62rem] h-[62rem] opacity-40" 
-          viewBox="0 0 800 800" 
-          fill="none"
-        >
-          <defs>
-            <linearGradient id="g1" x1="0" x2="1" y1="0" y2="1">
-              <stop offset="0%" stopColor="var(--lux-edge-from)" stopOpacity="0.6"/>
-              <stop offset="100%" stopColor="var(--lux-edge-to)" stopOpacity="0.4"/>
-            </linearGradient>
-          </defs>
-          <path d="M50,300 Q400,0 750,300 T750,700 Q400,1000 50,700 T50,300 Z" fill="url(#g1)"/>
-        </motion.svg>
-        <motion.svg 
-          style={{ y: ySecondary }} 
-          className="absolute -bottom-72 -right-48 w-[58rem] h-[58rem] opacity-35" 
-          viewBox="0 0 800 800" 
-          fill="none"
-        >
-          <defs>
-            <linearGradient id="g2" x1="0" x2="1" y1="0" y2="1">
-              <stop offset="0%" stopColor="var(--lux-edge-from)" stopOpacity="0.45"/>
-              <stop offset="100%" stopColor="var(--lux-edge-to)" stopOpacity="0.35"/>
-            </linearGradient>
-          </defs>
-          <path d="M100,350 Q420,40 700,350 T700,650 Q420,960 100,650 T100,350 Z" fill="url(#g2)"/>
-        </motion.svg>
-        <motion.div 
-          className="absolute inset-0 opacity-[0.06] mix-blend-multiply" 
-          style={{
-            backgroundImage: 'radial-gradient(circle at 30% 20%, rgba(2,6,23,0.05) 0, transparent 50%)'
-          }}
-          initial={{ scale: 0, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 2, delay: 1 }}
-        />
-      </motion.div>
+      
 
       <div className="max-w-6xl mx-auto relative z-10">
         {/* Header */}
@@ -328,33 +277,41 @@ const About = () => {
             }
           }}
         >
-          <motion.img
-              src={logoImage}
-              alt="Bexy Flowers Logo"
-            className="w-16 h-16 object-contain mx-auto mb-4"
-            variants={logoReveal}
-          />
           {/* SUGGESTION: Improved SEO-friendly H1 and more engaging copy */}
           <motion.h1 
-            className="font-luxury text-5xl md:text-6xl font-bold text-slate-800 mb-6" 
+            className="text-5xl md:text-6xl font-bold text-slate-800 mb-4" 
+            style={{ fontFamily: 'Playfair Display, serif' }}
             variants={headingReveal}
           >
             The Art of Floral Couture
           </motion.h1>
           <motion.p 
-            className="text-lg text-slate-600 max-w-3xl mx-auto leading-relaxed" 
+            className="text-base md:text-lg text-slate-500 max-w-3xl mx-auto leading-relaxed" 
+            style={{ fontFamily: 'Inter, ui-sans-serif, system-ui', lineHeight: 1.8 }}
             variants={paragraphReveal}
           >
             Welcome to Bexy Flowers, where generations of artistry meet modern luxury. Discover Lebanon's first and only glitter flower atelier.
           </motion.p>
-          </motion.div>
+          <motion.div
+            className="mx-auto mt-6 mb-2 h-px w-24 bg-amber-300/70"
+            initial={{ scaleX: 0 }}
+            whileInView={{ scaleX: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          />
+        </motion.div>
 
         {/* Main Content (Image-first layout for visual impact) */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-12 gap-y-16 items-center mb-24">
           {/* Enhanced Signature Image with Powerful 3D Reveal Effect */}
           <motion.div
             ref={imageRef}
-            className="w-full h-[500px] rounded-2xl overflow-hidden shadow-xl order-1 lg:order-2"
+            className="rounded-full overflow-hidden shadow-xl order-1 lg:order-2 mt-4 lg:mt-6 w-72 h-50
+             sm:w-96 sm:h-96 lg:w-[500px] lg:h-[500px]"
+            style={{ 
+             
+              boxShadow: '0 10px 30px rgb(198, 156, 72), 0 0 24px rgba(198, 157, 72, 0.2)'
+            }}
             variants={imageReveal}
             initial="hidden"
             whileInView="show"
@@ -364,7 +321,10 @@ const About = () => {
               src={signatureGlitterFlower} 
               alt="Signature glitter-dusted rose bouquet" 
               className="w-full h-full object-cover" 
-              style={{ scale: finalImageScale }}
+            style={{ 
+              scale: finalImageScale,
+              boxShadow: '0 0 0 5px rgba(212, 175, 55, 0.5)'
+            }}
             />
           </motion.div>
 
@@ -378,13 +338,14 @@ const About = () => {
           >
             <div>
               <motion.h2 
-                className="font-luxury text-3xl md:text-4xl font-bold text-slate-800 mb-3" 
+                className="text-3xl md:text-4xl font-bold text-slate-800 mb-3" 
+                style={{ fontFamily: 'Playfair Display, serif' }}
                 variants={headingReveal}
               >
                 Our Story
               </motion.h2>
               <motion.div 
-                className="w-20 h-1 bg-amber-400 rounded-full mb-8 origin-left" 
+                className="w-24 h-[3px] bg-amber-400/90 rounded-full mb-8 origin-left" 
                 initial={{ scaleX: 0 }} 
                 whileInView={{ scaleX: 1 }} 
                 transition={{ type: "spring", stiffness: 280, damping: 12, delay: 0.1 }} 
@@ -393,7 +354,7 @@ const About = () => {
             </div>
 
             {/* SUGGESTION: More personal and compelling story */}
-            <div className="space-y-6 text-slate-600 text-lg leading-relaxed">
+            <div className="space-y-6 text-slate-700 text-lg leading-relaxed" style={{ fontFamily: 'Inter, ui-sans-serif, system-ui', lineHeight: 1.9 }}>
               <motion.p variants={paragraphReveal}>
                 Born in 2024 from a family legacy of over 25 years in floral design, Bexy Flowers introduced a dream to Lebanon: the country's first glitter flower boutique. We blend time-honored techniques with a spark of modern magic.
               </motion.p>
@@ -405,24 +366,36 @@ const About = () => {
               </motion.p>
             </div>
 
-            <div className="grid sm:grid-cols-2 gap-4 pt-2">
-              <div className="p-5 rounded-2xl bg-white/70 backdrop-blur border border-amber-100/60 shadow-sm">
-                <div className="font-semibold text-slate-800 mb-2">Our Mission</div>
-                <div className="text-slate-600 text-sm leading-relaxed">
+            <div className="grid sm:grid-cols-2 gap-6 pt-2 items-stretch">
+              <div className="p-6 rounded-2xl bg-white/80 backdrop-blur border border-amber-100/60 shadow-sm transition-transform duration-300 hover:-translate-y-1 hover:shadow-[0_12px_30px_rgba(198,157,72,0.18)]">
+                <div className="flex items-center gap-2 font-semibold text-slate-800 mb-2" style={{ fontFamily: 'Inter, ui-sans-serif, system-ui' }}>
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#C69D48" strokeWidth="1.5" className="w-5 h-5"><path d="M12 2l3 7h7l-5.5 4 2 7L12 17l-6.5 3 2-7L2 9h7l3-7z"/></svg>
+                  Our Mission
+                </div>
+                <div className="text-slate-600 text-sm leading-relaxed" style={{ fontFamily: 'Inter, ui-sans-serif, system-ui' }}>
                   To craft breathtaking floral narratives that turn your cherished moments into unforgettable memories.
                 </div>
               </div>
-              <div className="p-5 rounded-2xl bg-white/70 backdrop-blur border border-amber-100/60 shadow-sm">
-                <div className="font-semibold text-slate-800 mb-2">Our Vision</div>
-                <div className="text-slate-600 text-sm leading-relaxed">
+              <div className="p-6 rounded-2xl bg-white/80 backdrop-blur border border-amber-100/60 shadow-sm transition-transform duration-300 hover:-translate-y-1 hover:shadow-[0_12px_30px_rgba(198,157,72,0.18)]">
+                <div className="flex items-center gap-2 font-semibold text-slate-800 mb-2" style={{ fontFamily: 'Inter, ui-sans-serif, system-ui' }}>
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#C69D48" strokeWidth="1.5" className="w-5 h-5"><path d="M8 5l4-3 4 3 3 4-3 4-4 3-4-3-3-4 3-4z"/></svg>
+                  Our Vision
+                </div>
+                <div className="text-slate-600 text-sm leading-relaxed" style={{ fontFamily: 'Inter, ui-sans-serif, system-ui' }}>
                   To be Lebanon's most sought-after floral couturier, celebrated for our pioneering designs and artistry.
                 </div>
-                  </div>
+              </div>
+              <div className="col-span-1 sm:col-span-2 flex items-center justify-center py-2">
+                <div className="h-px w-24 bg-amber-200" />
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#C69D48" strokeWidth="1.2" className="w-5 h-5 mx-3"><path d="M12 7c2 0 3 1 3 3s-1 3-3 3-3-1-3-3 1-3 3-3z"/><path d="M12 2v5M12 13v9M2 12h5M17 12h5"/></svg>
+                <div className="h-px w-24 bg-amber-200" />
+              </div>
             </div>
           </motion.div>
         </div>
 
         {/* Enhanced Statistics with Powerful 3D Card Effects */}
+        <div className="mt-16 p-8 rounded-2xl bg-rose-50/70">
         <motion.div
           className="grid grid-cols-2 md:grid-cols-4 gap-6"
           initial="hidden"
@@ -433,7 +406,7 @@ const About = () => {
           {stats.map((stat) => (
             <motion.div
               key={stat.label}
-              className="text-center p-6 bg-white/40 backdrop-blur-sm rounded-2xl border border-amber-100/50"
+              className="text-center p-6 bg-white/70 backdrop-blur-sm rounded-2xl border border-amber-100/60"
               variants={statsCardVariants}
               whileHover={{ 
                 scale: 1.05, 
@@ -450,8 +423,8 @@ const About = () => {
                 {stat.icon}
               </motion.div>
               <div className="font-luxury text-2xl font-bold text-slate-800 mb-2">
-                {stat.number}
-                <span className="text-amber-500">{stat.suffix}</span>
+                <span className="text-3xl md:text-4xl" style={{ fontFamily: 'Playfair Display, serif' }}>{stat.number}</span>
+                <span className="text-amber-500 text-2xl md:text-3xl">{stat.suffix}</span>
               </div>
               <div className="text-sm text-slate-600 font-medium">
                 {stat.label}
@@ -459,10 +432,11 @@ const About = () => {
             </motion.div>
           ))}
         </motion.div>
+        </div>
 
         {/* Enhanced Values with Powerful Staggered Animations */}
         <motion.div 
-          className="mt-24 grid md:grid-cols-3 gap-6"
+          className="mt-24 grid md:grid-cols-3 gap-8"
           initial="hidden"
           whileInView="show"
           viewport={{ once: true }}
@@ -475,7 +449,7 @@ const About = () => {
           ].map((v, i) => (
             <motion.div 
               key={i} 
-              className="p-6 rounded-2xl bg-white/70 backdrop-blur border border-amber-100/60 shadow-sm"
+              className="p-6 rounded-2xl bg-white/80 backdrop-blur border border-amber-100/60 shadow-sm h-full"
               variants={{
                 hidden: { opacity: 0, y: 40, scale: 0.9 },
                 show: { 
@@ -493,9 +467,10 @@ const About = () => {
               whileHover={{ 
                 scale: 1.03, 
                 y: -5,
-                boxShadow: "0 15px 35px rgba(0,0,0,0.1)",
+                boxShadow: "0 18px 40px rgba(198,157,72,0.15)",
                 transition: { duration: 0.3 }
               }}
+              style={{ borderColor: 'rgba(198, 157, 72, 0.35)' }}
             >
               <motion.div 
                 className="flex items-center gap-2 mb-2 text-amber-700"
@@ -506,11 +481,11 @@ const About = () => {
                   whileHover={{ rotate: 180, scale: 1.2 }}
                   transition={{ duration: 0.4 }}
                 >
-                  {v.icon}
+                  <span className="text-amber-600">{v.icon}</span>
                 </motion.div>
-                <div className="font-semibold">{v.title}</div>
+                <div className="font-semibold" style={{ fontFamily: 'Inter, ui-sans-serif, system-ui' }}>{v.title}</div>
               </motion.div>
-              <div className="text-slate-600 text-sm leading-relaxed">{v.body}</div>
+              <div className="text-slate-600 text-sm leading-relaxed" style={{ fontFamily: 'Inter, ui-sans-serif, system-ui' }}>{v.body}</div>
             </motion.div>
           ))}
         </motion.div>
