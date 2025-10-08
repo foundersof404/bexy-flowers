@@ -329,8 +329,8 @@ const About = () => {
           }}
         >
           <motion.img
-            src={logoImage}
-            alt="Bexy Flowers Logo"
+              src={logoImage}
+              alt="Bexy Flowers Logo"
             className="w-16 h-16 object-contain mx-auto mb-4"
             variants={logoReveal}
           />
@@ -347,12 +347,12 @@ const About = () => {
           >
             Welcome to Bexy Flowers, where generations of artistry meet modern luxury. Discover Lebanon's first and only glitter flower atelier.
           </motion.p>
-        </motion.div>
+          </motion.div>
 
         {/* Main Content (Image-first layout for visual impact) */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-12 gap-y-16 items-center mb-24">
           {/* Enhanced Signature Image with Powerful 3D Reveal Effect */}
-          <motion.div 
+          <motion.div
             ref={imageRef}
             className="w-full h-[500px] rounded-2xl overflow-hidden shadow-xl order-1 lg:order-2"
             variants={imageReveal}
@@ -417,7 +417,7 @@ const About = () => {
                 <div className="text-slate-600 text-sm leading-relaxed">
                   To be Lebanon's most sought-after floral couturier, celebrated for our pioneering designs and artistry.
                 </div>
-              </div>
+                  </div>
             </div>
           </motion.div>
         </div>
@@ -442,7 +442,7 @@ const About = () => {
                 transition: { duration: 0.3 }
               }}
             >
-              <motion.div 
+            <motion.div
                 className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center text-amber-600 mx-auto mb-4"
                 whileHover={{ rotate: 360, scale: 1.2 }}
                 transition={{ duration: 0.6 }}

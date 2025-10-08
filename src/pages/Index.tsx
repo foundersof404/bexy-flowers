@@ -8,7 +8,7 @@ const UltraFeaturedBouquets = React.lazy(() => import("@/components/UltraFeature
 const UltraCategories = React.lazy(() => import("@/components/UltraCategories"));
 // Replaced heavy interactive builder on home with lightweight CTA
 // const VirtualBouquetBuilder = React.lazy(() => import("@/components/interactive/VirtualBouquetBuilder"));
-const FlowerPersonalityQuiz = React.lazy(() => import("@/components/culture/FlowerPersonalityQuiz"));
+const ZodiacBouquetQuiz = React.lazy(() => import("@/components/culture/ZodiacBouquetQuiz"));
 const FlowerCareGuide = React.lazy(() => import("@/components/culture/FlowerCareGuide"));
 const Footer = React.lazy(() => import("@/components/Footer"));
 
@@ -84,7 +84,7 @@ const Index = () => {
         </LazySection>
         <LazySection rootMargin="400px 0px">
           <Suspense fallback={null}>
-            <FlowerPersonalityQuiz />
+            <ZodiacBouquetQuiz />
           </Suspense>
         </LazySection>
         <LazySection rootMargin="400px 0px">

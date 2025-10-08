@@ -392,8 +392,8 @@ const UltraFeaturedBouquets = () => {
                              alignItems: 'center',
                              transition: '0.3s'
                            }}
-                           whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
                     onClick={(e) => {
                       e.stopPropagation();
                       setSelectedBouquet(bouquet);
@@ -404,7 +404,7 @@ const UltraFeaturedBouquets = () => {
                              ↗
                            </span>
                          </motion.div>
-                    </div>
+                  </div>
                 </div>
 
                      {/* Content section */}
@@ -423,8 +423,8 @@ const UltraFeaturedBouquets = () => {
                         fontWeight: '700'
                       }}
                     >
-                      {bouquet.name}
-                    </h3>
+                    {bouquet.name}
+                  </h3>
                     <p 
                       style={{
                         margin: '0.625rem 0 1.25rem',
@@ -463,7 +463,7 @@ const UltraFeaturedBouquets = () => {
                          </li>
                        ))}
                      </ul>
-              </div>
+                </div>
               </div>
             </motion.div>
              );
