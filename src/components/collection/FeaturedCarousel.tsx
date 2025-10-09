@@ -85,10 +85,6 @@ export const FeaturedCarousel = ({ bouquets, onBouquetClick }: FeaturedCarouselP
               nextEl: ".swiper-button-next-custom",
               prevEl: ".swiper-button-prev-custom",
             }}
-            autoplay={{
-              delay: 4000,
-              disableOnInteraction: false,
-            }}
             modules={[EffectCoverflow, Pagination, Navigation, Autoplay]}
             className="featured-swiper"
             style={{
@@ -136,7 +132,7 @@ export const FeaturedCarousel = ({ bouquets, onBouquetClick }: FeaturedCarouselP
                         <Button
                           size="icon"
                           variant="secondary"
-                          className="w-8 h-8 bg-primary hover:bg-primary-dark text-primary-foreground"
+                          className="w-8 h-8 bg-[#C79E48] hover:bg-[#8B6F3A] text-white"
                           onClick={(e) => {
                             e.stopPropagation();
                             // Add to cart logic
@@ -156,16 +152,16 @@ export const FeaturedCarousel = ({ bouquets, onBouquetClick }: FeaturedCarouselP
                         {bouquet.description}
                       </p>
                       <div className="flex items-center justify-between">
-                        <span className="text-xl font-luxury text-primary">
+                        <span className="text-xl font-luxury text-[#C79E48]">
                           ${bouquet.price}
                         </span>
-                        <div className="w-6 h-px bg-primary" />
+                        <div className="w-6 h-px bg-[#C79E48]" />
                       </div>
                     </div>
                     
                     {/* Gold accent lines */}
-                    <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                    <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                    <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-[#C79E48] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                    <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-[#C79E48] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                   </div>
                 </motion.div>
               </SwiperSlide>

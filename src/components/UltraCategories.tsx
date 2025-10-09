@@ -328,7 +328,7 @@ const UltraCategories = () => {
             LUXURY COLLECTIONS
             {/* Animated Gold Underline */}
             <motion.div 
-              className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 h-1 bg-gradient-to-r from-amber-400 to-yellow-500 rounded-full"
+              className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 h-1 bg-gradient-to-r from-[#C79E48] to-[#D4A85A] rounded-full"
               initial={{ width: 0 }}
               whileInView={{ width: '200px' }}
               transition={{ duration: 1.2, delay: 0.8, ease: "easeOut" }}
@@ -338,8 +338,8 @@ const UltraCategories = () => {
 
           {/* Enhanced Decorative Elements */}
           <div className="relative mb-8">
-            <div className="w-40 h-0.5 bg-gradient-to-r from-transparent via-amber-500/60 to-transparent mx-auto" />
-            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-amber-500 rotate-45 shadow-lg shadow-amber-500/50" />
+            <div className="w-40 h-0.5 bg-gradient-to-r from-transparent via-[#C79E48]/60 to-transparent mx-auto" />
+            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-[#C79E48] rotate-45 shadow-lg shadow-[#C79E48]/50" />
           </div>
 
           {/* Enhanced Description */}
@@ -411,8 +411,8 @@ const UltraCategories = () => {
                       
                       {/* Top Icon with Modern Design */}
                       <div className="flex justify-end">
-                        <div className="w-14 h-14 bg-gradient-to-br from-slate-800/80 to-slate-900/90 backdrop-blur-xl rounded-2xl flex items-center justify-center border border-slate-700/50 transition-all duration-700 ease-out group-hover:scale-110 group-hover:from-slate-700/90 group-hover:to-slate-800/95 shadow-lg">
-                          <category.icon className="w-7 h-7 text-slate-200 transition-all duration-700 ease-out group-hover:text-white" />
+                        <div className="w-14 h-14 bg-gradient-to-br from-[#C79E48]/80 to-[#8B6F3A]/90 backdrop-blur-xl rounded-2xl flex items-center justify-center border border-[#C79E48]/50 transition-all duration-700 ease-out group-hover:scale-110 group-hover:from-slate-700/90 group-hover:to-slate-800/95 shadow-lg">
+                          <category.icon className="w-7 h-7 text-white transition-all duration-700 ease-out group-hover:text-white" />
                         </div>
                       </div>
 
@@ -424,7 +424,7 @@ const UltraCategories = () => {
                         </h3>
 
                         {/* Description - Sophisticated Styling */}
-                        <p className="font-sans font-light text-sm text-slate-200/90 opacity-0 group-hover:opacity-100 transform translate-y-6 group-hover:translate-y-0 transition-all duration-700 ease-out leading-relaxed">
+                        <p className="font-sans font-light text-sm text-white/90 opacity-0 group-hover:opacity-100 transform translate-y-6 group-hover:translate-y-0 transition-all duration-700 ease-out leading-relaxed">
                           {category.description}
                         </p>
 
@@ -613,8 +613,8 @@ const UltraCategories = () => {
                         
                         {/* Top Icon with Modern Design */}
                         <div className="flex justify-end">
-                          <div className="w-12 h-12 bg-gradient-to-br from-slate-800/80 to-slate-900/90 backdrop-blur-xl rounded-xl flex items-center justify-center border border-slate-700/50 transition-all duration-700 ease-out shadow-lg">
-                            <category.icon className="w-6 h-6 text-slate-200 transition-all duration-700 ease-out" />
+                          <div className="w-12 h-12 bg-gradient-to-br from-[#C79E48]/80 to-[#8B6F3A]/90 backdrop-blur-xl rounded-xl flex items-center justify-center border border-[#C79E48]/50 transition-all duration-700 ease-out shadow-lg">
+                            <category.icon className="w-6 h-6 text-white transition-all duration-700 ease-out" />
                           </div>
                         </div>
 
@@ -687,8 +687,8 @@ const UltraCategories = () => {
                         
                         {/* Top Icon with Modern Design */}
                         <div className="flex justify-end">
-                          <div className="w-12 h-12 bg-gradient-to-br from-slate-800/80 to-slate-900/90 backdrop-blur-xl rounded-xl flex items-center justify-center border border-slate-700/50 transition-all duration-700 ease-out shadow-lg">
-                            <category.icon className="w-6 h-6 text-slate-200 transition-all duration-700 ease-out" />
+                          <div className="w-12 h-12 bg-gradient-to-br from-[#C79E48]/80 to-[#8B6F3A]/90 backdrop-blur-xl rounded-xl flex items-center justify-center border border-[#C79E48]/50 transition-all duration-700 ease-out shadow-lg">
+                            <category.icon className="w-6 h-6 text-white transition-all duration-700 ease-out" />
                           </div>
                         </div>
 
@@ -718,23 +718,23 @@ const UltraCategories = () => {
         >
           <motion.button
             onClick={scrollLeft}
-            className="w-16 h-16 bg-gradient-to-br from-slate-800/90 to-slate-900/95 backdrop-blur-xl border border-slate-600/50 rounded-2xl flex items-center justify-center text-slate-200 hover:from-slate-700/90 hover:to-slate-800/95 hover:text-white transition-all duration-500 shadow-[0_10px_30px_rgba(0,0,0,0.2)] hover:shadow-[0_15px_40px_rgba(0,0,0,0.3)]"
+            className="w-16 h-16 bg-gradient-to-br from-[#C79E48]/90 to-[#8B6F3A]/95 backdrop-blur-xl border border-[#C79E48]/50 rounded-2xl flex items-center justify-center text-white hover:from-[#D4A85A]/90 hover:to-[#C79E48]/95 hover:text-white transition-all duration-500 shadow-[0_10px_30px_rgba(199,158,72,0.2)] hover:shadow-[0_15px_40px_rgba(199,158,72,0.3)]"
             whileHover={{ scale: 1.05, y: -2 }}
             whileTap={{ scale: 0.95 }}
           >
             <ChevronLeft className="w-7 h-7" />
           </motion.button>
 
-          <div className="flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-slate-800/10 to-slate-700/10 backdrop-blur-xl border border-slate-600/20 rounded-full">
-            <div className="w-2 h-2 rounded-full bg-gradient-to-r from-slate-600 to-slate-500 animate-pulse" />
-            <span className="text-sm text-slate-600 font-medium tracking-wider uppercase">
+          <div className="flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-[#C79E48]/10 to-[#D4A85A]/10 backdrop-blur-xl border border-[#C79E48]/20 rounded-full">
+            <div className="w-2 h-2 rounded-full bg-gradient-to-r from-[#C79E48] to-[#D4A85A] animate-pulse" />
+            <span className="text-sm text-[#8B6F3A] font-medium tracking-wider uppercase">
               Navigate Collections
             </span>
           </div>
 
           <motion.button
             onClick={scrollRight}
-            className="w-16 h-16 bg-gradient-to-br from-slate-800/90 to-slate-900/95 backdrop-blur-xl border border-slate-600/50 rounded-2xl flex items-center justify-center text-slate-200 hover:from-slate-700/90 hover:to-slate-800/95 hover:text-white transition-all duration-500 shadow-[0_10px_30px_rgba(0,0,0,0.2)] hover:shadow-[0_15px_40px_rgba(0,0,0,0.3)]"
+            className="w-16 h-16 bg-gradient-to-br from-[#C79E48]/90 to-[#8B6F3A]/95 backdrop-blur-xl border border-[#C79E48]/50 rounded-2xl flex items-center justify-center text-white hover:from-[#D4A85A]/90 hover:to-[#C79E48]/95 hover:text-white transition-all duration-500 shadow-[0_10px_30px_rgba(199,158,72,0.2)] hover:shadow-[0_15px_40px_rgba(199,158,72,0.3)]"
             whileHover={{ scale: 1.05, y: -2 }}
             whileTap={{ scale: 0.95 }}
           >

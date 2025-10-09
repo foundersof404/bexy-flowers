@@ -173,14 +173,14 @@ const Collection = () => {
         >
           <div className="absolute inset-0 flex items-center justify-center">
             <motion.div 
-              className="h-px bg-gradient-to-r from-transparent via-primary to-transparent"
+              className="h-px bg-gradient-to-r from-transparent via-[#C79E48] to-transparent"
               initial={{ width: 0 }}
               whileInView={{ width: "100%" }}
               transition={{ duration: 2, ease: "easeOut" }}
             />
           </div>
           <motion.h2 
-            className="text-center text-3xl font-luxury text-primary relative z-10 bg-background px-8"
+            className="text-center text-3xl font-luxury text-[#C79E48] relative z-10 bg-background px-8"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.5 }}

@@ -23,7 +23,7 @@ const careSteps: CareStep[] = [
       "Change water every 2-3 days",
       "Top off water daily"
     ],
-    color: "from-blue-400 to-blue-600"
+    color: "from-[#C79E48] to-[#D4A85A]"
   },
   {
     id: 2,
@@ -36,7 +36,7 @@ const careSteps: CareStep[] = [
       "Remove leaves below waterline",
       "Trim 1-2 inches off stems with each water change"
     ],
-    color: "from-green-400 to-green-600"
+    color: "from-[#C79E48] to-[#D4A85A]"
   },
   {
     id: 3,
@@ -49,7 +49,7 @@ const careSteps: CareStep[] = [
       "Ensure good air circulation",
       "Avoid heat sources and drafts"
     ],
-    color: "from-yellow-400 to-yellow-600"
+    color: "from-[#C79E48] to-[#D4A85A]"
   },
   {
     id: 4,
@@ -62,7 +62,7 @@ const careSteps: CareStep[] = [
       "Rotate vase for even light exposure",
       "Clean vase between arrangements"
     ],
-    color: "from-pink-400 to-pink-600"
+    color: "from-[#C79E48] to-[#D4A85A]"
   }
 ];
 
@@ -181,7 +181,7 @@ const FlowerCareGuide = () => {
                     transition={{ delay: index * 0.15, duration: 0.5, ease: "easeOut" }}
                     className="flex items-start gap-3 sm:gap-4 p-4 sm:p-5 backdrop-blur-sm bg-white/15 rounded-xl sm:rounded-2xl border border-white/20 hover:bg-white/20 transition-all duration-300 group"
                   >
-                    <div className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 bg-gradient-to-r from-amber-400 to-amber-600 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 shadow-md border border-white/30">
+                    <div className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 bg-gradient-to-r from-[#C79E48] to-[#D4A85A] rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 shadow-md border border-white/30">
                       <span className="text-white text-xs sm:text-sm font-bold">{index + 1}</span>
                     </div>
                     <span className="text-slate-700 group-hover:text-slate-800 transition-colors duration-300 text-sm sm:text-base leading-relaxed">{tip}</span>

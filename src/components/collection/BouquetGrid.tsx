@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { Heart, Eye, ShoppingCart, Crown } from "lucide-react";
+import { Heart, Eye, ShoppingCart, Crown, Star, Zap, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import OptimizedImage from "@/components/OptimizedImage";
 import { Card } from "@/components/ui/card";
@@ -16,6 +16,32 @@ interface BouquetGridProps {
   bouquets: Bouquet[];
   onBouquetClick: (bouquet: Bouquet) => void;
 }
+
+// Function to get tags for bouquets (similar to signature collection)
+const getBouquetTags = (bouquet: Bouquet) => {
+  const allTags = [
+    { name: "BEST SELLING", color: "#70b3b1" },
+    { name: "PREMIUM", color: "#d3b19a" },
+    { name: "LIMITED", color: "#d05fa2" },
+    { name: "FEATURED", color: "#70b3b1" },
+    { name: "NEW", color: "#d05fa2" },
+    { name: "EXCLUSIVE", color: "#d3b19a" },
+    { name: "LUXURY", color: "#70b3b1" },
+    { name: "SPECIAL", color: "#d05fa2" }
+  ];
+  
+  // Assign tags based on bouquet properties
+  if (bouquet.featured) {
+    return [allTags[0], allTags[3]]; // Best Selling + Featured
+  }
+  if (bouquet.price > 300) {
+    return [allTags[1], allTags[2]]; // Premium + Limited
+  }
+  if (bouquet.price > 200) {
+    return [allTags[1], allTags[5]]; // Premium + Exclusive
+  }
+  return [allTags[4]]; // New
+};
 
 export const BouquetGrid = ({ bouquets, onBouquetClick }: BouquetGridProps) => {
   const gridRef = useRef<HTMLDivElement>(null);
@@ -60,32 +86,27 @@ export const BouquetGrid = ({ bouquets, onBouquetClick }: BouquetGridProps) => {
     };
   }, [bouquets]);
 
-  const cardVariants = {
-    hidden: { opacity: 0, y: 50, scale: 0.9 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      scale: 1,
-      transition: {
-        duration: 0.6,
-        ease: "easeOut"
-      }
-    }
-  };
-
   return (
     <div 
       ref={gridRef}
-      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-5"
+      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
     >
-      {bouquets.map((bouquet, index) => (
+      {bouquets.map((bouquet, index) => {
+        const tags = getBouquetTags(bouquet);
+        const currentColor = '#C79E48'; // Gold color
+        
+        return (
         <motion.div
           key={bouquet.id}
-          initial={{ opacity: 0, y: 60, scale: 0.95 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ delay: index * 0.08, duration: 0.6, ease: "easeOut" }}
-          whileHover={{ y: -10 }}
-          className="group cursor-pointer max-w-[280px] mx-auto sm:max-w-none"
+            initial={{ opacity: 0, y: 100 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ 
+              duration: 0.8, 
+              delay: index * 0.1,
+              ease: [0.23, 1, 0.32, 1]
+            }}
+            whileHover={{ y: -8, scale: 1.02 }}
+            className="group cursor-pointer w-full"
           onClick={() => {
             navigate(`/product/${bouquet.id}`, { 
               state: { 
@@ -95,63 +116,105 @@ export const BouquetGrid = ({ bouquets, onBouquetClick }: BouquetGridProps) => {
                   price: bouquet.price,
                   description: bouquet.description,
                   imageUrl: bouquet.image,
-                  images: [bouquet.image, bouquet.image, bouquet.image], // Using same image for demo
+                    images: [bouquet.image, bouquet.image, bouquet.image],
                   category: 'Premium Bouquets'
                 }
               }
             });
           }}
         >
-          {/* Gradient border wrapper for polished edge */}
-          <div className="rounded-lg p-[1px] bg-gradient-to-r from-[var(--lux-edge-from)] to-[var(--lux-edge-to)] group/card">
-          <Card className="relative overflow-hidden rounded-lg bg-white/60 backdrop-blur-sm border-transparent shadow-[0_4px_30px_rgba(0,0,0,0.1)] transition-all duration-500">
-            {/* Image Container */}
-            <div className="relative aspect-[3/4] overflow-hidden transform-gpu">
-              <motion.div transition={{ duration: 0.7, ease: "easeOut" }} className="w-full h-full">
-                <OptimizedImage
+            {/* Card structure similar to signature collection - Fixed height only */}
+            <div 
+              className="card"
+              style={{
+                position: 'relative',
+                width: '100%',
+                height: '500px',
+                background: '#fff',
+                borderRadius: '1.25rem'
+              }}
+            >
+              {/* Image Container - Increased by 30% */}
+              <div 
+                className="imgBox"
+                style={{
+                  position: 'relative',
+                  width: '100%',
+                  height: '17.55rem', // Increased by 30% from 13.5rem
+                  borderRadius: '1.25rem 1.25rem 0 0',
+                  overflow: 'hidden'
+                }}
+              >
+                <motion.img
                   src={bouquet.image}
                   alt={bouquet.name}
-                  className="w-full h-full object-cover ring-0 group-hover/card:ring-1 group-hover/card:ring-amber-200"
-                  style={{ backfaceVisibility: 'hidden', transform: 'translateZ(0)', WebkitTransform: 'translateZ(0)' }}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover'
+                  }}
+                  className="transition-all duration-300 ease-out group-hover:scale-105"
                 />
-              </motion.div>
-              
-              {/* Hover Overlay */}
-              <div
-                className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                style={{
-                  background: "linear-gradient(180deg, rgba(0,0,0,0.0) 55%, rgba(0,0,0,0.25) 100%)"
-                }}
-              />
 
-              {/* Bottom gradient to make price stand out */}
-              <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/35 to-transparent" />
-              {/* Inset border glow */}
-              <div className="pointer-events-none absolute inset-0 rounded-lg shadow-[inset_0_0_40px_rgba(251,191,36,0.12)] opacity-0 group-hover/card:opacity-100 transition-opacity duration-500" />
-              
-              {/* Action Buttons */}
+                {/* Arrow and Eye Icons */}
+                <div 
+                style={{
+                    position: 'absolute',
+                    top: '1rem',
+                    right: '1rem',
+                    display: 'flex',
+                    gap: '0.5rem',
+                    opacity: 0,
+                    transform: 'translateX(10px)',
+                    transition: 'all 0.3s ease'
+                  }}
+                  className="group-hover:opacity-100 group-hover:translate-x-0"
+                >
               <motion.div
-                className="absolute top-4 right-4"
-                initial={{ opacity: 0, y: -10, x: 10 }}
-                whileHover={{ opacity: 1, y: 0, x: 0 }}
-                transition={{ duration: 0.3 }}
-              >
-                <div className="flex items-center gap-2 rounded-full bg-white/40 backdrop-blur-md shadow-sm border border-white/40 px-2 py-1">
-                  <Button
-                    size="icon"
-                    variant="secondary"
-                    className="w-9 h-9 bg-white/90 hover:bg-white text-black hover:text-primary"
+                    style={{
+                      width: '2.5rem',
+                      height: '2.5rem',
+                      background: 'rgba(255, 255, 255, 0.9)',
+                      backdropFilter: 'blur(10px)',
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: 'pointer',
+                      border: '1px solid rgba(199, 158, 72, 0.2)',
+                      transition: 'all 0.3s ease'
+                    }}
+                    whileHover={{ 
+                      scale: 1.1, 
+                      background: '#C79E48',
+                      color: '#fff'
+                    }}
                     onClick={(e) => {
                       e.stopPropagation();
-                      // Add to wishlist logic
                     }}
                   >
-                    <Heart className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    size="icon"
-                    variant="secondary"
-                    className="w-9 h-9 bg-white/90 hover:bg-white text-black hover:text-primary"
+                    <Heart style={{ width: '1rem', height: '1rem', color: '#8B6F3A' }} />
+                  </motion.div>
+                  
+                  <motion.div
+                    style={{
+                      width: '2.5rem',
+                      height: '2.5rem',
+                      background: 'rgba(255, 255, 255, 0.9)',
+                      backdropFilter: 'blur(10px)',
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: 'pointer',
+                      border: '1px solid rgba(199, 158, 72, 0.2)',
+                      transition: 'all 0.3s ease'
+                    }}
+                    whileHover={{ 
+                      scale: 1.1, 
+                      background: '#C79E48',
+                      color: '#fff'
+                    }}
                     onClick={(e) => {
                       e.stopPropagation();
                       navigate(`/product/${bouquet.id}`, { 
@@ -169,58 +232,185 @@ export const BouquetGrid = ({ bouquets, onBouquetClick }: BouquetGridProps) => {
                       });
                     }}
                   >
-                    <Eye className="w-4 h-4" />
-                  </Button>
+                    <Eye style={{ width: '1rem', height: '1rem', color: '#8B6F3A' }} />
+                  </motion.div>
                 </div>
-              </motion.div>
-              
-              {/* Gold Border Animation */}
+
+                {/* Icon with sophisticated cut-out effect (similar to signature) */}
+                <div 
+                  className="icon"
+                  style={{
+                    position: 'absolute',
+                    bottom: '-0.375rem',
+                    right: '-0.375rem',
+                    width: '4rem', // Slightly smaller
+                    height: '4rem',
+                    background:'#fff',
+                    borderTopLeftRadius: '50%'
+                  }}
+                >
+                  {/* Pseudo-element simulation with divs */}
+                  <div 
+                    style={{
+                      position: 'absolute',
+                      content: '""',
+                      bottom: '0.375rem',
+                      left: '-1.25rem',
+                      background: 'transparent',
+                      width: '1.25rem',
+                      height: '1.25rem',
+                      borderBottomRightRadius: '1.25rem',
+                      boxShadow: '0.313rem 0.313rem 0 0.313rem #fff'
+                    }}
+                  />
+                  <div 
+                    style={{
+                      position: 'absolute',
+                      content: '""',
+                      top: '-1.25rem',
+                      right: '0.375rem',
+                      background: 'transparent',
+                      width: '1.25rem',
+                      height: '1.25rem',
+                      borderBottomRightRadius: '1.25rem',
+                      boxShadow: "0.313rem 0.313rem 0 0.313rem #fff"
+                    }}
+                  />
+                  
               <motion.div
-                className="absolute inset-0 rounded-lg border border-amber-300/30"
-                initial={{ 
-                  clipPath: "inset(0 100% 100% 0)" 
+                    className="iconBox"
+                    style={{
+                      position: 'absolute',
+                      inset: '0.5rem',
+                      background: currentColor,
+                      borderRadius: '50%',
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      transition: '0.3s'
+                    }}
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/product/${bouquet.id}`, { 
+                        state: { 
+                          product: {
+                            id: bouquet.id,
+                            title: bouquet.name,
+                            price: bouquet.price,
+                            description: bouquet.description,
+                            imageUrl: bouquet.image,
+                            images: [bouquet.image, bouquet.image, bouquet.image],
+                            category: 'Premium Bouquets'
+                          }
+                        }
+                      });
+                    }}
+                  >
+                    <span style={{ color: '#fff', fontSize: '1.2rem' }}>
+                      👁️
+                    </span>
+                  </motion.div>
+                </div>
+              </div>
+
+              {/* Content section */}
+              <div 
+                className="content"
+                style={{
+                  padding: '0.938rem 0.625rem',
+                  borderRadius: '0 0 1.25rem 1.25rem',
+                  height: 'calc(500px - 17.55rem)', // Fixed height minus image height
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between'
                 }}
-                whileHover={{ 
-                  clipPath: "inset(0 0 0 0)",
-                  transition: {
-                    duration: 0.6,
-                    ease: "easeInOut"
-                  }
-                }}
-              />
-            </div>
-            
-            {/* Card Content */}
-            <div className="p-2.5 sm:p-3">
-              <motion.h3 
-                className="text-sm sm:text-base lg:text-lg font-luxury tracking-tight text-slate-900 mb-1"
-                whileHover={{ color: "hsl(var(--primary))" }}
-                transition={{ duration: 0.2 }}
+              >
+                <h3 
+                  style={{
+                    textTransform: 'capitalize',
+                    fontSize: 'clamp(1.2rem, 1.1rem + 0.4vw, 1.5rem)',
+                    color: '#111',
+                    fontWeight: '700',
+                    marginBottom: '0.5rem'
+                  }}
               >
                 {bouquet.name}
-              </motion.h3>
-              
-              <p className="text-slate-600/90 text-xs tracking-wide mb-2 line-clamp-2 font-body">
+                </h3>
+                
+                <p 
+                  style={{
+                    margin: '0 0 1rem',
+                    color: '#565656',
+                    fontSize: '0.9rem',
+                    lineHeight: '1.4'
+                  }}
+                >
                 {bouquet.description}
               </p>
               
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
-                <motion.span 
-                  className="inline-flex items-center gap-1 text-sm sm:text-base font-luxury text-amber-700 rounded-md bg-gradient-to-r from-amber-100 to-zinc-100 shadow-sm px-1.5 sm:px-2 py-0.5 border border-amber-200/60"
-                  whileHover={{ y: -2, scale: 1.03 }}
-                  transition={{ duration: 0.2 }}
+                {/* Tags */}
+                <ul 
+                  style={{
+                    margin: '0 0 1rem',
+                    padding: '0',
+                    listStyleType: 'none',
+                    display: 'flex',
+                    alignItems: 'center',
+                    flexWrap: 'wrap',
+                    gap: '0.5rem'
+                  }}
                 >
-                  <Crown className="w-3 h-3 text-amber-600" />
-                  ${bouquet.price}
-                </motion.span>
-                
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="w-full sm:w-auto"
+                  {tags.map((tag, tagIndex) => (
+                    <li 
+                      key={tagIndex}
+                      style={{
+                        textTransform: 'uppercase',
+                        background: '#f0f0f0',
+                        color: tag.color,
+                        fontWeight: '700',
+                        fontSize: '0.7rem',
+                        padding: '0.3rem 0.5rem',
+                        borderRadius: '0.188rem'
+                      }}
+                    >
+                      {tag.name}
+                    </li>
+                  ))}
+                </ul>
+
+                {/* Price at bottom (like signature collection) */}
+                <div 
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    marginTop: 'auto'
+                  }}
                 >
+                  <span 
+                    style={{
+                      fontSize: '1.5rem',
+                      fontWeight: '700',
+                      color: currentColor
+                    }}
+                  >
+                    ${bouquet.price}
+                  </span>
+                  
                   <Button
-                    className="w-full sm:w-auto rounded-md border border-amber-300/60 bg-white text-slate-900 hover:text-white transition-all duration-300 bg-[length:200%_100%] bg-gradient-to-r from-white via-amber-400 to-amber-600 hover:bg-[position:100%_0] text-xs"
+                    style={{
+                      background: currentColor,
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: '0.5rem',
+                      padding: '0.5rem 1rem',
+                      fontSize: '0.8rem',
+                      fontWeight: '600',
+                      cursor: 'pointer',
+                      transition: 'all 0.3s ease'
+                    }}
                     onClick={(e) => {
                       e.stopPropagation();
                       addToCart({
@@ -231,31 +421,15 @@ export const BouquetGrid = ({ bouquets, onBouquetClick }: BouquetGridProps) => {
                       });
                     }}
                   >
-                    <ShoppingCart className="w-3 h-3 mr-1" />
+                    <ShoppingCart style={{ width: '0.8rem', height: '0.8rem', marginRight: '0.25rem' }} />
                     Add to Cart
                   </Button>
-                </motion.div>
+                </div>
               </div>
-            </div>
-            
-            {/* 3D Hover Effect */}
-            <motion.div
-              className="absolute inset-0 pointer-events-none"
-              whileHover={{
-                rotateX: 2,
-                rotateY: 2,
-                z: 10,
-                transition: { duration: 0.3, ease: "easeOut" }
-              }}
-              style={{ 
-                transformStyle: "preserve-3d",
-                transformOrigin: "center center"
-              }}
-            />
-          </Card>
           </div>
         </motion.div>
-      ))}
+        );
+      })}
     </div>
   );
 };

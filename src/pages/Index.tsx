@@ -41,7 +41,7 @@ const Index = () => {
                 <h2 className="font-luxury text-5xl md:text-6xl font-bold text-slate-800 mb-6">
                   Design Your Perfect Bouquet
                 </h2>
-                <div className="w-24 h-1 bg-gradient-to-r from-amber-400 to-yellow-500 mx-auto mb-6"></div>
+                <div className="w-24 h-1 bg-gradient-to-r from-[#C79E48] to-[#D4A85A] mx-auto mb-6"></div>
                 <p className="font-body text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
                   Create a custom arrangement with unlimited creativity. Choose from premium flowers and design something uniquely yours.
                 </p>
@@ -49,7 +49,7 @@ const Index = () => {
 
               <div className="grid md:grid-cols-3 gap-8 mb-12">
                 <div className="text-center p-8 rounded-2xl bg-slate-50 hover:bg-slate-100 transition-colors duration-300">
-                  <div className="w-16 h-16 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <div className="w-16 h-16 bg-gradient-to-br from-[#C79E48] to-[#D4A85A] rounded-full flex items-center justify-center mx-auto mb-6">
                     <Wand2 className="h-8 w-8 text-white" />
                   </div>
                   <h3 className="text-xl font-semibold text-slate-800 mb-4">Style Presets</h3>
@@ -57,7 +57,7 @@ const Index = () => {
                 </div>
 
                 <div className="text-center p-8 rounded-2xl bg-slate-50 hover:bg-slate-100 transition-colors duration-300">
-                  <div className="w-16 h-16 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <div className="w-16 h-16 bg-gradient-to-br from-[#C79E48] to-[#D4A85A] rounded-full flex items-center justify-center mx-auto mb-6">
                     <Palette className="h-8 w-8 text-white" />
                   </div>
                   <h3 className="text-xl font-semibold text-slate-800 mb-4">Color Stories</h3>
@@ -65,7 +65,7 @@ const Index = () => {
                 </div>
 
                 <div className="text-center p-8 rounded-2xl bg-slate-50 hover:bg-slate-100 transition-colors duration-300">
-                  <div className="w-16 h-16 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <div className="w-16 h-16 bg-gradient-to-br from-[#C79E48] to-[#D4A85A] rounded-full flex items-center justify-center mx-auto mb-6">
                     <Flower2 className="h-8 w-8 text-white" />
                   </div>
                   <h3 className="text-xl font-semibold text-slate-800 mb-4">Premium Blooms</h3>
@@ -74,7 +74,7 @@ const Index = () => {
               </div>
 
               <div className="text-center">
-                <a href="/customize" className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-amber-500 to-yellow-500 text-white font-semibold text-lg rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
+                <a href="/customize" className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-[#C79E48] to-[#D4A85A] text-white font-semibold text-lg rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
                   Start Designing
                   <ChevronRight className="h-5 w-5" />
                 </a>
