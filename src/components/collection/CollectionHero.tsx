@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { gsap } from "gsap";
+import heroBackground from "@/assets/hero-bg.jpg";
 
 export const CollectionHero = () => {
   const heroRef = useRef<HTMLElement>(null);
@@ -93,17 +94,34 @@ export const CollectionHero = () => {
   return (
     <section 
       ref={heroRef}
-      className="relative h-screen flex items-center justify-center overflow-hidden"
+      className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16 sm:pt-20"
       style={{
         background: `
-          radial-gradient(circle at 20% 80%, hsl(var(--primary) / 0.1) 0%, transparent 50%),
-          radial-gradient(circle at 80% 20%, hsl(var(--primary) / 0.15) 0%, transparent 50%),
-          radial-gradient(circle at 40% 40%, hsl(var(--primary) / 0.05) 0%, transparent 50%)
+          radial-gradient(circle at 20% 80%, hsl(var(--primary) / 0.05) 0%, transparent 50%),
+          radial-gradient(circle at 80% 20%, hsl(var(--primary) / 0.08) 0%, transparent 50%),
+          radial-gradient(circle at 40% 40%, hsl(var(--primary) / 0.03) 0%, transparent 50%)
         `
       }}
     >
+      {/* Background Image with Parallax Effect */}
+      <motion.div
+        className="absolute inset-0 z-0"
+        initial={{ scale: 1.1 }}
+        animate={{ scale: 1 }}
+        transition={{ duration: 20, ease: "linear", repeat: Infinity, repeatType: "reverse" }}
+      >
+        <img
+          src={heroBackground}
+          alt="Luxury floral background"
+          className="w-full h-full object-cover opacity-40"
+        />
+      </motion.div>
+
+      {/* Gradient Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/50 to-background/70 z-10" />
+
       {/* Floating Particles Background */}
-      <div ref={particlesRef} className="absolute inset-0 pointer-events-none" aria-hidden="true">
+      <div ref={particlesRef} className="absolute inset-0 pointer-events-none z-15" aria-hidden="true">
         {Array.from({ length: 20 }, (_, i) => (
           <motion.div
             key={i}
