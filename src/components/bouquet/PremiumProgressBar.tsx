@@ -36,12 +36,12 @@ const PremiumProgressBar: React.FC<PremiumProgressBarProps> = ({
   ];
 
   return (
-    <div className="w-full max-w-4xl mx-auto mb-12">
+    <div className="w-full max-w-4xl mx-auto mb-12 px-4">
       <div className="relative">
         {/* Progress Line */}
-        <div className="absolute top-8 left-0 right-0 h-0.5 bg-slate-200">
+        <div className="absolute top-8 left-8 right-8 h-0.5 bg-slate-200">
           <motion.div
-            className="h-full bg-gradient-to-r from-amber-500 to-orange-500"
+            className="h-full bg-gradient-to-r from-amber-500 to-yellow-500"
             initial={{ width: '0%' }}
             animate={{ 
               width: `${((currentStep - 1) / (steps.length - 1)) * 100}%` 
@@ -51,7 +51,7 @@ const PremiumProgressBar: React.FC<PremiumProgressBarProps> = ({
         </div>
 
         {/* Steps */}
-        <div className="flex justify-between items-start">
+        <div className="flex justify-between items-start px-8">
           {steps.map((step, index) => {
             const isActive = currentStep === step.id;
             const isCompleted = step.completed;
@@ -72,7 +72,7 @@ const PremiumProgressBar: React.FC<PremiumProgressBarProps> = ({
                   <motion.div
                     className={`w-16 h-16 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${
                       isCompleted
-                        ? 'bg-gradient-to-r from-amber-500 to-orange-500 border-transparent text-white shadow-lg'
+                        ? 'bg-gradient-to-r from-amber-500 to-yellow-500 border-transparent text-white shadow-lg'
                         : isActive
                         ? 'bg-white border-amber-500 text-amber-500 shadow-lg'
                         : 'bg-white border-slate-300 text-slate-400 hover:border-slate-400'
@@ -121,10 +121,7 @@ const PremiumProgressBar: React.FC<PremiumProgressBarProps> = ({
                   </p>
                 </div>
 
-                {/* Connection Line */}
-                {index < steps.length - 1 && (
-                  <div className="absolute top-8 left-full w-full h-0.5 -translate-x-1/2 -translate-y-1/2 bg-slate-200" />
-                )}
+                {/* Connection Line - Removed to prevent overflow */}
               </motion.div>
             );
           })}
@@ -139,7 +136,7 @@ const PremiumProgressBar: React.FC<PremiumProgressBarProps> = ({
         transition={{ delay: 0.5 }}
       >
         <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-xl rounded-full border border-slate-200/50 shadow-lg">
-          <div className="w-2 h-2 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full animate-pulse" />
+          <div className="w-2 h-2 bg-gradient-to-r from-amber-500 to-yellow-500 rounded-full animate-pulse" />
           <span className="text-sm font-medium text-slate-700">
             Step {currentStep} of {steps.length}: {steps[currentStep - 1]?.title}
           </span>

@@ -213,7 +213,7 @@ const PremiumBouquetSummary: React.FC<SummaryPanelProps> = ({
           className={`w-full py-4 px-6 rounded-2xl font-bold text-lg transition-all duration-300 flex items-center justify-center gap-3 ${
             selectedFlowersArray.length === 0 || isOrdering
               ? 'bg-slate-200 text-slate-500 cursor-not-allowed'
-              : 'bg-gradient-to-r from-rose-500 to-pink-600 text-white hover:from-rose-600 hover:to-pink-700 shadow-lg hover:shadow-xl'
+              : 'bg-gradient-to-r from-amber-500 to-yellow-600 text-white hover:from-amber-600 hover:to-yellow-700 shadow-lg hover:shadow-xl'
           }`}
           whileHover={selectedFlowersArray.length > 0 && !isOrdering ? { scale: 1.02 } : {}}
           whileTap={selectedFlowersArray.length > 0 && !isOrdering ? { scale: 0.98 } : {}}

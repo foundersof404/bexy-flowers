@@ -24,7 +24,7 @@ const PreDesignedBouquets: React.FC<PreDesignedBouquetsProps> = ({
 
   const getCategoryColor = (category: string) => {
     const colors: Record<string, string> = {
-      romance: 'from-pink-500 to-rose-600',
+      romance: 'from-amber-500 to-yellow-600',
       seasonal: 'from-green-500 to-emerald-600',
       formal: 'from-slate-500 to-slate-600',
       warm: 'from-orange-500 to-red-600'

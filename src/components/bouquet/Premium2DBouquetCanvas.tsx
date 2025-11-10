@@ -99,17 +99,17 @@ const Premium2DBouquetCanvas: React.FC<Premium2DBouquetCanvasProps> = ({
   const selectedFlowersArray = Object.values(selectedFlowers);
 
   return (
-    <div className="relative w-full h-full bg-gradient-to-b from-sky-100 to-green-50 rounded-3xl overflow-hidden shadow-2xl">
+    <div className="relative w-full h-full bg-gradient-to-b from-amber-50 to-yellow-50 rounded-3xl overflow-hidden shadow-2xl">
       {/* Canvas Container */}
       <div
         ref={canvasRef}
         className="relative w-full h-full cursor-crosshair"
         style={{ 
-          minHeight: `${canvasSize.height}px`,
+          height: `${canvasSize.height}px`,
           background: `
-            radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.1) 0%, transparent 50%),
-            radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.1) 0%, transparent 50%),
-            linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(240, 248, 255, 0.6) 100%)
+            radial-gradient(circle at 20% 80%, rgba(199, 157, 72, 0.1) 0%, transparent 50%),
+            radial-gradient(circle at 80% 20%, rgba(255, 193, 77, 0.1) 0%, transparent 50%),
+            linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 251, 235, 0.8) 100%)
           `
         }}
         onMouseMove={handleMouseMove}
@@ -246,14 +246,14 @@ const Premium2DBouquetCanvas: React.FC<Premium2DBouquetCanvasProps> = ({
       </div>
 
       {/* Canvas Info Overlay */}
-      <div className="absolute top-6 left-6 right-6 flex justify-between items-start">
+      <div className="absolute top-4 left-4 right-4 flex justify-between items-start z-20">
         <div className="bg-white/90 backdrop-blur-xl px-4 py-2 rounded-2xl shadow-lg">
           <p className="text-sm font-medium text-slate-700">2D Canvas</p>
           <p className="text-xs text-slate-500">Drag flowers to arrange</p>
         </div>
         
         {selectedFlowersArray.length > 0 && (
-          <div className="bg-gradient-to-r from-amber-500 to-orange-500 text-white px-4 py-2 rounded-2xl shadow-lg">
+          <div className="bg-gradient-to-r from-amber-500 to-yellow-500 text-white px-4 py-2 rounded-2xl shadow-lg">
             <p className="text-sm font-bold">
               {selectedFlowersArray.reduce((sum, item) => sum + item.quantity, 0)} Flowers
             </p>
@@ -262,10 +262,10 @@ const Premium2DBouquetCanvas: React.FC<Premium2DBouquetCanvasProps> = ({
       </div>
 
       {/* Quality Badge */}
-      <div className="absolute bottom-6 left-6">
+      <div className="absolute bottom-4 left-4 z-20">
         <div className="bg-white/90 backdrop-blur-xl px-3 py-2 rounded-xl shadow-lg">
           <div className="flex items-center gap-2">
-            <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+            <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
             <span className="text-xs font-medium text-slate-700">Premium Quality</span>
           </div>
         </div>

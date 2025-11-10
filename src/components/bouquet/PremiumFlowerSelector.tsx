@@ -62,8 +62,8 @@ const PremiumFlowerSelector: React.FC<FlowerSelectorProps> = ({
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-gradient-to-br from-rose-100 to-pink-200 rounded-2xl flex items-center justify-center">
-            <Heart className="w-6 h-6 text-rose-600" />
+          <div className="w-12 h-12 bg-gradient-to-br from-amber-100 to-yellow-200 rounded-2xl flex items-center justify-center">
+            <Heart className="w-6 h-6 text-amber-600" />
           </div>
           <div>
             <h3 className="text-2xl font-bold text-slate-800 mb-1">Premium Flowers</h3>
@@ -92,7 +92,7 @@ const PremiumFlowerSelector: React.FC<FlowerSelectorProps> = ({
             placeholder="Search flowers..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-12 pr-4 py-4 bg-slate-50/80 border border-slate-200/50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-rose-400/50 focus:border-rose-400/50 transition-all text-slate-700 placeholder-slate-400"
+            className="w-full pl-12 pr-4 py-4 bg-slate-50/80 border border-slate-200/50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-amber-400/50 focus:border-amber-400/50 transition-all text-slate-700 placeholder-slate-400"
           />
         </div>
 
@@ -126,7 +126,7 @@ const PremiumFlowerSelector: React.FC<FlowerSelectorProps> = ({
                     onClick={() => setSelectedCategory(category.id)}
                     className={`flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-all ${
                       selectedCategory === category.id
-                        ? 'bg-gradient-to-r from-rose-500 to-pink-600 text-white shadow-lg'
+                        ? 'bg-gradient-to-r from-amber-500 to-yellow-600 text-white shadow-lg'
                         : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                     }`}
                     whileHover={{ scale: 1.05 }}
@@ -144,7 +144,7 @@ const PremiumFlowerSelector: React.FC<FlowerSelectorProps> = ({
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as 'name' | 'price' | 'category')}
-                  className="bg-white border border-slate-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400/50"
+                  className="bg-white border border-slate-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400/50"
                 >
                   {sortOptions.map(option => (
                     <option key={option.value} value={option.value}>
@@ -173,7 +173,7 @@ const PremiumFlowerSelector: React.FC<FlowerSelectorProps> = ({
               <motion.button
                 data-flower-id={flower.id}
                 onClick={() => handleFlowerClick(flower)}
-                className="w-full bg-white border border-slate-200/50 rounded-2xl p-6 cursor-pointer transition-all duration-300 hover:shadow-xl hover:border-rose-200/50 group"
+                className="w-full bg-white border border-slate-200/50 rounded-2xl p-6 cursor-pointer transition-all duration-300 hover:shadow-xl hover:border-amber-200/50 group"
                 whileHover={{ scale: 1.02, y: -4 }}
                 whileTap={{ scale: 0.98 }}
               >
@@ -197,7 +197,7 @@ const PremiumFlowerSelector: React.FC<FlowerSelectorProps> = ({
                   
                   {/* Add Button Overlay */}
                   <motion.div
-                    className="absolute top-2 right-2 w-8 h-8 bg-gradient-to-r from-rose-500 to-pink-600 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                    className="absolute top-2 right-2 w-8 h-8 bg-gradient-to-r from-amber-500 to-yellow-600 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
                     whileHover={{ scale: 1.1 }}
                   >
                     <Plus className="w-4 h-4 text-white" />
@@ -206,7 +206,7 @@ const PremiumFlowerSelector: React.FC<FlowerSelectorProps> = ({
 
                 {/* Flower Info */}
                 <div className="text-left">
-                  <h4 className="font-bold text-slate-800 mb-2 group-hover:text-rose-600 transition-colors">
+                  <h4 className="font-bold text-slate-800 mb-2 group-hover:text-amber-600 transition-colors">
                     {flower.name}
                   </h4>
                   
@@ -228,7 +228,7 @@ const PremiumFlowerSelector: React.FC<FlowerSelectorProps> = ({
                 </div>
 
                 {/* Hover Effect */}
-                <div className="absolute inset-0 bg-gradient-to-br from-rose-50/50 to-pink-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl" />
+                <div className="absolute inset-0 bg-gradient-to-br from-amber-50/50 to-yellow-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl" />
               </motion.button>
             </motion.div>
           ))}
