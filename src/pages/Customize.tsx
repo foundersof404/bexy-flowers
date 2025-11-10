@@ -299,7 +299,7 @@ const Customize: React.FC = () => {
     setIsGenerating(true);
     
     try {
-      // Build DETAILED prompt with EXACT flower counts and colors
+      // Build SUPER DETAILED prompt with EXACT flower counts - emphasized multiple times
       const flowerDetails = Object.entries(flowerCounts)
         .filter(([_, count]) => count > 0)
         .map(([id, count]) => {
@@ -307,17 +307,21 @@ const Customize: React.FC = () => {
           const colorId = flowerColors[id];
           const colorObj = flower?.colors.find(c => c.id === colorId);
           const colorName = colorObj?.name || flower?.colors[0]?.name || "";
-          return `exactly ${count} ${colorName} ${flower?.name}`;
+          return `EXACTLY ${count} ${colorName} ${flower?.name}`;
         })
-        .join(", ");
+        .join(" and ");
 
-      const glitterDesc = withGlitter ? "with beautiful sparkly glitter on the flowers and petals" : "";
+      const totalCount = totalFlowers;
+      
+      const glitterDesc = withGlitter ? ", with beautiful sparkly glitter on the flowers and petals" : "";
       
       const boxDesc = selectedPackage?.type === "box" 
         ? `in a ${selectedBoxColor?.name || ""} ${selectedBoxShape?.name} shaped luxury box`
         : `wrapped in ${selectedWrapColor?.name} decorative paper with silk ribbon`;
 
-      const prompt = `Professional photograph of a luxury flower bouquet with ${flowerDetails}, ${boxDesc}, ${glitterDesc}, studio lighting, white background, high resolution, detailed, elegant floral arrangement, premium quality`;
+      const prompt = `Professional studio photograph of a minimalist flower bouquet containing ONLY ${totalCount} total flowers: ${flowerDetails}, arranged ${boxDesc}${glitterDesc}. IMPORTANT: Show exactly ${totalCount} flower stems, no more no less. Clean composition, white background, high resolution, count the flowers carefully: ${totalCount} flowers total.`;
+      
+      const negativePrompt = "too many flowers, crowded, more than specified, extra flowers, wrong count, messy, wilted, ugly, blurry, low quality, distorted";
 
       // Method 1: Pollinations.ai - Super stable
       try {
@@ -352,8 +356,9 @@ const Customize: React.FC = () => {
             body: JSON.stringify({
               inputs: prompt,
               parameters: {
-                negative_prompt: "ugly, blurry, low quality, distorted, bad composition, wilted flowers, wrong number of flowers",
-                num_inference_steps: 25,
+                negative_prompt: negativePrompt,
+                num_inference_steps: 30,
+                guidance_scale: 8.5,
               }
             }),
           }
@@ -395,8 +400,8 @@ const Customize: React.FC = () => {
         console.log("Alternative Pollinations unavailable, trying next method...");
       }
 
-      // Final fallback with simpler prompt
-      const simplePrompt = `luxury bouquet with ${flowerDetails}, professional photo, white background`;
+      // Final fallback with simpler but still specific prompt
+      const simplePrompt = `minimalist bouquet with ONLY ${totalCount} flowers total: ${flowerDetails}, ${boxDesc}, professional photo, white background, count exactly ${totalCount} flowers`;
       const finalUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(simplePrompt)}?width=1024&height=1024&nologo=true&seed=${Date.now()}`;
       
       const finalResponse = await fetch(finalUrl);
