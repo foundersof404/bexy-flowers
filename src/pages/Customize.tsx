@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Box, Gift, ChevronLeft, ShoppingCart, Plus, Minus, Check, Sparkles, Heart, Star, Square, Circle, Triangle, Wand2, RefreshCw, Download } from "lucide-react";
+import { Box, Gift, ChevronLeft, ShoppingCart, Plus, Minus, Check, Sparkles, Heart, Star, Square, Circle, Triangle, Wand2, RefreshCw, Download, MessageCircle, Eye } from "lucide-react";
 import UltraNavigation from "@/components/UltraNavigation";
 import { useCart } from "@/contexts/CartContext";
 import { toast } from "sonner";
@@ -23,6 +23,13 @@ interface BoxShape {
   description: string;
 }
 
+interface BoxColor {
+  id: string;
+  name: string;
+  color: string;
+  gradient: string;
+}
+
 interface Size {
   id: string;
   name: string;
@@ -31,12 +38,18 @@ interface Size {
   description: string;
 }
 
+interface FlowerColor {
+  id: string;
+  name: string;
+  value: string;
+}
+
 interface Flower {
   id: string;
   name: string;
   price: number;
   image: string;
-  color: string;
+  colors: FlowerColor[];
 }
 
 interface WrapColor {
@@ -59,6 +72,15 @@ const boxShapes: BoxShape[] = [
   { id: "triangle", name: "Triangle", icon: Triangle, description: "Unique triangular design" }
 ];
 
+const boxColors: BoxColor[] = [
+  { id: "white", name: "White", color: "#FFFFFF", gradient: "linear-gradient(135deg, #FFFFFF 0%, #F5F5F5 100%)" },
+  { id: "black", name: "Black", color: "#1a1a1a", gradient: "linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)" },
+  { id: "gold", name: "Gold", color: GOLD, gradient: `linear-gradient(135deg, ${GOLD} 0%, #D4A85A 100%)` },
+  { id: "pink", name: "Pink", color: "#FFB6C1", gradient: "linear-gradient(135deg, #FFB6C1 0%, #FFC0CB 100%)" },
+  { id: "blue", name: "Blue", color: "#87CEEB", gradient: "linear-gradient(135deg, #87CEEB 0%, #4682B4 100%)" },
+  { id: "red", name: "Red", color: "#DC143C", gradient: "linear-gradient(135deg, #DC143C 0%, #B22222 100%)" }
+];
+
 const boxSizes: Size[] = [
   { id: "small", name: "Small", capacity: 15, price: 50, description: "~15 flowers" },
   { id: "medium", name: "Medium", capacity: 25, price: 85, description: "~25 flowers" },
@@ -74,12 +96,76 @@ const wrapSizes: Size[] = [
 ];
 
 const flowers: Flower[] = [
-  { id: "rose", name: "Roses", price: 5, image: "/src/assets/flowers/red.png", color: "#DC143C" },
-  { id: "peony", name: "Peonies", price: 7, image: "/src/assets/flowers/pink.png", color: "#FFB6C1" },
-  { id: "lily", name: "Lilies", price: 6, image: "/src/assets/flowers/white .png", color: "#FFFFFF" },
-  { id: "tulip", name: "Tulips", price: 4, image: "/src/assets/flowers/red.png", color: "#FF6347" },
-  { id: "orchid", name: "Orchids", price: 8, image: "/src/assets/flowers/pink.png", color: "#DA70D6" },
-  { id: "carnation", name: "Carnations", price: 3, image: "/src/assets/flowers/white .png", color: "#FFF0F5" }
+  { 
+    id: "rose", 
+    name: "Roses", 
+    price: 5, 
+    image: "/src/assets/flowers/red.png",
+    colors: [
+      { id: "red", name: "Red", value: "red" },
+      { id: "pink", name: "Pink", value: "pink" },
+      { id: "white", name: "White", value: "white" },
+      { id: "yellow", name: "Yellow", value: "yellow" },
+      { id: "orange", name: "Orange", value: "orange" }
+    ]
+  },
+  { 
+    id: "peony", 
+    name: "Peonies", 
+    price: 7, 
+    image: "/src/assets/flowers/pink.png",
+    colors: [
+      { id: "pink", name: "Pink", value: "pink" },
+      { id: "white", name: "White", value: "white" },
+      { id: "coral", name: "Coral", value: "coral" }
+    ]
+  },
+  { 
+    id: "lily", 
+    name: "Lilies", 
+    price: 6, 
+    image: "/src/assets/flowers/white .png",
+    colors: [
+      { id: "white", name: "White", value: "white" },
+      { id: "pink", name: "Pink", value: "pink" },
+      { id: "orange", name: "Orange", value: "orange" }
+    ]
+  },
+  { 
+    id: "tulip", 
+    name: "Tulips", 
+    price: 4, 
+    image: "/src/assets/flowers/red.png",
+    colors: [
+      { id: "red", name: "Red", value: "red" },
+      { id: "pink", name: "Pink", value: "pink" },
+      { id: "white", name: "White", value: "white" },
+      { id: "yellow", name: "Yellow", value: "yellow" },
+      { id: "purple", name: "Purple", value: "purple" }
+    ]
+  },
+  { 
+    id: "orchid", 
+    name: "Orchids", 
+    price: 8, 
+    image: "/src/assets/flowers/pink.png",
+    colors: [
+      { id: "purple", name: "Purple", value: "purple" },
+      { id: "white", name: "White", value: "white" },
+      { id: "pink", name: "Pink", value: "pink" }
+    ]
+  },
+  { 
+    id: "carnation", 
+    name: "Carnations", 
+    price: 3, 
+    image: "/src/assets/flowers/white .png",
+    colors: [
+      { id: "pink", name: "Pink", value: "pink" },
+      { id: "red", name: "Red", value: "red" },
+      { id: "white", name: "White", value: "white" }
+    ]
+  }
 ];
 
 const wrapColors: WrapColor[] = [
@@ -122,16 +208,19 @@ const Customize: React.FC = () => {
   const [step, setStep] = useState(1);
   const [selectedPackage, setSelectedPackage] = useState<Package | null>(null);
   const [selectedBoxShape, setSelectedBoxShape] = useState<BoxShape | null>(null);
+  const [selectedBoxColor, setSelectedBoxColor] = useState<BoxColor | null>(null);
   const [selectedSize, setSelectedSize] = useState<Size | null>(null);
   const [selectedWrapColor, setSelectedWrapColor] = useState<WrapColor | null>(null);
   const [customQty, setCustomQty] = useState(25);
   const [flowerCounts, setFlowerCounts] = useState<Record<string, number>>({});
+  const [flowerColors, setFlowerColors] = useState<Record<string, string>>({});
   const [note, setNote] = useState("");
   const [showPrices, setShowPrices] = useState(false);
   const [celebrating, setCelebrating] = useState(false);
   const [withGlitter, setWithGlitter] = useState(false);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
   const { addToCart } = useCart();
 
   useEffect(() => {
@@ -152,6 +241,13 @@ const Customize: React.FC = () => {
     }
   }, [selectedBoxShape, step, selectedPackage]);
 
+  // Auto-advance when box color is selected
+  useEffect(() => {
+    if (selectedBoxColor && step === 3 && selectedPackage?.type === "box") {
+      setTimeout(() => setStep(4), 600);
+    }
+  }, [selectedBoxColor, step, selectedPackage]);
+
   // Auto-advance when size is selected (for wrap with color)
   useEffect(() => {
     if (selectedSize && step === 2 && selectedPackage?.type === "wrap" && selectedWrapColor) {
@@ -159,10 +255,10 @@ const Customize: React.FC = () => {
     }
   }, [selectedSize, selectedWrapColor, step, selectedPackage]);
 
-  // Auto-advance when size is selected for box (step 3 -> 4)
+  // Auto-advance when size is selected for box (step 4 -> 5)
   useEffect(() => {
-    if (selectedSize && step === 3 && selectedPackage?.type === "box") {
-      setTimeout(() => setStep(4), 600);
+    if (selectedSize && step === 4 && selectedPackage?.type === "box") {
+      setTimeout(() => setStep(5), 600);
     }
   }, [selectedSize, step, selectedPackage]);
 
@@ -188,6 +284,14 @@ const Customize: React.FC = () => {
     }
     
     setFlowerCounts(prev => ({ ...prev, [id]: newVal }));
+    
+    // Set default color if adding first flower of this type
+    if (newVal > 0 && !flowerColors[id]) {
+      const flower = flowers.find(f => f.id === id);
+      if (flower && flower.colors.length > 0) {
+        setFlowerColors(prev => ({ ...prev, [id]: flower.colors[0].id }));
+      }
+    }
   };
 
   // AI Image Generation Function with Multiple Reliable Fallbacks
@@ -195,23 +299,29 @@ const Customize: React.FC = () => {
     setIsGenerating(true);
     
     try {
-      // Build detailed prompt based on user selections
-      const flowerList = Object.entries(flowerCounts)
+      // Build DETAILED prompt with EXACT flower counts and colors
+      const flowerDetails = Object.entries(flowerCounts)
         .filter(([_, count]) => count > 0)
         .map(([id, count]) => {
           const flower = flowers.find(f => f.id === id);
-          return `${count} ${flower?.name}`;
+          const colorId = flowerColors[id];
+          const colorObj = flower?.colors.find(c => c.id === colorId);
+          const colorName = colorObj?.name || flower?.colors[0]?.name || "";
+          return `exactly ${count} ${colorName} ${flower?.name}`;
         })
         .join(", ");
 
-      const prompt = `A beautiful luxury flower bouquet arrangement, professional photography, ${flowerList}, 
-        ${selectedPackage?.type === "box" ? `in a ${selectedBoxShape?.name} shaped elegant box` : `wrapped in ${selectedWrapColor?.name} paper with ribbon`}, 
-        ${withGlitter ? "with sparkly glitter accents," : ""} 
-        premium floral design, studio lighting, white background, high quality, 4K, detailed, elegant composition`;
+      const glitterDesc = withGlitter ? "with beautiful sparkly glitter on the flowers and petals" : "";
+      
+      const boxDesc = selectedPackage?.type === "box" 
+        ? `in a ${selectedBoxColor?.name || ""} ${selectedBoxShape?.name} shaped luxury box`
+        : `wrapped in ${selectedWrapColor?.name} decorative paper with silk ribbon`;
 
-      // Method 1: Pollinations.ai - Super stable, URL-based, 100% free, no rate limits
+      const prompt = `Professional photograph of a luxury flower bouquet with ${flowerDetails}, ${boxDesc}, ${glitterDesc}, studio lighting, white background, high resolution, detailed, elegant floral arrangement, premium quality`;
+
+      // Method 1: Pollinations.ai - Super stable
       try {
-        const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&height=1024&nologo=true&enhance=true`;
+        const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&height=1024&nologo=true&enhance=true&seed=${Date.now()}`;
         
         const pollinationsResponse = await fetch(pollinationsUrl);
         
@@ -230,7 +340,7 @@ const Customize: React.FC = () => {
         console.log("Pollinations.ai unavailable, trying next method...");
       }
 
-      // Method 2: Hugging Face Stable Diffusion XL (more reliable model)
+      // Method 2: Hugging Face Stable Diffusion XL
       try {
         const hfResponse = await fetch(
           "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0",
@@ -242,7 +352,7 @@ const Customize: React.FC = () => {
             body: JSON.stringify({
               inputs: prompt,
               parameters: {
-                negative_prompt: "ugly, blurry, low quality, distorted, bad composition, wilted flowers",
+                negative_prompt: "ugly, blurry, low quality, distorted, bad composition, wilted flowers, wrong number of flowers",
                 num_inference_steps: 25,
               }
             }),
@@ -285,50 +395,9 @@ const Customize: React.FC = () => {
         console.log("Alternative Pollinations unavailable, trying next method...");
       }
 
-      // Method 4: Hugging Face Stable Diffusion 2.1
-      try {
-        const hfSD21Response = await fetch(
-          "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-2-1",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              inputs: prompt,
-              parameters: {
-                negative_prompt: "ugly, blurry, low quality",
-                num_inference_steps: 20,
-              }
-            }),
-          }
-        );
-
-        if (hfSD21Response.ok) {
-          const blob = await hfSD21Response.blob();
-          const imageUrl = URL.createObjectURL(blob);
-          setGeneratedImage(imageUrl);
-          
-          toast.success("✨ Your bouquet preview is ready!", {
-            duration: 3000,
-            icon: "🎨"
-          });
-          return;
-        }
-      } catch (error) {
-        console.log("Hugging Face SD 2.1 unavailable, trying next method...");
-      }
-
-      // Method 5: Fallback to a beautiful placeholder with custom message
-      // Instead of showing an error, show a preview message
-      toast.info("🌸 Creating your preview...", {
-        description: "This might take a moment. Your beautiful bouquet is being designed!",
-        duration: 4000
-      });
-      
-      // Try one more time with a simpler prompt for Pollinations
-      const simplePrompt = `luxury ${flowerList} bouquet, professional photo, white background`;
-      const finalUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(simplePrompt)}?width=1024&height=1024&nologo=true`;
+      // Final fallback with simpler prompt
+      const simplePrompt = `luxury bouquet with ${flowerDetails}, professional photo, white background`;
+      const finalUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(simplePrompt)}?width=1024&height=1024&nologo=true&seed=${Date.now()}`;
       
       const finalResponse = await fetch(finalUrl);
       if (finalResponse.ok) {
@@ -343,13 +412,10 @@ const Customize: React.FC = () => {
         return;
       }
 
-      // If absolutely everything fails (very rare), show a friendly message
       throw new Error("All services temporarily unavailable");
       
     } catch (error) {
       console.error("Error generating image:", error);
-      
-      // User-friendly error message
       toast.error("Please try again in a moment! 🌸", {
         description: "Our AI is taking a short break. Click 'Generate' again!",
         duration: 5000
@@ -359,15 +425,26 @@ const Customize: React.FC = () => {
     }
   };
 
-  const handleCheckout = () => {
-    if (totalFlowers === 0) return;
+  const handlePreviewClick = () => {
+    if (totalFlowers === 0) {
+      toast.error("Please add some flowers first!");
+      return;
+    }
+    setShowPreview(true);
+  };
 
+  const handleAddToCart = () => {
     const flowerList = Object.entries(flowerCounts)
       .filter(([_, c]) => c > 0)
-      .map(([id, c]) => `${c}x ${flowers.find(f => f.id === id)?.name}`)
+      .map(([id, c]) => {
+        const flower = flowers.find(f => f.id === id);
+        const colorId = flowerColors[id];
+        const colorObj = flower?.colors.find(col => col.id === colorId);
+        return `${c}x ${colorObj?.name || ""} ${flower?.name}`;
+      })
       .join(", ");
 
-    const shapeInfo = selectedBoxShape ? ` - ${selectedBoxShape.name} Shape` : "";
+    const shapeInfo = selectedBoxShape ? ` - ${selectedBoxShape.name} ${selectedBoxColor?.name || ""} Box` : "";
 
     addToCart({
       id: `custom-${Date.now()}`,
@@ -385,23 +462,50 @@ const Customize: React.FC = () => {
     
     setCelebrating(true);
     setTimeout(() => setCelebrating(false), 2000);
+    setShowPreview(false);
+  };
+
+  const handleWhatsAppShare = () => {
+    const flowerList = Object.entries(flowerCounts)
+      .filter(([_, c]) => c > 0)
+      .map(([id, c]) => {
+        const flower = flowers.find(f => f.id === id);
+        const colorId = flowerColors[id];
+        const colorObj = flower?.colors.find(col => col.id === colorId);
+        return `${c}x ${colorObj?.name || ""} ${flower?.name}`;
+      })
+      .join(", ");
+
+    const message = `Hi! I'd like to order a custom bouquet:\n\n${selectedPackage?.name}${selectedBoxShape ? ` - ${selectedBoxShape.name} ${selectedBoxColor?.name || ""} Box` : ""}\nSize: ${selectedSize?.name}\nFlowers: ${flowerList}${withGlitter ? "\nWith Glitter ✨" : ""}${note ? `\n\nNote: ${note}` : ""}\n\nTotal: $${totalPrice.toFixed(2)}`;
+    
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
+    
+    toast.success("Opening WhatsApp...", { icon: "💬" });
   };
 
   const handleBack = () => {
     if (step === 2) {
       setSelectedPackage(null);
       setSelectedBoxShape(null);
+      setSelectedBoxColor(null);
       setSelectedSize(null);
       setSelectedWrapColor(null);
     } else if (step === 3) {
       if (selectedPackage?.type === "box") {
         setSelectedBoxShape(null);
+        setSelectedBoxColor(null);
         setSelectedSize(null);
       } else {
         setSelectedSize(null);
         setSelectedWrapColor(null);
       }
     } else if (step === 4) {
+      if (selectedPackage?.type === "box") {
+        setSelectedBoxColor(null);
+        setSelectedSize(null);
+      }
+    } else if (step === 5) {
       setSelectedSize(null);
     }
     setStep(s => Math.max(1, s - 1));
@@ -409,7 +513,7 @@ const Customize: React.FC = () => {
   };
 
   const getTotalSteps = () => {
-    return selectedPackage?.type === "box" ? 4 : 3;
+    return selectedPackage?.type === "box" ? 5 : 3;
   };
 
   const downloadImage = () => {
@@ -421,6 +525,8 @@ const Customize: React.FC = () => {
       toast.success("Image downloaded!");
     }
   };
+
+  const finalStep = (selectedPackage?.type === "wrap" && step === 3) || (selectedPackage?.type === "box" && step === 5);
 
   return (
     <div className="min-h-screen bg-white relative overflow-hidden">
@@ -473,6 +579,150 @@ const Customize: React.FC = () => {
         )}
       </AnimatePresence>
 
+      {/* Preview Modal */}
+      <AnimatePresence>
+        {showPreview && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => setShowPreview(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-3xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+            >
+              <h2 className="text-3xl font-bold mb-6 text-center" style={{ color: GOLD }}>
+                Review Your Bouquet
+              </h2>
+
+              {generatedImage && (
+                <div className="mb-6">
+                  <img 
+                    src={generatedImage} 
+                    alt="Your Custom Bouquet" 
+                    className="w-full rounded-2xl shadow-lg"
+                  />
+                </div>
+              )}
+
+              <div className="space-y-3 mb-6 p-6 rounded-2xl" style={{ backgroundColor: "#fffbf5" }}>
+                <h3 className="text-xl font-bold mb-4" style={{ color: GOLD }}>Order Summary</h3>
+                {selectedPackage && (
+                  <div className="flex justify-between">
+                    <span className="font-semibold">Package:</span>
+                    <span>{selectedPackage.name} (+${selectedPackage.price})</span>
+                  </div>
+                )}
+                {selectedBoxShape && (
+                  <div className="flex justify-between">
+                    <span className="font-semibold">Shape:</span>
+                    <span>{selectedBoxShape.name}</span>
+                  </div>
+                )}
+                {selectedBoxColor && (
+                  <div className="flex justify-between">
+                    <span className="font-semibold">Box Color:</span>
+                    <span>{selectedBoxColor.name}</span>
+                  </div>
+                )}
+                {selectedWrapColor && (
+                  <div className="flex justify-between">
+                    <span className="font-semibold">Wrap Color:</span>
+                    <span>{selectedWrapColor.name}</span>
+                  </div>
+                )}
+                {selectedSize && (
+                  <div className="flex justify-between">
+                    <span className="font-semibold">Size:</span>
+                    <span>{selectedSize.name} {selectedSize.id !== "custom" && `($${selectedSize.price})`}</span>
+                  </div>
+                )}
+                <div className="border-t-2 pt-3 mt-3" style={{ borderColor: GOLD }}>
+                  <p className="font-semibold mb-2">Flowers:</p>
+                  {Object.entries(flowerCounts)
+                    .filter(([_, count]) => count > 0)
+                    .map(([id, count]) => {
+                      const flower = flowers.find(f => f.id === id);
+                      const colorId = flowerColors[id];
+                      const colorObj = flower?.colors.find(c => c.id === colorId);
+                      return (
+                        <div key={id} className="flex justify-between text-sm ml-4">
+                          <span>{count}x {colorObj?.name} {flower?.name}</span>
+                          <span>${(flower?.price || 0) * count}</span>
+                        </div>
+                      );
+                    })}
+                </div>
+                {withGlitter && (
+                  <div className="flex justify-between items-center">
+                    <span className="font-semibold">Glitter:</span>
+                    <span className="flex items-center gap-1">
+                      <Sparkles className="w-4 h-4" style={{ color: GOLD }} />
+                      Yes
+                    </span>
+                  </div>
+                )}
+                {note && (
+                  <div>
+                    <p className="font-semibold mb-1">Personal Note:</p>
+                    <p className="text-sm text-gray-700 italic">"{note}"</p>
+                  </div>
+                )}
+                <div className="border-t-2 pt-3 mt-3 flex justify-between text-2xl font-bold" style={{ borderColor: GOLD, color: GOLD }}>
+                  <span>Total:</span>
+                  <span>${totalPrice.toFixed(2)}</span>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-3">
+                <motion.button
+                  whileTap={{ scale: 0.97 }}
+                  onClick={handleAddToCart}
+                  className="w-full px-6 py-4 rounded-xl font-bold text-white flex items-center justify-center gap-3 shadow-lg text-lg"
+                  style={{ background: `linear-gradient(135deg, ${GOLD} 0%, #D4A85A 100%)` }}
+                >
+                  <ShoppingCart className="w-6 h-6" />
+                  Add to Cart
+                </motion.button>
+
+                <motion.button
+                  whileTap={{ scale: 0.97 }}
+                  onClick={handleWhatsAppShare}
+                  className="w-full px-6 py-4 rounded-xl font-bold text-white flex items-center justify-center gap-3 shadow-lg text-lg bg-green-500 hover:bg-green-600 transition-colors"
+                >
+                  <MessageCircle className="w-6 h-6" />
+                  Contact via WhatsApp
+                </motion.button>
+
+                {generatedImage && (
+                  <motion.button
+                    whileTap={{ scale: 0.97 }}
+                    onClick={downloadImage}
+                    className="w-full px-6 py-4 rounded-xl font-bold border-2 flex items-center justify-center gap-3 text-lg"
+                    style={{ borderColor: GOLD, color: GOLD }}
+                  >
+                    <Download className="w-6 h-6" />
+                    Download Image
+                  </motion.button>
+                )}
+
+                <button
+                  onClick={() => setShowPreview(false)}
+                  className="w-full px-6 py-3 rounded-xl font-semibold text-gray-600 hover:text-gray-800 transition-colors"
+                >
+                  Close
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Hero */}
       <div className="relative pt-24 pb-12 px-6" style={{ background: "linear-gradient(to bottom, #ffffff, #fffbf5)" }}>
         <motion.div 
@@ -482,15 +732,10 @@ const Customize: React.FC = () => {
           className="max-w-5xl mx-auto text-center relative z-10"
         >
           <motion.div
-            animate={{
-              scale: [1, 1.05, 1],
-            }}
+            animate={{ scale: [1, 1.05, 1] }}
             transition={{ duration: 3, repeat: Infinity }}
             className="inline-flex items-center gap-2 mb-6 px-6 py-3 rounded-full backdrop-blur-xl border-2 shadow-xl"
-            style={{ 
-              borderColor: GOLD,
-              background: "rgba(255, 255, 255, 0.7)"
-            }}
+            style={{ borderColor: GOLD, background: "rgba(255, 255, 255, 0.7)" }}
           >
             <Sparkles className="w-5 h-5" style={{ color: GOLD }} />
             <span className="text-sm font-bold tracking-wide" style={{ color: GOLD }}>
@@ -500,10 +745,7 @@ const Customize: React.FC = () => {
           
           <motion.h1 
             className="text-5xl md:text-7xl font-bold mb-6 tracking-tight"
-            style={{ 
-              color: GOLD,
-              textShadow: `0 2px 20px ${GOLD}40`
-            }}
+            style={{ color: GOLD, textShadow: `0 2px 20px ${GOLD}40` }}
           >
             Create Your Dream Bouquet
           </motion.h1>
@@ -518,17 +760,14 @@ const Customize: React.FC = () => {
           </motion.p>
 
           {/* Progress Indicator */}
-          <div className="flex justify-center items-center gap-4 mt-12">
+          <div className="flex justify-center items-center gap-4 mt-12 flex-wrap">
             {[...Array(getTotalSteps())].map((_, index) => {
               const num = index + 1;
               const active = step >= num;
               const current = step === num;
               
               return (
-                <motion.div
-                  key={num}
-                  className="flex items-center gap-3"
-                >
+                <motion.div key={num} className="flex items-center gap-3">
                   <div className="flex flex-col items-center gap-2">
                     <motion.div
                       className="relative w-14 h-14 rounded-full flex items-center justify-center font-bold shadow-lg transition-all"
@@ -544,31 +783,18 @@ const Customize: React.FC = () => {
                       {current && (
                         <motion.div
                           className="absolute inset-0 rounded-full"
-                          animate={{
-                            scale: [1, 1.3, 1],
-                            opacity: [0.5, 0, 0.5]
-                          }}
+                          animate={{ scale: [1, 1.3, 1], opacity: [0.5, 0, 0.5] }}
                           transition={{ duration: 2, repeat: Infinity }}
                           style={{ border: `2px solid ${GOLD}` }}
                         />
                       )}
                     </motion.div>
-                    <span className="text-sm font-semibold text-gray-700 hidden sm:block">
-                      {num === 1 && "Package"}
-                      {num === 2 && selectedPackage?.type === "box" && "Shape"}
-                      {num === 2 && selectedPackage?.type === "wrap" && "Size"}
-                      {num === 3 && selectedPackage?.type === "box" && "Size"}
-                      {num === 3 && selectedPackage?.type === "wrap" && "Flowers"}
-                      {num === 4 && "Flowers"}
-                    </span>
                   </div>
                   
                   {num < getTotalSteps() && (
                     <motion.div
-                      className="w-16 h-1 rounded-full hidden md:block"
-                      style={{
-                        backgroundColor: step > num ? GOLD : "#e5e7eb"
-                      }}
+                      className="w-8 h-1 rounded-full hidden sm:block"
+                      style={{ backgroundColor: step > num ? GOLD : "#e5e7eb" }}
                     />
                   )}
                 </motion.div>
@@ -585,7 +811,7 @@ const Customize: React.FC = () => {
             {/* Left Side: Steps */}
             <div>
               <AnimatePresence mode="wait">
-                {/* Step 1: Package - NO PRICES */}
+                {/* Step 1: Package */}
                 {step === 1 && (
                   <motion.div
                     key="s1"
@@ -594,10 +820,7 @@ const Customize: React.FC = () => {
                     exit={{ opacity: 0, x: -20 }}
                     transition={{ duration: 0.4 }}
                   >
-                    <motion.h2 
-                      className="text-4xl font-bold text-center mb-4"
-                      style={{ color: GOLD }}
-                    >
+                    <motion.h2 className="text-4xl font-bold text-center mb-4" style={{ color: GOLD }}>
                       Choose Your Style
                     </motion.h2>
                     <p className="text-center text-gray-600 mb-8 text-lg">
@@ -620,9 +843,7 @@ const Customize: React.FC = () => {
                             className="group relative p-8 rounded-3xl border-2 transition-all bg-white"
                             style={{
                               borderColor: selected ? GOLD : "#e5e7eb",
-                              boxShadow: selected 
-                                ? `0 20px 60px ${GOLD}40` 
-                                : "0 10px 30px rgba(0,0,0,0.08)"
+                              boxShadow: selected ? `0 20px 60px ${GOLD}40` : "0 10px 30px rgba(0,0,0,0.08)"
                             }}
                           >
                             <div className="flex items-center gap-6">
@@ -633,22 +854,12 @@ const Customize: React.FC = () => {
                                   boxShadow: selected ? `0 8px 24px ${GOLD}40` : "none"
                                 }}
                               >
-                                <Icon 
-                                  className="w-10 h-10" 
-                                  style={{ color: selected ? "white" : "#9ca3af" }}
-                                />
+                                <Icon className="w-10 h-10" style={{ color: selected ? "white" : "#9ca3af" }} />
                               </motion.div>
                               
                               <div className="text-left flex-1">
-                                <h3 
-                                  className="text-2xl font-bold mb-2" 
-                                  style={{ color: GOLD }}
-                                >
-                                  {pkg.name}
-                                </h3>
-                                <p className="text-gray-600 text-base">
-                                  {pkg.description}
-                                </p>
+                                <h3 className="text-2xl font-bold mb-2" style={{ color: GOLD }}>{pkg.name}</h3>
+                                <p className="text-gray-600 text-base">{pkg.description}</p>
                               </div>
                             </div>
                             
@@ -669,7 +880,7 @@ const Customize: React.FC = () => {
                   </motion.div>
                 )}
 
-                {/* Step 2: Box Shape Selection */}
+                {/* Step 2: Box Shape */}
                 {step === 2 && selectedPackage?.type === "box" && (
                   <motion.div
                     key="s2-shape"
@@ -678,10 +889,7 @@ const Customize: React.FC = () => {
                     exit={{ opacity: 0, x: -20 }}
                     transition={{ duration: 0.4 }}
                   >
-                    <motion.h2 
-                      className="text-4xl font-bold text-center mb-4"
-                      style={{ color: GOLD }}
-                    >
+                    <motion.h2 className="text-4xl font-bold text-center mb-4" style={{ color: GOLD }}>
                       Choose Box Shape
                     </motion.h2>
                     <p className="text-center text-gray-600 mb-8 text-lg">
@@ -704,32 +912,18 @@ const Customize: React.FC = () => {
                             className="group relative p-6 rounded-2xl border-2 transition-all bg-white"
                             style={{
                               borderColor: selected ? GOLD : "#e5e7eb",
-                              boxShadow: selected 
-                                ? `0 12px 40px ${GOLD}40` 
-                                : "0 6px 20px rgba(0,0,0,0.06)"
+                              boxShadow: selected ? `0 12px 40px ${GOLD}40` : "0 6px 20px rgba(0,0,0,0.06)"
                             }}
                           >
                             <motion.div
                               className="w-14 h-14 mx-auto mb-3 rounded-xl flex items-center justify-center"
-                              style={{ 
-                                backgroundColor: selected ? GOLD : "#f9fafb",
-                              }}
+                              style={{ backgroundColor: selected ? GOLD : "#f9fafb" }}
                             >
-                              <Icon 
-                                className="w-7 h-7" 
-                                style={{ color: selected ? "white" : "#9ca3af" }}
-                              />
+                              <Icon className="w-7 h-7" style={{ color: selected ? "white" : "#9ca3af" }} />
                             </motion.div>
                             
-                            <h3 
-                              className="text-lg font-bold mb-1" 
-                              style={{ color: GOLD }}
-                            >
-                              {shape.name}
-                            </h3>
-                            <p className="text-gray-600 text-sm">
-                              {shape.description}
-                            </p>
+                            <h3 className="text-lg font-bold mb-1" style={{ color: GOLD }}>{shape.name}</h3>
+                            <p className="text-gray-600 text-sm">{shape.description}</p>
                             
                             {selected && (
                               <motion.div
@@ -748,7 +942,68 @@ const Customize: React.FC = () => {
                   </motion.div>
                 )}
 
-                {/* Step 2 (Wrap): Size & Color - NO PRICES */}
+                {/* Step 3: Box Color */}
+                {step === 3 && selectedPackage?.type === "box" && (
+                  <motion.div
+                    key="s3-box-color"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ duration: 0.4 }}
+                  >
+                    <motion.h2 className="text-4xl font-bold text-center mb-4" style={{ color: GOLD }}>
+                      Choose Box Color
+                    </motion.h2>
+                    <p className="text-center text-gray-600 mb-8 text-lg">
+                      Select your box color
+                    </p>
+
+                    <div className="flex justify-center gap-4 flex-wrap mb-8">
+                      {boxColors.map((boxColor, index) => (
+                        <motion.button
+                          key={boxColor.id}
+                          initial={{ opacity: 0, scale: 0 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ delay: index * 0.05 }}
+                          whileTap={{ scale: 0.9 }}
+                          onClick={() => setSelectedBoxColor(boxColor)}
+                          className="relative w-16 h-16 rounded-full border-4 transition-all"
+                          style={{
+                            background: boxColor.gradient,
+                            borderColor: selectedBoxColor?.id === boxColor.id ? GOLD : "#d1d5db",
+                            boxShadow: selectedBoxColor?.id === boxColor.id 
+                              ? `0 8px 24px ${GOLD}60` 
+                              : boxColor.color === "#FFFFFF" 
+                                ? "inset 0 0 0 1px #e5e7eb, 0 4px 12px rgba(0,0,0,0.1)" 
+                                : "0 4px 12px rgba(0,0,0,0.2)"
+                          }}
+                        >
+                          {selectedBoxColor?.id === boxColor.id && (
+                            <motion.div 
+                              initial={{ scale: 0 }}
+                              animate={{ scale: 1 }}
+                              className="absolute inset-0 flex items-center justify-center bg-black/30 rounded-full"
+                            >
+                              <Check className="w-7 h-7 text-white drop-shadow-lg" />
+                            </motion.div>
+                          )}
+                        </motion.button>
+                      ))}
+                    </div>
+                    {selectedBoxColor && (
+                      <motion.p 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="text-center text-xl font-semibold" 
+                        style={{ color: GOLD }}
+                      >
+                        {selectedBoxColor.name} Box
+                      </motion.p>
+                    )}
+                  </motion.div>
+                )}
+
+                {/* Step 2 (Wrap): Size & Color */}
                 {step === 2 && selectedPackage?.type === "wrap" && (
                   <motion.div
                     key="s2-wrap"
@@ -757,17 +1012,13 @@ const Customize: React.FC = () => {
                     exit={{ opacity: 0, x: -20 }}
                     transition={{ duration: 0.4 }}
                   >
-                    <motion.h2 
-                      className="text-4xl font-bold text-center mb-4"
-                      style={{ color: GOLD }}
-                    >
+                    <motion.h2 className="text-4xl font-bold text-center mb-4" style={{ color: GOLD }}>
                       Choose Size & Color
                     </motion.h2>
                     <p className="text-center text-gray-600 mb-8 text-lg">
                       Select quantity and wrap color
                     </p>
 
-                    {/* Wrap Color Picker */}
                     <motion.div className="mb-8">
                       <h3 className="text-xl font-bold text-center mb-4" style={{ color: GOLD }}>
                         Wrap Color
@@ -831,19 +1082,13 @@ const Customize: React.FC = () => {
                             className="group relative p-6 rounded-2xl border-2 transition-all bg-white"
                             style={{
                               borderColor: selected ? GOLD : "#e5e7eb",
-                              boxShadow: selected 
-                                ? `0 15px 40px ${GOLD}40` 
-                                : "0 8px 20px rgba(0,0,0,0.08)"
+                              boxShadow: selected ? `0 15px 40px ${GOLD}40` : "0 8px 20px rgba(0,0,0,0.08)"
                             }}
                           >
                             <div className="relative z-10 text-center">
-                              <h3 className="text-xl font-bold mb-2" style={{ color: GOLD }}>
-                                {size.name}
-                              </h3>
+                              <h3 className="text-xl font-bold mb-2" style={{ color: GOLD }}>{size.name}</h3>
                               {size.id !== "custom" ? (
-                                <p className="text-base text-gray-700 font-semibold">
-                                  {size.description}
-                                </p>
+                                <p className="text-base text-gray-700 font-semibold">{size.description}</p>
                               ) : (
                                 <input
                                   type="number"
@@ -876,19 +1121,16 @@ const Customize: React.FC = () => {
                   </motion.div>
                 )}
 
-                {/* Step 3 (Box): Size Selection */}
-                {step === 3 && selectedPackage?.type === "box" && (
+                {/* Step 4 (Box): Size Selection */}
+                {step === 4 && selectedPackage?.type === "box" && (
                   <motion.div
-                    key="s3-box-size"
+                    key="s4-box-size"
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -20 }}
                     transition={{ duration: 0.4 }}
                   >
-                    <motion.h2 
-                      className="text-4xl font-bold text-center mb-4"
-                      style={{ color: GOLD }}
-                    >
+                    <motion.h2 className="text-4xl font-bold text-center mb-4" style={{ color: GOLD }}>
                       Choose Box Size
                     </motion.h2>
                     <p className="text-center text-gray-600 mb-8 text-lg">
@@ -910,19 +1152,13 @@ const Customize: React.FC = () => {
                             className="group relative p-6 rounded-2xl border-2 transition-all bg-white"
                             style={{
                               borderColor: selected ? GOLD : "#e5e7eb",
-                              boxShadow: selected 
-                                ? `0 15px 40px ${GOLD}40` 
-                                : "0 8px 20px rgba(0,0,0,0.08)"
+                              boxShadow: selected ? `0 15px 40px ${GOLD}40` : "0 8px 20px rgba(0,0,0,0.08)"
                             }}
                           >
                             <div className="relative z-10 text-center">
-                              <h3 className="text-xl font-bold mb-2" style={{ color: GOLD }}>
-                                {size.name}
-                              </h3>
+                              <h3 className="text-xl font-bold mb-2" style={{ color: GOLD }}>{size.name}</h3>
                               {size.id !== "custom" ? (
-                                <p className="text-base text-gray-700 font-semibold">
-                                  {size.description}
-                                </p>
+                                <p className="text-base text-gray-700 font-semibold">{size.description}</p>
                               ) : (
                                 <input
                                   type="number"
@@ -956,7 +1192,7 @@ const Customize: React.FC = () => {
                 )}
 
                 {/* Final Step: Flowers */}
-                {((step === 3 && selectedPackage?.type === "wrap") || (step === 4 && selectedPackage?.type === "box")) && selectedSize && (
+                {finalStep && selectedSize && (
                   <motion.div
                     key="s-flowers"
                     initial={{ opacity: 0, x: 20 }}
@@ -965,14 +1201,11 @@ const Customize: React.FC = () => {
                     transition={{ duration: 0.4 }}
                     className="h-full overflow-y-auto"
                   >
-                    <motion.h2 
-                      className="text-4xl font-bold text-center mb-4"
-                      style={{ color: GOLD }}
-                    >
+                    <motion.h2 className="text-4xl font-bold text-center mb-4" style={{ color: GOLD }}>
                       Choose Your Flowers
                     </motion.h2>
                     <p className="text-center text-gray-600 mb-6 text-lg">
-                      Select your beautiful blooms
+                      Select flowers and their colors
                     </p>
 
                     {/* Progress Bar */}
@@ -1012,9 +1245,10 @@ const Customize: React.FC = () => {
                       </div>
                     </motion.div>
 
-                    <div className="grid grid-cols-2 gap-3 mb-6">
+                    <div className="space-y-4 mb-6">
                       {flowers.map((flower, index) => {
                         const count = flowerCounts[flower.id] || 0;
+                        const selectedColorId = flowerColors[flower.id];
                         
                         return (
                           <motion.div
@@ -1022,26 +1256,24 @@ const Customize: React.FC = () => {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: index * 0.05 }}
-                            className="group relative p-3 rounded-xl border-2 bg-white"
+                            className="group relative p-4 rounded-xl border-2 bg-white"
                             style={{
                               borderColor: count > 0 ? GOLD : "#e5e7eb",
-                              boxShadow: count > 0 
-                                ? `0 8px 24px ${GOLD}30` 
-                                : "0 4px 12px rgba(0,0,0,0.06)"
+                              boxShadow: count > 0 ? `0 8px 24px ${GOLD}30` : "0 4px 12px rgba(0,0,0,0.06)"
                             }}
                           >
-                            <div className="flex items-center gap-2 mb-2">
+                            <div className="flex items-center gap-3 mb-3">
                               <div className="relative">
                                 <img 
                                   src={flower.image} 
                                   alt={flower.name} 
-                                  className="w-12 h-12 object-cover rounded-lg" 
+                                  className="w-16 h-16 object-cover rounded-lg" 
                                 />
                                 {count > 0 && (
                                   <motion.div
                                     initial={{ scale: 0 }}
                                     animate={{ scale: 1 }}
-                                    className="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center font-bold text-white text-xs"
+                                    className="absolute -top-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center font-bold text-white text-xs"
                                     style={{ backgroundColor: GOLD }}
                                   >
                                     {count}
@@ -1050,28 +1282,51 @@ const Customize: React.FC = () => {
                               </div>
                               
                               <div className="flex-1">
-                                <h4 className="text-sm font-bold" style={{ color: GOLD }}>
+                                <h4 className="text-lg font-bold mb-1" style={{ color: GOLD }}>
                                   {flower.name}
                                 </h4>
-                                <p className="text-xs font-semibold" style={{ color: GOLD }}>
-                                  ${flower.price}
+                                <p className="text-sm font-semibold" style={{ color: GOLD }}>
+                                  ${flower.price} each
                                 </p>
                               </div>
                             </div>
+
+                            {/* Color Selection */}
+                            {count > 0 && (
+                              <div className="mb-3">
+                                <p className="text-xs font-semibold text-gray-700 mb-2">Choose Color:</p>
+                                <div className="flex flex-wrap gap-2">
+                                  {flower.colors.map(color => (
+                                    <button
+                                      key={color.id}
+                                      onClick={() => setFlowerColors(prev => ({ ...prev, [flower.id]: color.id }))}
+                                      className="px-3 py-1 rounded-full text-xs font-semibold transition-all"
+                                      style={{
+                                        backgroundColor: selectedColorId === color.id ? GOLD : "#f3f4f6",
+                                        color: selectedColorId === color.id ? "white" : "#6b7280",
+                                        border: `2px solid ${selectedColorId === color.id ? GOLD : "transparent"}`
+                                      }}
+                                    >
+                                      {color.name}
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
                             
-                            <div className="flex items-center justify-between bg-gray-50 rounded-lg p-1">
+                            <div className="flex items-center justify-between bg-gray-50 rounded-lg p-2">
                               <motion.button
                                 whileTap={{ scale: 0.9 }}
                                 onClick={() => adjustFlower(flower.id, -1)}
                                 disabled={count === 0}
-                                className="w-8 h-8 rounded-full flex items-center justify-center text-white disabled:opacity-30 disabled:cursor-not-allowed"
+                                className="w-9 h-9 rounded-full flex items-center justify-center text-white disabled:opacity-30 disabled:cursor-not-allowed"
                                 style={{ backgroundColor: GOLD }}
                               >
                                 <Minus className="w-4 h-4" />
                               </motion.button>
                               
                               <span 
-                                className="text-xl font-bold"
+                                className="text-2xl font-bold"
                                 style={{ color: GOLD }}
                               >
                                 {count}
@@ -1081,7 +1336,7 @@ const Customize: React.FC = () => {
                                 whileTap={{ scale: 0.9 }}
                                 onClick={() => adjustFlower(flower.id, 1)}
                                 disabled={totalFlowers >= maxFlowers}
-                                className="w-8 h-8 rounded-full flex items-center justify-center text-white disabled:opacity-30 disabled:cursor-not-allowed"
+                                className="w-9 h-9 rounded-full flex items-center justify-center text-white disabled:opacity-30 disabled:cursor-not-allowed"
                                 style={{ backgroundColor: GOLD }}
                               >
                                 <Plus className="w-4 h-4" />
@@ -1103,7 +1358,7 @@ const Customize: React.FC = () => {
                         <div className="flex items-center gap-3">
                           <Sparkles className="w-5 h-5" style={{ color: GOLD }} />
                           <div>
-                            <span className="font-bold text-gray-800">Add Glitter</span>
+                            <span className="font-bold text-gray-800">Add Glitter on Flowers</span>
                             <p className="text-xs text-gray-600">Sparkly finishing touch</p>
                           </div>
                         </div>
@@ -1185,11 +1440,11 @@ const Customize: React.FC = () => {
                       </motion.button>
                       <motion.button
                         whileTap={{ scale: 0.95 }}
-                        onClick={downloadImage}
+                        onClick={handlePreviewClick}
                         className="px-4 py-3 rounded-xl font-semibold border-2 flex items-center justify-center"
                         style={{ borderColor: GOLD, color: GOLD }}
                       >
-                        <Download className="w-5 h-5" />
+                        <Eye className="w-5 h-5" />
                       </motion.button>
                     </div>
                   </motion.div>
@@ -1257,6 +1512,12 @@ const Customize: React.FC = () => {
                           <span className="font-semibold">{selectedBoxShape.name}</span>
                         </div>
                       )}
+                      {selectedBoxColor && (
+                        <div className="flex justify-between">
+                          <span>Box Color:</span>
+                          <span className="font-semibold">{selectedBoxColor.name}</span>
+                        </div>
+                      )}
                       {selectedSize && (
                         <div className="flex justify-between">
                           <span>Size:</span>
@@ -1309,20 +1570,20 @@ const Customize: React.FC = () => {
               Back
             </motion.button>
 
-            {((step === 3 && selectedPackage?.type === "wrap") || (step === 4 && selectedPackage?.type === "box")) && totalFlowers > 0 && (
+            {finalStep && totalFlowers > 0 && (
               <motion.button
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={handleCheckout}
+                onClick={handlePreviewClick}
                 className="px-8 py-4 rounded-2xl font-bold flex items-center gap-3 text-white transition-all shadow-2xl text-lg"
                 style={{ 
                   background: `linear-gradient(135deg, ${GOLD} 0%, #D4A85A 100%)`,
                   boxShadow: `0 8px 32px ${GOLD}60`
                 }}
               >
-                <ShoppingCart className="w-6 h-6" />
-                Add to Cart - ${totalPrice.toFixed(2)}
+                <Eye className="w-6 h-6" />
+                Review & Order - ${totalPrice.toFixed(2)}
               </motion.button>
             )}
           </motion.div>
