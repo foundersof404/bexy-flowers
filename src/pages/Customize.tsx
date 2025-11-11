@@ -788,7 +788,7 @@ MANDATORY REQUIREMENTS (DO NOT DEVIATE):
                 )}
                 <div className="border-t-2 pt-3 mt-3" style={{ borderColor: GOLD }}>
                   <p className="font-semibold mb-2">Flowers:</p>
-                  {Object.entries(colorQuantities).map(([flowerId, colors]) => {
+                  {Object.entries(colorQuantities).flatMap(([flowerId, colors]) => {
                     const flower = flowers.find(f => f.id === flowerId);
                     return Object.entries(colors)
                       .filter(([_, count]) => count > 0)
@@ -1485,12 +1485,44 @@ MANDATORY REQUIREMENTS (DO NOT DEVIATE):
                                         <Minus className="w-3 h-3" />
                                       </motion.button>
                                       
-                                      <span 
-                                        className="text-lg font-bold w-8 text-center"
-                                        style={{ color: colorCount > 0 ? GOLD : "#9ca3af" }}
-                                      >
-                                        {colorCount}
-                                      </span>
+                                      <input
+                                        type="number"
+                                        min="0"
+                                        max={maxFlowers}
+                                        value={colorCount}
+                                        onChange={(e) => {
+                                          const newValue = parseInt(e.target.value) || 0;
+                                          const currentTotal = totalFlowers - colorCount;
+                                          const maxAllowed = maxFlowers - currentTotal;
+                                          const finalValue = Math.min(Math.max(0, newValue), maxAllowed);
+                                          
+                                          // Set the new value
+                                          setColorQuantities(prev => {
+                                            if (finalValue === 0) {
+                                              const flowerColors = prev[flower.id] || {};
+                                              const { [color.id]: removed, ...rest } = flowerColors;
+                                              if (Object.keys(rest).length === 0) {
+                                                const { [flower.id]: removedFlower, ...restFlowers } = prev;
+                                                return restFlowers;
+                                              }
+                                              return { ...prev, [flower.id]: rest };
+                                            }
+                                            
+                                            return {
+                                              ...prev,
+                                              [flower.id]: {
+                                                ...(prev[flower.id] || {}),
+                                                [color.id]: finalValue
+                                              }
+                                            };
+                                          });
+                                        }}
+                                        className="w-14 h-8 text-center text-lg font-bold rounded-lg border-2 focus:outline-none"
+                                        style={{
+                                          color: colorCount > 0 ? GOLD : "#9ca3af",
+                                          borderColor: colorCount > 0 ? GOLD : "#e5e7eb"
+                                        }}
+                                      />
                                       
                                       <motion.button
                                         whileTap={{ scale: 0.9 }}
