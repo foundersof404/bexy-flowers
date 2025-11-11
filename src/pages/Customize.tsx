@@ -284,8 +284,8 @@ const Customize: React.FC = () => {
   }, [selectedSize, step, selectedPackage]);
 
   // Calculate total flowers from colorQuantities (supports multiple colors per flower type)
-  const totalFlowers = Object.values(colorQuantities).reduce((flowerColorMap, count) => {
-    return count + Object.values(flowerColorMap).reduce((a, b) => a + b, 0);
+  const totalFlowers = Object.values(colorQuantities).reduce((total, colorMap) => {
+    return total + Object.values(colorMap).reduce((a, b) => a + b, 0);
   }, 0);
   const maxFlowers = selectedSize?.id === "custom" ? customQty : selectedSize?.capacity || 0;
   
