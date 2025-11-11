@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Box, Gift, ChevronLeft, ShoppingCart, Plus, Minus, Check, Sparkles, Heart, Star, Square, Circle, Triangle, Wand2, RefreshCw, Download, MessageCircle, Eye, Crown, Candy, CreditCard } from "lucide-react";
 import UltraNavigation from "@/components/UltraNavigation";
+import Footer from "@/components/Footer";
 import { useCart } from "@/contexts/CartContext";
 import { toast } from "sonner";
 
@@ -1882,6 +1883,9 @@ MANDATORY REQUIREMENTS (DO NOT DEVIATE):
           </motion.div>
         </div>
       </div>
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 };
