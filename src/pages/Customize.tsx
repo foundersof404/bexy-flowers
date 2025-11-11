@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Box, Gift, ChevronLeft, ShoppingCart, Plus, Minus, Check, Sparkles, Heart, Star, Square, Circle, Triangle, Wand2, RefreshCw, Download, MessageCircle, Eye } from "lucide-react";
+import { Box, Gift, ChevronLeft, ShoppingCart, Plus, Minus, Check, Sparkles, Heart, Star, Square, Circle, Triangle, Wand2, RefreshCw, Download, MessageCircle, Eye, Crown, Candy, CreditCard } from "lucide-react";
 import UltraNavigation from "@/components/UltraNavigation";
 import { useCart } from "@/contexts/CartContext";
 import { toast } from "sonner";
@@ -57,6 +57,14 @@ interface WrapColor {
   name: string;
   color: string;
   gradient: string;
+}
+
+interface Accessory {
+  id: string;
+  name: string;
+  icon: any;
+  price: number;
+  description: string;
 }
 
 const packages: Package[] = [
@@ -177,6 +185,13 @@ const wrapColors: WrapColor[] = [
   { id: "lavender", name: "Lavender", color: "#E6E6FA", gradient: "linear-gradient(135deg, #E6E6FA 0%, #D8BFD8 100%)" }
 ];
 
+const accessories: Accessory[] = [
+  { id: "crown", name: "Crown", icon: Crown, price: 15, description: "Golden crown accessory" },
+  { id: "teddy", name: "Teddy Bear", icon: Heart, price: 20, description: "Cute plush teddy bear" },
+  { id: "chocolates", name: "Chocolates", icon: Candy, price: 12, description: "Premium chocolates box" },
+  { id: "card", name: "Greeting Card", icon: CreditCard, price: 5, description: "Beautiful greeting card" }
+];
+
 // Simple floating petal component
 const FloatingPetal = ({ delay }: { delay: number }) => (
   <motion.div
@@ -218,6 +233,7 @@ const Customize: React.FC = () => {
   const [showPrices, setShowPrices] = useState(false);
   const [celebrating, setCelebrating] = useState(false);
   const [withGlitter, setWithGlitter] = useState(false);
+  const [selectedAccessories, setSelectedAccessories] = useState<string[]>([]);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
@@ -270,9 +286,15 @@ const Customize: React.FC = () => {
     return sum + (flower ? flower.price * count : 0);
   }, 0);
 
+  const accessoriesCost = selectedAccessories.reduce((sum, accId) => {
+    const acc = accessories.find(a => a.id === accId);
+    return sum + (acc ? acc.price : 0);
+  }, 0);
+
   const totalPrice = (selectedPackage?.price || 0) + 
                      (selectedSize?.id === "custom" ? 0 : selectedSize?.price || 0) + 
-                     flowerCost;
+                     flowerCost + 
+                     accessoriesCost;
 
   const adjustFlower = (id: string, delta: number) => {
     const current = flowerCounts[id] || 0;
@@ -294,12 +316,22 @@ const Customize: React.FC = () => {
     }
   };
 
+  const toggleAccessory = (accessoryId: string) => {
+    setSelectedAccessories(prev => {
+      if (prev.includes(accessoryId)) {
+        return prev.filter(id => id !== accessoryId);
+      } else {
+        return [...prev, accessoryId];
+      }
+    });
+  };
+
   // AI Image Generation Function with Multiple Reliable Fallbacks
   const generateBouquetImage = async () => {
     setIsGenerating(true);
     
     try {
-      // Build SUPER DETAILED prompt with EXACT flower counts - emphasized multiple times
+      // Build ULTRA DETAILED prompt with EXACT flower counts, stems, and accessories
       const flowerDetails = Object.entries(flowerCounts)
         .filter(([_, count]) => count > 0)
         .map(([id, count]) => {
@@ -307,21 +339,34 @@ const Customize: React.FC = () => {
           const colorId = flowerColors[id];
           const colorObj = flower?.colors.find(c => c.id === colorId);
           const colorName = colorObj?.name || flower?.colors[0]?.name || "";
-          return `EXACTLY ${count} ${colorName} ${flower?.name}`;
+          return `EXACTLY ${count} ${colorName} ${flower?.name} with stems and leaves`;
         })
         .join(" and ");
 
       const totalCount = totalFlowers;
       
-      const glitterDesc = withGlitter ? ", with beautiful sparkly glitter on the flowers and petals" : "";
+      // Glitter ONLY on flower petals, not the whole image or background
+      const glitterDesc = withGlitter ? ", with delicate sparkly glitter ONLY on the flower petals (not on background or box)" : "";
       
       const boxDesc = selectedPackage?.type === "box" 
-        ? `in a ${selectedBoxColor?.name || ""} ${selectedBoxShape?.name} shaped luxury box`
+        ? `inside a ${selectedBoxColor?.name || ""} ${selectedBoxShape?.name} shaped luxury box`
         : `wrapped in ${selectedWrapColor?.name} decorative paper with silk ribbon`;
 
-      const prompt = `Professional studio photograph of a minimalist flower bouquet containing ONLY ${totalCount} total flowers: ${flowerDetails}, arranged ${boxDesc}${glitterDesc}. IMPORTANT: Show exactly ${totalCount} flower stems, no more no less. Clean composition, white background, high resolution, count the flowers carefully: ${totalCount} flowers total.`;
+      // Add accessories to the prompt
+      const accessoriesDesc = selectedAccessories.length > 0
+        ? ", with " + selectedAccessories.map(accId => {
+            const acc = accessories.find(a => a.id === accId);
+            if (accId === "crown") return "a small decorative golden crown placed on top of the bouquet";
+            if (accId === "teddy") return "a cute small teddy bear placed beside the flowers";
+            if (accId === "chocolates") return "a small box of chocolates placed next to the arrangement";
+            if (accId === "card") return "a greeting card visible in the arrangement";
+            return acc?.name;
+          }).join(" and ")
+        : "";
+
+      const prompt = `Professional studio photograph of a minimalist floral arrangement: COUNT CAREFULLY - ONLY ${totalCount} individual flower stems total (${flowerDetails}), arranged ${boxDesc}${accessoriesDesc}${glitterDesc}. CRITICAL: Must show EXACTLY ${totalCount} separate flower stems with visible individual stems and natural green leaves, no extra flowers. Product photography style, clean white background, high resolution, sharp focus. Verify: ${totalCount} flowers only.`;
       
-      const negativePrompt = "too many flowers, crowded, more than specified, extra flowers, wrong count, messy, wilted, ugly, blurry, low quality, distorted";
+      const negativePrompt = "too many flowers, crowded bouquet, more than ${totalCount} flowers, extra flowers beyond count, wrong flower count, excessive flowers, messy arrangement, wilted flowers, glitter on background, glitter everywhere, ugly, blurry, low quality, distorted, artificial looking";
 
       // Method 1: Pollinations.ai - Super stable
       try {
@@ -450,13 +495,16 @@ const Customize: React.FC = () => {
       .join(", ");
 
     const shapeInfo = selectedBoxShape ? ` - ${selectedBoxShape.name} ${selectedBoxColor?.name || ""} Box` : "";
+    const accessoriesInfo = selectedAccessories.length > 0
+      ? ` - Accessories: ${selectedAccessories.map(id => accessories.find(a => a.id === id)?.name).join(", ")}`
+      : "";
 
     addToCart({
       id: `custom-${Date.now()}`,
       title: "Custom Bouquet",
       price: totalPrice,
       image: generatedImage || "/src/assets/bouquet-1.jpg",
-      description: `${selectedPackage?.name}${shapeInfo} - ${selectedSize?.name} - ${flowerList}${withGlitter ? " with glitter" : ""}`,
+      description: `${selectedPackage?.name}${shapeInfo} - ${selectedSize?.name} - ${flowerList}${accessoriesInfo}${withGlitter ? " with glitter on petals" : ""}`,
       personalNote: note || undefined
     });
 
@@ -481,7 +529,11 @@ const Customize: React.FC = () => {
       })
       .join(", ");
 
-    const message = `Hi! I'd like to order a custom bouquet:\n\n${selectedPackage?.name}${selectedBoxShape ? ` - ${selectedBoxShape.name} ${selectedBoxColor?.name || ""} Box` : ""}\nSize: ${selectedSize?.name}\nFlowers: ${flowerList}${withGlitter ? "\nWith Glitter ✨" : ""}${note ? `\n\nNote: ${note}` : ""}\n\nTotal: $${totalPrice.toFixed(2)}`;
+    const accessoriesList = selectedAccessories.length > 0
+      ? `\nAccessories: ${selectedAccessories.map(id => accessories.find(a => a.id === id)?.name).join(", ")}`
+      : "";
+
+    const message = `Hi! I'd like to order a custom bouquet:\n\n${selectedPackage?.name}${selectedBoxShape ? ` - ${selectedBoxShape.name} ${selectedBoxColor?.name || ""} Box` : ""}\nSize: ${selectedSize?.name}\nFlowers: ${flowerList}${accessoriesList}${withGlitter ? "\nGlitter on Flower Petals ✨" : ""}${note ? `\n\nNote: ${note}` : ""}\n\nTotal: $${totalPrice.toFixed(2)}`;
     
     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
@@ -663,12 +715,28 @@ const Customize: React.FC = () => {
                       );
                     })}
                 </div>
+                {selectedAccessories.length > 0 && (
+                  <div>
+                    <p className="font-semibold mb-1">Accessories:</p>
+                    <div className="ml-4 space-y-1">
+                      {selectedAccessories.map(accId => {
+                        const acc = accessories.find(a => a.id === accId);
+                        return (
+                          <div key={accId} className="flex justify-between text-sm">
+                            <span>{acc?.name}</span>
+                            <span>${acc?.price}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
                 {withGlitter && (
                   <div className="flex justify-between items-center">
                     <span className="font-semibold">Glitter:</span>
                     <span className="flex items-center gap-1">
                       <Sparkles className="w-4 h-4" style={{ color: GOLD }} />
-                      Yes
+                      On Flower Petals
                     </span>
                   </div>
                 )}
@@ -1352,6 +1420,57 @@ const Customize: React.FC = () => {
                       })}
                     </div>
 
+                    {/* Accessories Section */}
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="mb-6"
+                    >
+                      <h3 className="text-xl font-bold mb-4" style={{ color: GOLD }}>
+                        🎁 Add Accessories (Optional)
+                      </h3>
+                      <div className="grid grid-cols-2 gap-3">
+                        {accessories.map((accessory, index) => {
+                          const Icon = accessory.icon;
+                          const isSelected = selectedAccessories.includes(accessory.id);
+                          
+                          return (
+                            <motion.button
+                              key={accessory.id}
+                              initial={{ opacity: 0, scale: 0.9 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              transition={{ delay: index * 0.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              onClick={() => toggleAccessory(accessory.id)}
+                              className="p-4 rounded-xl border-2 transition-all bg-white"
+                              style={{
+                                borderColor: isSelected ? GOLD : "#e5e7eb",
+                                boxShadow: isSelected ? `0 4px 16px ${GOLD}30` : "none"
+                              }}
+                            >
+                              <div className="flex items-center gap-3">
+                                <div
+                                  className="w-10 h-10 rounded-full flex items-center justify-center"
+                                  style={{ backgroundColor: isSelected ? GOLD : "#f3f4f6" }}
+                                >
+                                  <Icon className="w-5 h-5" style={{ color: isSelected ? "white" : "#9ca3af" }} />
+                                </div>
+                                <div className="flex-1 text-left">
+                                  <p className="text-sm font-bold" style={{ color: GOLD }}>
+                                    {accessory.name}
+                                  </p>
+                                  <p className="text-xs text-gray-600">+${accessory.price}</p>
+                                </div>
+                                {isSelected && (
+                                  <Check className="w-5 h-5" style={{ color: GOLD }} />
+                                )}
+                              </div>
+                            </motion.button>
+                          );
+                        })}
+                      </div>
+                    </motion.div>
+
                     {/* Glitter Toggle */}
                     <motion.div
                       initial={{ opacity: 0 }}
@@ -1363,8 +1482,8 @@ const Customize: React.FC = () => {
                         <div className="flex items-center gap-3">
                           <Sparkles className="w-5 h-5" style={{ color: GOLD }} />
                           <div>
-                            <span className="font-bold text-gray-800">Add Glitter on Flowers</span>
-                            <p className="text-xs text-gray-600">Sparkly finishing touch</p>
+                            <span className="font-bold text-gray-800">Add Glitter on Flower Petals</span>
+                            <p className="text-xs text-gray-600">Delicate sparkles on flowers only</p>
                           </div>
                         </div>
                         <motion.button
@@ -1541,10 +1660,16 @@ const Customize: React.FC = () => {
                           <span className="font-semibold">{totalFlowers} stems</span>
                         </div>
                       )}
+                      {selectedAccessories.length > 0 && (
+                        <div className="flex justify-between">
+                          <span>Accessories:</span>
+                          <span className="font-semibold">{selectedAccessories.length} items</span>
+                        </div>
+                      )}
                       {withGlitter && (
                         <div className="flex justify-between">
                           <span>Glitter:</span>
-                          <span className="font-semibold">✨ Yes</span>
+                          <span className="font-semibold">✨ On Petals</span>
                         </div>
                       )}
                       <div className="border-t-2 pt-2 mt-2 flex justify-between text-lg font-bold" style={{ borderColor: GOLD, color: GOLD }}>
