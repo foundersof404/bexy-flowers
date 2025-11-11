@@ -229,6 +229,8 @@ const Customize: React.FC = () => {
   const [customQty, setCustomQty] = useState(25);
   const [flowerCounts, setFlowerCounts] = useState<Record<string, number>>({});
   const [flowerColors, setFlowerColors] = useState<Record<string, string>>({});
+  // NEW: Track individual color quantities for each flower type
+  const [colorQuantities, setColorQuantities] = useState<Record<string, Record<string, number>>>({});
   const [note, setNote] = useState("");
   const [showPrices, setShowPrices] = useState(false);
   const [celebrating, setCelebrating] = useState(false);
@@ -237,6 +239,8 @@ const Customize: React.FC = () => {
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [aiRefinementText, setAiRefinementText] = useState("");
+  const [showRefinement, setShowRefinement] = useState(false);
   const { addToCart } = useCart();
 
   useEffect(() => {
@@ -278,12 +282,17 @@ const Customize: React.FC = () => {
     }
   }, [selectedSize, step, selectedPackage]);
 
-  const totalFlowers = Object.values(flowerCounts).reduce((a, b) => a + b, 0);
+  // Calculate total flowers from colorQuantities (supports multiple colors per flower type)
+  const totalFlowers = Object.values(colorQuantities).reduce((flowerColorMap, count) => {
+    return count + Object.values(flowerColorMap).reduce((a, b) => a + b, 0);
+  }, 0);
   const maxFlowers = selectedSize?.id === "custom" ? customQty : selectedSize?.capacity || 0;
   
-  const flowerCost = Object.entries(flowerCounts).reduce((sum, [id, count]) => {
-    const flower = flowers.find(f => f.id === id);
-    return sum + (flower ? flower.price * count : 0);
+  // Calculate flower cost from colorQuantities
+  const flowerCost = Object.entries(colorQuantities).reduce((sum, [flowerId, colors]) => {
+    const flower = flowers.find(f => f.id === flowerId);
+    const flowerTotal = Object.values(colors).reduce((a, b) => a + b, 0);
+    return sum + (flower ? flower.price * flowerTotal : 0);
   }, 0);
 
   const accessoriesCost = selectedAccessories.reduce((sum, accId) => {
@@ -296,24 +305,35 @@ const Customize: React.FC = () => {
                      flowerCost + 
                      accessoriesCost;
 
-  const adjustFlower = (id: string, delta: number) => {
-    const current = flowerCounts[id] || 0;
-    const newVal = Math.max(0, current + delta);
-    
+  // NEW: Adjust flower with specific color
+  const adjustFlowerColor = (flowerId: string, colorId: string, delta: number) => {
     if (delta > 0 && totalFlowers >= maxFlowers) {
       toast.error(`Maximum ${maxFlowers} flowers`, { icon: "🌸" });
       return;
     }
     
-    setFlowerCounts(prev => ({ ...prev, [id]: newVal }));
-    
-    // Set default color if adding first flower of this type
-    if (newVal > 0 && !flowerColors[id]) {
-      const flower = flowers.find(f => f.id === id);
-      if (flower && flower.colors.length > 0) {
-        setFlowerColors(prev => ({ ...prev, [id]: flower.colors[0].id }));
+    setColorQuantities(prev => {
+      const flowerColors = prev[flowerId] || {};
+      const current = flowerColors[colorId] || 0;
+      const newVal = Math.max(0, current + delta);
+      
+      if (newVal === 0) {
+        const { [colorId]: removed, ...rest } = flowerColors;
+        if (Object.keys(rest).length === 0) {
+          const { [flowerId]: removedFlower, ...restFlowers } = prev;
+          return restFlowers;
+        }
+        return { ...prev, [flowerId]: rest };
       }
-    }
+      
+      return {
+        ...prev,
+        [flowerId]: {
+          ...flowerColors,
+          [colorId]: newVal
+        }
+      };
+    });
   };
 
   const toggleAccessory = (accessoryId: string) => {
@@ -331,42 +351,82 @@ const Customize: React.FC = () => {
     setIsGenerating(true);
     
     try {
-      // Build ULTRA DETAILED prompt with EXACT flower counts, stems, and accessories
-      const flowerDetails = Object.entries(flowerCounts)
-        .filter(([_, count]) => count > 0)
-        .map(([id, count]) => {
-          const flower = flowers.find(f => f.id === id);
-          const colorId = flowerColors[id];
+      // Build ULTRA PRECISE prompt with NUMBERED flower list and multiple verifications
+      const flowerDetailsList: string[] = [];
+      let flowerNumber = 1;
+      
+      Object.entries(colorQuantities).forEach(([flowerId, colors]) => {
+        const flower = flowers.find(f => f.id === flowerId);
+        Object.entries(colors).forEach(([colorId, count]) => {
           const colorObj = flower?.colors.find(c => c.id === colorId);
-          const colorName = colorObj?.name || flower?.colors[0]?.name || "";
-          return `EXACTLY ${count} ${colorName} ${flower?.name} with stems and leaves`;
-        })
-        .join(" and ");
+          const colorName = colorObj?.name || "";
+          for (let i = 0; i < count; i++) {
+            flowerDetailsList.push(`Flower #${flowerNumber}: ${colorName} ${flower?.name} with stem and leaves`);
+            flowerNumber++;
+          }
+        });
+      });
 
       const totalCount = totalFlowers;
+      const numberedFlowerList = flowerDetailsList.join(", ");
       
-      // Glitter ONLY on flower petals, not the whole image or background
-      const glitterDesc = withGlitter ? ", with delicate sparkly glitter ONLY on the flower petals (not on background or box)" : "";
+      // Summary for AI
+      const flowerSummary = Object.entries(colorQuantities)
+        .map(([flowerId, colors]) => {
+          const flower = flowers.find(f => f.id === flowerId);
+          return Object.entries(colors)
+            .map(([colorId, count]) => {
+              const colorObj = flower?.colors.find(c => c.id === colorId);
+              return `${count} ${colorObj?.name} ${flower?.name}`;
+            })
+            .join(" + ");
+        })
+        .join(" + ");
+
+      // Glitter ONLY on flower petals
+      const glitterDesc = withGlitter ? ". ADD delicate sparkly glitter ONLY on flower petals (NOT on background, box, or accessories)" : "";
       
       const boxDesc = selectedPackage?.type === "box" 
-        ? `inside a ${selectedBoxColor?.name || ""} ${selectedBoxShape?.name} shaped luxury box`
-        : `wrapped in ${selectedWrapColor?.name} decorative paper with silk ribbon`;
+        ? `${selectedBoxColor?.name || ""} ${selectedBoxShape?.name}-shaped luxury gift box`
+        : `${selectedWrapColor?.name} decorative paper wrap with silk ribbon`;
 
-      // Add accessories to the prompt
+      // Accessories
       const accessoriesDesc = selectedAccessories.length > 0
-        ? ", with " + selectedAccessories.map(accId => {
-            const acc = accessories.find(a => a.id === accId);
-            if (accId === "crown") return "a small decorative golden crown placed on top of the bouquet";
-            if (accId === "teddy") return "a cute small teddy bear placed beside the flowers";
-            if (accId === "chocolates") return "a small box of chocolates placed next to the arrangement";
-            if (accId === "card") return "a greeting card visible in the arrangement";
-            return acc?.name;
-          }).join(" and ")
+        ? ". INCLUDE: " + selectedAccessories.map(accId => {
+            if (accId === "crown") return "one small golden crown on top";
+            if (accId === "teddy") return "one small teddy bear beside flowers";
+            if (accId === "chocolates") return "one small chocolate box nearby";
+            if (accId === "card") return "one greeting card visible";
+            return "";
+          }).filter(Boolean).join(", ")
         : "";
 
-      const prompt = `Professional studio photograph of a minimalist floral arrangement: COUNT CAREFULLY - ONLY ${totalCount} individual flower stems total (${flowerDetails}), arranged ${boxDesc}${accessoriesDesc}${glitterDesc}. CRITICAL: Must show EXACTLY ${totalCount} separate flower stems with visible individual stems and natural green leaves, no extra flowers. Product photography style, clean white background, high resolution, sharp focus. Verify: ${totalCount} flowers only.`;
+      // User refinement text (if provided after first generation)
+      const refinementInstructions = aiRefinementText.trim() 
+        ? `\n\nUSER REFINEMENT REQUEST: ${aiRefinementText}`
+        : "";
+
+      const prompt = `PROFESSIONAL PRODUCT PHOTOGRAPHY TASK:
+Create a premium floral arrangement photograph with EXACTLY ${totalCount} flowers.
+
+MANDATORY FLOWER COUNT (${totalCount} TOTAL):
+${numberedFlowerList}
+
+SUMMARY CHECK: ${flowerSummary} = ${totalCount} flowers total
+
+PACKAGING: ${boxDesc}${accessoriesDesc}${glitterDesc}
+
+CRITICAL REQUIREMENTS:
+1. COUNT: Show EXACTLY ${totalCount} individual flower stems, NO MORE, NO LESS
+2. Each flower must be CLEARLY VISIBLE with its own stem
+3. Natural green leaves on each stem
+4. Product photography style with clean white background
+5. High resolution, sharp focus, professional lighting
+6. Verify flower count: ${totalCount}
+
+IMPORTANT: This is for a customer order - the count MUST be precise!${refinementInstructions}`;
       
-      const negativePrompt = "too many flowers, crowded bouquet, more than ${totalCount} flowers, extra flowers beyond count, wrong flower count, excessive flowers, messy arrangement, wilted flowers, glitter on background, glitter everywhere, ugly, blurry, low quality, distorted, artificial looking";
+      const negativePrompt = `wrong flower count, more than ${totalCount} flowers, less than ${totalCount} flowers, extra flowers, missing flowers, crowded, too many stems, incorrect number, wilted, ugly, blurry, low quality, distorted, glitter on background, glitter on box, messy, unprofessional`;
 
       // Method 1: Pollinations.ai - Super stable
       try {
@@ -446,7 +506,7 @@ const Customize: React.FC = () => {
       }
 
       // Final fallback with simpler but still specific prompt
-      const simplePrompt = `minimalist bouquet with ONLY ${totalCount} flowers total: ${flowerDetails}, ${boxDesc}, professional photo, white background, count exactly ${totalCount} flowers`;
+      const simplePrompt = `minimalist bouquet with ONLY ${totalCount} flowers total: ${flowerSummary}, ${boxDesc}, professional photo, white background, count exactly ${totalCount} flowers`;
       const finalUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(simplePrompt)}?width=1024&height=1024&nologo=true&seed=${Date.now()}`;
       
       const finalResponse = await fetch(finalUrl);
@@ -484,14 +544,19 @@ const Customize: React.FC = () => {
   };
 
   const handleAddToCart = () => {
-    const flowerList = Object.entries(flowerCounts)
-      .filter(([_, c]) => c > 0)
-      .map(([id, c]) => {
-        const flower = flowers.find(f => f.id === id);
-        const colorId = flowerColors[id];
-        const colorObj = flower?.colors.find(col => col.id === colorId);
-        return `${c}x ${colorObj?.name || ""} ${flower?.name}`;
+    // NEW: Build detailed flower list from colorQuantities
+    const flowerList = Object.entries(colorQuantities)
+      .map(([flowerId, colors]) => {
+        const flower = flowers.find(f => f.id === flowerId);
+        return Object.entries(colors)
+          .filter(([_, count]) => count > 0)
+          .map(([colorId, count]) => {
+            const colorObj = flower?.colors.find(c => c.id === colorId);
+            return `${count}x ${colorObj?.name} ${flower?.name}`;
+          })
+          .join(", ");
       })
+      .filter(Boolean)
       .join(", ");
 
     const shapeInfo = selectedBoxShape ? ` - ${selectedBoxShape.name} ${selectedBoxColor?.name || ""} Box` : "";
@@ -519,14 +584,19 @@ const Customize: React.FC = () => {
   };
 
   const handleWhatsAppShare = () => {
-    const flowerList = Object.entries(flowerCounts)
-      .filter(([_, c]) => c > 0)
-      .map(([id, c]) => {
-        const flower = flowers.find(f => f.id === id);
-        const colorId = flowerColors[id];
-        const colorObj = flower?.colors.find(col => col.id === colorId);
-        return `${c}x ${colorObj?.name || ""} ${flower?.name}`;
+    // NEW: Build flower list from colorQuantities
+    const flowerList = Object.entries(colorQuantities)
+      .map(([flowerId, colors]) => {
+        const flower = flowers.find(f => f.id === flowerId);
+        return Object.entries(colors)
+          .filter(([_, count]) => count > 0)
+          .map(([colorId, count]) => {
+            const colorObj = flower?.colors.find(c => c.id === colorId);
+            return `${count}x ${colorObj?.name} ${flower?.name}`;
+          })
+          .join(", ");
       })
+      .filter(Boolean)
       .join(", ");
 
     const accessoriesList = selectedAccessories.length > 0
@@ -701,19 +771,20 @@ const Customize: React.FC = () => {
                 )}
                 <div className="border-t-2 pt-3 mt-3" style={{ borderColor: GOLD }}>
                   <p className="font-semibold mb-2">Flowers:</p>
-                  {Object.entries(flowerCounts)
-                    .filter(([_, count]) => count > 0)
-                    .map(([id, count]) => {
-                      const flower = flowers.find(f => f.id === id);
-                      const colorId = flowerColors[id];
-                      const colorObj = flower?.colors.find(c => c.id === colorId);
-                      return (
-                        <div key={id} className="flex justify-between text-sm ml-4">
-                          <span>{count}x {colorObj?.name} {flower?.name}</span>
-                          <span>${(flower?.price || 0) * count}</span>
-                        </div>
-                      );
-                    })}
+                  {Object.entries(colorQuantities).map(([flowerId, colors]) => {
+                    const flower = flowers.find(f => f.id === flowerId);
+                    return Object.entries(colors)
+                      .filter(([_, count]) => count > 0)
+                      .map(([colorId, count]) => {
+                        const colorObj = flower?.colors.find(c => c.id === colorId);
+                        return (
+                          <div key={`${flowerId}-${colorId}`} className="flex justify-between text-sm ml-4">
+                            <span>{count}x {colorObj?.name} {flower?.name}</span>
+                            <span>${(flower?.price || 0) * count}</span>
+                          </div>
+                        );
+                      });
+                  })}
                 </div>
                 {selectedAccessories.length > 0 && (
                   <div>
@@ -1320,8 +1391,9 @@ const Customize: React.FC = () => {
 
                     <div className="space-y-4 mb-6">
                       {flowers.map((flower, index) => {
-                        const count = flowerCounts[flower.id] || 0;
-                        const selectedColorId = flowerColors[flower.id];
+                        // NEW: Get total count across all colors for this flower type
+                        const flowerColorMap = colorQuantities[flower.id] || {};
+                        const totalCount = Object.values(flowerColorMap).reduce((a, b) => a + b, 0);
                         
                         return (
                           <motion.div
@@ -1331,8 +1403,8 @@ const Customize: React.FC = () => {
                             transition={{ delay: index * 0.05 }}
                             className="group relative p-4 rounded-xl border-2 bg-white"
                             style={{
-                              borderColor: count > 0 ? GOLD : "#e5e7eb",
-                              boxShadow: count > 0 ? `0 8px 24px ${GOLD}30` : "0 4px 12px rgba(0,0,0,0.06)"
+                              borderColor: totalCount > 0 ? GOLD : "#e5e7eb",
+                              boxShadow: totalCount > 0 ? `0 8px 24px ${GOLD}30` : "0 4px 12px rgba(0,0,0,0.06)"
                             }}
                           >
                             <div className="flex items-center gap-3 mb-3">
@@ -1342,14 +1414,14 @@ const Customize: React.FC = () => {
                                   alt={flower.name} 
                                   className="w-16 h-16 object-cover rounded-lg" 
                                 />
-                                {count > 0 && (
+                                {totalCount > 0 && (
                                   <motion.div
                                     initial={{ scale: 0 }}
                                     animate={{ scale: 1 }}
                                     className="absolute -top-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center font-bold text-white text-xs"
                                     style={{ backgroundColor: GOLD }}
                                   >
-                                    {count}
+                                    {totalCount}
                                   </motion.div>
                                 )}
                               </div>
@@ -1364,57 +1436,76 @@ const Customize: React.FC = () => {
                               </div>
                             </div>
 
-                            {/* Color Selection */}
-                            {count > 0 && (
-                              <div className="mb-3">
-                                <p className="text-xs font-semibold text-gray-700 mb-2">Choose Color:</p>
-                                <div className="flex flex-wrap gap-2">
-                                  {flower.colors.map(color => (
-                                    <button
-                                      key={color.id}
-                                      onClick={() => setFlowerColors(prev => ({ ...prev, [flower.id]: color.id }))}
-                                      className="px-3 py-1 rounded-full text-xs font-semibold transition-all"
-                                      style={{
-                                        backgroundColor: selectedColorId === color.id ? GOLD : "#f3f4f6",
-                                        color: selectedColorId === color.id ? "white" : "#6b7280",
-                                        border: `2px solid ${selectedColorId === color.id ? GOLD : "transparent"}`
-                                      }}
-                                    >
+                            {/* NEW: Multiple Colors Support - Each color gets its own counter */}
+                            <div className="space-y-2">
+                              <p className="text-xs font-bold text-gray-700 mb-2">
+                                🎨 Select Colors & Quantities:
+                              </p>
+                              {flower.colors.map(color => {
+                                const colorCount = flowerColorMap[color.id] || 0;
+                                
+                                return (
+                                  <div 
+                                    key={color.id}
+                                    className="flex items-center justify-between p-2 rounded-lg transition-all"
+                                    style={{
+                                      backgroundColor: colorCount > 0 ? `${GOLD}10` : "#f9fafb",
+                                      border: `1px solid ${colorCount > 0 ? GOLD : "#e5e7eb"}`
+                                    }}
+                                  >
+                                    <span className="text-sm font-semibold text-gray-700">
                                       {color.name}
-                                    </button>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-                            
-                            <div className="flex items-center justify-between bg-gray-50 rounded-lg p-2">
-                              <motion.button
-                                whileTap={{ scale: 0.9 }}
-                                onClick={() => adjustFlower(flower.id, -1)}
-                                disabled={count === 0}
-                                className="w-9 h-9 rounded-full flex items-center justify-center text-white disabled:opacity-30 disabled:cursor-not-allowed"
-                                style={{ backgroundColor: GOLD }}
-                              >
-                                <Minus className="w-4 h-4" />
-                              </motion.button>
-                              
-                              <span 
-                                className="text-2xl font-bold"
-                                style={{ color: GOLD }}
-                              >
-                                {count}
-                              </span>
-                              
-                              <motion.button
-                                whileTap={{ scale: 0.9 }}
-                                onClick={() => adjustFlower(flower.id, 1)}
-                                disabled={totalFlowers >= maxFlowers}
-                                className="w-9 h-9 rounded-full flex items-center justify-center text-white disabled:opacity-30 disabled:cursor-not-allowed"
-                                style={{ backgroundColor: GOLD }}
-                              >
-                                <Plus className="w-4 h-4" />
-                              </motion.button>
+                                    </span>
+                                    
+                                    <div className="flex items-center gap-2">
+                                      <motion.button
+                                        whileTap={{ scale: 0.9 }}
+                                        onClick={() => adjustFlowerColor(flower.id, color.id, -1)}
+                                        disabled={colorCount === 0}
+                                        className="w-7 h-7 rounded-full flex items-center justify-center text-white disabled:opacity-30 disabled:cursor-not-allowed"
+                                        style={{ backgroundColor: GOLD }}
+                                      >
+                                        <Minus className="w-3 h-3" />
+                                      </motion.button>
+                                      
+                                      <span 
+                                        className="text-lg font-bold w-8 text-center"
+                                        style={{ color: colorCount > 0 ? GOLD : "#9ca3af" }}
+                                      >
+                                        {colorCount}
+                                      </span>
+                                      
+                                      <motion.button
+                                        whileTap={{ scale: 0.9 }}
+                                        onClick={() => adjustFlowerColor(flower.id, color.id, 1)}
+                                        disabled={totalFlowers >= maxFlowers}
+                                        className="w-7 h-7 rounded-full flex items-center justify-center text-white disabled:opacity-30 disabled:cursor-not-allowed"
+                                        style={{ backgroundColor: GOLD }}
+                                      >
+                                        <Plus className="w-3 h-3" />
+                                      </motion.button>
+                                    </div>
+                                  </div>
+                                );
+                              })}
                             </div>
+                            
+                            {/* Total for this flower type */}
+                            {totalCount > 0 && (
+                              <motion.div
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: "auto" }}
+                                className="mt-3 pt-3 border-t-2 flex justify-between items-center"
+                                style={{ borderColor: GOLD }}
+                              >
+                                <span className="text-sm font-bold" style={{ color: GOLD }}>
+                                  Total {flower.name}:
+                                </span>
+                                <span className="text-lg font-bold" style={{ color: GOLD }}>
+                                  {totalCount} × ${flower.price} = ${(totalCount * flower.price).toFixed(2)}
+                                </span>
+                              </motion.div>
+                            )}
                           </motion.div>
                         );
                       })}
@@ -1551,7 +1642,33 @@ const Customize: React.FC = () => {
                       alt="AI Generated Bouquet" 
                       className="w-full h-80 object-cover rounded-2xl mb-4"
                     />
-                    <div className="flex gap-2">
+                    
+                    {/* AI REFINEMENT TEXT BOX - Super powerful! */}
+                    {showRefinement && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        className="mb-4 p-4 rounded-xl border-2"
+                        style={{ borderColor: GOLD, background: "#fffbf5" }}
+                      >
+                        <label className="block text-sm font-bold mb-2" style={{ color: GOLD }}>
+                          ✨ Refine Your Image (AI will adjust):
+                        </label>
+                        <textarea
+                          value={aiRefinementText}
+                          onChange={e => setAiRefinementText(e.target.value)}
+                          placeholder="E.g., 'Make the crown bigger', 'Move teddy bear left', 'Show EXACTLY 5 roses'"
+                          rows={3}
+                          className="w-full px-3 py-2 border-2 rounded-lg resize-none focus:outline-none text-sm"
+                          style={{ borderColor: GOLD }}
+                        />
+                        <p className="text-xs text-gray-600 mt-1">
+                          💡 Be specific! The AI will regenerate with your instructions.
+                        </p>
+                      </motion.div>
+                    )}
+                    
+                    <div className="flex gap-2 mb-3">
                       <motion.button
                         whileTap={{ scale: 0.95 }}
                         onClick={generateBouquetImage}
@@ -1560,7 +1677,7 @@ const Customize: React.FC = () => {
                         style={{ backgroundColor: GOLD }}
                       >
                         <RefreshCw className="w-5 h-5" />
-                        Regenerate
+                        {aiRefinementText ? "Apply Refinements" : "Regenerate"}
                       </motion.button>
                       <motion.button
                         whileTap={{ scale: 0.95 }}
@@ -1571,6 +1688,18 @@ const Customize: React.FC = () => {
                         <Eye className="w-5 h-5" />
                       </motion.button>
                     </div>
+                    
+                    <motion.button
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => setShowRefinement(!showRefinement)}
+                      className="w-full px-4 py-2 rounded-lg font-semibold text-sm transition-colors"
+                      style={{ 
+                        backgroundColor: showRefinement ? `${GOLD}20` : "#f3f4f6",
+                        color: GOLD 
+                      }}
+                    >
+                      {showRefinement ? "Hide" : "Show"} AI Refinement Box
+                    </motion.button>
                   </motion.div>
                 ) : (
                   <div>
