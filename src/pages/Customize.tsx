@@ -386,9 +386,10 @@ const Customize: React.FC = () => {
       // Glitter ONLY on flower petals
       const glitterDesc = withGlitter ? ". ADD delicate sparkly glitter ONLY on flower petals (NOT on background, box, or accessories)" : "";
       
+      // BRANDING: Add "Bexy Flowers" LOGO to packaging - must look professional and real
       const boxDesc = selectedPackage?.type === "box" 
-        ? `${selectedBoxColor?.name || ""} ${selectedBoxShape?.name}-shaped luxury gift box`
-        : `${selectedWrapColor?.name} decorative paper wrap with silk ribbon`;
+        ? `${selectedBoxColor?.name || ""} ${selectedBoxShape?.name}-shaped luxury gift box with a professional "Bexy Flowers" logo prominently displayed on the front of the box (gold/elegant font style with flower icon)`
+        : `${selectedWrapColor?.name} decorative paper wrap with "Bexy Flowers" logo pattern tastefully repeated across the wrapping paper (gold elegant branding), tied with silk ribbon`;
 
       // Accessories
       const accessoriesDesc = selectedAccessories.length > 0
@@ -406,27 +407,37 @@ const Customize: React.FC = () => {
         ? `\n\nUSER REFINEMENT REQUEST: ${aiRefinementText}`
         : "";
 
-      const prompt = `PROFESSIONAL PRODUCT PHOTOGRAPHY TASK:
-Create a premium floral arrangement photograph with EXACTLY ${totalCount} flowers.
+      const prompt = `PROFESSIONAL PRODUCT PHOTOGRAPHY - STRICT REQUIREMENTS:
 
-MANDATORY FLOWER COUNT (${totalCount} TOTAL):
+⚠️ CRITICAL: This is a REAL CUSTOMER ORDER - EXACT flower count is MANDATORY ⚠️
+
+FLOWER COUNT VERIFICATION (COUNT THREE TIMES):
+First Count: ${totalCount} flowers
+Second Count: ${totalCount} flowers  
+Third Count: ${totalCount} flowers
+✅ CONFIRMED: EXACTLY ${totalCount} FLOWERS TOTAL
+
+DETAILED FLOWER LIST (Each flower must appear in the image):
 ${numberedFlowerList}
 
-SUMMARY CHECK: ${flowerSummary} = ${totalCount} flowers total
+VERIFICATION: ${flowerSummary} = ${totalCount} flowers total
 
-PACKAGING: ${boxDesc}${accessoriesDesc}${glitterDesc}
+PACKAGING DETAILS:
+${boxDesc}${accessoriesDesc}${glitterDesc}
 
-CRITICAL REQUIREMENTS:
-1. COUNT: Show EXACTLY ${totalCount} individual flower stems, NO MORE, NO LESS
-2. Each flower must be CLEARLY VISIBLE with its own stem
-3. Natural green leaves on each stem
-4. Product photography style with clean white background
-5. High resolution, sharp focus, professional lighting
-6. Verify flower count: ${totalCount}
+MANDATORY REQUIREMENTS (DO NOT DEVIATE):
+1. ⭐ FLOWER COUNT: Show EXACTLY ${totalCount} individual flower stems with visible stems and leaves
+2. ⭐ COUNT AGAIN: Double-check you have ${totalCount} flowers, NOT ${totalCount + 1}, NOT ${totalCount - 1}, EXACTLY ${totalCount}
+3. ⭐ MINIMALIST COMPOSITION: Space flowers appropriately so each stem is clearly visible and countable
+4. ⭐ STEMS VISIBLE: Each of the ${totalCount} flowers must have a visible green stem
+5. ⭐ BRANDING: "Bexy Flowers" logo/text must be CLEARLY READABLE on the ${selectedPackage?.type === "box" ? "box" : "wrapping paper"}
+6. ⭐ PROFESSIONAL: Clean white background, sharp focus, high-res product photography
+7. ⭐ FINAL CHECK: Before finishing, verify you have EXACTLY ${totalCount} flower stems
 
-IMPORTANT: This is for a customer order - the count MUST be precise!${refinementInstructions}`;
+❌ FORBIDDEN: Adding extra flowers beyond ${totalCount}, crowding, hiding stems, unclear count
+✅ GOAL: Customer should be able to COUNT and VERIFY ${totalCount} flowers in the image${refinementInstructions}`;
       
-      const negativePrompt = `wrong flower count, more than ${totalCount} flowers, less than ${totalCount} flowers, extra flowers, missing flowers, crowded, too many stems, incorrect number, wilted, ugly, blurry, low quality, distorted, glitter on background, glitter on box, messy, unprofessional`;
+      const negativePrompt = `${totalCount + 1} flowers, ${totalCount + 2} flowers, ${totalCount + 3} flowers, too many flowers, extra flowers beyond ${totalCount}, wrong count, ${totalCount - 1} flowers, less flowers, more flowers, crowded arrangement, hidden stems, unclear count, overlapping flowers making count impossible, bouquet with unclear number, wilted, blurry, low quality, no branding, messy, unprofessional, generic packaging`;
 
       // Method 1: Pollinations.ai - Super stable
       try {
@@ -462,8 +473,10 @@ IMPORTANT: This is for a customer order - the count MUST be precise!${refinement
               inputs: prompt,
               parameters: {
                 negative_prompt: negativePrompt,
-                num_inference_steps: 30,
-                guidance_scale: 8.5,
+                num_inference_steps: 40,
+                guidance_scale: 12.0,
+                width: 1024,
+                height: 1024,
               }
             }),
           }
@@ -506,7 +519,10 @@ IMPORTANT: This is for a customer order - the count MUST be precise!${refinement
       }
 
       // Final fallback with simpler but still specific prompt
-      const simplePrompt = `minimalist bouquet with ONLY ${totalCount} flowers total: ${flowerSummary}, ${boxDesc}, professional photo, white background, count exactly ${totalCount} flowers`;
+      const brandedBoxDesc = selectedPackage?.type === "box" 
+        ? `${selectedBoxColor?.name || ""} box with "Bexy Flowers" branding`
+        : `${selectedWrapColor?.name} wrap with "Bexy Flowers" pattern`;
+      const simplePrompt = `minimalist bouquet with ONLY ${totalCount} flowers total: ${flowerSummary}, in ${brandedBoxDesc}, professional photo, white background, count exactly ${totalCount} flowers`;
       const finalUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(simplePrompt)}?width=1024&height=1024&nologo=true&seed=${Date.now()}`;
       
       const finalResponse = await fetch(finalUrl);
@@ -1657,13 +1673,18 @@ IMPORTANT: This is for a customer order - the count MUST be precise!${refinement
                         <textarea
                           value={aiRefinementText}
                           onChange={e => setAiRefinementText(e.target.value)}
-                          placeholder="E.g., 'Make the crown bigger', 'Move teddy bear left', 'Show EXACTLY 5 roses'"
-                          rows={3}
+                          placeholder="Examples:
+• 'Recount - I need EXACTLY 5 separate flower stems visible'
+• 'Make Bexy Flowers logo bigger and more visible on box'
+• 'Space out flowers more so I can count each one'
+• 'Make the crown accessory larger'
+• 'Show each flower stem clearly'"
+                          rows={4}
                           className="w-full px-3 py-2 border-2 rounded-lg resize-none focus:outline-none text-sm"
                           style={{ borderColor: GOLD }}
                         />
                         <p className="text-xs text-gray-600 mt-1">
-                          💡 Be specific! The AI will regenerate with your instructions.
+                          💡 <strong>Be specific!</strong> Tell the AI exactly what to fix or adjust. It will regenerate with your instructions.
                         </p>
                       </motion.div>
                     )}
@@ -1742,6 +1763,19 @@ IMPORTANT: This is for a customer order - the count MUST be precise!${refinement
                       <Wand2 className="w-6 h-6" />
                       {isGenerating ? "Generating..." : "Generate AI Preview"}
                     </motion.button>
+                    
+                    {totalFlowers > 0 && (
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="mt-3 p-3 rounded-lg border-2"
+                        style={{ borderColor: GOLD, background: "#fffbf5" }}
+                      >
+                        <p className="text-xs text-gray-700 text-center">
+                          <strong style={{ color: GOLD }}>🎯 Ultra-Precise AI:</strong> Generates exactly {totalFlowers} flower{totalFlowers !== 1 ? 's' : ''} with Bexy Flowers branding
+                        </p>
+                      </motion.div>
+                    )}
                   </div>
                 )}
 
