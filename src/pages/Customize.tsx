@@ -389,8 +389,8 @@ const Customize: React.FC = () => {
       
       // BRANDING: Add "Bexy Flowers" LOGO to packaging - must look professional and real
       const boxDesc = selectedPackage?.type === "box" 
-        ? `${selectedBoxColor?.name || ""} ${selectedBoxShape?.name}-shaped luxury gift box with a professional "Bexy Flowers" logo prominently displayed on the front of the box (gold/elegant font style with flower icon)`
-        : `${selectedWrapColor?.name} decorative paper wrap with "Bexy Flowers" logo pattern tastefully repeated across the wrapping paper (gold elegant branding), tied with silk ribbon`;
+        ? `arranged in a ${selectedBoxColor?.name || ""} ${selectedBoxShape?.name}-shaped luxury gift box with a professional "Bexy Flowers" logo prominently displayed on the front of the box (gold/elegant font style with flower icon), box clearly visible`
+        : `hand-wrapped in ${selectedWrapColor?.name} colored decorative wrapping paper with "Bexy Flowers" branding printed on the paper, the ${selectedWrapColor?.name} wrapping paper CLEARLY VISIBLE wrapping around the flower stems at the bottom of the bouquet, tied with elegant silk ribbon bow, gift wrap MUST be visible in the image`;
 
       // Accessories
       const accessoriesDesc = selectedAccessories.length > 0
@@ -431,14 +431,15 @@ MANDATORY REQUIREMENTS (DO NOT DEVIATE):
 2. ⭐ COUNT AGAIN: Double-check you have ${totalCount} flowers, NOT ${totalCount + 1}, NOT ${totalCount - 1}, EXACTLY ${totalCount}
 3. ⭐ MINIMALIST COMPOSITION: Space flowers appropriately so each stem is clearly visible and countable
 4. ⭐ STEMS VISIBLE: Each of the ${totalCount} flowers must have a visible green stem
-5. ⭐ BRANDING: "Bexy Flowers" logo/text must be CLEARLY READABLE on the ${selectedPackage?.type === "box" ? "box" : "wrapping paper"}
-6. ⭐ PROFESSIONAL: Clean white background, sharp focus, high-res product photography
-7. ⭐ FINAL CHECK: Before finishing, verify you have EXACTLY ${totalCount} flower stems
+5. ⭐ PACKAGING VISIBLE: The ${selectedPackage?.type === "box" ? "box" : "wrapping paper"} MUST be CLEARLY VISIBLE in the photograph${selectedPackage?.type === "wrap" ? " - show the wrap around the bottom stems" : " - show the box"}
+6. ⭐ BRANDING: "Bexy Flowers" logo/text must be CLEARLY READABLE on the ${selectedPackage?.type === "box" ? "box" : "wrapping paper"}
+7. ⭐ PROFESSIONAL: Clean white background, sharp focus, high-res product photography
+8. ⭐ FINAL CHECK: Before finishing, verify you have EXACTLY ${totalCount} flower stems AND the packaging is visible
 
-❌ FORBIDDEN: Adding extra flowers beyond ${totalCount}, crowding, hiding stems, unclear count
-✅ GOAL: Customer should be able to COUNT and VERIFY ${totalCount} flowers in the image${refinementInstructions}`;
+❌ FORBIDDEN: Adding extra flowers beyond ${totalCount}, crowding, hiding stems, unclear count, invisible packaging, no wrap showing, hidden box
+✅ GOAL: Customer should be able to COUNT ${totalCount} flowers AND SEE the ${selectedPackage?.type === "box" ? "box" : "wrapping paper"}${refinementInstructions}`;
       
-      const negativePrompt = `${totalCount + 1} flowers, ${totalCount + 2} flowers, ${totalCount + 3} flowers, too many flowers, extra flowers beyond ${totalCount}, wrong count, ${totalCount - 1} flowers, less flowers, more flowers, crowded arrangement, hidden stems, unclear count, overlapping flowers making count impossible, bouquet with unclear number, wilted, blurry, low quality, no branding, messy, unprofessional, generic packaging`;
+      const negativePrompt = `${totalCount + 1} flowers, ${totalCount + 2} flowers, ${totalCount + 3} flowers, too many flowers, extra flowers beyond ${totalCount}, wrong count, ${totalCount - 1} flowers, less flowers, more flowers, crowded arrangement, hidden stems, unclear count, overlapping flowers making count impossible, bouquet with unclear number, wilted, blurry, low quality, no branding, messy, unprofessional, generic packaging, invisible wrapping paper, no wrap visible, hidden packaging, stems without wrap, unwrapped stems, no box visible, packaging not shown`;
 
       // Method 1: Pollinations.ai - Super stable
       try {
@@ -521,9 +522,9 @@ MANDATORY REQUIREMENTS (DO NOT DEVIATE):
 
       // Final fallback with simpler but still specific prompt
       const brandedBoxDesc = selectedPackage?.type === "box" 
-        ? `${selectedBoxColor?.name || ""} box with "Bexy Flowers" branding`
-        : `${selectedWrapColor?.name} wrap with "Bexy Flowers" pattern`;
-      const simplePrompt = `minimalist bouquet with ONLY ${totalCount} flowers total: ${flowerSummary}, in ${brandedBoxDesc}, professional photo, white background, count exactly ${totalCount} flowers`;
+        ? `${selectedBoxColor?.name || ""} box with "Bexy Flowers" branding visible on box`
+        : `${selectedWrapColor?.name} colored wrapping paper with "Bexy Flowers" pattern clearly wrapping the stems`;
+      const simplePrompt = `minimalist bouquet with ONLY ${totalCount} flowers total: ${flowerSummary}, ${selectedPackage?.type === "wrap" ? "hand-wrapped in" : "in"} ${brandedBoxDesc}, ${selectedPackage?.type === "wrap" ? "wrapping paper visible around stems" : ""}, professional photo, white background, count exactly ${totalCount} flowers`;
       const finalUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(simplePrompt)}?width=1024&height=1024&nologo=true&seed=${Date.now()}`;
       
       const finalResponse = await fetch(finalUrl);
