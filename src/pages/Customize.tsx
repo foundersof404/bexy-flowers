@@ -408,38 +408,38 @@ const Customize: React.FC = () => {
         ? `\n\nUSER REFINEMENT REQUEST: ${aiRefinementText}`
         : "";
 
-      const prompt = `PROFESSIONAL PRODUCT PHOTOGRAPHY - STRICT REQUIREMENTS:
+      // SIMPLE, NATURAL PROMPT - like talking to a person!
+      const simpleFlowerList = Object.entries(colorQuantities)
+        .flatMap(([flowerId, colors]) => {
+          const flower = flowers.find(f => f.id === flowerId);
+          return Object.entries(colors)
+            .filter(([_, count]) => count > 0)
+            .map(([colorId, count]) => {
+              const colorObj = flower?.colors.find(c => c.id === colorId);
+              return `${count} ${colorObj?.name} ${flower?.name}`;
+            });
+        })
+        .join(" and ");
 
-⚠️ CRITICAL: This is a REAL CUSTOMER ORDER - EXACT flower count is MANDATORY ⚠️
+      const packagingDesc = selectedPackage?.type === "box"
+        ? `in a ${selectedBoxColor?.name} ${selectedBoxShape?.name}-shaped gift box with "Bexy Flowers" logo on it`
+        : `wrapped in ${selectedWrapColor?.name} wrapping paper with "Bexy Flowers" printed on it`;
 
-FLOWER COUNT VERIFICATION (COUNT THREE TIMES):
-First Count: ${totalCount} flowers
-Second Count: ${totalCount} flowers  
-Third Count: ${totalCount} flowers
-✅ CONFIRMED: EXACTLY ${totalCount} FLOWERS TOTAL
+      const extrasDesc = selectedAccessories.length > 0
+        ? `, with ` + selectedAccessories.map(accId => {
+            if (accId === "crown") return "a crown on top";
+            if (accId === "teddy") return "a teddy bear";
+            if (accId === "chocolates") return "a box of chocolates";
+            if (accId === "card") return "a greeting card";
+            return "";
+          }).filter(Boolean).join(" and ")
+        : "";
 
-DETAILED FLOWER LIST (Each flower must appear in the image):
-${numberedFlowerList}
+      const glitterNote = withGlitter ? ". Add sparkly glitter on the flower petals." : "";
 
-VERIFICATION: ${flowerSummary} = ${totalCount} flowers total
-
-PACKAGING DETAILS:
-${boxDesc}${accessoriesDesc}${glitterDesc}
-
-MANDATORY REQUIREMENTS (DO NOT DEVIATE):
-1. ⭐ FLOWER COUNT: Show EXACTLY ${totalCount} individual flower stems with visible stems and leaves
-2. ⭐ COUNT AGAIN: Double-check you have ${totalCount} flowers, NOT ${totalCount + 1}, NOT ${totalCount - 1}, EXACTLY ${totalCount}
-3. ⭐ MINIMALIST COMPOSITION: Space flowers appropriately so each stem is clearly visible and countable
-4. ⭐ STEMS VISIBLE: Each of the ${totalCount} flowers must have a visible green stem
-5. ⭐ PACKAGING VISIBLE: The ${selectedPackage?.type === "box" ? "box" : "wrapping paper"} MUST be CLEARLY VISIBLE in the photograph${selectedPackage?.type === "wrap" ? " - show the wrap around the bottom stems" : " - show the box"}
-6. ⭐ BRANDING: "Bexy Flowers" logo/text must be CLEARLY READABLE on the ${selectedPackage?.type === "box" ? "box" : "wrapping paper"}
-7. ⭐ PROFESSIONAL: Clean white background, sharp focus, high-res product photography
-8. ⭐ FINAL CHECK: Before finishing, verify you have EXACTLY ${totalCount} flower stems AND the packaging is visible
-
-❌ FORBIDDEN: Adding extra flowers beyond ${totalCount}, crowding, hiding stems, unclear count, invisible packaging, no wrap showing, hidden box
-✅ GOAL: Customer should be able to COUNT ${totalCount} flowers AND SEE the ${selectedPackage?.type === "box" ? "box" : "wrapping paper"}${refinementInstructions}`;
+      const prompt = `Create a beautiful flower bouquet with ${simpleFlowerList}, ${packagingDesc}${extrasDesc}${glitterNote} Professional product photo with white background, clear and sharp focus${refinementInstructions ? `. ${aiRefinementText}` : ""}.`;
       
-      const negativePrompt = `${totalCount + 1} flowers, ${totalCount + 2} flowers, ${totalCount + 3} flowers, too many flowers, extra flowers beyond ${totalCount}, wrong count, ${totalCount - 1} flowers, less flowers, more flowers, crowded arrangement, hidden stems, unclear count, overlapping flowers making count impossible, bouquet with unclear number, wilted, blurry, low quality, no branding, messy, unprofessional, generic packaging, invisible wrapping paper, no wrap visible, hidden packaging, stems without wrap, unwrapped stems, no box visible, packaging not shown`;
+      const negativePrompt = `ugly, blurry, low quality, wilted flowers, messy, dark background, poor lighting`;
 
       // Method 1: Pollinations.ai - Super stable
       try {
@@ -520,12 +520,25 @@ MANDATORY REQUIREMENTS (DO NOT DEVIATE):
         console.log("Alternative Pollinations unavailable, trying next method...");
       }
 
-      // Final fallback with simpler but still specific prompt
-      const brandedBoxDesc = selectedPackage?.type === "box" 
-        ? `${selectedBoxColor?.name || ""} box with "Bexy Flowers" branding visible on box`
-        : `${selectedWrapColor?.name} colored wrapping paper with "Bexy Flowers" pattern clearly wrapping the stems`;
-      const simplePrompt = `minimalist bouquet with ONLY ${totalCount} flowers total: ${flowerSummary}, ${selectedPackage?.type === "wrap" ? "hand-wrapped in" : "in"} ${brandedBoxDesc}, ${selectedPackage?.type === "wrap" ? "wrapping paper visible around stems" : ""}, professional photo, white background, count exactly ${totalCount} flowers`;
-      const finalUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(simplePrompt)}?width=1024&height=1024&nologo=true&seed=${Date.now()}`;
+      // Final fallback - keep it simple!
+      const finalFlowerList = Object.entries(colorQuantities)
+        .flatMap(([flowerId, colors]) => {
+          const flower = flowers.find(f => f.id === flowerId);
+          return Object.entries(colors)
+            .filter(([_, count]) => count > 0)
+            .map(([colorId, count]) => {
+              const colorObj = flower?.colors.find(c => c.id === colorId);
+              return `${count} ${colorObj?.name} ${flower?.name}`;
+            });
+        })
+        .join(", ");
+      
+      const finalPackaging = selectedPackage?.type === "box" 
+        ? `${selectedBoxColor?.name || ""} gift box`
+        : `${selectedWrapColor?.name} wrapping paper`;
+      
+      const finalSimplePrompt = `Beautiful bouquet with ${finalFlowerList} in ${finalPackaging}, professional photo, white background`;
+      const finalUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(finalSimplePrompt)}?width=1024&height=1024&nologo=true&seed=${Date.now()}`;
       
       const finalResponse = await fetch(finalUrl);
       if (finalResponse.ok) {
