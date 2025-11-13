@@ -1,927 +1,915 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ShoppingCart, Heart, Star, ZoomIn, ChevronLeft, ChevronRight, Gift, Sparkles, Box, MessageSquare, Shield, Check, Crown, Flower2, ArrowRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { 
+  X, 
+  ShoppingCart, 
+  Heart, 
+  Star, 
+  ChevronLeft, 
+  ChevronRight, 
+  Gift, 
+  Sparkles, 
+  Box, 
+  MessageSquare, 
+  Check, 
+  Crown, 
+  Flower2, 
+  ArrowRight,
+  AlertCircle,
+  Package,
+  Truck
+} from 'lucide-react';
 import { useCartWithToast } from '@/hooks/useCartWithToast';
 import { Link } from 'react-router-dom';
 
-interface QuickItem {
-  id: number;
+// ==================== TYPES ====================
+export interface QuickViewItem {
+  id: number | string;
   name: string;
   price: number | string;
   image: string;
   description: string;
+  rating?: number;
+  reviewsCount?: number;
+  isBestseller?: boolean;
+  images?: string[];
+  category?: string;
+  inStock?: boolean;
+}
+
+interface SizeOption {
+  value: string;
+  label: string;
+  price: number;
+  description: string;
+}
+
+interface Accessory {
+  id: string;
+  name: string;
+  price: number;
+  icon: typeof Box;
 }
 
 interface SignatureQuickViewProps {
   open: boolean;
-  item?: QuickItem | null;
+  item: QuickViewItem | null;
   onClose: () => void;
 }
 
+// ==================== CONSTANTS ====================
+const SIZE_OPTIONS: SizeOption[] = [
+  { value: 'small', label: 'Small', price: 0, description: 'Perfect for intimate moments' },
+  { value: 'medium', label: 'Medium', price: 50, description: 'Ideal for special occasions' },
+  { value: 'large', label: 'Large', price: 100, description: 'Makes a grand statement' },
+  { value: 'premium', label: 'Premium', price: 200, description: 'Ultimate luxury experience' }
+];
+
+const ACCESSORIES: Accessory[] = [
+  { id: 'gift-box', name: 'Gift Box', price: 20, icon: Box },
+  { id: 'glitter', name: 'Glitter', price: 15, icon: Sparkles },
+  { id: 'chocolate', name: 'Chocolate', price: 25, icon: Gift },
+  { id: 'ribbon', name: 'Premium Ribbon', price: 10, icon: Package }
+];
+
+const DEFAULT_RATING = 4.9;
+const DEFAULT_REVIEWS_COUNT = 127;
+const DEFAULT_CATEGORY = 'Signature Collection';
+
+// ==================== COMPONENT ====================
 const SignatureQuickView = ({ open, item, onClose }: SignatureQuickViewProps) => {
   const { addToCart } = useCartWithToast();
   const dialogRef = useRef<HTMLDivElement>(null);
-  const [selectedSize, setSelectedSize] = useState<string>('');
-  const [customDescription, setCustomDescription] = useState<string>('');
+
+  // ==================== STATE ====================
+  const [selectedSize, setSelectedSize] = useState<string>('medium');
+  const [personalMessage, setPersonalMessage] = useState<string>('');
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [isZoomed, setIsZoomed] = useState(false);
   const [isGift, setIsGift] = useState(false);
   const [recipientName, setRecipientName] = useState('');
   const [deliveryDate, setDeliveryDate] = useState('');
   const [selectedAccessories, setSelectedAccessories] = useState<string[]>([]);
-  const [showMessagePreview, setShowMessagePreview] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
-  // Handle touch events for mobile scrolling
-  const handleTouchStart = (e: React.TouchEvent) => {
-    // Allow touch events to work normally for scrolling
-  };
+  // ==================== COMPUTED VALUES ====================
+  const productData = useMemo(() => {
+    if (!item) return null;
 
-  const handleTouchMove = (e: React.TouchEvent) => {
-    // Allow touch events to work normally for scrolling
-  };
+    const basePrice = typeof item.price === 'string' 
+      ? parseFloat(item.price.replace(/[^0-9.]/g, '')) 
+      : item.price;
 
+    const images = item.images && item.images.length > 0 
+      ? item.images 
+      : [item.image];
+
+    return {
+      id: item.id,
+      name: item.name,
+      description: item.description,
+      basePrice,
+      images,
+      rating: item.rating ?? DEFAULT_RATING,
+      reviewsCount: item.reviewsCount ?? DEFAULT_REVIEWS_COUNT,
+      isBestseller: item.isBestseller ?? false,
+      category: item.category ?? DEFAULT_CATEGORY,
+      inStock: item.inStock ?? true
+    };
+  }, [item]);
+
+  const totalPrice = useMemo(() => {
+    if (!productData) return 0;
+
+    const selectedSizeOption = SIZE_OPTIONS.find(opt => opt.value === selectedSize);
+    const sizePrice = selectedSizeOption?.price ?? 0;
+
+    const accessoriesTotal = selectedAccessories.reduce((total, accessoryId) => {
+      const accessory = ACCESSORIES.find(acc => acc.id === accessoryId);
+      return total + (accessory?.price || 0);
+    }, 0);
+
+    return productData.basePrice + sizePrice + accessoriesTotal;
+  }, [productData, selectedSize, selectedAccessories]);
+
+  const selectedSizeOption = useMemo(() => {
+    return SIZE_OPTIONS.find(opt => opt.value === selectedSize);
+  }, [selectedSize]);
+
+  // ==================== EFFECTS ====================
   useEffect(() => {
     if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    
-    // Lock body scroll and preserve position while modal is open
-    const originalOverflow = document.body.style.overflow;
-    const originalPosition = document.body.style.position;
-    const originalTop = document.body.style.top;
-    const originalLeft = document.body.style.left;
-    const originalWidth = document.body.style.width;
-    const originalHeight = document.body.style.height;
 
     const scrollY = window.scrollY;
-
+    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+    
+    // Store original styles
+    const originalBodyOverflow = document.body.style.overflow;
+    const originalBodyPosition = document.body.style.position;
+    const originalBodyTop = document.body.style.top;
+    const originalBodyWidth = document.body.style.width;
+    const originalBodyPaddingRight = document.body.style.paddingRight;
+    const originalHtmlOverflow = document.documentElement.style.overflow;
+    
+    // Lock background scroll completely
     document.body.style.overflow = 'hidden';
     document.body.style.position = 'fixed';
     document.body.style.top = `-${scrollY}px`;
-    document.body.style.left = '0';
     document.body.style.width = '100%';
-    document.body.style.height = '100%';
+    document.body.style.paddingRight = `${scrollbarWidth}px`;
+    document.documentElement.style.overflow = 'hidden';
+
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
     
-    document.addEventListener('keydown', onKey);
-    
+    // Prevent wheel events on background
+    const preventBackgroundScroll = (e: WheelEvent) => {
+      const target = e.target as HTMLElement;
+      // Only prevent if not inside the scrollable content
+      if (!target.closest('.modal-scrollable-content')) {
+        e.preventDefault();
+      }
+    };
+
+    document.addEventListener('keydown', handleEscape);
+    document.addEventListener('wheel', preventBackgroundScroll, { passive: false });
+
     return () => {
-      document.removeEventListener('keydown', onKey);
-
-      document.body.style.overflow = originalOverflow;
-      document.body.style.position = originalPosition;
-      document.body.style.top = originalTop;
-      document.body.style.left = originalLeft;
-      document.body.style.width = originalWidth;
-      document.body.style.height = originalHeight;
-
-      // Restore scroll position
+      document.removeEventListener('keydown', handleEscape);
+      document.removeEventListener('wheel', preventBackgroundScroll);
+      
+      // Restore original styles
+      document.body.style.overflow = originalBodyOverflow;
+      document.body.style.position = originalBodyPosition;
+      document.body.style.top = originalBodyTop;
+      document.body.style.width = originalBodyWidth;
+      document.body.style.paddingRight = originalBodyPaddingRight;
+      document.documentElement.style.overflow = originalHtmlOverflow;
+      
       window.scrollTo(0, scrollY);
     };
   }, [open, onClose]);
 
-  // Reset form when modal opens
   useEffect(() => {
-    if (open) {
-      setSelectedSize('');
-      setCustomDescription('');
+    if (open && item) {
+      setSelectedSize('medium');
+      setPersonalMessage('');
       setIsAddingToCart(false);
       setCurrentImageIndex(0);
-      setIsZoomed(false);
       setIsGift(false);
       setRecipientName('');
       setDeliveryDate('');
       setSelectedAccessories([]);
-      setShowMessagePreview(false);
+      setImageError(false);
     }
-  }, [open]);
+  }, [open, item]);
 
-  if (!item) return null;
+  // ==================== HANDLERS ====================
+  const handleImageNavigation = useCallback((direction: 'prev' | 'next') => {
+    if (!productData) return;
 
-  const numericPrice = typeof item.price === 'string' ? parseFloat(item.price.replace('$','')) : item.price;
+    setCurrentImageIndex(prev => {
+      if (direction === 'next') {
+        return prev === productData.images.length - 1 ? 0 : prev + 1;
+      } else {
+        return prev === 0 ? productData.images.length - 1 : prev - 1;
+      }
+    });
+  }, [productData]);
 
-  const sizeOptions = [
-    { value: 'small', label: 'Small', price: 0, description: 'Perfect for intimate moments' },
-    { value: 'medium', label: 'Medium', price: 50, description: 'Ideal for special occasions' },
-    { value: 'large', label: 'Large', price: 100, description: 'Makes a grand statement' },
-    { value: 'premium', label: 'Premium', price: 200, description: 'Ultimate luxury experience' }
-  ];
+  const handleAccessoryToggle = useCallback((accessoryId: string) => {
+    setSelectedAccessories(prev => 
+      prev.includes(accessoryId)
+        ? prev.filter(id => id !== accessoryId)
+        : [...prev, accessoryId]
+    );
+  }, []);
 
-  // Mock data for gallery images
-  const galleryImages = [
-    item.image,
-    item.image, // Different angle
-    item.image, // Close-up
-    item.image, // With accessories
-    item.image  // Lifestyle context
-  ];
+  const handleAddToCart = useCallback(async () => {
+    if (!productData || !selectedSize) return;
 
-  // Accessories data
-  const accessories = [
-    { id: 'gift-box', name: 'Gift Box', price: 20, icon: Box },
-    { id: 'glitter', name: 'Glitter', price: 15, icon: Sparkles },
-    { id: 'chocolate', name: 'Chocolate', price: 25, icon: Gift },
-    { id: 'ribbon', name: 'Premium Ribbon', price: 10, icon: MessageSquare }
-  ];
-
-  // Mock reviews
-  const review = { name: 'Sarah M.', rating: 5, comment: 'Absolutely stunning! Perfect for my anniversary.' };
-
-  // Premium product data
-  const productInfo = {
-    isBestseller: true,
-    isPremium: true,
-    rating: 4.9,
-    reviewsCount: 127,
-    isSignature: true
-  };
-
-  const handleAddToCart = async () => {
-    if (!selectedSize) {
-      alert('Please select a size');
+    if (isGift && (!recipientName.trim() || !deliveryDate)) {
+      alert('Please fill in all gift information');
       return;
     }
 
     setIsAddingToCart(true);
-    
-    const selectedSizeOption = sizeOptions.find(option => option.value === selectedSize);
-    const accessoriesTotal = selectedAccessories.reduce((total, accessoryId) => {
-      const accessory = accessories.find(acc => acc.id === accessoryId);
-      return total + (accessory?.price || 0);
-    }, 0);
-    
-    const finalPrice = numericPrice + (selectedSizeOption?.price || 0) + accessoriesTotal;
-    const finalDescription = customDescription.trim() || `${item.description} - ${selectedSizeOption?.label} Size`;
-    
-    const giftInfo = isGift ? {
-      recipient: recipientName,
-      deliveryDate: deliveryDate,
-      message: customDescription
-    } : null;
 
-    addToCart({
-      id: item.id,
-      title: item.name,
-      price: finalPrice,
-      image: item.image,
-      size: selectedSizeOption?.label,
-      description: finalDescription,
-      accessories: selectedAccessories,
-      giftInfo: giftInfo
-    });
+    try {
+      const cartItem = {
+        id: productData.id,
+        title: productData.name,
+        price: totalPrice,
+        image: productData.images[0],
+        size: selectedSizeOption?.label,
+        description: personalMessage.trim() || `${productData.description} - ${selectedSizeOption?.label} Size`,
+        accessories: selectedAccessories,
+        ...(isGift && {
+          giftInfo: {
+            recipient: recipientName,
+            deliveryDate: deliveryDate,
+            message: personalMessage
+          }
+        })
+      };
 
-    // Show success animation
-    setTimeout(() => {
+      addToCart(cartItem);
+
+      setTimeout(() => {
+        setIsAddingToCart(false);
+        onClose();
+      }, 800);
+    } catch (error) {
+      console.error('Error adding to cart:', error);
       setIsAddingToCart(false);
-      onClose();
-    }, 1000);
+      alert('Failed to add item to cart. Please try again.');
+    }
+  }, [productData, selectedSize, selectedSizeOption, totalPrice, personalMessage, selectedAccessories, isGift, recipientName, deliveryDate, addToCart, onClose]);
+
+  const renderStars = (rating: number) => {
+    return Array.from({ length: 5 }, (_, i) => (
+      <Star
+        key={i}
+        className={`w-4 h-4 ${
+          i < Math.floor(rating)
+            ? 'fill-amber-400 text-amber-400'
+            : i < rating
+            ? 'fill-amber-200 text-amber-400'
+            : 'fill-gray-200 text-gray-300'
+        }`}
+      />
+    ));
   };
 
+  // ==================== EARLY RETURNS ====================
+  if (!open || !item || !productData) return null;
+
+  // ==================== RENDER ====================
   return (
-    <AnimatePresence>
+    <AnimatePresence mode="wait">
       {open && (
         <motion.div
-          className="fixed inset-0 z-[100] flex justify-center items-center p-4"
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-2 sm:p-4"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          style={{ 
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            zIndex: 1000,
-            overscrollBehavior: 'contain'
-          }}
+          transition={{ duration: 0.2 }}
         >
           {/* Backdrop */}
-          <motion.div 
-            className="absolute inset-0 bg-black/70 backdrop-blur-md"
+          <motion.div
+            className="absolute inset-0 bg-black/75 backdrop-blur-md"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
           />
 
-          {/* Enhanced Signature Modal */}
+          {/* Modal Container */}
           <motion.div
             ref={dialogRef}
-            className="relative z-[101] w-full max-w-4xl h-[80vh] bg-white rounded-xl shadow-2xl overflow-hidden flex flex-col"
-            initial={{ y: 60, opacity: 0, scale: 0.94 }}
-            animate={{ y: 0, opacity: 1, scale: 1 }}
-            exit={{ y: 26, opacity: 0, scale: 0.97 }}
-            transition={{ type: 'spring', stiffness: 280, damping: 20, mass: 0.9 }}
-            style={{ 
-              position: 'relative',
-              zIndex: 1001,
-              maxHeight: '80vh',
-              overscrollBehavior: 'contain',
-              touchAction: 'pan-y'
+            className="relative z-10 w-full max-w-7xl h-[95vh] bg-white rounded-2xl shadow-2xl overflow-hidden"
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
             }}
           >
-            {/* Elegant Header */}
-            <div className="relative bg-gradient-to-r from-white via-rose-50/40 to-white px-8 py-6 border-b border-rose-100 flex-shrink-0">
-              {/* Enhanced background pattern */}
-              <div className="absolute inset-0 opacity-10">
-                <div className="absolute inset-0 bg-gradient-to-r from-rose-300/30 via-amber-200/20 to-rose-300/30"></div>
-                <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-amber-300/50 to-transparent"></div>
-              </div>
-              
-              <div className="relative flex items-center justify-between">
-                <div className="flex items-center gap-6">
-                  {/* Enhanced Signature indicator */}
-                  <div className="flex items-center gap-3 px-4 py-2 bg-gradient-to-r from-amber-50 to-rose-50 rounded-full border border-amber-200/50">
-                    <div className="relative">
-                      <Crown className="w-5 h-5 text-amber-600 drop-shadow-sm" />
-                      <div className="absolute -top-1 -right-1 w-2 h-2 bg-amber-400 rounded-full animate-pulse"></div>
-                    </div>
-                    <span className="text-amber-700 font-bold text-sm tracking-wider uppercase" style={{ 
-                      fontFamily: 'Inter, ui-sans-serif, system-ui',
-                      letterSpacing: '0.1em',
-                      textShadow: '0 1px 2px rgba(0,0,0,0.05)'
-                    }}>
-                      Signature Collection
-                    </span>
-                  </div>
-                  
-                  <div>
-                    <h3 className="text-4xl font-bold text-slate-800 mb-3 leading-tight" style={{ 
-                      fontFamily: '"Playfair Display", "Times New Roman", serif',
-                      textShadow: '0 3px 6px rgba(0,0,0,0.1)',
-                      background: 'linear-gradient(135deg, #1e293b 0%, #475569 100%)',
-                      WebkitBackgroundClip: 'text',
-                      WebkitTextFillColor: 'transparent',
-                      fontWeight: '800',
-                      letterSpacing: '-0.03em'
-                    }}>
-                      {item.name}
-                    </h3>
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center gap-1">
-                        {[...Array(5)].map((_, i) => (
-                          <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400 drop-shadow-sm" />
-                        ))}
-                        <span className="text-slate-600 text-sm ml-2 font-semibold" style={{ 
-                          fontFamily: '"Inter", "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif',
-                          textShadow: '0 1px 2px rgba(0,0,0,0.06)',
-                          fontWeight: '600'
-                        }}>
-                          {productInfo.rating} ({productInfo.reviewsCount} reviews)
-                        </span>
-                      </div>
-                      {productInfo.isBestseller && (
-                        <div className="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-4 py-1.5 rounded-full text-sm font-bold shadow-lg shadow-amber-500/25">
-                          Bestseller
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Enhanced Close Button */}
-                <motion.button
-                onClick={onClose}
-                  className="group relative w-12 h-12 rounded-full bg-gradient-to-br from-slate-100 to-slate-200 hover:from-slate-200 hover:to-slate-300 transition-all duration-300 flex items-center justify-center shadow-md hover:shadow-lg border border-slate-200/50"
-                  whileHover={{ scale: 1.05, rotate: 90 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <X className="w-5 h-5 text-slate-600 group-hover:text-slate-800 transition-colors duration-300" />
-                  <div className="absolute inset-0 rounded-full bg-gradient-to-br from-amber-400/10 to-rose-400/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                </motion.button>
-              </div>
-            </div>
+            {/* Close Button - Absolute positioned */}
+            <motion.button
+              onClick={onClose}
+              className="absolute top-4 right-4 z-50 w-12 h-12 rounded-full bg-white/90 backdrop-blur-md hover:bg-white flex items-center justify-center transition-all shadow-lg border border-slate-200/50"
+              whileHover={{ scale: 1.1, rotate: 90 }}
+              whileTap={{ scale: 0.9 }}
+            >
+              <X className="w-6 h-6 text-slate-700" strokeWidth={2.5} />
+            </motion.button>
 
-            {/* Content with Responsive Layout */}
-            <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
-              {/* Enhanced Image Gallery */}
-              <motion.div 
-                className="relative w-full lg:w-1/2 bg-gradient-to-br from-slate-50 to-white flex-shrink-0 overflow-hidden"
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.05, duration: 0.4 }}
-                style={{ height: '100%' }}
-              >
-                {/* Main Image Container with Enhanced Display */}
-                <div className="relative w-full h-full flex items-center justify-center p-6">
-                  <div className="relative w-full h-full max-w-lg rounded-xl overflow-hidden shadow-2xl group">
-                  <img 
-                    src={galleryImages[currentImageIndex]} 
-                      alt={`${item.name} - Image ${currentImageIndex + 1}`}
-                      className={`w-full h-full object-cover transition-all duration-700 cursor-zoom-in ${
-                      isZoomed ? 'scale-150' : 'group-hover:scale-110'
-                    }`}
-                    onClick={() => setIsZoomed(!isZoomed)}
-                      loading="eager"
-                      style={{
-                        imageRendering: 'crisp-edges',
-                        objectFit: 'cover'
-                      }}
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.src = '/placeholder.svg';
-                      }}
-                    />
-                    
-                    {/* Enhanced overlay gradient */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    
-                    {/* Enhanced Zoom indicator */}
-                    <div className="absolute top-6 left-6 bg-white/95 backdrop-blur-md rounded-2xl p-3 shadow-xl border border-white/20">
-                      <ZoomIn className="w-5 h-5 text-slate-700" />
-                  </div>
-                  
-                    {/* Enhanced Gallery Navigation */}
-                  <div className="absolute top-1/2 -translate-y-1/2 left-6 right-6 flex justify-between">
-                    <motion.button
-                        className="w-12 h-12 bg-white/95 backdrop-blur-md rounded-2xl flex items-center justify-center shadow-xl hover:bg-white transition-all duration-300 border border-white/20"
-                      onClick={() => setCurrentImageIndex(prev => prev === 0 ? galleryImages.length - 1 : prev - 1)}
-                        whileHover={{ scale: 1.1, x: -3 }}
-                      whileTap={{ scale: 0.9 }}
-                    >
-                        <ChevronLeft className="w-6 h-6 text-slate-700" />
-                    </motion.button>
-                    <motion.button
-                        className="w-12 h-12 bg-white/95 backdrop-blur-md rounded-2xl flex items-center justify-center shadow-xl hover:bg-white transition-all duration-300 border border-white/20"
-                      onClick={() => setCurrentImageIndex(prev => prev === galleryImages.length - 1 ? 0 : prev + 1)}
-                        whileHover={{ scale: 1.1, x: 3 }}
-                      whileTap={{ scale: 0.9 }}
-                    >
-                        <ChevronRight className="w-6 h-6 text-slate-700" />
-                    </motion.button>
-                  </div>
-                  
-                    {/* Enhanced Gallery Dots */}
-                  <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-3">
-                    {galleryImages.map((_, index) => (
-                      <button
-                        key={index}
-                          className={`w-3 h-3 rounded-full transition-all duration-300 shadow-lg ${
-                          index === currentImageIndex 
-                              ? 'bg-white scale-125 shadow-xl' 
-                              : 'bg-white/60 hover:bg-white/80'
-                        }`}
-                        onClick={() => setCurrentImageIndex(index)}
+            {/* Main Content Grid */}
+            <div className="h-full grid grid-cols-1 lg:grid-cols-2">
+              {/* LEFT: Image Gallery */}
+              <div className="relative bg-gradient-to-br from-slate-50 via-white to-slate-50 flex items-center justify-center p-6 lg:p-10">
+                {productData.images.length > 0 && !imageError ? (
+                  <div className="relative w-full max-w-2xl">
+                    {/* Main Image */}
+                    <div className="relative aspect-square rounded-2xl overflow-hidden shadow-2xl border-4 border-white/80 group">
+                      <img
+                        src={productData.images[currentImageIndex]}
+                        alt={`${productData.name} - Image ${currentImageIndex + 1}`}
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        onError={() => setImageError(true)}
+                        loading="eager"
                       />
-                    ))}
-                    </div>
-                    
-                    {/* Image counter */}
-                    <div className="absolute top-6 right-6 bg-black/70 backdrop-blur-md text-white px-3 py-1 rounded-full text-sm font-medium">
-                      {currentImageIndex + 1} / {galleryImages.length}
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Enhanced Price Display */}
-                <div className="absolute bottom-6 left-6 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl px-6 py-4 shadow-2xl border border-amber-400/30">
-                  <p className="text-3xl font-bold" style={{ 
-                    fontFamily: 'Playfair Display, serif',
-                    textShadow: '0 2px 4px rgba(0,0,0,0.2)'
-                  }}>
-                    ${numericPrice.toFixed(2)}
-                  </p>
-                  <p className="text-amber-100 text-sm font-medium">Starting from</p>
-                </div>
-
-                {/* Enhanced Heart Button */}
-                <motion.button
-                  className="absolute bottom-6 right-6 w-14 h-14 bg-white/95 backdrop-blur-md rounded-xl flex items-center justify-center shadow-xl hover:bg-red-50 transition-all duration-300 border border-white/20"
-                  whileHover={{ scale: 1.1, rotate: 5 }}
-                  whileTap={{ scale: 0.9 }}
-                >
-                  <Heart className="w-6 h-6 text-slate-600 hover:text-red-500 transition-colors duration-300" />
-                </motion.button>
-              </motion.div>
-
-              {/* Enhanced Content Section */}
-              <motion.div 
-                className="w-full lg:w-1/2 flex flex-col overflow-hidden bg-gradient-to-b from-white to-rose-50/50"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.08, duration: 0.45 }}
-                style={{ height: '100%' }}
-              >
-                <div 
-                  className="flex-1 overflow-y-auto px-8 py-10 flex flex-col gap-10 custom-scrollbar"
-                  style={{ 
-                    WebkitOverflowScrolling: 'touch',
-                    overscrollBehavior: 'contain',
-                    touchAction: 'pan-y',
-                    scrollBehavior: 'smooth',
-                    minHeight: '0',
-                    height: '100%',
-                    scrollbarWidth: 'thin',
-                    scrollbarColor: 'rgba(245, 158, 11, 0.4) transparent'
-                  }}
-                >
-                {/* Elegant Size Selection */}
-                <motion.section
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.1 }}
-                >
-                  <motion.div 
-                    className="flex items-center gap-4 mb-6"
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.4, delay: 0.15 }}
-                  >
-                    <motion.div 
-                      className="relative p-2 bg-gradient-to-br from-amber-100 to-rose-100 rounded-xl border border-amber-200/50"
-                      whileHover={{ scale: 1.05, rotate: 5 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <Flower2 className="w-5 h-5 text-amber-600 drop-shadow-sm" />
-                      <div className="absolute -top-1 -right-1 w-2 h-2 bg-amber-400 rounded-full animate-pulse"></div>
-                    </motion.div>
-                    <motion.h4 
-                      className="text-2xl font-bold text-slate-800 leading-tight"
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.4, delay: 0.2 }}
-                      style={{ 
-                        fontFamily: '"Playfair Display", "Times New Roman", serif',
-                        textShadow: '0 2px 4px rgba(0,0,0,0.08)',
-                        background: 'linear-gradient(135deg, #1e293b 0%, #475569 100%)',
-                        WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent',
-                        fontWeight: '700',
-                        letterSpacing: '-0.02em'
-                      }}
-                    >
-                    Choose Your Size
-                    </motion.h4>
-                  </motion.div>
-                  <div className="grid grid-cols-2 gap-3">
-                    {sizeOptions.map((option, i) => {
-                      const isSelected = selectedSize === option.value;
-                      const optionPrice = numericPrice + option.price;
                       
-                      return (
-                        <motion.button
-                          key={option.value}
-                          className={`p-3 rounded-lg border-2 transition-all duration-300 text-left relative ${
-                            isSelected 
-                              ? 'border-amber-400 bg-amber-50 shadow-md' 
-                              : 'border-slate-200 bg-white hover:border-amber-300 hover:bg-amber-25'
-                          }`}
-                          onClick={() => setSelectedSize(option.value)}
-                          initial={{ opacity: 0, y: 10, scale: 0.98 }}
-                          animate={{ opacity: 1, y: 0, scale: 1 }}
-                          transition={{ duration: 0.35, delay: i * 0.04 }}
-                          whileHover={{ scale: 1.02, y: -1 }}
-                          whileTap={{ scale: 0.98 }}
-                        >
-                          {/* Selection indicator */}
-                          {isSelected && (
-                            <div className="absolute top-3 right-3 w-4 h-4 bg-amber-500 rounded-full flex items-center justify-center">
-                              <Check className="w-3 h-3 text-white" />
-                            </div>
-                          )}
-                          
-                          <div className="pr-8">
-                          <div className="flex justify-between items-start mb-2">
-                              <h5 className="font-bold text-slate-800 text-base" style={{ 
-                                fontFamily: '"Inter", "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif',
-                                textShadow: '0 1px 2px rgba(0,0,0,0.06)',
-                                fontWeight: '600',
-                                letterSpacing: '-0.01em'
-                              }}>
-                                {option.label}
-                              </h5>
-                              <span className="text-amber-600 font-bold text-xs" style={{ 
-                                fontFamily: '"Inter", "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif',
-                                textShadow: '0 1px 2px rgba(0,0,0,0.06)',
-                                fontWeight: '700'
-                              }}>
-                                +${option.price}
-                              </span>
-                          </div>
-                            <p className="text-slate-600 text-xs mb-3 leading-relaxed" style={{ 
-                              fontFamily: '"Inter", "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif',
-                              textShadow: '0 1px 2px rgba(0,0,0,0.04)',
-                              lineHeight: '1.6',
-                              fontWeight: '400'
-                            }}>
-                              {option.description}
-                            </p>
-                            <p className="text-lg font-bold text-slate-800" style={{ 
-                              fontFamily: '"Playfair Display", "Times New Roman", serif',
-                              textShadow: '0 2px 4px rgba(0,0,0,0.06)',
-                              fontWeight: '700',
-                              letterSpacing: '-0.02em'
-                            }}>
-                              ${optionPrice.toFixed(2)}
-                            </p>
-                          </div>
-                        </motion.button>
-                      );
-                    })}
-                </div>
-                </motion.section>
+                      {/* Image Navigation */}
+                      {productData.images.length > 1 && (
+                        <>
+                          <button
+                            className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/95 backdrop-blur-sm rounded-full flex items-center justify-center shadow-xl hover:bg-white transition-all hover:scale-110"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleImageNavigation('prev');
+                            }}
+                          >
+                            <ChevronLeft className="w-6 h-6 text-slate-800" strokeWidth={2.5} />
+                          </button>
+                          <button
+                            className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/95 backdrop-blur-sm rounded-full flex items-center justify-center shadow-xl hover:bg-white transition-all hover:scale-110"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleImageNavigation('next');
+                            }}
+                          >
+                            <ChevronRight className="w-6 h-6 text-slate-800" strokeWidth={2.5} />
+                          </button>
 
-                {/* Elegant Personal Message */}
-                <motion.section
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.25 }}
-                >
-                  <motion.div 
-                    className="flex items-center gap-4 mb-6"
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.4, delay: 0.3 }}
-                  >
-                    <motion.div 
-                      className="relative p-2 bg-gradient-to-br from-amber-100 to-rose-100 rounded-xl border border-amber-200/50"
-                      whileHover={{ scale: 1.05, rotate: 5 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <MessageSquare className="w-5 h-5 text-amber-600 drop-shadow-sm" />
-                      <div className="absolute -top-1 -right-1 w-2 h-2 bg-amber-400 rounded-full animate-pulse"></div>
-                    </motion.div>
-                    <motion.h4 
-                      className="text-2xl font-bold text-slate-800 leading-tight"
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.4, delay: 0.35 }}
-                      style={{ 
-                        fontFamily: '"Playfair Display", "Times New Roman", serif',
-                        textShadow: '0 2px 4px rgba(0,0,0,0.08)',
-                        background: 'linear-gradient(135deg, #1e293b 0%, #475569 100%)',
-                        WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent',
-                        fontWeight: '700',
-                        letterSpacing: '-0.02em'
-                      }}
-                    >
-                    Personal Message
-                    </motion.h4>
-                  </motion.div>
-                  <div className="relative">
-                    <textarea
-                      value={customDescription}
-                      onChange={(e) => setCustomDescription(e.target.value)}
-                      placeholder="Share your heartfelt message... (optional)"
-                      className="w-full p-5 border-2 border-slate-200 rounded-2xl resize-none focus:ring-4 focus:ring-amber-400/20 focus:border-amber-400 transition-all duration-300 text-slate-700 placeholder-slate-400 bg-white shadow-sm hover:shadow-md focus:shadow-lg"
-                      rows={4}
-                      maxLength={200}
-                      style={{
-                        fontFamily: '"Inter", "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif',
-                        fontSize: '16px',
-                        lineHeight: '1.6',
-                        fontWeight: '400',
-                        textShadow: '0 1px 2px rgba(0,0,0,0.04)'
-                      }}
-                    />
-                    <div className="absolute bottom-4 right-4 bg-gradient-to-r from-amber-100 to-rose-100 text-slate-600 px-3 py-1.5 rounded-full shadow-sm border border-amber-200/50">
-                      <p className="text-xs font-semibold" style={{
-                        fontFamily: '"Inter", "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif',
-                        textShadow: '0 1px 2px rgba(0,0,0,0.04)'
-                      }}>
-                        {customDescription.length}/200
-                      </p>
-                    </div>
-                  </div>
-                </motion.section>
-
-                {/* Elegant Accessories */}
-                <motion.section
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.4 }}
-                >
-                  <motion.div 
-                    className="flex items-center gap-4 mb-6"
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.4, delay: 0.45 }}
-                  >
-                    <motion.div 
-                      className="relative p-2 bg-gradient-to-br from-amber-100 to-rose-100 rounded-xl border border-amber-200/50"
-                      whileHover={{ scale: 1.05, rotate: 5 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <Sparkles className="w-5 h-5 text-amber-600 drop-shadow-sm" />
-                      <div className="absolute -top-1 -right-1 w-2 h-2 bg-amber-400 rounded-full animate-pulse"></div>
-                    </motion.div>
-                    <motion.h4 
-                      className="text-2xl font-bold text-slate-800 leading-tight"
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.4, delay: 0.5 }}
-                      style={{ 
-                        fontFamily: '"Playfair Display", "Times New Roman", serif',
-                        textShadow: '0 2px 4px rgba(0,0,0,0.08)',
-                        background: 'linear-gradient(135deg, #1e293b 0%, #475569 100%)',
-                        WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent',
-                        fontWeight: '700',
-                        letterSpacing: '-0.02em'
-                      }}
-                    >
-                      Add Elegant Touches
-                    </motion.h4>
-                  </motion.div>
-                  <div className="grid grid-cols-2 gap-3">
-                    {accessories.map((accessory, i) => {
-                      const Icon = accessory.icon;
-                      const isSelected = selectedAccessories.includes(accessory.id);
-                      
-                      return (
-                        <motion.button
-                          key={accessory.id}
-                          className={`p-3 rounded-lg border-2 transition-all duration-300 text-left relative ${
-                            isSelected 
-                              ? 'border-amber-400 bg-amber-50 shadow-md' 
-                              : 'border-slate-200 bg-white hover:border-amber-300 hover:bg-amber-25'
-                          }`}
-                          onClick={() => {
-                            setSelectedAccessories(prev => 
-                              prev.includes(accessory.id)
-                                ? prev.filter(id => id !== accessory.id)
-                                : [...prev, accessory.id]
-                            );
-                          }}
-                          initial={{ opacity: 0, y: 10, scale: 0.98 }}
-                          animate={{ opacity: 1, y: 0, scale: 1 }}
-                          transition={{ duration: 0.35, delay: i * 0.04 }}
-                          whileHover={{ scale: 1.02, y: -1 }}
-                          whileTap={{ scale: 0.98 }}
-                        >
-                          {/* Selection indicator */}
-                          {isSelected && (
-                            <div className="absolute top-3 right-3 w-4 h-4 bg-amber-500 rounded-full flex items-center justify-center">
-                              <Check className="w-3 h-3 text-white" />
-                            </div>
-                          )}
-                          
-                          <div className="flex items-center gap-3 pr-8">
-                            <div className={`w-8 h-8 rounded-md flex items-center justify-center shadow-sm ${
-                              isSelected ? 'bg-gradient-to-br from-amber-500 to-amber-600' : 'bg-gradient-to-br from-amber-100 to-rose-100'
-                            }`}>
-                              <Icon className={`w-4 h-4 ${isSelected ? 'text-white drop-shadow-sm' : 'text-amber-600 drop-shadow-sm'}`} />
-                    </div>
-                    <div>
-                              <h5 className="font-bold text-slate-800 text-base" style={{ 
-                                fontFamily: '"Inter", "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif',
-                                textShadow: '0 1px 2px rgba(0,0,0,0.06)',
-                                fontWeight: '600',
-                                letterSpacing: '-0.01em'
-                              }}>
-                                {accessory.name}
-                              </h5>
-                              <p className="text-amber-600 font-bold text-base" style={{ 
-                                fontFamily: '"Inter", "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif',
-                                textShadow: '0 1px 2px rgba(0,0,0,0.06)',
-                                fontWeight: '700'
-                              }}>
-                                +${accessory.price}
-                              </p>
-                            </div>
+                          {/* Image Counter */}
+                          <div className="absolute top-4 right-4 bg-black/80 backdrop-blur-md text-white px-4 py-2 rounded-full text-sm font-semibold">
+                            {currentImageIndex + 1} / {productData.images.length}
                           </div>
-                        </motion.button>
-                      );
-                    })}
-                  </div>
-                </motion.section>
+                        </>
+                      )}
 
-                {/* Gift Option */}
-                <motion.section
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.55 }}
-                >
-                  <motion.div 
-                    className="flex items-center gap-4 mb-6"
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.4, delay: 0.6 }}
-                  >
-                    <motion.div 
-                      className="relative p-2 bg-gradient-to-br from-amber-100 to-rose-100 rounded-xl border border-amber-200/50"
-                      whileHover={{ scale: 1.05, rotate: 5 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <Gift className="w-5 h-5 text-amber-600 drop-shadow-sm" />
-                      <div className="absolute -top-1 -right-1 w-2 h-2 bg-amber-400 rounded-full animate-pulse"></div>
-                    </motion.div>
-                    <motion.h4 
-                      className="text-2xl font-bold text-slate-800 leading-tight"
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.4, delay: 0.65 }}
-                      style={{ 
-                        fontFamily: '"Playfair Display", "Times New Roman", serif',
-                        textShadow: '0 2px 4px rgba(0,0,0,0.08)',
-                        background: 'linear-gradient(135deg, #1e293b 0%, #475569 100%)',
-                        WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent',
-                        fontWeight: '700',
-                        letterSpacing: '-0.02em'
-                      }}
-                    >
-                    Gift Options
-                    </motion.h4>
-                  </motion.div>
-                    <motion.button
-                      className={`w-full p-4 rounded-xl border-2 transition-all duration-300 text-left ${
-                        isGift 
-                          ? 'border-amber-400 bg-amber-50 shadow-md' 
-                        : 'border-slate-200 bg-white hover:border-amber-300 hover:bg-amber-25'
-                      }`}
-                      onClick={() => setIsGift(!isGift)}
-                      whileHover={{ scale: 1.01 }}
-                      whileTap={{ scale: 0.99 }}
-                    >
-                      <div className="flex items-center gap-3">
-                      <div className="p-1.5 bg-gradient-to-br from-amber-100 to-rose-100 rounded-lg">
-                        <Gift className="w-4 h-4 text-amber-600 drop-shadow-sm" />
-                      </div>
-                      <span className="font-bold text-slate-800 text-lg" style={{ 
-                        fontFamily: '"Inter", "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif',
-                        textShadow: '0 1px 2px rgba(0,0,0,0.06)',
-                        fontWeight: '600',
-                        letterSpacing: '-0.01em'
-                      }}>
-                        Send as a gift
-                      </span>
-                      {isGift && <Check className="w-5 h-5 text-amber-600 ml-auto drop-shadow-sm" />}
+                      {/* Favorite Button */}
+                      <button className="absolute top-4 left-4 w-12 h-12 bg-white/95 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-red-50 transition-all hover:scale-110">
+                        <Heart className="w-5 h-5 text-slate-600 hover:text-red-500 transition-colors" strokeWidth={2.5} />
+                      </button>
                     </div>
-                  </motion.button>
-                  
-                  {isGift && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0, y: -10 }}
-                      animate={{ opacity: 1, height: 'auto', y: 0 }}
-                      exit={{ opacity: 0, height: 0, y: -10 }}
-                      transition={{ duration: 0.4, ease: 'easeOut' }}
-                      className="mt-4 space-y-4 p-4 bg-amber-50 rounded-xl"
-                    >
-                    <div>
-                        <label className="block text-sm font-bold text-slate-700 mb-3" style={{ 
-                          fontFamily: '"Inter", "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif',
-                          textShadow: '0 1px 2px rgba(0,0,0,0.06)',
-                          fontWeight: '600',
-                          letterSpacing: '-0.01em'
-                        }}>
-                            Recipient Name
-                          </label>
-                          <input
-                            type="text"
-                            value={recipientName}
-                            onChange={(e) => setRecipientName(e.target.value)}
-                            placeholder="Enter recipient's name"
-                          className="w-full p-4 border-2 border-slate-200 rounded-xl focus:ring-4 focus:ring-amber-400/20 focus:border-amber-400 transition-all duration-300 shadow-sm hover:shadow-md focus:shadow-lg"
-                          style={{ 
-                            fontFamily: '"Inter", "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif',
-                            textShadow: '0 1px 2px rgba(0,0,0,0.04)',
-                            fontSize: '16px',
-                            lineHeight: '1.5'
-                          }}
+
+                    {/* Gallery Dots */}
+                    {productData.images.length > 1 && (
+                      <div className="flex justify-center gap-2 mt-6">
+                        {productData.images.map((_, index) => (
+                          <button
+                            key={index}
+                            className={`rounded-full transition-all ${
+                              index === currentImageIndex
+                                ? 'bg-amber-500 w-10 h-2.5'
+                                : 'bg-slate-300 hover:bg-slate-400 w-2.5 h-2.5'
+                            }`}
+                            onClick={() => setCurrentImageIndex(index)}
                           />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-bold text-slate-700 mb-3" style={{ 
-                          fontFamily: '"Inter", "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif',
-                          textShadow: '0 1px 2px rgba(0,0,0,0.06)',
-                          fontWeight: '600',
-                          letterSpacing: '-0.01em'
-                        }}>
-                            Delivery Date
-                          </label>
-                          <input
-                            type="date"
-                            value={deliveryDate}
-                            onChange={(e) => setDeliveryDate(e.target.value)}
-                          className="w-full p-4 border-2 border-slate-200 rounded-xl focus:ring-4 focus:ring-amber-400/20 focus:border-amber-400 transition-all duration-300 shadow-sm hover:shadow-md focus:shadow-lg"
-                          style={{ 
-                            fontFamily: '"Inter", "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif',
-                            textShadow: '0 1px 2px rgba(0,0,0,0.04)',
-                            fontSize: '16px',
-                            lineHeight: '1.5'
-                          }}
-                          />
-                        </div>
-                    </motion.div>
-                  )}
-                </motion.section>
-
-                {/* Elegant Add to Cart Section */}
-                <motion.div 
-                  className="pt-6 border-t border-slate-200"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.7 }}
-                >
-                  <motion.button
-                    className={`w-full py-5 px-8 rounded-2xl font-bold text-white text-xl transition-all duration-300 ${
-                      isAddingToCart
-                        ? 'bg-green-500'
-                        : 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700'
-                    } shadow-xl hover:shadow-2xl relative overflow-hidden group`}
-                    onClick={handleAddToCart}
-                    disabled={!selectedSize || isAddingToCart}
-                    whileHover={{ scale: 1.02, y: -2 }}
-                    whileTap={{ scale: 0.98 }}
-                    style={{
-                      fontFamily: '"Inter", "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif',
-                      textShadow: '0 2px 4px rgba(0,0,0,0.2)',
-                      fontWeight: '700',
-                      letterSpacing: '-0.01em'
-                    }}
-                  >
-                    {isAddingToCart ? (
-                      <div className="flex items-center justify-center gap-3">
-                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        <span>Adding to Cart...</span>
-                      </div>
-                    ) : (
-                      <div className="flex items-center justify-center gap-3">
-                        <ShoppingCart className="w-5 h-5" />
-                        <span>
-                          Add to Cart - ${(() => {
-                            const selectedSizeOption = sizeOptions.find(opt => opt.value === selectedSize);
-                            const accessoriesTotal = selectedAccessories.reduce((total, accessoryId) => {
-                              const accessory = accessories.find(acc => acc.id === accessoryId);
-                              return total + (accessory?.price || 0);
-                            }, 0);
-                            const finalPrice = numericPrice + (selectedSizeOption?.price || 0) + accessoriesTotal;
-                            return finalPrice.toFixed(2);
-                          })()}
-                        </span>
+                        ))}
                       </div>
                     )}
-                  </motion.button>
-                  
-                  {!selectedSize && (
-                    <motion.p 
-                      className="text-center text-amber-600 mt-3 font-medium text-sm"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                    >
-                      Please select a size to continue
-                    </motion.p>
-                  )}
-                  
-                  {/* Message Preview */}
-                  {customDescription && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="mt-4 p-4 bg-gradient-to-br from-amber-50 to-rose-50 rounded-xl border border-amber-200/50 shadow-sm"
-                    >
-                      <div className="flex items-center gap-3 mb-3">
-                        <div className="p-1.5 bg-gradient-to-br from-amber-200 to-rose-200 rounded-lg">
-                          <MessageSquare className="w-4 h-4 text-amber-700 drop-shadow-sm" />
-                        </div>
-                        <span className="text-sm font-bold text-amber-800" style={{ 
-                          fontFamily: '"Inter", "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif',
-                          textShadow: '0 1px 2px rgba(0,0,0,0.06)',
-                          fontWeight: '700'
-                        }}>
-                          Message Preview
-                        </span>
-                      </div>
-                      <p className="text-amber-700 text-base italic leading-relaxed" style={{ 
-                        fontFamily: '"Inter", "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif',
-                        textShadow: '0 1px 2px rgba(0,0,0,0.04)',
-                        lineHeight: '1.7',
-                        fontWeight: '400'
-                      }}>
-                        "{customDescription}"
-                      </p>
-                    </motion.div>
-                  )}
-
-                  {/* Full details link */}
-                  <div className="mt-4 flex justify-end">
-                    <Link
-                      to={`/product/${String(item.id)}`}
-                      state={{
-                        product: {
-                          id: String(item.id),
-                          title: item.name,
-                          price: numericPrice,
-                          description: item.description,
-                          imageUrl: item.image,
-                          images: galleryImages,
-                          category: 'Signature Collection',
-                          inStock: true
-                        }
-                      }}
-                      className="inline-flex items-center gap-2 text-amber-700 hover:text-amber-800 underline underline-offset-4"
-                    >
-                      View full details
-                      <ArrowRight className="w-4 h-4" />
-                    </Link>
                   </div>
-                </motion.div>
+                ) : (
+                  <div className="w-full max-w-2xl aspect-square rounded-2xl bg-slate-200 flex items-center justify-center">
+                    <AlertCircle className="w-20 h-20 text-slate-400" />
+                  </div>
+                )}
+              </div>
+
+              {/* RIGHT: Product Details (Scrollable) */}
+              <div className="flex flex-col h-full overflow-hidden">
+                {/* Header Section - Fixed */}
+                <div className="flex-shrink-0 px-6 lg:px-10 pt-8 pb-6 border-b border-slate-200 bg-white">
+                  <div className="flex items-center gap-3 mb-4">
+                    <Crown className="w-5 h-5 text-amber-600" strokeWidth={2.5} />
+                    <span className="text-amber-700 font-bold text-xs tracking-widest uppercase">
+                      {productData.category}
+                    </span>
+                    {productData.isBestseller && (
+                      <span className="px-3 py-1 bg-amber-500 text-white rounded-full text-xs font-bold">
+                        Bestseller
+                      </span>
+                    )}
+                  </div>
+
+                  <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-3 leading-tight" style={{ fontFamily: '"Playfair Display", serif' }}>
+                    {productData.name}
+                  </h2>
+
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="flex items-center gap-1">
+                      {renderStars(productData.rating)}
+                    </div>
+                    <span className="text-slate-600 text-sm font-semibold">
+                      {productData.rating.toFixed(1)} ({productData.reviewsCount} reviews)
+                    </span>
+                  </div>
+
+                  {/* Price Display - Premium Style */}
+                  <div className="flex items-baseline gap-4 p-5 bg-gradient-to-r from-amber-50 to-amber-100/50 rounded-xl border-2 border-amber-200/50">
+                    <div>
+                      <p className="text-sm text-amber-800 font-semibold mb-1">Starting from</p>
+                      <p className="text-4xl font-bold text-amber-900" style={{ fontFamily: '"Playfair Display", serif' }}>
+                        ${productData.basePrice.toFixed(2)}
+                      </p>
+                    </div>
+                    {selectedSize && (
+                      <div className="ml-auto text-right">
+                        <p className="text-xs text-slate-600 mb-1">Your Total</p>
+                        <p className="text-2xl font-bold text-slate-900" style={{ fontFamily: '"Playfair Display", serif' }}>
+                          ${totalPrice.toFixed(2)}
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </motion.div>
+
+                {/* Scrollable Content Area */}
+                <div 
+                  className="modal-scrollable-content flex-1 overflow-y-auto px-6 lg:px-10 py-6 space-y-8 custom-scrollbar"
+                  style={{ 
+                    overscrollBehavior: 'contain',
+                    WebkitOverflowScrolling: 'touch',
+                    touchAction: 'pan-y'
+                  }}
+                  onWheel={(e) => e.stopPropagation()}
+                  onTouchMove={(e) => e.stopPropagation()}
+                >
+                  {/* Size Selection */}
+                  <section>
+                    <div className="flex items-center gap-3 mb-4">
+                      <Flower2 className="w-5 h-5 text-amber-600" strokeWidth={2.5} />
+                      <h3 className="text-xl font-bold text-slate-900" style={{ fontFamily: '"Playfair Display", serif' }}>
+                        Choose Your Size
+                      </h3>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      {SIZE_OPTIONS.map((option) => {
+                        const isSelected = selectedSize === option.value;
+                        const optionPrice = productData.basePrice + option.price;
+
+                        return (
+                          <button
+                            key={option.value}
+                            className={`relative p-4 rounded-xl border-2 text-left transition-all ${
+                              isSelected
+                                ? 'border-amber-500 bg-amber-50 shadow-lg ring-2 ring-amber-200'
+                                : 'border-slate-200 bg-white hover:border-amber-300 hover:shadow-md'
+                            }`}
+                            onClick={() => setSelectedSize(option.value)}
+                          >
+                            {isSelected && (
+                              <div className="absolute -top-2 -right-2 w-7 h-7 bg-amber-500 rounded-full flex items-center justify-center shadow-md">
+                                <Check className="w-4 h-4 text-white" strokeWidth={3} />
+                              </div>
+                            )}
+                            <h4 className="font-bold text-slate-900 mb-1">{option.label}</h4>
+                            <p className="text-xs text-slate-600 mb-2">{option.description}</p>
+                            <p className="text-lg font-bold text-amber-600">
+                              {option.price > 0 ? `+$${option.price}` : 'Included'}
+                            </p>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </section>
+
+                  {/* Personal Message */}
+                  <section>
+                    <div className="flex items-center gap-3 mb-4">
+                      <MessageSquare className="w-5 h-5 text-amber-600" strokeWidth={2.5} />
+                      <h3 className="text-xl font-bold text-slate-900" style={{ fontFamily: '"Playfair Display", serif' }}>
+                        Personal Message
+                      </h3>
+                    </div>
+                    <div className="relative">
+                      <textarea
+                        value={personalMessage}
+                        onChange={(e) => setPersonalMessage(e.target.value)}
+                        placeholder="Share your heartfelt message..."
+                        className="w-full p-4 border-2 border-slate-200 rounded-xl resize-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition-all"
+                        rows={3}
+                        maxLength={200}
+                      />
+                      <div className="absolute bottom-3 right-3 text-xs text-slate-500 font-semibold bg-white px-2 py-1 rounded">
+                        {personalMessage.length}/200
+                      </div>
+                    </div>
+                  </section>
+
+                  {/* Accessories */}
+                  <section>
+                    <div className="flex items-center gap-3 mb-4">
+                      <Sparkles className="w-5 h-5 text-amber-600" strokeWidth={2.5} />
+                      <h3 className="text-xl font-bold text-slate-900" style={{ fontFamily: '"Playfair Display", serif' }}>
+                        Add Elegant Touches
+                      </h3>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      {ACCESSORIES.map((accessory, index) => {
+                        const Icon = accessory.icon;
+                        const isSelected = selectedAccessories.includes(accessory.id);
+
+                        return (
+                          <motion.button
+                            key={accessory.id}
+                            className={`relative p-4 rounded-xl border-2 transition-all duration-300 overflow-hidden group ${
+                              isSelected
+                                ? 'border-amber-500 bg-gradient-to-br from-amber-50 to-amber-100/50 shadow-lg'
+                                : 'border-slate-200 bg-white hover:border-amber-300 hover:shadow-md'
+                            }`}
+                            onClick={() => handleAccessoryToggle(accessory.id)}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: index * 0.05, duration: 0.3 }}
+                            whileHover={{ 
+                              scale: 1.03,
+                              y: -3,
+                              transition: { type: 'spring', stiffness: 400, damping: 17 }
+                            }}
+                            whileTap={{ scale: 0.97 }}
+                          >
+                            {/* Animated Background on Hover */}
+                            {!isSelected && (
+                              <motion.div
+                                className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-100/30 to-transparent"
+                                initial={{ x: '-100%' }}
+                                whileHover={{
+                                  x: '100%',
+                                  transition: {
+                                    duration: 0.8,
+                                    ease: 'easeInOut'
+                                  }
+                                }}
+                              />
+                            )}
+
+                            {/* Glow effect when selected */}
+                            {isSelected && (
+                              <motion.div
+                                className="absolute inset-0 bg-gradient-to-r from-amber-300/0 via-amber-400/20 to-amber-300/0"
+                                animate={{
+                                  x: ['-100%', '100%'],
+                                }}
+                                transition={{
+                                  duration: 2,
+                                  repeat: Infinity,
+                                  ease: 'easeInOut'
+                                }}
+                              />
+                            )}
+
+                            {/* Selection Badge */}
+                            <AnimatePresence>
+                              {isSelected && (
+                                <motion.div 
+                                  className="absolute -top-2 -right-2 w-7 h-7 bg-gradient-to-br from-amber-400 to-amber-600 rounded-full flex items-center justify-center shadow-lg"
+                                  initial={{ scale: 0, rotate: -180 }}
+                                  animate={{ 
+                                    scale: 1, 
+                                    rotate: 0,
+                                  }}
+                                  exit={{ scale: 0, rotate: 180 }}
+                                  transition={{ 
+                                    type: 'spring', 
+                                    stiffness: 500, 
+                                    damping: 15 
+                                  }}
+                                >
+                                  <motion.div
+                                    initial={{ scale: 0 }}
+                                    animate={{ scale: 1 }}
+                                    transition={{ delay: 0.1 }}
+                                  >
+                                    <Check className="w-4 h-4 text-white" strokeWidth={3} />
+                                  </motion.div>
+                                  
+                                  {/* Pulse ring */}
+                                  <motion.div
+                                    className="absolute inset-0 rounded-full border-2 border-amber-400"
+                                    animate={{
+                                      scale: [1, 1.5, 1],
+                                      opacity: [0.8, 0, 0.8],
+                                    }}
+                                    transition={{
+                                      duration: 1.5,
+                                      repeat: Infinity,
+                                      ease: 'easeOut'
+                                    }}
+                                  />
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+
+                            <div className="flex items-center gap-3 relative z-10">
+                              <motion.div 
+                                className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-300 ${
+                                  isSelected 
+                                    ? 'bg-gradient-to-br from-amber-500 to-amber-600 shadow-lg' 
+                                    : 'bg-gradient-to-br from-amber-50 to-amber-100'
+                                }`}
+                                whileHover={{ rotate: [0, -10, 10, -10, 0] }}
+                                transition={{ duration: 0.5 }}
+                              >
+                                <motion.div
+                                  animate={isSelected ? {
+                                    scale: [1, 1.2, 1],
+                                  } : {}}
+                                  transition={{
+                                    duration: 0.3
+                                  }}
+                                >
+                                  <Icon 
+                                    className={`w-5 h-5 transition-colors duration-300 ${
+                                      isSelected ? 'text-white' : 'text-amber-600'
+                                    }`} 
+                                    strokeWidth={2.5} 
+                                  />
+                                </motion.div>
+                              </motion.div>
+                              <div>
+                                <h4 className="font-bold text-slate-900 text-sm">{accessory.name}</h4>
+                                <motion.p 
+                                  className="text-amber-600 font-bold text-sm"
+                                  animate={isSelected ? {
+                                    scale: [1, 1.1, 1],
+                                  } : {}}
+                                  transition={{ duration: 0.3 }}
+                                >
+                                  +${accessory.price}
+                                </motion.p>
+                              </div>
+                            </div>
+                          </motion.button>
+                        );
+                      })}
+                    </div>
+                  </section>
+
+                  {/* Gift Option */}
+                  <section>
+                    <div className="flex items-center gap-3 mb-4">
+                      <Gift className="w-5 h-5 text-amber-600" strokeWidth={2.5} />
+                      <h3 className="text-xl font-bold text-slate-900" style={{ fontFamily: '"Playfair Display", serif' }}>
+                        Gift Options
+                      </h3>
+                    </div>
+                    <button
+                      className={`w-full p-4 rounded-xl border-2 transition-all text-left ${
+                        isGift
+                          ? 'border-amber-500 bg-amber-50 shadow-lg'
+                          : 'border-slate-200 bg-white hover:border-amber-300 hover:shadow-md'
+                      }`}
+                      onClick={() => setIsGift(!isGift)}
+                    >
+                      <div className="flex items-center gap-3">
+                        <Gift className="w-6 h-6 text-amber-600" strokeWidth={2.5} />
+                        <span className="font-bold text-slate-900">Send as a gift</span>
+                        {isGift && <Check className="w-5 h-5 text-amber-600 ml-auto" strokeWidth={3} />}
+                      </div>
+                    </button>
+
+                    <AnimatePresence>
+                      {isGift && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          exit={{ opacity: 0, height: 0 }}
+                          transition={{ duration: 0.3 }}
+                          className="mt-4 space-y-4 p-4 bg-amber-50 rounded-xl"
+                        >
+                          <div>
+                            <label className="block text-sm font-bold text-slate-800 mb-2">
+                              Recipient Name
+                            </label>
+                            <input
+                              type="text"
+                              value={recipientName}
+                              onChange={(e) => setRecipientName(e.target.value)}
+                              placeholder="Enter recipient's name"
+                              className="w-full p-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition-all"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-bold text-slate-800 mb-2">
+                              Delivery Date
+                            </label>
+                            <input
+                              type="date"
+                              value={deliveryDate}
+                              onChange={(e) => setDeliveryDate(e.target.value)}
+                              min={new Date().toISOString().split('T')[0]}
+                              className="w-full p-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition-all"
+                            />
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </section>
+
+                  {/* Shipping Info */}
+                  <div className="flex items-center gap-3 p-4 bg-green-50 rounded-xl border border-green-200">
+                    <Truck className="w-5 h-5 text-green-600" strokeWidth={2.5} />
+                    <p className="text-sm text-green-800 font-semibold">
+                      Free shipping on orders over $100
+                    </p>
+                  </div>
+                </div>
+
+                {/* Footer - Fixed */}
+                <div className="flex-shrink-0 px-6 lg:px-10 py-6 border-t-2 border-slate-200 bg-white space-y-4">
+                  {/* Add to Cart Button with Professional Color Wave */}
+                  <motion.button
+                    className={`relative w-full py-5 px-6 rounded-lg font-bold text-white text-lg shadow-lg overflow-hidden group ${
+                      isAddingToCart
+                        ? 'bg-green-500'
+                        : selectedSize
+                        ? ''
+                        : 'bg-slate-300 cursor-not-allowed'
+                    }`}
+                    onClick={handleAddToCart}
+                    disabled={!selectedSize || isAddingToCart}
+                    style={{
+                      border: selectedSize && !isAddingToCart ? '2px solid rgba(245, 158, 11, 0.5)' : '2px solid rgba(148, 163, 184, 0.3)',
+                      letterSpacing: '0.02em',
+                    }}
+                    whileHover={selectedSize && !isAddingToCart ? {
+                      boxShadow: '0 20px 40px rgba(245, 158, 11, 0.4)',
+                    } : {}}
+                    whileTap={selectedSize && !isAddingToCart ? { scale: 0.98 } : {}}
+                  >
+                    {/* Base Gradient Background */}
+                    {selectedSize && !isAddingToCart && (
+                      <>
+                        {/* Base amber gradient */}
+                        <div 
+                          className="absolute inset-0 bg-gradient-to-r from-amber-500 via-amber-600 to-amber-500 transition-all duration-500"
+                        />
+                        
+                        {/* Animated Color Wave - Changes button color from left to right */}
+                        <motion.div
+                          className="absolute inset-0"
+                          style={{
+                            background: 'linear-gradient(90deg, rgba(251, 191, 36, 0) 0%, rgba(251, 191, 36, 1) 25%, rgba(245, 158, 11, 1) 50%, rgba(217, 119, 6, 1) 75%, rgba(245, 158, 11, 0) 100%)',
+                            backgroundSize: '200% 100%',
+                          }}
+                          initial={{ 
+                            backgroundPosition: '-100% 0%',
+                          }}
+                          whileHover={{
+                            backgroundPosition: ['-100% 0%', '200% 0%'],
+                            transition: {
+                              duration: 2.5,
+                              ease: 'linear',
+                              repeat: Infinity,
+                              repeatDelay: 0,
+                            }
+                          }}
+                        />
+
+                        {/* Shimmer Overlay - Creates the professional shine effect */}
+                        <motion.div
+                          className="absolute inset-0"
+                          style={{
+                            background: 'linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.3) 30%, rgba(255, 255, 255, 0.5) 50%, rgba(255, 255, 255, 0.3) 70%, transparent 100%)',
+                            width: '40%',
+                          }}
+                          initial={{ x: '-100%' }}
+                          whileHover={{
+                            x: ['-100%', '300%'],
+                            transition: {
+                              duration: 2,
+                              ease: 'easeInOut',
+                              repeat: Infinity,
+                              repeatDelay: 0.5,
+                            }
+                          }}
+                        />
+
+                        {/* Secondary Color Layer - Adds depth to the color transition */}
+                        <motion.div
+                          className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                          style={{
+                            background: 'linear-gradient(90deg, rgba(234, 179, 8, 0) 0%, rgba(234, 179, 8, 0.8) 40%, rgba(217, 119, 6, 0.9) 60%, rgba(234, 179, 8, 0) 100%)',
+                            backgroundSize: '250% 100%',
+                            filter: 'blur(1px)',
+                          }}
+                          animate={{
+                            backgroundPosition: ['-100% 0%', '200% 0%'],
+                          }}
+                          transition={{
+                            duration: 3,
+                            ease: 'linear',
+                            repeat: Infinity,
+                            repeatDelay: 0,
+                          }}
+                        />
+
+                        {/* Glow Effect - Creates the luminous border */}
+                        <motion.div
+                          className="absolute -inset-1 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                          style={{
+                            background: 'linear-gradient(90deg, rgba(251, 191, 36, 0.5) 0%, rgba(245, 158, 11, 0.8) 50%, rgba(251, 191, 36, 0.5) 100%)',
+                            backgroundSize: '200% 100%',
+                            borderRadius: '0.5rem',
+                            filter: 'blur(8px)',
+                            zIndex: -1,
+                          }}
+                          animate={{
+                            backgroundPosition: ['-100% 0%', '200% 0%'],
+                          }}
+                          transition={{
+                            duration: 2.5,
+                            ease: 'linear',
+                            repeat: Infinity,
+                            repeatDelay: 0,
+                          }}
+                        />
+                      </>
+                    )}
+                    
+                    {/* Button Content */}
+                    <motion.div 
+                      className="relative z-10 flex items-center justify-center"
+                      whileHover={selectedSize && !isAddingToCart ? { 
+                        scale: 1.02,
+                      } : {}}
+                      transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+                    >
+                      {isAddingToCart ? (
+                        <div className="flex items-center justify-center gap-3">
+                          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          <span>Adding to Cart...</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-center gap-3">
+                          <motion.div
+                            animate={selectedSize && !isAddingToCart ? {
+                              y: [0, -3, 0],
+                            } : {}}
+                            transition={{
+                              duration: 2,
+                              repeat: Infinity,
+                              ease: 'easeInOut'
+                            }}
+                          >
+                            <ShoppingCart className="w-6 h-6" strokeWidth={2.5} />
+                          </motion.div>
+                          <span className="font-bold drop-shadow-sm">Add to Cart — ${totalPrice.toFixed(2)}</span>
+                        </div>
+                      )}
+                    </motion.div>
+                  </motion.button>
+
+                  {/* View Full Details Link */}
+                  <Link
+                    to={`/product/${productData.id}`}
+                    state={{
+                      product: {
+                        id: String(productData.id),
+                        title: productData.name,
+                        price: productData.basePrice,
+                        description: productData.description,
+                        imageUrl: productData.images[0],
+                        images: productData.images,
+                        category: productData.category,
+                        inStock: productData.inStock
+                      }
+                    }}
+                    className="flex items-center justify-center gap-2 text-amber-700 hover:text-amber-800 font-semibold text-sm transition-colors"
+                  >
+                    View full details
+                    <ArrowRight className="w-4 h-4" strokeWidth={2.5} />
+                  </Link>
+                </div>
+              </div>
             </div>
           </motion.div>
         </motion.div>
@@ -931,5 +919,3 @@ const SignatureQuickView = ({ open, item, onClose }: SignatureQuickViewProps) =>
 };
 
 export default SignatureQuickView;
-
-

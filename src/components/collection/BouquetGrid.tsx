@@ -89,7 +89,7 @@ export const BouquetGrid = ({ bouquets, onBouquetClick }: BouquetGridProps) => {
   return (
     <div 
       ref={gridRef}
-      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
+      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-5"
     >
       {bouquets.map((bouquet, index) => {
         const tags = getBouquetTags(bouquet);
@@ -129,19 +129,19 @@ export const BouquetGrid = ({ bouquets, onBouquetClick }: BouquetGridProps) => {
               style={{
                 position: 'relative',
                 width: '100%',
-                height: '500px',
+                height: '400px',
                 background: '#fff',
-                borderRadius: '1.25rem'
+                borderRadius: '1rem'
               }}
             >
-              {/* Image Container - Increased by 30% */}
+              {/* Image Container - Reduced size */}
               <div 
                 className="imgBox"
                 style={{
                   position: 'relative',
                   width: '100%',
-                  height: '17.55rem', // Increased by 30% from 13.5rem
-                  borderRadius: '1.25rem 1.25rem 0 0',
+                  height: '13rem',
+                  borderRadius: '1rem 1rem 0 0',
                   overflow: 'hidden'
                 }}
               >
@@ -160,10 +160,10 @@ export const BouquetGrid = ({ bouquets, onBouquetClick }: BouquetGridProps) => {
                 <div 
                 style={{
                     position: 'absolute',
-                    top: '1rem',
-                    right: '1rem',
+                    top: '0.75rem',
+                    right: '0.75rem',
                     display: 'flex',
-                    gap: '0.5rem',
+                    gap: '0.4rem',
                     opacity: 0,
                     transform: 'translateX(10px)',
                     transition: 'all 0.3s ease'
@@ -172,8 +172,8 @@ export const BouquetGrid = ({ bouquets, onBouquetClick }: BouquetGridProps) => {
                 >
               <motion.div
                     style={{
-                      width: '2.5rem',
-                      height: '2.5rem',
+                      width: '2rem',
+                      height: '2rem',
                       background: 'rgba(255, 255, 255, 0.9)',
                       backdropFilter: 'blur(10px)',
                       borderRadius: '50%',
@@ -193,13 +193,13 @@ export const BouquetGrid = ({ bouquets, onBouquetClick }: BouquetGridProps) => {
                       e.stopPropagation();
                     }}
                   >
-                    <Heart style={{ width: '1rem', height: '1rem', color: '#8B6F3A' }} />
+                    <Heart style={{ width: '0.875rem', height: '0.875rem', color: '#8B6F3A' }} />
                   </motion.div>
                   
                   <motion.div
                     style={{
-                      width: '2.5rem',
-                      height: '2.5rem',
+                      width: '2rem',
+                      height: '2rem',
                       background: 'rgba(255, 255, 255, 0.9)',
                       backdropFilter: 'blur(10px)',
                       borderRadius: '50%',
@@ -232,7 +232,7 @@ export const BouquetGrid = ({ bouquets, onBouquetClick }: BouquetGridProps) => {
                       });
                     }}
                   >
-                    <Eye style={{ width: '1rem', height: '1rem', color: '#8B6F3A' }} />
+                    <Eye style={{ width: '0.875rem', height: '0.875rem', color: '#8B6F3A' }} />
                   </motion.div>
                 </div>
 
@@ -241,10 +241,10 @@ export const BouquetGrid = ({ bouquets, onBouquetClick }: BouquetGridProps) => {
                   className="icon"
                   style={{
                     position: 'absolute',
-                    bottom: '-0.375rem',
-                    right: '-0.375rem',
-                    width: '4rem', // Slightly smaller
-                    height: '4rem',
+                    bottom: '-0.3rem',
+                    right: '-0.3rem',
+                    width: '3.25rem',
+                    height: '3.25rem',
                     background:'#fff',
                     borderTopLeftRadius: '50%'
                   }}
@@ -254,26 +254,26 @@ export const BouquetGrid = ({ bouquets, onBouquetClick }: BouquetGridProps) => {
                     style={{
                       position: 'absolute',
                       content: '""',
-                      bottom: '0.375rem',
-                      left: '-1.25rem',
+                      bottom: '0.3rem',
+                      left: '-1rem',
                       background: 'transparent',
-                      width: '1.25rem',
-                      height: '1.25rem',
-                      borderBottomRightRadius: '1.25rem',
-                      boxShadow: '0.313rem 0.313rem 0 0.313rem #fff'
+                      width: '1rem',
+                      height: '1rem',
+                      borderBottomRightRadius: '1rem',
+                      boxShadow: '0.25rem 0.25rem 0 0.25rem #fff'
                     }}
                   />
                   <div 
                     style={{
                       position: 'absolute',
                       content: '""',
-                      top: '-1.25rem',
-                      right: '0.375rem',
+                      top: '-1rem',
+                      right: '0.3rem',
                       background: 'transparent',
-                      width: '1.25rem',
-                      height: '1.25rem',
-                      borderBottomRightRadius: '1.25rem',
-                      boxShadow: "0.313rem 0.313rem 0 0.313rem #fff"
+                      width: '1rem',
+                      height: '1rem',
+                      borderBottomRightRadius: '1rem',
+                      boxShadow: "0.25rem 0.25rem 0 0.25rem #fff"
                     }}
                   />
                   
@@ -281,7 +281,7 @@ export const BouquetGrid = ({ bouquets, onBouquetClick }: BouquetGridProps) => {
                     className="iconBox"
                     style={{
                       position: 'absolute',
-                      inset: '0.5rem',
+                      inset: '0.4rem',
                       background: currentColor,
                       borderRadius: '50%',
                       display: 'flex',
@@ -308,7 +308,7 @@ export const BouquetGrid = ({ bouquets, onBouquetClick }: BouquetGridProps) => {
                       });
                     }}
                   >
-                    <span style={{ color: '#fff', fontSize: '1.2rem' }}>
+                    <span style={{ color: '#fff', fontSize: '1rem' }}>
                       👁️
                     </span>
                   </motion.div>
@@ -319,9 +319,9 @@ export const BouquetGrid = ({ bouquets, onBouquetClick }: BouquetGridProps) => {
               <div 
                 className="content"
                 style={{
-                  padding: '0.938rem 0.625rem',
-                  borderRadius: '0 0 1.25rem 1.25rem',
-                  height: 'calc(500px - 17.55rem)', // Fixed height minus image height
+                  padding: '0.75rem 0.5rem',
+                  borderRadius: '0 0 1rem 1rem',
+                  height: 'calc(400px - 13rem)', // Fixed height minus image height
                   display: 'flex',
                   flexDirection: 'column',
                   justifyContent: 'space-between'
@@ -330,10 +330,10 @@ export const BouquetGrid = ({ bouquets, onBouquetClick }: BouquetGridProps) => {
                 <h3 
                   style={{
                     textTransform: 'capitalize',
-                    fontSize: 'clamp(1.2rem, 1.1rem + 0.4vw, 1.5rem)',
+                    fontSize: 'clamp(1rem, 0.95rem + 0.3vw, 1.25rem)',
                     color: '#111',
                     fontWeight: '700',
-                    marginBottom: '0.5rem'
+                    marginBottom: '0.375rem'
                   }}
               >
                 {bouquet.name}
@@ -341,10 +341,10 @@ export const BouquetGrid = ({ bouquets, onBouquetClick }: BouquetGridProps) => {
                 
                 <p 
                   style={{
-                    margin: '0 0 1rem',
+                    margin: '0 0 0.75rem',
                     color: '#565656',
-                    fontSize: '0.9rem',
-                    lineHeight: '1.4'
+                    fontSize: '0.8rem',
+                    lineHeight: '1.3'
                   }}
                 >
                 {bouquet.description}
@@ -353,13 +353,13 @@ export const BouquetGrid = ({ bouquets, onBouquetClick }: BouquetGridProps) => {
                 {/* Tags */}
                 <ul 
                   style={{
-                    margin: '0 0 1rem',
+                    margin: '0 0 0.75rem',
                     padding: '0',
                     listStyleType: 'none',
                     display: 'flex',
                     alignItems: 'center',
                     flexWrap: 'wrap',
-                    gap: '0.5rem'
+                    gap: '0.375rem'
                   }}
                 >
                   {tags.map((tag, tagIndex) => (
@@ -370,8 +370,8 @@ export const BouquetGrid = ({ bouquets, onBouquetClick }: BouquetGridProps) => {
                         background: '#f0f0f0',
                         color: tag.color,
                         fontWeight: '700',
-                        fontSize: '0.7rem',
-                        padding: '0.3rem 0.5rem',
+                        fontSize: '0.65rem',
+                        padding: '0.25rem 0.4rem',
                         borderRadius: '0.188rem'
                       }}
                     >
@@ -391,7 +391,7 @@ export const BouquetGrid = ({ bouquets, onBouquetClick }: BouquetGridProps) => {
                 >
                   <span 
                     style={{
-                      fontSize: '1.5rem',
+                      fontSize: '1.25rem',
                       fontWeight: '700',
                       color: currentColor
                     }}
@@ -404,9 +404,9 @@ export const BouquetGrid = ({ bouquets, onBouquetClick }: BouquetGridProps) => {
                       background: currentColor,
                       color: '#fff',
                       border: 'none',
-                      borderRadius: '0.5rem',
-                      padding: '0.5rem 1rem',
-                      fontSize: '0.8rem',
+                      borderRadius: '0.4rem',
+                      padding: '0.4rem 0.8rem',
+                      fontSize: '0.75rem',
                       fontWeight: '600',
                       cursor: 'pointer',
                       transition: 'all 0.3s ease'
@@ -421,7 +421,7 @@ export const BouquetGrid = ({ bouquets, onBouquetClick }: BouquetGridProps) => {
                       });
                     }}
                   >
-                    <ShoppingCart style={{ width: '0.8rem', height: '0.8rem', marginRight: '0.25rem' }} />
+                    <ShoppingCart style={{ width: '0.7rem', height: '0.7rem', marginRight: '0.2rem' }} />
                     Add to Cart
                   </Button>
                 </div>

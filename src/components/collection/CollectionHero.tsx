@@ -94,7 +94,7 @@ export const CollectionHero = () => {
   return (
     <section 
       ref={heroRef}
-      className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16 sm:pt-20"
+      className="relative min-h-[85vh] flex items-center justify-center overflow-hidden pt-16 sm:pt-20"
       style={{
         background: `
           radial-gradient(circle at 20% 80%, hsl(var(--primary) / 0.05) 0%, transparent 50%),
@@ -138,8 +138,8 @@ export const CollectionHero = () => {
       <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-pulse-gold"></div>
       <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-primary/15 rounded-full blur-3xl animate-float"></div>
 
-      {/* Hero Content */}
-      <div className="relative z-20 text-center max-w-4xl mx-auto px-4">
+      {/* Hero Content - Moved upward */}
+      <div className="relative z-20 text-center max-w-4xl mx-auto px-4 -mt-20">
         <motion.div
           className="hero-title mb-8"
           initial={{ opacity: 0 }}
