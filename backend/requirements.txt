@@ -20,6 +20,10 @@ Pillow==10.2.0
 numpy==1.26.3
 requests==2.31.0
 
+# Training Dependencies (only needed for fine-tuning)
+datasets==2.16.1
+evaluate==0.4.1
+
 # Optional: For faster loading and better performance
 # xformers==0.0.23  # Uncomment for faster attention (GPU only, requires compilation)
 # bitsandbytes==0.41.3  # Uncomment for 8-bit optimization (reduces VRAM usage)

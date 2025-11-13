@@ -32,6 +32,7 @@ pipeline = None
 
 # Configuration
 MODEL_ID = "runwayml/stable-diffusion-v1-5"  # You can also use "stabilityai/stable-diffusion-2-1"
+LORA_WEIGHTS_PATH = "fine_tuned_model/final/lora_weights.pt"  # Path to fine-tuned LoRA weights
 OUTPUT_DIR = "generated_images"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
@@ -76,6 +77,29 @@ def load_model():
             pipeline.enable_attention_slicing()
             # Uncomment if you have limited VRAM (< 8GB)
             # pipeline.enable_sequential_cpu_offload()
+        
+        # Load fine-tuned LoRA weights if available
+        if os.path.exists(LORA_WEIGHTS_PATH):
+            logger.info(f"🎨 Loading fine-tuned LoRA weights from: {LORA_WEIGHTS_PATH}")
+            try:
+                from diffusers.models.attention_processor import LoRAAttnProcessor
+                from diffusers.loaders import AttnProcsLayers
+                
+                # Load LoRA state dict
+                lora_state_dict = torch.load(LORA_WEIGHTS_PATH, map_location=device)
+                
+                # Apply LoRA weights to UNet
+                pipeline.unet.load_state_dict(lora_state_dict, strict=False)
+                
+                logger.info("✅ Fine-tuned LoRA weights loaded successfully!")
+                logger.info("   Your AI will now generate in BEXY FLOWERS STYLE! 🌸")
+            except Exception as e:
+                logger.warning(f"⚠️  Could not load LoRA weights: {str(e)}")
+                logger.info("   Continuing with base model...")
+        else:
+            logger.info("ℹ️  No fine-tuned weights found. Using base model.")
+            logger.info(f"   To use custom Bexy Flowers style, train a model:")
+            logger.info("   python train_model.py")
         
         logger.info("✅ Model loaded successfully!")
         
