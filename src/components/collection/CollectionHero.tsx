@@ -1,13 +1,33 @@
-import { useEffect, useRef } from "react";
-import { motion } from "framer-motion";
+import { useEffect, useRef, useMemo } from "react";
+import { motion, useReducedMotion } from "framer-motion";
 import { gsap } from "gsap";
 import heroBackground from "@/assets/hero-bg.jpg";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export const CollectionHero = () => {
   const heroRef = useRef<HTMLElement>(null);
   const particlesRef = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile();
+  const shouldReduceMotion = useReducedMotion();
+  
+  const prefersReducedMotion = useMemo(() => 
+    typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+    []
+  );
 
   useEffect(() => {
+    // Skip heavy animations on mobile or reduced motion
+    if (isMobile || prefersReducedMotion || shouldReduceMotion) {
+      gsap.set([".hero-title .char", ".hero-subtitle", ".hero-description", ".subtitle-underline"], { 
+        opacity: 1, 
+        y: 0, 
+        rotateX: 0,
+        filter: "blur(0px)",
+        scale: 1,
+        clipPath: "inset(0 0% 0 0%)"
+      });
+      return;
+    }
     // Prepare states for staged reveal
     gsap.set([".hero-subtitle"], { opacity: 0, y: 20, filter: "blur(6px)" });
     gsap.set([".hero-description"], {
@@ -54,8 +74,8 @@ export const CollectionHero = () => {
       ease: "power3.out"
     }, "+=0.1");
 
-    // Floating particles animation
-    if (particlesRef.current) {
+    // Floating particles animation - Disabled on mobile
+    if (!isMobile && particlesRef.current) {
       const particles = particlesRef.current.children;
       gsap.set(particles, {
         x: () => gsap.utils.random(-200, 200),
@@ -70,10 +90,11 @@ export const CollectionHero = () => {
         duration: () => gsap.utils.random(10, 20),
         ease: "none",
         repeat: -1,
-        stagger: { each: 0.5, repeat: -1 }
+        stagger: { each: 0.5, repeat: -1 },
+        force3D: true
       });
     }
-  }, []);
+  }, [isMobile, prefersReducedMotion, shouldReduceMotion]);
 
   const splitText = (text: string) => {
     return text.split("").map((char, i) => (
@@ -100,53 +121,71 @@ export const CollectionHero = () => {
           radial-gradient(circle at 20% 80%, hsl(var(--primary) / 0.05) 0%, transparent 50%),
           radial-gradient(circle at 80% 20%, hsl(var(--primary) / 0.08) 0%, transparent 50%),
           radial-gradient(circle at 40% 40%, hsl(var(--primary) / 0.03) 0%, transparent 50%)
-        `
+        `,
+        minHeight: isMobile ? '75vh' : '85vh'
       }}
     >
-      {/* Background Image with Parallax Effect */}
+      {/* Background Image with Parallax Effect - Reduced on mobile */}
       <motion.div
         className="absolute inset-0 z-0"
-        initial={{ scale: 1.1 }}
+        initial={{ scale: shouldReduceMotion || isMobile ? 1 : 1.1 }}
         animate={{ scale: 1 }}
-        transition={{ duration: 20, ease: "linear", repeat: Infinity, repeatType: "reverse" }}
+        transition={{ 
+          duration: shouldReduceMotion || isMobile ? 0 : 20, 
+          ease: "linear", 
+          repeat: shouldReduceMotion || isMobile ? 0 : Infinity, 
+          repeatType: "reverse" 
+        }}
+        style={{ willChange: shouldReduceMotion || isMobile ? "auto" : "transform" }}
       >
         <img
           src={heroBackground}
           alt="Luxury floral background"
           className="w-full h-full object-cover opacity-40"
+          loading="eager"
+          decoding="async"
+          style={{ willChange: "auto" }}
         />
       </motion.div>
 
       {/* Gradient Overlay */}
       <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/50 to-background/70 z-10" />
 
-      {/* Floating Particles Background */}
-      <div ref={particlesRef} className="absolute inset-0 pointer-events-none z-15" aria-hidden="true">
-        {Array.from({ length: 20 }, (_, i) => (
-          <motion.div
-            key={i}
-            className="absolute w-1 h-1 bg-primary rounded-full"
-            style={{
-              filter: "blur(0.5px)",
-              boxShadow: "0 0 10px hsl(var(--primary))"
-            }}
-          />
-        ))}
-      </div>
+      {/* Floating Particles Background - Reduced on mobile */}
+      {!isMobile && (
+        <div ref={particlesRef} className="absolute inset-0 pointer-events-none z-15" aria-hidden="true">
+          {Array.from({ length: 20 }, (_, i) => (
+            <motion.div
+              key={i}
+              className="absolute w-1 h-1 bg-primary rounded-full"
+              style={{
+                filter: "blur(0.5px)",
+                boxShadow: "0 0 10px hsl(var(--primary))",
+                willChange: "transform"
+              }}
+            />
+          ))}
+        </div>
+      )}
 
-      {/* Gradient Orbs */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-pulse-gold"></div>
-      <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-primary/15 rounded-full blur-3xl animate-float"></div>
+      {/* Gradient Orbs - Hidden on mobile */}
+      {!isMobile && (
+        <>
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-pulse-gold"></div>
+          <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-primary/15 rounded-full blur-3xl animate-float"></div>
+        </>
+      )}
 
       {/* Hero Content - Moved upward */}
-      <div className="relative z-20 text-center max-w-4xl mx-auto px-4 -mt-20">
+      <div className="relative z-20 text-center max-w-4xl mx-auto px-4 xs:px-5 sm:px-6 lg:px-8 -mt-12 sm:-mt-16 md:-mt-20">
         <motion.div
-          className="hero-title mb-8"
+          className="hero-title mb-6 sm:mb-8"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.1 }}
+          transition={{ delay: shouldReduceMotion || isMobile ? 0 : 0.1 }}
+          style={{ willChange: shouldReduceMotion || isMobile ? "auto" : "opacity" }}
         >
-          <h1 className="text-6xl lg:text-8xl font-luxury text-foreground leading-tight">
+          <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-luxury text-foreground leading-tight px-2 sm:px-0">
             {splitText("Our Complete")}
             <br />
             <span className="text-primary">
@@ -156,7 +195,7 @@ export const CollectionHero = () => {
         </motion.div>
 
         <motion.p 
-          className="hero-subtitle relative inline-block text-xl lg:text-2xl text-foreground/80 mb-6 font-body"
+          className="hero-subtitle relative inline-block text-base xs:text-lg sm:text-xl lg:text-2xl text-foreground/80 mb-4 sm:mb-6 font-body px-2 sm:px-0"
           initial={false}
           animate={false}
         >
@@ -169,8 +208,8 @@ export const CollectionHero = () => {
           initial={false}
           animate={false}
         >
-          <div className="bg-background/70 backdrop-blur-md border border-primary/20 rounded-xl shadow-gold px-6 py-5">
-            <p className="text-lg leading-relaxed text-foreground/90 font-body">
+          <div className="bg-background/70 backdrop-blur-md border border-primary/20 rounded-xl shadow-gold px-4 xs:px-5 sm:px-6 py-4 sm:py-5">
+            <p className="text-sm xs:text-base sm:text-lg leading-relaxed text-foreground/90 font-body">
             Discover our curated collection of artisanal bouquets, each carefully designed 
             to celebrate life's most beautiful moments with elegance and sophistication.
             </p>

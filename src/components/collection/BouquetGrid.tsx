@@ -55,26 +55,27 @@ export const BouquetGrid = ({ bouquets, onBouquetClick }: BouquetGridProps) => {
       // Reset previous animations
       gsap.set(cards, { clearProps: "all" });
       
-      // Staggered reveal animation
+      // Staggered reveal animation - optimized for performance
       gsap.fromTo(cards, 
         {
           opacity: 0,
-          y: 100,
-          scale: 0.8,
-          rotationX: -15
+          y: 50, // Reduced from 100 for better performance
+          scale: 0.95 // Reduced from 0.8 for less transform work
+          // Removed rotationX for better performance
         },
         {
           opacity: 1,
           y: 0,
           scale: 1,
-          rotationX: 0,
-          duration: 0.8,
+          duration: 0.6, // Reduced from 0.8
           ease: "power2.out",
-          stagger: 0.1,
+          stagger: 0.08, // Reduced from 0.1
+          force3D: true, // Use GPU acceleration
           scrollTrigger: {
             trigger: gridRef.current,
-            start: "top 80%",
-            toggleActions: "play none none reverse"
+            start: "top 85%", // Trigger slightly later
+            toggleActions: "play none none none", // Don't reverse on scroll up
+            refreshPriority: -1 // Lower priority for better scroll performance
           }
         }
       );

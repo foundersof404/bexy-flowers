@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useEffect, useRef, useState, useMemo } from 'react';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { 
   ShoppingCart, 
   Menu, 
@@ -66,20 +67,32 @@ const UltraNavigation = () => {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const { getTotalItems } = useCart();
   const cartItems = getTotalItems();
+  const isMobile = useIsMobile();
+  const shouldReduceMotion = useReducedMotion();
+  
+  const prefersReducedMotion = useMemo(() => 
+    typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+    []
+  );
 
   useEffect(() => {
     const nav = navRef.current;
     const logo = logoRef.current;
 
     if (nav && logo) {
-      // Initial logo animation
-      gsap.set(logo, { scale: 0, rotation: -180 });
-      gsap.to(logo, {
-        duration: 2,
-        scale: 1,
-        rotation: 0,
-        ease: "elastic.out(1, 0.3)"
-      });
+      // Initial logo animation - Simplified on mobile
+      if (isMobile || prefersReducedMotion || shouldReduceMotion) {
+        gsap.set(logo, { scale: 1, rotation: 0 });
+      } else {
+        gsap.set(logo, { scale: 0, rotation: -180 });
+        gsap.to(logo, {
+          duration: 2,
+          scale: 1,
+          rotation: 0,
+          ease: "elastic.out(1, 0.3)",
+          force3D: true
+        });
+      }
 
        // Set initial platinum background immediately - no transitions
        gsap.set(nav, {
@@ -89,26 +102,30 @@ const UltraNavigation = () => {
          immediateRender: true // Force immediate render
        });
 
-       // Scroll effect - maintain platinum background throughout
+       // Scroll effect - maintain platinum background throughout (optimized)
        ScrollTrigger.create({
          trigger: document.body,
          start: "top top",
          end: "bottom top",
+         refreshPriority: -2, // Lower priority for scroll performance
+         invalidateOnRefresh: false, // Don't recalculate on resize for better performance
          onUpdate: (self) => {
            setIsScrolled(self.progress > 0.1);
            
-           // Always maintain platinum background with slight opacity adjustment
-           gsap.to(nav, {
-             duration: 0.3,
-             backgroundColor: self.progress > 0.1 
-               ? "rgba(229, 228, 226, 0.98)" // Slightly more opaque when scrolled
-               : "rgba(229, 228, 226, 0.95)", // Slightly less opaque at top
-             backdropFilter: "blur(20px)",
-             boxShadow: self.progress > 0.1 
-               ? "0 8px 32px rgba(0,0,0,0.15)"
-               : "0 8px 32px rgba(0,0,0,0.1)",
-             ease: "power2.out"
-           });
+           // Throttle updates for better scroll performance
+           const opacity = self.progress > 0.1 ? 0.98 : 0.95;
+           
+           // Use CSS variables for better performance instead of direct style updates
+           nav.style.setProperty('--nav-opacity', opacity.toString());
+           nav.style.backgroundColor = `rgba(229, 228, 226, ${opacity})`;
+           
+           // Only update boxShadow if it actually changed
+           const newShadow = self.progress > 0.1 
+             ? "0 8px 32px rgba(0,0,0,0.15)"
+             : "0 8px 32px rgba(0,0,0,0.1)";
+           if (nav.style.boxShadow !== newShadow) {
+             nav.style.boxShadow = newShadow;
+           }
          }
        });
 
@@ -138,7 +155,7 @@ const UltraNavigation = () => {
     return () => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
-  }, []);
+  }, [isMobile, prefersReducedMotion, shouldReduceMotion]);
 
   const handleMenuToggle = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -171,14 +188,15 @@ const UltraNavigation = () => {
     <>
 
        <nav
-         ref={navRef}
-         className="ultra-navigation fixed top-0 left-0 right-0 z-50 backdrop-blur-xl shadow-luxury"
-         style={{
-           backgroundColor: 'transparent', // Make header transparent
-           transition: 'none' // Remove transition to prevent black flash
-         }}
-       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
+         ref=      {navRef}
+        className="ultra-navigation fixed top-0 left-0 right-0 z-50 backdrop-blur-xl shadow-luxury"
+        style={{
+          backgroundColor: 'transparent', // Make header transparent
+          transition: 'none' // Remove transition to prevent black flash
+          // Removed will-change as it causes performance issues with scroll
+        }}
+      >
+        <div className="max-w-7xl mx-auto px-3 xs:px-4 sm:px-6 py-2 xs:py-3 sm:py-4">
           <div className="flex items-center justify-between">
             
             {/* Logo and Brand */}
@@ -247,7 +265,7 @@ const UltraNavigation = () => {
                       {/* Icon with Advanced 3D Hover Effects */}
                       <motion.span 
                         className="transition-all duration-500 relative"
-                        whileHover={{ 
+                        whileHover={isMobile || shouldReduceMotion ? {} : { 
                           scale: 1.2, 
                           rotateY: [0, 15, -15, 0],
                           rotateX: [0, 10, -10, 0],
@@ -255,11 +273,12 @@ const UltraNavigation = () => {
                           filter: "drop-shadow(0 0 8px rgba(196,166,105,0.6))"
                         }}
                         transition={{ 
-                          duration: 0.8, 
+                          duration: shouldReduceMotion ? 0 : 0.8, 
                           ease: [0.23, 1, 0.32, 1],
-                          rotateY: { duration: 0.6, repeat: 1, repeatType: "reverse" },
-                          rotateX: { duration: 0.6, repeat: 1, repeatType: "reverse" }
+                          rotateY: shouldReduceMotion ? {} : { duration: 0.6, repeat: 1, repeatType: "reverse" },
+                          rotateX: shouldReduceMotion ? {} : { duration: 0.6, repeat: 1, repeatType: "reverse" }
                         }}
+                        style={{ willChange: isMobile || shouldReduceMotion ? "auto" : "transform" }}
                       >
                         {item.icon}
                         

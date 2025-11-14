@@ -480,6 +480,96 @@ All colors MUST be HSL. No rounded corners - sharp and architectural.
     }
   }
 
+  /* Performance Optimizations */
+  /* Use GPU acceleration for smooth animations */
+  * {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Optimize animations with will-change - Only when actively animating */
+  /* Don't apply will-change globally as it causes performance issues */
+  @media (prefers-reduced-motion: no-preference) {
+    [data-animate],
+    .animate-element {
+      /* Only use will-change when actively animating, remove after animation */
+      transform: translateZ(0);
+      backface-visibility: hidden;
+    }
+  }
+
+  /* Disable animations for users who prefer reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* Optimize image rendering */
+  img {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+    transform: translateZ(0);
+  }
+
+  /* Smooth scrolling - Handled by Lenis, disable native smooth scroll to avoid conflicts */
+  html {
+    scroll-behavior: auto; /* Let Lenis handle smooth scrolling */
+  }
+  
+  /* Improve scroll performance */
+  html,
+  body {
+    overflow-x: hidden;
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Container optimization */
+  .container,
+  .max-w-container {
+    contain: layout style paint;
+  }
+
+  /* Reduce repaints on mobile */
+  @media (max-width: 768px) {
+    body {
+      -webkit-overflow-scrolling: touch;
+      /* Reduce composite layers for better scroll performance */
+      transform: translateZ(0);
+    }
+    
+    /* Simplify shadows on mobile for better performance */
+    .shadow-lg,
+    .shadow-xl,
+    .shadow-2xl {
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+    
+    /* Disable backdrop blur on mobile for better scroll performance */
+    .backdrop-blur-xl,
+    .backdrop-blur-lg,
+    .backdrop-blur-md {
+      backdrop-filter: none !important;
+      background-color: rgba(229, 228, 226, 0.95) !important;
+    }
+  }
+  
+  /* Optimize backdrop blur on desktop - reduce intensity */
+  @media (min-width: 769px) {
+    .backdrop-blur-xl {
+      backdrop-filter: blur(12px); /* Reduced from default */
+    }
+    .backdrop-blur-lg {
+      backdrop-filter: blur(8px);
+    }
+  }
+
   /* Flower Button Styling */
   .flower-button {
     position: relative;

@@ -1,10 +1,11 @@
-import { useEffect, useRef } from 'react';
-import { motion, useAnimation } from 'framer-motion';
+import { useEffect, useRef, useMemo } from 'react';
+import { motion, useAnimation, useReducedMotion } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import heroBackground from '@/assets/hero-bg.jpg';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -14,6 +15,13 @@ const UltraHero = () => {
   const subtitleRef = useRef<HTMLParagraphElement>(null);
   const buttonRef = useRef<HTMLDivElement>(null);
   const controls = useAnimation();
+  const isMobile = useIsMobile();
+  const shouldReduceMotion = useReducedMotion();
+  
+  const prefersReducedMotion = useMemo(() => 
+    typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+    []
+  );
 
   useEffect(() => {
     const hero = heroRef.current;
@@ -21,6 +29,12 @@ const UltraHero = () => {
     const subtitle = subtitleRef.current;
     const button = buttonRef.current;
     if (hero && title && subtitle && button) {
+      
+      // Skip heavy animations on mobile or reduced motion
+      if (isMobile || prefersReducedMotion) {
+        gsap.set([title, subtitle, button], { y: 0, opacity: 1 });
+        return;
+      }
       // Initial animation sequence
       const tl = gsap.timeline();
       
@@ -61,45 +75,53 @@ const UltraHero = () => {
           }
         }, "-=0.3");
 
-      // Parallax scroll effect
-      ScrollTrigger.create({
-        trigger: hero,
-        start: "top top",
-        end: "bottom top",
-        scrub: 1,
-        onUpdate: (self) => {
-          const progress = self.progress;
-          gsap.to(hero, {
-            duration: 0.1,
-            y: progress * -200,
-            scale: 1 + progress * 0.1,
-            ease: "none"
-          });
-        }
-      });
-
-      // Beautiful 3D rotation effect for flower image on scroll
-      const flowerImage = hero.querySelector('img[alt="Beautiful Flower"]');
-      if (flowerImage) {
+      // Parallax scroll effect - Disabled on mobile
+      if (!isMobile) {
         ScrollTrigger.create({
           trigger: hero,
-          start: "top center",
-          end: "bottom center",
-          scrub: 0.5,
+          start: "top top",
+          end: "bottom top",
+          scrub: 1,
+          refreshPriority: -1,
           onUpdate: (self) => {
             const progress = self.progress;
-            const smoothProgress = progress * progress * (3 - 2 * progress); // Smooth easing
-            
-            gsap.to(flowerImage, {
+            gsap.to(hero, {
               duration: 0.1,
-              rotateY: smoothProgress * 720, // Two full rotations
-              rotateX: Math.sin(progress * Math.PI * 2) * 10, // Gentle X rotation
-              rotateZ: Math.sin(progress * Math.PI) * 5, // Subtle Z rotation
-              scale: 1 + Math.sin(progress * Math.PI) * 0.05, // Subtle scale breathing
-              ease: "none"
+              y: progress * -200,
+              scale: 1 + progress * 0.1,
+              ease: "none",
+              force3D: true
             });
           }
         });
+      }
+
+      // Beautiful 3D rotation effect for flower image on scroll - Disabled on mobile
+      if (!isMobile) {
+        const flowerImage = hero.querySelector('img[alt="Beautiful Flower"]');
+        if (flowerImage) {
+          ScrollTrigger.create({
+            trigger: hero,
+            start: "top center",
+            end: "bottom center",
+            scrub: 0.5,
+            refreshPriority: -1,
+            onUpdate: (self) => {
+              const progress = self.progress;
+              const smoothProgress = progress * progress * (3 - 2 * progress); // Smooth easing
+              
+              gsap.to(flowerImage, {
+                duration: 0.1,
+                rotateY: smoothProgress * 720, // Two full rotations
+                rotateX: Math.sin(progress * Math.PI * 2) * 10, // Gentle X rotation
+                rotateZ: Math.sin(progress * Math.PI) * 5, // Subtle Z rotation
+                scale: 1 + Math.sin(progress * Math.PI) * 0.05, // Subtle scale breathing
+                ease: "none",
+                force3D: true
+              });
+            }
+          });
+        }
       }
 
       // Floating elements animation
@@ -120,12 +142,13 @@ const UltraHero = () => {
     return () => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
-  }, []);
+  }, [isMobile, prefersReducedMotion]);
 
   return (
     <section 
       ref={heroRef}
-      className="relative min-h-screen flex items-center justify-center overflow-hidden perspective-1000 pt-8 -mt-20"
+      className="relative min-h-screen flex items-center justify-center overflow-hidden perspective-1000 pt-16 sm:pt-8 -mt-20"
+      style={{ minHeight: isMobile ? '90vh' : '100vh' }}
     >
       {/* Background Image with 3D Parallax */}
       <div className="absolute inset-0 z-0 -top-4">
@@ -133,10 +156,18 @@ const UltraHero = () => {
           src={heroBackground}
           alt="Luxury floral background"
           className="w-full h-full object-cover opacity-20 transform-3d shadow-gold"
-          initial={{ scale: 1.2, rotateX: -5 }}
+          initial={{ scale: shouldReduceMotion || isMobile ? 1 : 1.2, rotateX: shouldReduceMotion || isMobile ? 0 : -5 }}
           whileInView={{ scale: 1, rotateX: 0 }}
           viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 20, ease: "linear", repeat: Infinity, repeatType: "reverse" }}
+          transition={{ 
+            duration: shouldReduceMotion || isMobile ? 0 : 20, 
+            ease: "linear", 
+            repeat: shouldReduceMotion || isMobile ? 0 : Infinity, 
+            repeatType: "reverse" 
+          }}
+          loading="eager"
+          decoding="async"
+          style={{ willChange: shouldReduceMotion || isMobile ? "auto" : "transform" }}
         />
         <div className="absolute inset-0 -top-4 bg-gradient-to-b from-background/90 via-background/70 to-background/90" />
       </div>
@@ -145,30 +176,31 @@ const UltraHero = () => {
       
 
       {/* Modern Hero Content */}
-      <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid lg:grid-cols-2 gap-8 sm:gap-10 lg:gap-12 items-center min-h-[70vh] sm:min-h-[75vh] lg:min-h-[80vh]">
+      <div className="relative z-20 max-w-7xl mx-auto px-4 xs:px-5 sm:px-6 lg:px-8 w-full">
+        <div className={`grid ${isMobile ? 'grid-cols-1' : 'lg:grid-cols-2'} gap-6 sm:gap-8 lg:gap-10 xl:gap-12 items-center ${isMobile ? 'min-h-[60vh]' : 'min-h-[70vh] sm:min-h-[75vh] lg:min-h-[80vh]'}`}>
           
           {/* Left Content */}
-          <div className="space-y-6 sm:space-y-8">
+          <div className={`space-y-4 ${isMobile ? 'space-y-4' : 'sm:space-y-6 lg:space-y-8'} text-center lg:text-left`}>
              <motion.div
                ref={titleRef}
                className="overflow-hidden"
-               initial={{ opacity: 0, x: -100, scale: 0.9 }}
+               initial={{ opacity: 0, x: shouldReduceMotion || isMobile ? 0 : -100, scale: shouldReduceMotion || isMobile ? 1 : 0.9 }}
                animate={{ opacity: 1, x: 0, scale: 1 }}
                transition={{ 
-                 duration: 1.5, 
-                 delay: 0.2,
-                 type: "spring",
-                 stiffness: 60,
-                 damping: 15
+                 duration: shouldReduceMotion || isMobile ? 0 : 1.5, 
+                 delay: shouldReduceMotion || isMobile ? 0 : 0.2,
+                 type: shouldReduceMotion || isMobile ? "tween" : "spring",
+                 stiffness: shouldReduceMotion || isMobile ? undefined : 60,
+                 damping: shouldReduceMotion || isMobile ? undefined : 15
                }}
+               style={{ willChange: shouldReduceMotion || isMobile ? "auto" : "transform, opacity" }}
              >
-               {/* Main Title with Character-by-Character Animation */}
+               {/* Main Title with Character-by-Character Animation - Simplified on mobile */}
                <motion.h1 
-                 className="font-luxury text-3xl sm:text-4xl lg:text-6xl font-black text-foreground leading-tight mb-4"
+                 className="font-luxury text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-foreground leading-tight mb-3 sm:mb-4 px-2 sm:px-0"
                  initial={{ opacity: 0 }}
                  animate={{ opacity: 1 }}
-                 transition={{ duration: 0.1, delay: 0.4 }}
+                 transition={{ duration: shouldReduceMotion || isMobile ? 0 : 0.1, delay: shouldReduceMotion || isMobile ? 0 : 0.4 }}
                >
                  <motion.span 
                    className="inline-block relative overflow-hidden"
@@ -185,17 +217,17 @@ const UltraHero = () => {
                      transition={{ duration: 2, delay: 1.5, ease: "easeInOut" }}
                    />
                    
-                   {/* Text with staggered character animation */}
+                   {/* Text with staggered character animation - Simplified on mobile */}
                    <span className="relative z-10">
                      {"Elegant Flowers for   Every Occasion".split("").map((char, index) => (
                        <motion.span
                          key={index}
                          className="inline-block"
                          initial={{ 
-                           opacity: 0, 
-                           y: 50, 
-                           rotateX: -90,
-                           filter: "blur(10px)"
+                           opacity: shouldReduceMotion || isMobile ? 1 : 0, 
+                           y: shouldReduceMotion || isMobile ? 0 : 50, 
+                           rotateX: shouldReduceMotion || isMobile ? 0 : -90,
+                           filter: shouldReduceMotion || isMobile ? "blur(0px)" : "blur(10px)"
                          }}
                          animate={{ 
                            opacity: 1, 
@@ -204,16 +236,17 @@ const UltraHero = () => {
                            filter: "blur(0px)"
                          }}
                          transition={{ 
-                           duration: 0.6,
-                           delay: 0.5 + index * 0.05,
+                           duration: shouldReduceMotion || isMobile ? 0 : 0.6,
+                           delay: shouldReduceMotion || isMobile ? 0 : 0.5 + index * 0.05,
                            ease: [0.25, 0.46, 0.45, 0.94]
                          }}
-                         whileHover={{
+                         whileHover={isMobile ? {} : {
                            scale: 1.1,
                            color: "#c6a151",
                            textShadow: "0 0 20px rgba(198,161,81,0.5)",
                            transition: { duration: 0.2 }
                          }}
+                         style={{ willChange: shouldReduceMotion || isMobile ? "auto" : "transform, filter" }}
                        >
                          {char === " " ? "\u00A0" : char}
                        </motion.span>
@@ -242,15 +275,17 @@ const UltraHero = () => {
                {/* Subtitle with elegant reveal */}
                <motion.div
                  className="relative overflow-hidden"
-                 initial={{ opacity: 0, y: 30 }}
+                 initial={{ opacity: 0, y: shouldReduceMotion || isMobile ? 0 : 30 }}
                  animate={{ opacity: 1, y: 0 }}
-                 transition={{ duration: 1, delay: 0.8 }}
+                 transition={{ duration: shouldReduceMotion || isMobile ? 0 : 1, delay: shouldReduceMotion || isMobile ? 0 : 0.8 }}
+                 style={{ willChange: shouldReduceMotion || isMobile ? "auto" : "transform, opacity" }}
                >
                 <motion.p 
-                  className="font-serif text-base sm:text-lg text-primary/100 font-light tracking-wide mb-2 relative"
-                   initial={{ opacity: 0.5, x: -50 }}
+                  className="font-serif text-sm xs:text-base sm:text-lg text-primary/100 font-light tracking-wide mb-2 relative px-2 sm:px-0"
+                   initial={{ opacity: shouldReduceMotion || isMobile ? 1 : 0.5, x: shouldReduceMotion || isMobile ? 0 : -50 }}
                    animate={{ opacity: 1, x: 0 }}
-                   transition={{ duration: 1.2, delay: 1, ease: "easeOut" }}
+                   transition={{ duration: shouldReduceMotion || isMobile ? 0 : 1.2, delay: shouldReduceMotion || isMobile ? 0 : 1, ease: "easeOut" }}
+                   style={{ willChange: shouldReduceMotion || isMobile ? "auto" : "transform, opacity" }}
                 >
                   <motion.span
                     className="inline-block drop-shadow-[0_2px_6px_rgba(0,0,0,0.7)] drop-shadow-md"
@@ -281,15 +316,17 @@ const UltraHero = () => {
                {/* Description with typewriter effect */}
                <motion.div
                  className="relative overflow-hidden"
-                 initial={{ opacity: 0, y: 30 }}
+                 initial={{ opacity: 0, y: shouldReduceMotion || isMobile ? 0 : 30 }}
                  animate={{ opacity: 1, y: 0 }}
-                 transition={{ duration: 1, delay: 1.2 }}
+                 transition={{ duration: shouldReduceMotion || isMobile ? 0 : 1, delay: shouldReduceMotion || isMobile ? 0 : 1.2 }}
+                 style={{ willChange: shouldReduceMotion || isMobile ? "auto" : "transform, opacity" }}
                >
                  <motion.p 
-                   className="font-body text-sm sm:text-base text-muted-foreground leading-relaxed max-w-2xl relative"
-                   initial={{ opacity: 0 }}
+                   className="font-body text-xs xs:text-sm sm:text-base text-muted-foreground leading-relaxed max-w-2xl relative px-2 sm:px-0"
+                   initial={{ opacity: shouldReduceMotion || isMobile ? 1 : 0 }}
                    animate={{ opacity: 1 }}
-                   transition={{ duration: 0.5, delay: 1.4 }}
+                   transition={{ duration: shouldReduceMotion || isMobile ? 0 : 0.5, delay: shouldReduceMotion || isMobile ? 0 : 1.4 }}
+                   style={{ willChange: shouldReduceMotion || isMobile ? "auto" : "opacity" }}
                  >
                    <motion.span
                      className="inline-block"
@@ -318,16 +355,17 @@ const UltraHero = () => {
             {/* Action Buttons */}
             <motion.div
               ref={buttonRef}
-              className="flex flex-col sm:flex-row gap-3 sm:gap-4"
-              initial={{ opacity: 0, y: 30, scale: 0.9 }}
+              className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start"
+              initial={{ opacity: 0, y: shouldReduceMotion || isMobile ? 0 : 30, scale: shouldReduceMotion || isMobile ? 1 : 0.9 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               transition={{ 
-                duration: 1, 
-                delay: 0.6,
-                type: "spring",
-                stiffness: 100,
-                damping: 15
+                duration: shouldReduceMotion || isMobile ? 0 : 1, 
+                delay: shouldReduceMotion || isMobile ? 0 : 0.6,
+                type: shouldReduceMotion || isMobile ? "tween" : "spring",
+                stiffness: shouldReduceMotion || isMobile ? undefined : 100,
+                damping: shouldReduceMotion || isMobile ? undefined : 15
               }}
+              style={{ willChange: shouldReduceMotion || isMobile ? "auto" : "transform, opacity" }}
             >
               <motion.div
                 whileHover={{ 
@@ -339,7 +377,7 @@ const UltraHero = () => {
               >
                 <Button
                   size="lg"
-                  className="font-body text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-[rgb(209,162,73)] via-[rgb(229,182,93)] to-[rgb(209,162,73)] text-white font-semibold shadow-lg hover:shadow-xl hover:shadow-[rgba(209,162,73,0.3)] transition-all duration-300 rounded-full relative overflow-hidden group"
+                  className="font-body text-sm xs:text-base sm:text-lg px-5 xs:px-6 sm:px-8 py-2.5 xs:py-3 sm:py-4 bg-gradient-to-r from-[rgb(209,162,73)] via-[rgb(229,182,93)] to-[rgb(209,162,73)] text-white font-semibold shadow-lg hover:shadow-xl hover:shadow-[rgba(209,162,73,0.3)] transition-all duration-300 rounded-full relative overflow-hidden group touch-target min-h-[44px] sm:min-h-[auto] w-full sm:w-auto"
                   onClick={() => {
                     const el = document.querySelector('[data-section="signature-collection"]');
                     if (el) {
@@ -374,7 +412,7 @@ const UltraHero = () => {
                 <Button
                   size="lg"
                   variant="outline"
-                  className="font-body text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 border-2 border-muted-foreground/30 text-muted-foreground hover:border-primary hover:bg-primary/5 hover:text-primary transition-all duration-300 rounded-full backdrop-blur-sm relative overflow-hidden group"
+                  className="font-body text-sm xs:text-base sm:text-lg px-5 xs:px-6 sm:px-8 py-2.5 xs:py-3 sm:py-4 border-2 border-muted-foreground/30 text-muted-foreground hover:border-primary hover:bg-primary/5 hover:text-primary transition-all duration-300 rounded-full backdrop-blur-sm relative overflow-hidden group touch-target min-h-[44px] sm:min-h-[auto] w-full sm:w-auto"
                   onClick={() => {
                     const el = document.querySelector('[data-section="custom-bouquet"]');
                     if (el) {
@@ -401,40 +439,42 @@ const UltraHero = () => {
 
              {/* Statistics with Enhanced Animations */}
              <motion.div
-               className="grid grid-cols-3 gap-4 sm:gap-6 lg:gap-8 pt-6 sm:pt-8"
-               initial={{ opacity: 0, y: 50, scale: 0.9 }}
+               className="grid grid-cols-3 gap-2 xs:gap-3 sm:gap-4 lg:gap-6 xl:gap-8 pt-4 sm:pt-6 lg:pt-8"
+               initial={{ opacity: 0, y: shouldReduceMotion || isMobile ? 0 : 50, scale: shouldReduceMotion || isMobile ? 1 : 0.9 }}
                animate={{ opacity: 1, y: 0, scale: 1 }}
                transition={{ 
-                 duration: 1.2, 
-                 delay: 1.8,
-                 type: "spring",
-                 stiffness: 60,
-                 damping: 15
+                 duration: shouldReduceMotion || isMobile ? 0 : 1.2, 
+                 delay: shouldReduceMotion || isMobile ? 0 : 1.8,
+                 type: shouldReduceMotion || isMobile ? "tween" : "spring",
+                 stiffness: shouldReduceMotion || isMobile ? undefined : 60,
+                 damping: shouldReduceMotion || isMobile ? undefined : 15
                }}
+               style={{ willChange: shouldReduceMotion || isMobile ? "auto" : "transform, opacity" }}
              >
                {[
                  { number: "1+", label: "years experience", color: "#c6a151" },
                  { number: "100+", label: "flowers", color: "#ffd700" },
                  { number: "98%", label: "satisfied rate", color: "#e4b55c" }
                ].map((stat, index) => (
-                 <motion.div 
+                  <motion.div 
                    key={index}
                    className="text-center group cursor-pointer relative"
-                   initial={{ opacity: 0, y: 30, rotateX: -45 }}
+                   initial={{ opacity: 0, y: shouldReduceMotion || isMobile ? 0 : 30, rotateX: shouldReduceMotion || isMobile ? 0 : -45 }}
                    animate={{ opacity: 1, y: 0, rotateX: 0 }}
                    transition={{ 
-                     duration: 0.8, 
-                     delay: 2 + index * 0.3,
-                     type: "spring",
-                     stiffness: 100,
-                     damping: 15
+                     duration: shouldReduceMotion || isMobile ? 0 : 0.8, 
+                     delay: shouldReduceMotion || isMobile ? 0 : 2 + index * 0.3,
+                     type: shouldReduceMotion || isMobile ? "tween" : "spring",
+                     stiffness: shouldReduceMotion || isMobile ? undefined : 100,
+                     damping: shouldReduceMotion || isMobile ? undefined : 15
                    }}
-                   whileHover={{ 
+                   whileHover={isMobile ? {} : { 
                      scale: 1.08,
                      y: -8,
                      rotateY: 5,
                      transition: { duration: 0.4, ease: "easeOut" }
                    }}
+                   style={{ willChange: shouldReduceMotion || isMobile ? "auto" : "transform, opacity" }}
                  >
                    {/* Background glow effect */}
                    <motion.div
@@ -451,22 +491,23 @@ const UltraHero = () => {
                    
                    {/* Number with counting animation */}
                    <motion.div 
-                     className="font-luxury text-3xl lg:text-4xl font-bold text-foreground relative z-10"
-                     initial={{ scale: 0.5, opacity: 0 }}
+                     className="font-luxury text-xl xs:text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground relative z-10"
+                     initial={{ scale: shouldReduceMotion || isMobile ? 1 : 0.5, opacity: shouldReduceMotion || isMobile ? 1 : 0 }}
                      animate={{ scale: 1, opacity: 1 }}
                      transition={{ 
-                       duration: 0.8, 
-                       delay: 2.2 + index * 0.3,
-                       type: "spring",
-                       stiffness: 200,
-                       damping: 15
+                       duration: shouldReduceMotion || isMobile ? 0 : 0.8, 
+                       delay: shouldReduceMotion || isMobile ? 0 : 2.2 + index * 0.3,
+                       type: shouldReduceMotion || isMobile ? "tween" : "spring",
+                       stiffness: shouldReduceMotion || isMobile ? undefined : 200,
+                       damping: shouldReduceMotion || isMobile ? undefined : 15
                      }}
-                     whileHover={{ 
+                     whileHover={isMobile ? {} : { 
                        color: stat.color,
                        scale: 1.1,
                        textShadow: `0 0 20px ${stat.color}40`,
                        transition: { duration: 0.3 }
                      }}
+                     style={{ willChange: shouldReduceMotion || isMobile ? "auto" : "transform, opacity" }}
                    >
                      <motion.span
                        initial={{ opacity: 0, y: 20 }}
@@ -493,15 +534,16 @@ const UltraHero = () => {
                    
                    {/* Label with typewriter effect */}
                    <motion.div 
-                     className="font-body text-sm text-muted-foreground mt-2 relative z-10"
-                     initial={{ opacity: 0, y: 10 }}
+                     className="font-body text-xs xs:text-sm text-muted-foreground mt-1 sm:mt-2 relative z-10"
+                     initial={{ opacity: shouldReduceMotion || isMobile ? 1 : 0, y: shouldReduceMotion || isMobile ? 0 : 10 }}
                      animate={{ opacity: 1, y: 0 }}
-                     transition={{ duration: 0.6, delay: 2.6 + index * 0.3 }}
-                     whileHover={{ 
+                     transition={{ duration: shouldReduceMotion || isMobile ? 0 : 0.6, delay: shouldReduceMotion || isMobile ? 0 : 2.6 + index * 0.3 }}
+                     whileHover={isMobile ? {} : { 
                        color: stat.color,
                        scale: 1.05,
                        transition: { duration: 0.3 }
                      }}
+                     style={{ willChange: shouldReduceMotion || isMobile ? "auto" : "transform, opacity" }}
                    >
                      <motion.span
                        className="inline-block"
@@ -532,15 +574,15 @@ const UltraHero = () => {
              </motion.div>
           </div>
 
-          {/* Right Content */}
-          <div className="relative">
+          {/* Right Content - Hidden on mobile if single column */}
+          <div className={`relative ${isMobile ? 'hidden' : ''} lg:block`}>
             {/* Flower Image with Clean Transitions */}
             <motion.div
               className="relative"
               initial={{ 
-                opacity: 0, 
-                x: 300, 
-                scale: 0.8
+                opacity: shouldReduceMotion ? 1 : 0, 
+                x: shouldReduceMotion ? 0 : 300, 
+                scale: shouldReduceMotion ? 1 : 0.8
               }}
               animate={{ 
                 opacity: 1, 
@@ -548,12 +590,13 @@ const UltraHero = () => {
                 scale: 1
               }}
               transition={{ 
-                duration: 1.5, 
-                delay: 0.3,
+                duration: shouldReduceMotion ? 0 : 1.5, 
+                delay: shouldReduceMotion ? 0 : 0.3,
                 ease: [0.25, 0.46, 0.45, 0.94]
               }}
+              style={{ willChange: shouldReduceMotion ? "auto" : "transform, opacity" }}
             >
-              <div className="relative w-full h-96 lg:h-[500px] perspective-1000" style={{ transformStyle: "preserve-3d" }}>
+              <div className="relative w-full h-80 md:h-96 lg:h-[500px] perspective-1000" style={{ transformStyle: "preserve-3d", willChange: "transform" }}>
                 {/* Subtle glow effect */}
                 <motion.div 
                   className="absolute inset-0 bg-gradient-radial from-primary/20 via-primary/10 to-transparent rounded-full blur-3xl scale-110"
@@ -572,41 +615,45 @@ const UltraHero = () => {
                 <motion.img
                   src="/assets/flower1.jpg"
                   alt="Beautiful Flower"
-                  className="relative w-full h-full object-contain z-10 ml-8"
+                  className="relative w-full h-full object-contain z-10 ml-4 md:ml-6 lg:ml-8"
                   initial={{ 
-                    filter: "blur(8px) brightness(0.9) drop-shadow(0 0 15px rgba(228, 181, 92, 0.4)) drop-shadow(0 0 25px rgba(228, 181, 92, 0.2))",
-                    scale: 0.95
+                    filter: shouldReduceMotion ? "drop-shadow(0 20px 40px rgba(198,161,81,0.3))" : "blur(8px) brightness(0.9) drop-shadow(0 0 15px rgba(228, 181, 92, 0.4)) drop-shadow(0 0 25px rgba(228, 181, 92, 0.2))",
+                    scale: shouldReduceMotion ? 1 : 0.95
                   }}
                   animate={{ 
-                    filter: "blur(0px) brightness(1) drop-shadow(0 0 15px rgba(228, 181, 92, 0.4)) drop-shadow(0 0 25px rgba(228, 181, 92, 0.2))",
+                    filter: "drop-shadow(0 20px 40px rgba(198,161,81,0.3))",
                     scale: 1
                   }}
                   transition={{ 
-                    duration: 1.2, 
-                    delay: 0.5,
+                    duration: shouldReduceMotion ? 0 : 1.2, 
+                    delay: shouldReduceMotion ? 0 : 0.5,
                     ease: "easeOut"
                   }}
+                  loading="eager"
+                  decoding="async"
                   style={{
                     filter: "drop-shadow(0 20px 40px rgba(198,161,81,0.3))",
-                    transformStyle: "preserve-3d"
+                    transformStyle: "preserve-3d",
+                    willChange: shouldReduceMotion ? "auto" : "transform, filter"
                   }}
                 />
                 
               </div>
             </motion.div>
 
-            {/* Glassmorphism Service Cards */}
+            {/* Glassmorphism Service Cards - Hidden on smaller screens */}
             <motion.div
-              className="absolute -right-24 top-8 space-y-6"
-              initial={{ opacity: 0, x: 50, scale: 0.9 }}
+              className="absolute -right-12 md:-right-16 lg:-right-24 top-8 space-y-4 lg:space-y-6 hidden xl:block"
+              initial={{ opacity: 0, x: shouldReduceMotion ? 0 : 50, scale: shouldReduceMotion ? 1 : 0.9 }}
               animate={{ opacity: 1, x: 0, scale: 1 }}
               transition={{ 
-                duration: 1, 
-                delay: 0.5,
-                type: "spring",
-                stiffness: 80,
-                damping: 12
+                duration: shouldReduceMotion ? 0 : 1, 
+                delay: shouldReduceMotion ? 0 : 0.5,
+                type: shouldReduceMotion ? "tween" : "spring",
+                stiffness: shouldReduceMotion ? undefined : 80,
+                damping: shouldReduceMotion ? undefined : 12
               }}
+              style={{ willChange: shouldReduceMotion ? "auto" : "transform, opacity" }}
             >
               {[
                 { 
@@ -696,33 +743,38 @@ const UltraHero = () => {
         </div>
       </div>
 
-      {/* Advanced Scroll Indicator */}
-      <motion.div
-        className="absolute bottom-8 left-[47%] transform -translate-x-1/2 z-30"
-        initial={{ opacity: 0, y: -30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.2 }}
-        transition={{ duration: 1, delay: 2 }}
-      >
+      {/* Advanced Scroll Indicator - Hidden on mobile */}
+      {!isMobile && (
         <motion.div
-          animate={{ y: [0, 15, 0] }}
-          transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-          className="flex flex-col items-center text-muted-foreground cursor-pointer group"
-          onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}
+          className="absolute bottom-8 left-[47%] transform -translate-x-1/2 z-30"
+          initial={{ opacity: 0, y: shouldReduceMotion ? 0 : -30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: shouldReduceMotion ? 0 : 1, delay: shouldReduceMotion ? 0 : 2 }}
+          style={{ willChange: shouldReduceMotion ? "auto" : "transform, opacity" }}
         >
-          <span className="font-body text-sm mb-4 tracking-wide opacity-80 group-hover:opacity-100 transition-opacity">
-            DISCOVER LUXURY
-          </span>
-          <div className="relative">
-            <ChevronDown className="w-8 h-8 text-primary animate-pulse-gold" />
-            <motion.div
-              className="absolute inset-0 border-2 border-primary rounded-full"
-              animate={{ scale: [1, 1.5], opacity: [1, 0] }}
-              transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }}
-            />
-          </div>
+          <motion.div
+            animate={shouldReduceMotion ? {} : { y: [0, 15, 0] }}
+            transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+            className="flex flex-col items-center text-muted-foreground cursor-pointer group"
+            onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}
+          >
+            <span className="font-body text-xs sm:text-sm mb-4 tracking-wide opacity-80 group-hover:opacity-100 transition-opacity">
+              DISCOVER LUXURY
+            </span>
+            <div className="relative">
+              <ChevronDown className="w-6 h-6 sm:w-8 sm:h-8 text-primary animate-pulse-gold" />
+              {!shouldReduceMotion && (
+                <motion.div
+                  className="absolute inset-0 border-2 border-primary rounded-full"
+                  animate={{ scale: [1, 1.5], opacity: [1, 0] }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }}
+                />
+              )}
+            </div>
+          </motion.div>
         </motion.div>
-      </motion.div>
+      )}
     </section>
   );
 };
