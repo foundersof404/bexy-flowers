@@ -248,7 +248,7 @@ const UltraFeaturedBouquets = () => {
 
         <div className="flex justify-center">
           <div 
-            className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl px-4"
+            className="grid grid-cols-3 gap-3 sm:gap-4 md:gap-6 lg:gap-8 max-w-6xl mx-auto px-2 sm:px-4 w-full"
             style={{ marginTop: '5em' }}
           >
           {bouquets.map((bouquet, index) => {
@@ -322,7 +322,8 @@ const UltraFeaturedBouquets = () => {
                        style={{
                          position: 'relative',
                          width: '100%',
-                         height: '18.75rem',
+                         height: 'clamp(8rem, 20vw, 18.75rem)',
+                         minHeight: '8rem',
                          borderRadius: '1.25rem 1.25rem 0 0',
                          overflow: 'hidden'
                        }}
@@ -411,24 +412,32 @@ const UltraFeaturedBouquets = () => {
                      <div 
                        className="content"
                        style={{
-                         padding: '0.938rem 0.625rem',
+                         padding: 'clamp(0.5rem, 1.5vw, 0.938rem) clamp(0.4rem, 1.2vw, 0.625rem)',
                          borderRadius: '0 0 1.25rem 1.25rem'
                        }}
                      >
                     <h3 
                       style={{
                         textTransform: 'capitalize',
-                        fontSize: 'clamp(1.5rem, 1.3909rem + 0.4364vw, 1.8rem)',
+                        fontSize: 'clamp(0.875rem, 2vw, 1.8rem)',
                         color: '#111',
-                        fontWeight: '700'
+                        fontWeight: '700',
+                        lineHeight: '1.2',
+                        marginBottom: '0.25rem'
                       }}
                     >
                     {bouquet.name}
                   </h3>
                     <p 
                       style={{
-                        margin: '0.625rem 0 1.25rem',
-                        color: '#565656'
+                        margin: 'clamp(0.25rem, 1vw, 0.625rem) 0 clamp(0.5rem, 1.5vw, 1.25rem)',
+                        color: '#565656',
+                        fontSize: 'clamp(0.65rem, 1.5vw, 0.875rem)',
+                        lineHeight: '1.3',
+                        display: '-webkit-box',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden'
                       }}
                     >
                       Fill out the form and the algorithm will offer the right team of experts
@@ -454,9 +463,10 @@ const UltraFeaturedBouquets = () => {
                              background: '#f0f0f0',
                              color: tag.color,
                              fontWeight: '700',
-                             fontSize: '0.8rem',
-                             padding: '0.375rem 0.625rem',
-                             borderRadius: '0.188rem'
+                             fontSize: 'clamp(0.5rem, 1.2vw, 0.8rem)',
+                             padding: 'clamp(0.2rem, 0.8vw, 0.375rem) clamp(0.3rem, 1vw, 0.625rem)',
+                             borderRadius: '0.188rem',
+                             whiteSpace: 'nowrap'
                            }}
                          >
                            {tag.text}

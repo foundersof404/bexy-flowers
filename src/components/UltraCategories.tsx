@@ -105,7 +105,7 @@ const UltraCategories = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const mobileRow1Ref = useRef<HTMLDivElement>(null);
   const mobileRow2Ref = useRef<HTMLDivElement>(null);
-  const [isAutoScroll, setIsAutoScroll] = useState(true);
+  const [isAutoScroll, setIsAutoScroll] = useState(false);
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -149,23 +149,8 @@ const UltraCategories = () => {
     const container = containerRef.current;
     if (!container) return;
 
-    // Create seamless infinite loop animation
-      const singleSetWidth = categories.length * 352; // Width of one complete set
-      
-      gsap.to(container, {
-        x: -singleSetWidth, // Move exactly one set width
-      duration: 30, // 30 seconds to complete one full cycle (slower)
-        ease: "none",
-        force3D: true, // Force hardware acceleration
-      repeat: -1, // Infinite repeat
-      repeatDelay: 0,
-      modifiers: {
-        x: (x) => {
-          const val = parseFloat(x);
-          return `${val % singleSetWidth}px`;
-        }
-      }
-    });
+    // Auto scroll disabled - no automatic animation
+    // Users can manually scroll through categories
 
     return () => {
       gsap.killTweensOf(container);

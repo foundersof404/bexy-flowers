@@ -89,6 +89,26 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   };
 
   /**
+   * Update the quantity of a specific cart item
+   */
+  const updateQuantity = (productId: number | string, newQuantity: number, size?: string, personalNote?: string): void => {
+    if (newQuantity <= 0) {
+      removeFromCart(productId, size, personalNote);
+      return;
+    }
+    
+    setCartItems(prevItems =>
+      prevItems.map(item =>
+        item.id === productId &&
+        item.size === size &&
+        item.personalNote === personalNote
+          ? { ...item, quantity: newQuantity }
+          : item
+      )
+    );
+  };
+
+  /**
    * Clear all items from the cart
    */
   const clearCart = (): void => {
@@ -99,6 +119,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     cartItems,
     addToCart,
     removeFromCart,
+    updateQuantity,
     getTotalItems,
     getTotalPrice,
     clearCart,

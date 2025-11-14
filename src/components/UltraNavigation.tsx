@@ -129,27 +129,7 @@ const UltraNavigation = () => {
          }
        });
 
-      // Logo hover effect
-      const logoButton = logo.querySelector('button');
-      if (logoButton) {
-        logoButton.addEventListener('mouseenter', () => {
-          gsap.to(logo, {
-            duration: 0.6,
-            scale: 1.1,
-            rotation: 5,
-            ease: "power2.out"
-          });
-        });
-
-        logoButton.addEventListener('mouseleave', () => {
-          gsap.to(logo, {
-            duration: 0.6,
-            scale: 1,
-            rotation: 0,
-            ease: "power2.out"
-          });
-        });
-      }
+      // Logo hover effect - Removed movement, only glow effect via CSS
     }
 
     return () => {
@@ -188,54 +168,78 @@ const UltraNavigation = () => {
     <>
 
        <nav
-         ref=      {navRef}
-        className="ultra-navigation fixed top-0 left-0 right-0 z-50 backdrop-blur-xl shadow-luxury"
+         ref={navRef}
+        className="ultra-navigation fixed top-0 left-0 right-0 z-[100] backdrop-blur-xl shadow-luxury"
         style={{
           backgroundColor: 'transparent', // Make header transparent
-          transition: 'none' // Remove transition to prevent black flash
+          transition: 'none', // Remove transition to prevent black flash
+          pointerEvents: 'auto' // Ensure navigation is clickable
           // Removed will-change as it causes performance issues with scroll
         }}
       >
         <div className="max-w-7xl mx-auto px-3 xs:px-4 sm:px-6 py-2 xs:py-3 sm:py-4">
           <div className="flex items-center justify-between">
             
-            {/* Logo and Brand */}
+            {/* Logo and Brand - Elegant Glow Only, No Movement */}
             <motion.div
               ref={logoRef}
               className="flex items-center flex-shrink-0"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
             >
               <Button
                 variant="ghost"
                 className="relative p-1 sm:p-2 hover:bg-primary/5 transition-all duration-500 group flex items-center rounded-lg"
                 onClick={() => navigate('/')}
               >
-                {/* Logo Container - Responsive sizing */}
-                <motion.div 
+                {/* Logo Container - Elegant Glow Only */}
+                <div 
                   className="w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 relative"
-                  whileHover={{ scale: 1.05, rotate: 2 }}
-                  transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
                 >
                   <img
                     src={logoImage}
                     alt="𝓑𝓮𝔁𝔂 𝓯𝓵𝓸𝔀𝓮𝓻 Logo"
-                    className="w-full h-full object-contain transition-all duration-500 group-hover:drop-shadow-[0_0_20px_rgba(196,166,105,0.4)]"
-                  />
-                </motion.div>
-                
-                {/* Brand Name - Hidden on very small screens */}
-                <div className="ml-1 sm:ml-2 hidden xs:block">
-                  <motion.h1 
-                    className="font-luxury text-lg sm:text-xl lg:text-2xl font-bold text-foreground drop-shadow-[0_0_8px_rgba(196,166,105,0.6)] [text-shadow:_0_0_12px_rgba(196,166,105,0.8)]"
-                    whileHover={{ 
-                      scale: 1.02,
-                      textShadow: "0 0 20px rgba(196,166,105,1), 0 0 30px rgba(196,166,105,0.8)"
+                    className="w-full h-full object-contain transition-all duration-700 relative z-10"
+                    style={{
+                      filter: 'drop-shadow(0 0 8px rgba(196,166,105,0.3))'
                     }}
-                    transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+                  />
+                  
+                  {/* Elegant Glow Effect on Hover */}
+                  <motion.div
+                    className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700"
+                    style={{
+                      background: 'radial-gradient(circle, rgba(196,166,105,0.4) 0%, rgba(196,166,105,0.2) 40%, transparent 70%)',
+                      filter: 'blur(12px)',
+                      zIndex: 0
+                    }}
+                    animate={{
+                      scale: [1, 1.2, 1],
+                      opacity: [0, 0.6, 0]
+                    }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }}
+                  />
+                  
+                  {/* Secondary Glow Layer */}
+                  <motion.div
+                    className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                    style={{
+                      background: 'radial-gradient(circle, rgba(196,166,105,0.3) 0%, transparent 60%)',
+                      filter: 'blur(8px)',
+                      zIndex: 0
+                    }}
+                  />
+                </div>
+                
+                {/* Brand Name - Hidden on very small screens - Elegant Glow Only */}
+                <div className="ml-1 sm:ml-2 hidden xs:block">
+                  <h1 
+                    className="font-luxury text-lg sm:text-xl lg:text-2xl font-bold text-foreground drop-shadow-[0_0_8px_rgba(196,166,105,0.6)] [text-shadow:_0_0_12px_rgba(196,166,105,0.8)] transition-all duration-700 group-hover:[text-shadow:_0_0_20px_rgba(196,166,105,1),_0_0_30px_rgba(196,166,105,0.8),_0_0_40px_rgba(196,166,105,0.6)]"
                   >
                     𝓑𝓮𝔁𝔂 𝓯𝓵𝓸𝔀𝓮𝓻
-                  </motion.h1>
+                  </h1>
                 </div>
               </Button>
             </motion.div>
@@ -264,30 +268,51 @@ const UltraNavigation = () => {
                     <span className="relative z-10 flex items-center space-x-2">
                       {/* Icon with Advanced 3D Hover Effects */}
                       <motion.span 
-                        className="transition-all duration-500 relative"
+                        className="transition-all duration-500 relative inline-flex items-center justify-center"
                         whileHover={isMobile || shouldReduceMotion ? {} : { 
-                          scale: 1.2, 
-                          rotateY: [0, 15, -15, 0],
-                          rotateX: [0, 10, -10, 0],
-                          color: "rgb(196,166,105)",
-                          filter: "drop-shadow(0 0 8px rgba(196,166,105,0.6))"
+                          scale: 1.15, 
+                          rotate: [0, -5, 5, 0],
+                          color: "rgb(194, 154, 67)",
+                          filter: "drop-shadow(0 0 12px rgba(194, 154, 67, 0.8))"
                         }}
                         transition={{ 
-                          duration: shouldReduceMotion ? 0 : 0.8, 
+                          duration: shouldReduceMotion ? 0 : 0.5, 
                           ease: [0.23, 1, 0.32, 1],
-                          rotateY: shouldReduceMotion ? {} : { duration: 0.6, repeat: 1, repeatType: "reverse" },
-                          rotateX: shouldReduceMotion ? {} : { duration: 0.6, repeat: 1, repeatType: "reverse" }
+                          rotate: shouldReduceMotion ? {} : { duration: 0.4, repeat: 1, repeatType: "reverse" }
                         }}
                         style={{ willChange: isMobile || shouldReduceMotion ? "auto" : "transform" }}
                       >
                         {item.icon}
                         
-                        {/* Icon Glow Effect */}
+                        {/* Enhanced Icon Glow Effect - Gold Halo */}
                         <motion.div
-                          className="absolute inset-0 bg-primary/30 rounded-full blur-md"
+                          className="absolute inset-0 rounded-full"
+                          style={{
+                            background: 'radial-gradient(circle, rgba(194, 154, 67, 0.4) 0%, transparent 70%)',
+                            filter: 'blur(8px)'
+                          }}
                           initial={{ scale: 0, opacity: 0 }}
-                          whileHover={{ scale: 1.5, opacity: 0.6 }}
-                          transition={{ duration: 0.4 }}
+                          whileHover={{ scale: 2, opacity: 1 }}
+                          transition={{ duration: 0.4, ease: "easeOut" }}
+                        />
+                        
+                        {/* Secondary Pulse Ring */}
+                        <motion.div
+                          className="absolute inset-0 rounded-full border"
+                          style={{
+                            borderColor: 'rgba(194, 154, 67, 0.5)',
+                            borderWidth: '1px'
+                          }}
+                          initial={{ scale: 0.8, opacity: 0 }}
+                          whileHover={{ 
+                            scale: 1.5, 
+                            opacity: [0, 0.6, 0],
+                          }}
+                          transition={{ 
+                            duration: 1.2,
+                            repeat: Infinity,
+                            ease: "easeOut"
+                          }}
                         />
                       </motion.span>
                       

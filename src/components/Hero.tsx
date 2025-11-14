@@ -9,7 +9,7 @@ const Hero = () => {
   const shouldReduceMotion = useReducedMotion();
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16 sm:pt-20">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16 sm:pt-20 pb-8 sm:pb-12">
       {/* Background Image with Parallax Effect - Reduced on mobile */}
       <motion.div
         className="absolute inset-0 z-0"
@@ -21,7 +21,6 @@ const Hero = () => {
           repeat: shouldReduceMotion || isMobile ? 0 : Infinity, 
           repeatType: "reverse" 
         }}
-        // Removed willChange for better scroll performance
       >
         <img
           src={heroBackground}
@@ -36,23 +35,22 @@ const Hero = () => {
       <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/60 to-background/80 z-10" />
 
       {/* Content */}
-      <div className="relative z-20 text-center px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto w-full">
+      <div className="relative z-20 text-center px-4 xs:px-5 sm:px-6 lg:px-8 max-w-4xl mx-auto w-full">
         <motion.div
           initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: shouldReduceMotion ? 0 : 1, ease: "easeOut" }}
-          // Removed willChange for better scroll performance
+          className="w-full"
         >
-          <h1 className="font-luxury text-4xl xs:text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-bold text-foreground mb-4 sm:mb-6 tracking-wider leading-tight">
+          <h1 className="font-luxury text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-foreground mb-3 xs:mb-4 sm:mb-5 md:mb-6 tracking-tight sm:tracking-wider leading-[1.1] sm:leading-tight px-1 sm:px-0">
             Bexy Flowers
           </h1>
           
           <motion.p
-            className="font-body text-base xs:text-lg sm:text-xl md:text-2xl text-muted-foreground mb-8 sm:mb-10 md:mb-12 max-w-2xl mx-auto leading-relaxed px-2 sm:px-0"
+            className="font-body text-sm xs:text-base sm:text-lg md:text-xl lg:text-2xl text-muted-foreground mb-6 xs:mb-7 sm:mb-8 md:mb-10 lg:mb-12 max-w-2xl mx-auto leading-relaxed px-2 xs:px-3 sm:px-4 md:px-0"
             initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: shouldReduceMotion ? 0 : 1, delay: shouldReduceMotion ? 0 : 0.3, ease: "easeOut" }}
-            // Removed willChange for better scroll performance
           >
             Crafting luxury floral experiences with premium arrangements and bespoke designs
           </motion.p>
@@ -61,12 +59,12 @@ const Hero = () => {
             initial={{ opacity: 0, scale: shouldReduceMotion ? 1 : 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: shouldReduceMotion ? 0 : 0.8, delay: shouldReduceMotion ? 0 : 0.6, ease: "easeOut" }}
-            // Removed willChange for better scroll performance
+            className="flex justify-center"
           >
             <Button
               variant="default"
               size="lg"
-              className="font-body text-base sm:text-lg px-8 sm:px-10 md:px-12 py-4 sm:py-5 md:py-6 rounded-full shadow-luxury hover:shadow-gold hover:glow-gold transition-luxury gradient-gold text-primary-foreground font-semibold touch-target min-h-[44px] sm:min-h-[auto]"
+              className="font-body text-sm xs:text-base sm:text-lg px-6 xs:px-7 sm:px-8 md:px-10 lg:px-12 py-3 xs:py-3.5 sm:py-4 md:py-5 lg:py-6 rounded-full shadow-luxury hover:shadow-gold hover:glow-gold transition-luxury gradient-gold text-primary-foreground font-semibold touch-target min-h-[44px] w-auto"
             >
               Shop Now
             </Button>

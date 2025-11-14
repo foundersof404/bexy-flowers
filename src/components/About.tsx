@@ -434,97 +434,260 @@ const About = () => {
         </motion.div>
         </div>
 
-        {/* Enhanced Values with Powerful Staggered Animations */}
+        {/* Enhanced Values Section - Innovation, Sustainability, Authenticity */}
         <motion.div 
-          className="mt-24 grid md:grid-cols-3 gap-8"
+          className="mt-24"
           initial="hidden"
           whileInView="show"
-          viewport={{ once: true }}
-          variants={{ show: { transition: { staggerChildren: 0.3 } } }}
+          viewport={{ once: true, margin: "-100px" }}
+          variants={{ show: { transition: { staggerChildren: 0.2 } } }}
         >
-          {[
-            { icon: <Sparkles className="w-5 h-5" />, title: 'Innovation', body: 'Forward-thinking design techniques and trends.' }, 
-            { icon: <Flower2 className="w-5 h-5" />, title: 'Sustainability', body: 'Responsible sourcing and mindful operations.' }, 
-            { icon: <Leaf className="w-5 h-5" />, title: 'Authenticity', body: 'Honest craft that honors nature&apos;s beauty.' }
-          ].map((v, i) => (
-            <motion.div 
-              key={i} 
-              className="p-6 rounded-2xl bg-white/80 backdrop-blur border border-amber-100/60 shadow-sm h-full"
-              variants={{
-                hidden: { opacity: 0, y: 40, scale: 0.9 },
-                show: { 
-                  opacity: 1, 
-                  y: 0, 
-                  scale: 1,
-                  transition: { 
-                    type: "spring", 
-                    stiffness: 200, 
-                    damping: 20,
-                    duration: 0.8
-                  } 
-                }
-              }}
-              whileHover={{ 
-                scale: 1.03, 
-                y: -5,
-                boxShadow: "0 18px 40px rgba(198,157,72,0.15)",
-                transition: { duration: 0.3 }
-              }}
-              style={{ borderColor: 'rgba(198, 157, 72, 0.35)' }}
-            >
+          <motion.div
+            variants={{
+              hidden: { opacity: 0, y: 30 },
+              show: { opacity: 1, y: 0, transition: { duration: 0.6 } }
+            }}
+            className="text-center mb-16"
+          >
+            <h2 className="font-luxury text-4xl md:text-5xl font-bold text-slate-900 mb-4">
+              Our Core Values
+            </h2>
+            <div className="w-24 h-1 mx-auto bg-gradient-to-r from-transparent via-amber-400 to-transparent"></div>
+          </motion.div>
+
+          <div className="grid md:grid-cols-3 gap-8 lg:gap-12">
+            {[
+              { 
+                icon: <Sparkles className="w-8 h-8" />, 
+                title: 'Innovation', 
+                body: 'Forward-thinking design techniques and trends.',
+                gradient: 'from-purple-50 to-amber-50',
+                iconColor: 'text-purple-600',
+                accentColor: 'rgba(147, 51, 234, 0.1)'
+              }, 
+              { 
+                icon: <Flower2 className="w-8 h-8" />, 
+                title: 'Sustainability', 
+                body: 'Responsible sourcing and mindful operations.',
+                gradient: 'from-green-50 to-emerald-50',
+                iconColor: 'text-green-600',
+                accentColor: 'rgba(5, 150, 105, 0.1)'
+              }, 
+              { 
+                icon: <Leaf className="w-8 h-8" />, 
+                title: 'Authenticity', 
+                body: 'Honest craft that honors nature&apos;s beauty.',
+                gradient: 'from-amber-50 to-orange-50',
+                iconColor: 'text-amber-600',
+                accentColor: 'rgba(194, 154, 67, 0.1)'
+              }
+            ].map((v, i) => (
               <motion.div 
-                className="flex items-center gap-2 mb-2 text-amber-700"
-                whileHover={{ x: 5 }}
-                transition={{ duration: 0.2 }}
+                key={i} 
+                className="group relative p-8 rounded-3xl bg-white border-2 border-transparent overflow-hidden h-full"
+                variants={{
+                  hidden: { opacity: 0, y: 50, scale: 0.95 },
+                  show: { 
+                    opacity: 1, 
+                    y: 0, 
+                    scale: 1,
+                    transition: { 
+                      type: "spring", 
+                      stiffness: 150, 
+                      damping: 20,
+                      duration: 0.8
+                    } 
+                  }
+                }}
+                whileHover={{ 
+                  scale: 1.05, 
+                  y: -8,
+                  transition: { duration: 0.3, ease: [0.23, 1, 0.32, 1] }
+                }}
+                style={{ 
+                  boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)'
+                }}
               >
+                {/* Gradient Background on Hover */}
                 <motion.div
-                  whileHover={{ rotate: 180, scale: 1.2 }}
-                  transition={{ duration: 0.4 }}
+                  className={`absolute inset-0 bg-gradient-to-br ${v.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`}
+                />
+                
+                {/* Gold Border on Hover */}
+                <motion.div
+                  className="absolute inset-0 rounded-3xl"
+                  style={{
+                    boxShadow: 'inset 0 0 0 2px rgba(194, 154, 67, 0)'
+                  }}
+                  whileHover={{
+                    boxShadow: 'inset 0 0 0 2px rgba(194, 154, 67, 0.4)'
+                  }}
+                  transition={{ duration: 0.3 }}
+                />
+
+                {/* Icon Container */}
+                <motion.div 
+                  className="relative z-10 flex items-center gap-4 mb-4"
                 >
-                  <span className="text-amber-600">{v.icon}</span>
+                  <motion.div
+                    className={`p-4 rounded-2xl ${v.iconColor} bg-white/80 backdrop-blur-sm shadow-lg`}
+                    whileHover={{ 
+                      rotate: [0, -10, 10, 0],
+                      scale: 1.1
+                    }}
+                    transition={{ 
+                      duration: 0.5,
+                      type: "spring",
+                      stiffness: 300
+                    }}
+                  >
+                    {v.icon}
+                  </motion.div>
+                  
+                  <motion.h3 
+                    className="font-luxury text-2xl font-bold text-slate-900"
+                    whileHover={{ x: 5 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    {v.title}
+                  </motion.h3>
                 </motion.div>
-                <div className="font-semibold" style={{ fontFamily: 'Inter, ui-sans-serif, system-ui' }}>{v.title}</div>
+
+                {/* Description */}
+                <motion.p 
+                  className="relative z-10 text-slate-600 leading-relaxed text-base"
+                  style={{ fontFamily: 'Inter, ui-sans-serif, system-ui' }}
+                >
+                  {v.body}
+                </motion.p>
+
+                {/* Decorative Accent Line */}
+                <motion.div
+                  className="absolute bottom-0 left-0 h-1 bg-gradient-to-r from-amber-400 to-transparent"
+                  initial={{ width: 0 }}
+                  whileInView={{ width: '100%' }}
+                  whileHover={{ width: '100%' }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.8, delay: i * 0.2 }}
+                />
               </motion.div>
-              <div className="text-slate-600 text-sm leading-relaxed" style={{ fontFamily: 'Inter, ui-sans-serif, system-ui' }}>{v.body}</div>
-            </motion.div>
-          ))}
+            ))}
+          </div>
         </motion.div>
 
         {/* Enhanced CTA Section with Luxury Hover Effects */}
         <motion.div 
-          className="mt-24 text-center p-10 rounded-2xl bg-gradient-to-br from-amber-50 to-pink-50 border border-amber-100/60"
-          initial={{ opacity: 0, y: 30 }}
+          className="mt-32 relative overflow-hidden"
+          initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
           viewport={{ once: true }}
         >
-          <h2 className="font-luxury text-3xl font-bold text-slate-800 mb-4">
-            Ready to Create Something Beautiful?
-          </h2>
-          <p className="text-slate-600 max-w-2xl mx-auto mb-8">
-            Whether it's a gift for a loved one or a stunning centerpiece for your event, let us bring your vision to life.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <motion.a 
-              href="/collection" 
-              className="px-8 py-3 bg-slate-800 text-white font-semibold rounded-full shadow-lg hover:bg-slate-700 transition-all duration-300"
-              variants={ctaButtonVariants}
-              initial="rest"
-              whileHover="hover"
-              whileTap="tap"
+          {/* Background with Gradient */}
+          <div className="absolute inset-0 bg-gradient-to-br from-amber-50 via-pink-50 to-rose-50 rounded-3xl"></div>
+          
+          {/* Decorative Elements */}
+          <div className="absolute top-0 right-0 w-64 h-64 bg-amber-200/20 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-0 left-0 w-48 h-48 bg-pink-200/20 rounded-full blur-3xl"></div>
+          
+          <div className="relative z-10 text-center p-12 md:p-16 rounded-3xl border-2 border-amber-100/60 backdrop-blur-sm">
+            <motion.h2 
+              className="font-luxury text-4xl md:text-5xl font-bold text-slate-900 mb-6"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              viewport={{ once: true }}
             >
-              Explore Collections
-            </motion.a>
-            <motion.a 
-              href="/contact" 
-              className="px-8 py-3 bg-white/80 backdrop-blur border border-amber-200 text-slate-800 font-semibold rounded-full hover:bg-white transition-all duration-300"
-              variants={ctaButtonVariants}
-              initial="rest"
-              whileHover="hover"
-              whileTap="tap"
+              Ready to Create Something Beautiful?
+            </motion.h2>
+            
+            <motion.p 
+              className="text-slate-600 max-w-2xl mx-auto mb-10 text-lg leading-relaxed"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              viewport={{ once: true }}
             >
-              Request a Custom Design
-            </motion.a>
+              Whether it's a gift for a loved one or a stunning centerpiece for your event, let us bring your vision to life.
+            </motion.p>
+            
+            <motion.div 
+              className="flex flex-col sm:flex-row gap-6 justify-center"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              viewport={{ once: true }}
+            >
+              <motion.a 
+                href="/collection" 
+                className="group relative px-10 py-4 bg-gradient-to-r from-slate-800 to-slate-900 text-white font-semibold rounded-full shadow-xl overflow-hidden"
+                whileHover={{ 
+                  scale: 1.05,
+                  boxShadow: '0 12px 32px rgba(0, 0, 0, 0.3)'
+                }}
+                whileTap={{ scale: 0.98 }}
+                transition={{ duration: 0.3 }}
+              >
+                {/* Shimmer Effect */}
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                  animate={{
+                    x: ['-100%', '200%']
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    repeatDelay: 1,
+                    ease: "linear"
+                  }}
+                />
+                <span className="relative z-10 flex items-center justify-center gap-2">
+                  Explore Collections
+                  <motion.span
+                    animate={{ x: [0, 4, 0] }}
+                    transition={{ duration: 1.5, repeat: Infinity }}
+                  >
+                    →
+                  </motion.span>
+                </span>
+              </motion.a>
+              
+              <motion.a 
+                href="/contact" 
+                className="group relative px-10 py-4 bg-white/90 backdrop-blur-md border-2 border-amber-300 text-slate-800 font-semibold rounded-full shadow-lg overflow-hidden"
+                whileHover={{ 
+                  scale: 1.05,
+                  backgroundColor: 'rgba(255, 255, 255, 1)',
+                  borderColor: 'rgba(194, 154, 67, 0.6)',
+                  boxShadow: '0 12px 32px rgba(194, 154, 67, 0.2)'
+                }}
+                whileTap={{ scale: 0.98 }}
+                transition={{ duration: 0.3 }}
+              >
+                {/* Gold Shimmer Effect */}
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-200/30 to-transparent"
+                  animate={{
+                    x: ['-100%', '200%']
+                  }}
+                  transition={{
+                    duration: 2.5,
+                    repeat: Infinity,
+                    repeatDelay: 1.5,
+                    ease: "linear"
+                  }}
+                />
+                <span className="relative z-10 flex items-center justify-center gap-2">
+                  Request a Custom Design
+                  <motion.span
+                    animate={{ rotate: [0, 15, -15, 0] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  >
+                    ✨
+                  </motion.span>
+                </span>
+              </motion.a>
+            </motion.div>
           </div>
         </motion.div>
 

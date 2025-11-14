@@ -133,9 +133,9 @@ const Collection = () => {
       {/* Ultra Navigation */}
       <UltraNavigation />
       
-      {/* Curtain Animation */}
-      <div className="curtain-left fixed top-0 left-0 w-1/2 h-full bg-primary z-50"></div>
-      <div className="curtain-right fixed top-0 right-0 w-1/2 h-full bg-primary z-50"></div>
+      {/* Curtain Animation - Lower z-index and pointer-events-none to not block navigation */}
+      <div className="curtain-left fixed top-0 left-0 w-1/2 h-full bg-primary z-40 pointer-events-none"></div>
+      <div className="curtain-right fixed top-0 right-0 w-1/2 h-full bg-primary z-40 pointer-events-none"></div>
       
       {/* Floating 3D Background */}
       <FloatingBackground />
@@ -151,9 +151,9 @@ const Collection = () => {
           onCategoryChange={setSelectedCategory}
         />
         
-        {/* Main Bouquet Grid */}
-        <section className="py-20 px-4 lg:px-8">
-          <div className="max-w-7xl mx-auto">
+        {/* Main Bouquet Grid - No Gaps */}
+        <section className="py-20 px-4 sm:px-6 lg:px-8 w-full">
+          <div className="max-w-7xl mx-auto w-full">
             <AnimatePresence mode="wait">
               <BouquetGrid 
                 key={selectedCategory}

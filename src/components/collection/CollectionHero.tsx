@@ -115,14 +115,14 @@ export const CollectionHero = () => {
   return (
     <section 
       ref={heroRef}
-      className="relative min-h-[85vh] flex items-center justify-center overflow-hidden pt-16 sm:pt-20"
+      className="relative min-h-[85vh] flex items-center justify-center overflow-hidden pt-16 sm:pt-20 pb-8 sm:pb-12"
       style={{
         background: `
           radial-gradient(circle at 20% 80%, hsl(var(--primary) / 0.05) 0%, transparent 50%),
           radial-gradient(circle at 80% 20%, hsl(var(--primary) / 0.08) 0%, transparent 50%),
           radial-gradient(circle at 40% 40%, hsl(var(--primary) / 0.03) 0%, transparent 50%)
         `,
-        minHeight: isMobile ? '75vh' : '85vh'
+        minHeight: isMobile ? '70vh' : '85vh'
       }}
     >
       {/* Background Image with Parallax Effect - Reduced on mobile */}

@@ -197,7 +197,7 @@ const UltraHero = () => {
              >
                {/* Main Title with Character-by-Character Animation - Simplified on mobile */}
                <motion.h1 
-                 className="font-luxury text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-foreground leading-tight mb-3 sm:mb-4 px-2 sm:px-0"
+                 className="font-luxury text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black text-foreground leading-[1.1] sm:leading-tight mb-3 sm:mb-4 px-2 xs:px-3 sm:px-0"
                  initial={{ opacity: 0 }}
                  animate={{ opacity: 1 }}
                  transition={{ duration: shouldReduceMotion || isMobile ? 0 : 0.1, delay: shouldReduceMotion || isMobile ? 0 : 0.4 }}
