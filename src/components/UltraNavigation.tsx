@@ -17,6 +17,8 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/contexts/CartContext';
+import { useFavorites } from '@/contexts/FavoritesContext';
+import { useFlyingHeart } from '@/contexts/FlyingHeartContext';
 import CartDashboard from '@/components/cart/CartDashboard';
 import logoImage from '/assets/bexy-flowers-logo.png';
 
@@ -66,7 +68,10 @@ const UltraNavigation = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const { getTotalItems } = useCart();
+  const { getTotalFavorites } = useFavorites();
+  const { navHeartPulse } = useFlyingHeart();
   const cartItems = getTotalItems();
+  const favoritesCount = getTotalFavorites();
   const isMobile = useIsMobile();
   const shouldReduceMotion = useReducedMotion();
   
@@ -166,17 +171,18 @@ const UltraNavigation = () => {
 
   return (
     <>
-
-       <nav
-         ref={navRef}
-        className="ultra-navigation fixed top-0 left-0 right-0 z-[100] backdrop-blur-xl shadow-luxury"
-        style={{
-          backgroundColor: 'transparent', // Make header transparent
-          transition: 'none', // Remove transition to prevent black flash
-          pointerEvents: 'auto' // Ensure navigation is clickable
-          // Removed will-change as it causes performance issues with scroll
-        }}
-      >
+      {!isCartOpen && (
+        <>
+          <nav
+            ref={navRef}
+            className="ultra-navigation fixed top-0 left-0 right-0 z-[100] backdrop-blur-xl shadow-luxury"
+            style={{
+              backgroundColor: 'transparent', // Make header transparent
+              transition: 'none', // Remove transition to prevent black flash
+              pointerEvents: 'auto' // Ensure navigation is clickable
+              // Removed will-change as it causes performance issues with scroll
+            }}
+          >
         <div className="max-w-7xl mx-auto px-3 xs:px-4 sm:px-6 py-2 xs:py-3 sm:py-4">
           <div className="flex items-center justify-between">
             
@@ -422,8 +428,157 @@ const UltraNavigation = () => {
               ))}
             </div>
 
-            {/* Cart & Menu with Enhanced Hover Effects */}
+            {/* Favorites, Cart & Menu with Enhanced Hover Effects */}
             <div className="flex items-center space-x-2 sm:space-x-4 ml-2 sm:ml-4">
+              {/* Favorites with Advanced Hover Effects */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 1.1, duration: 0.6 }}
+              >
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handleNavigation('/favorites')}
+                  className="relative group hover:bg-primary/10 transition-all duration-500 overflow-hidden rounded-lg w-10 h-10 sm:w-12 sm:h-12"
+                >
+                  {/* Favorites Icon with 3D Effects */}
+                  <motion.div
+                    className="relative z-10"
+                    animate={navHeartPulse ? {
+                      scale: [1, 1.5, 1.2, 1],
+                      rotate: [0, 15, -15, 0],
+                      filter: "drop-shadow(0 0 20px rgba(220, 38, 127, 1))"
+                    } : {}}
+                    whileHover={{ 
+                      scale: 1.15, 
+                      rotateY: [0, 20, -20, 0],
+                      rotateX: [0, 15, -15, 0],
+                      color: "rgb(220, 38, 127)",
+                      filter: "drop-shadow(0 0 12px rgba(220, 38, 127, 0.8))"
+                    }}
+                    transition={{ 
+                      duration: navHeartPulse ? 0.6 : 0.8, 
+                      ease: [0.23, 1, 0.32, 1],
+                      rotateY: { duration: 0.6, repeat: 1, repeatType: "reverse" },
+                      rotateX: { duration: 0.6, repeat: 1, repeatType: "reverse" }
+                    }}
+                  >
+                    <Heart className={`w-5 h-5 sm:w-6 sm:h-6 transition-all duration-500 ${location.pathname === '/favorites' ? 'fill-[#dc267f] text-[#dc267f]' : 'text-foreground'}`} />
+                    
+                    {/* Icon Glow Effect */}
+                    <motion.div
+                      className="absolute inset-0 bg-pink-500/40 rounded-full blur-lg"
+                      initial={{ scale: 0, opacity: 0 }}
+                      animate={navHeartPulse ? {
+                        scale: [1, 2.5, 1.5, 1],
+                        opacity: [0.7, 1, 0.8, 0.7]
+                      } : {}}
+                      whileHover={{ scale: 1.8, opacity: 0.7 }}
+                      transition={{ duration: navHeartPulse ? 0.6 : 0.5 }}
+                    />
+                    
+                    {/* Pulse rings on animation */}
+                    {navHeartPulse && (
+                      <>
+                        <motion.div
+                          className="absolute inset-0 border-2 border-[#dc267f] rounded-full"
+                          initial={{ scale: 1, opacity: 0.8 }}
+                          animate={{
+                            scale: [1, 2, 2.5],
+                            opacity: [0.8, 0.4, 0]
+                          }}
+                          transition={{ duration: 0.6, ease: "easeOut" }}
+                        />
+                        <motion.div
+                          className="absolute inset-0 border-2 border-[#dc267f] rounded-full"
+                          initial={{ scale: 1, opacity: 0.6 }}
+                          animate={{
+                            scale: [1, 1.8, 2.2],
+                            opacity: [0.6, 0.3, 0]
+                          }}
+                          transition={{ duration: 0.6, delay: 0.1, ease: "easeOut" }}
+                        />
+                      </>
+                    )}
+                  </motion.div>
+                  
+                  {/* Multi-layered Background Effects */}
+                  
+                  {/* Primary Background */}
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-r from-pink-500/5 via-pink-500/15 to-pink-500/5 rounded-lg"
+                    initial={{ scale: 0, opacity: 0 }}
+                    whileHover={{ scale: 1, opacity: 1 }}
+                    transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
+                  />
+                  
+                  {/* Shimmer Effect */}
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent rounded-lg"
+                    initial={{ x: "-100%", opacity: 0 }}
+                    whileHover={{ x: "100%", opacity: 1 }}
+                    transition={{ duration: 1, ease: "easeInOut", delay: 0.2 }}
+                  />
+                  
+                  {/* Pulsing Border */}
+                  <motion.div
+                    className="absolute inset-0 border border-pink-500/30 rounded-lg"
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    whileHover={{ 
+                      opacity: 1, 
+                      scale: 1,
+                      borderColor: "rgba(220, 38, 127, 0.6)"
+                    }}
+                    transition={{ duration: 0.4 }}
+                  />
+                  
+                  {/* Favorites Badge with Enhanced Animation */}
+                  {favoritesCount > 0 && (
+                    <motion.div
+                        className="absolute -top-3 -right-0 -left-3 w-4 h-4 sm:w-4 sm:h-5 bg-[#dc267f] text-white rounded-full flex items-center justify-center text-xs shadow-lg relative z-20"
+                      initial={{ scale: 0, rotate: -180 }}
+                      animate={{ scale: 1, rotate: 0 }}
+                      transition={{ delay: 1.4, type: "spring", stiffness: 500 }}
+                      whileHover={{ 
+                        scale: 1.1, 
+                        rotate: 360,
+                        boxShadow: "0 0 10px rgba(220, 38, 127, 0.8)"
+                      }}
+                    >
+                      <motion.span
+                        animate={{ scale: [1, 1.2, 1] }}
+                        transition={{ duration: 2, repeat: Infinity }}
+                      >
+                        {favoritesCount}
+                      </motion.span>
+                      
+                      {/* Badge Glow */}
+                      <motion.div
+                        className="absolute inset-0 bg-pink-500/50 rounded-full blur-md"
+                        animate={{
+                          scale: [1, 1.5, 1],
+                          opacity: [0.5, 0.8, 0.5]
+                        }}
+                        transition={{
+                          duration: 2,
+                          repeat: Infinity,
+                          ease: "easeInOut"
+                        }}
+                      />
+                    </motion.div>
+                  )}
+                  
+                  {/* Overall Glow Effect */}
+                  <motion.div
+                    className="absolute inset-0 bg-pink-500/10 rounded-lg blur-xl"
+                    initial={{ scale: 0, opacity: 0 }}
+                    whileHover={{ scale: 1.3, opacity: 0.4 }}
+                    transition={{ duration: 0.6 }}
+                  />
+                </Button>
+              </motion.div>
+
               {/* Cart with Advanced Hover Effects */}
               <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
@@ -773,8 +928,10 @@ const UltraNavigation = () => {
          </AnimatePresence>
        </nav>
 
-      {/* Spacer for fixed navigation */}
-      <div className="h-16 sm:h-20" />
+          {/* Spacer for fixed navigation */}
+          <div className="h-16 sm:h-20" />
+        </>
+      )}
 
       {/* Cart Dashboard */}
       <CartDashboard 

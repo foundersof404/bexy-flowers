@@ -456,7 +456,7 @@ const About = () => {
           </motion.div>
 
           <div className="grid md:grid-cols-3 gap-8 lg:gap-12">
-            {[
+          {[
               { 
                 icon: <Sparkles className="w-8 h-8" />, 
                 title: 'Innovation', 
@@ -481,25 +481,25 @@ const About = () => {
                 iconColor: 'text-amber-600',
                 accentColor: 'rgba(194, 154, 67, 0.1)'
               }
-            ].map((v, i) => (
-              <motion.div 
-                key={i} 
+          ].map((v, i) => (
+            <motion.div 
+              key={i} 
                 className="group relative p-8 rounded-3xl bg-white border-2 border-transparent overflow-hidden h-full"
-                variants={{
+              variants={{
                   hidden: { opacity: 0, y: 50, scale: 0.95 },
-                  show: { 
-                    opacity: 1, 
-                    y: 0, 
-                    scale: 1,
-                    transition: { 
-                      type: "spring", 
+                show: { 
+                  opacity: 1, 
+                  y: 0, 
+                  scale: 1,
+                  transition: { 
+                    type: "spring", 
                       stiffness: 150, 
-                      damping: 20,
-                      duration: 0.8
-                    } 
-                  }
-                }}
-                whileHover={{ 
+                    damping: 20,
+                    duration: 0.8
+                  } 
+                }
+              }}
+              whileHover={{ 
                   scale: 1.05, 
                   y: -8,
                   transition: { duration: 0.3, ease: [0.23, 1, 0.32, 1] }
@@ -528,8 +528,8 @@ const About = () => {
                 {/* Icon Container */}
                 <motion.div 
                   className="relative z-10 flex items-center gap-4 mb-4"
-                >
-                  <motion.div
+            >
+              <motion.div 
                     className={`p-4 rounded-2xl ${v.iconColor} bg-white/80 backdrop-blur-sm shadow-lg`}
                     whileHover={{ 
                       rotate: [0, -10, 10, 0],
@@ -546,9 +546,9 @@ const About = () => {
                   
                   <motion.h3 
                     className="font-luxury text-2xl font-bold text-slate-900"
-                    whileHover={{ x: 5 }}
-                    transition={{ duration: 0.2 }}
-                  >
+                whileHover={{ x: 5 }}
+                transition={{ duration: 0.2 }}
+              >
                     {v.title}
                   </motion.h3>
                 </motion.div>
@@ -570,8 +570,8 @@ const About = () => {
                   viewport={{ once: true }}
                   transition={{ duration: 0.8, delay: i * 0.2 }}
                 />
-              </motion.div>
-            ))}
+            </motion.div>
+          ))}
           </div>
         </motion.div>
 
@@ -598,7 +598,7 @@ const About = () => {
               transition={{ duration: 0.6, delay: 0.2 }}
               viewport={{ once: true }}
             >
-              Ready to Create Something Beautiful?
+            Ready to Create Something Beautiful?
             </motion.h2>
             
             <motion.p 
@@ -608,7 +608,7 @@ const About = () => {
               transition={{ duration: 0.6, delay: 0.3 }}
               viewport={{ once: true }}
             >
-              Whether it's a gift for a loved one or a stunning centerpiece for your event, let us bring your vision to life.
+            Whether it's a gift for a loved one or a stunning centerpiece for your event, let us bring your vision to life.
             </motion.p>
             
             <motion.div 
@@ -618,8 +618,8 @@ const About = () => {
               transition={{ duration: 0.6, delay: 0.4 }}
               viewport={{ once: true }}
             >
-              <motion.a 
-                href="/collection" 
+            <motion.a 
+              href="/collection" 
                 className="group relative px-10 py-4 bg-gradient-to-r from-slate-800 to-slate-900 text-white font-semibold rounded-full shadow-xl overflow-hidden"
                 whileHover={{ 
                   scale: 1.05,
@@ -642,7 +642,7 @@ const About = () => {
                   }}
                 />
                 <span className="relative z-10 flex items-center justify-center gap-2">
-                  Explore Collections
+              Explore Collections
                   <motion.span
                     animate={{ x: [0, 4, 0] }}
                     transition={{ duration: 1.5, repeat: Infinity }}
@@ -650,10 +650,10 @@ const About = () => {
                     →
                   </motion.span>
                 </span>
-              </motion.a>
+            </motion.a>
               
-              <motion.a 
-                href="/contact" 
+            <motion.a 
+              href="/contact" 
                 className="group relative px-10 py-4 bg-white/90 backdrop-blur-md border-2 border-amber-300 text-slate-800 font-semibold rounded-full shadow-lg overflow-hidden"
                 whileHover={{ 
                   scale: 1.05,
@@ -678,7 +678,7 @@ const About = () => {
                   }}
                 />
                 <span className="relative z-10 flex items-center justify-center gap-2">
-                  Request a Custom Design
+              Request a Custom Design
                   <motion.span
                     animate={{ rotate: [0, 15, -15, 0] }}
                     transition={{ duration: 2, repeat: Infinity }}
@@ -686,7 +686,7 @@ const About = () => {
                     ✨
                   </motion.span>
                 </span>
-              </motion.a>
+            </motion.a>
             </motion.div>
           </div>
         </motion.div>

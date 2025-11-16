@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import type { Bouquet } from "@/pages/Collection";
 import { useCartWithToast } from "@/hooks/useCartWithToast";
+import { useFavorites } from "@/contexts/FavoritesContext";
 
 interface ProductModalProps {
   bouquet: Bouquet;
@@ -16,6 +17,7 @@ export const ProductModal = ({ bouquet, onClose }: ProductModalProps) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
   const { addToCart } = useCartWithToast();
+  const { toggleFavorite, isFavorite } = useFavorites();
 
   useEffect(() => {
     // Prevent body scroll
@@ -229,9 +231,24 @@ export const ProductModal = ({ bouquet, onClose }: ProductModalProps) => {
                 <Button
                   variant="outline"
                   size="icon"
-                  className="h-12 w-12 border-primary/30 hover:border-primary hover:bg-primary/10"
+                  className={`h-12 w-12 border-primary/30 hover:border-primary hover:bg-primary/10 ${
+                    isFavorite(bouquet.id) ? 'bg-pink-50 border-pink-300' : ''
+                  }`}
+                  onClick={() => {
+                    toggleFavorite({
+                      id: bouquet.id,
+                      title: bouquet.name,
+                      price: bouquet.price,
+                      image: bouquet.image,
+                      description: bouquet.description,
+                      featured: bouquet.featured
+                    });
+                  }}
                 >
-                  <Heart className="w-5 h-5 text-primary" />
+                  <Heart 
+                    className={`w-5 h-5 ${isFavorite(bouquet.id) ? 'fill-[#dc267f] text-[#dc267f]' : 'text-primary'}`} 
+                    strokeWidth={2}
+                  />
                 </Button>
               </div>
 

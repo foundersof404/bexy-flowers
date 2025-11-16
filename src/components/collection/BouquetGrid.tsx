@@ -5,6 +5,8 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Heart, Eye, ShoppingCart, Crown, Sparkles, ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCartWithToast } from "@/hooks/useCartWithToast";
+import { useFavorites } from "@/contexts/FavoritesContext";
+import { useFlyingHeart } from "@/contexts/FlyingHeartContext";
 import { useNavigate } from "react-router-dom";
 import type { Bouquet } from "@/pages/Collection";
 
@@ -41,7 +43,10 @@ const getBouquetTags = (bouquet: Bouquet) => {
 
 export const BouquetGrid = ({ bouquets, onBouquetClick }: BouquetGridProps) => {
   const gridRef = useRef<HTMLDivElement>(null);
+  const heartButtonRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({});
   const { addToCart } = useCartWithToast();
+  const { toggleFavorite, isFavorite } = useFavorites();
+  const { triggerFlyingHeart } = useFlyingHeart();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -86,6 +91,7 @@ export const BouquetGrid = ({ bouquets, onBouquetClick }: BouquetGridProps) => {
       {bouquets.map((bouquet, index) => {
         const tags = getBouquetTags(bouquet);
         const [isHovered, setIsHovered] = useState(false);
+        const isFav = isFavorite(bouquet.id);
         
         return (
           <motion.div
@@ -264,17 +270,19 @@ export const BouquetGrid = ({ bouquets, onBouquetClick }: BouquetGridProps) => {
                 {/* Floating Action Buttons - Enhanced Glass-morphism with Gold Halo */}
                 <div className="absolute top-4 right-4 flex gap-2 z-20">
                   <motion.button 
+                    ref={(el) => { heartButtonRefs.current[bouquet.id] = el; }}
                     className="w-10 h-10 rounded-full backdrop-blur-md flex items-center justify-center relative overflow-visible"
                     style={{
-                      background: 'rgba(255, 255, 255, 0.6)',
-                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+                      background: isFav ? 'rgba(220, 38, 127, 0.2)' : 'rgba(255, 255, 255, 0.6)',
+                      boxShadow: isFav ? '0 4px 12px rgba(220, 38, 127, 0.3)' : '0 4px 12px rgba(0, 0, 0, 0.1)'
                     }}
                     whileHover={{ 
                       scale: 1.1,
                       y: -2,
-                      boxShadow: '0 6px 20px rgba(194, 154, 67, 0.25), 0 0 0 2px rgba(194, 154, 67, 0.2)',
-                      background: 'rgba(255, 255, 255, 0.75)'
+                      boxShadow: '0 6px 20px rgba(220, 38, 127, 0.4), 0 0 0 2px rgba(220, 38, 127, 0.3)',
+                      background: 'rgba(220, 38, 127, 0.3)'
                     }}
+                    whileTap={{ scale: 0.95 }}
                     transition={{ 
                       duration: 0.3,
                       type: "spring",
@@ -282,9 +290,49 @@ export const BouquetGrid = ({ bouquets, onBouquetClick }: BouquetGridProps) => {
                     }}
                     onClick={(e) => {
                       e.stopPropagation();
+                      
+                      // Only trigger flying heart if adding to favorites (not removing)
+                      if (!isFav) {
+                        const button = heartButtonRefs.current[bouquet.id];
+                        // Try to find the navbar heart button - look for button with heart icon before cart
+                        const navButtons = document.querySelectorAll('nav button');
+                        let navHeart: HTMLElement | null = null;
+                        
+                        for (let i = 0; i < navButtons.length; i++) {
+                          const btn = navButtons[i];
+                          if (btn.querySelector('svg') && btn.innerHTML.includes('Heart') && !btn.innerHTML.includes('ShoppingCart')) {
+                            navHeart = btn as HTMLElement;
+                            break;
+                          }
+                        }
+                        
+                        if (button && navHeart) {
+                          const buttonRect = button.getBoundingClientRect();
+                          const navRect = navHeart.getBoundingClientRect();
+                          
+                          triggerFlyingHeart(
+                            buttonRect.left + buttonRect.width / 2,
+                            buttonRect.top + buttonRect.height / 2,
+                            navRect.left + navRect.width / 2,
+                            navRect.top + navRect.height / 2
+                          );
+                        }
+                      }
+                      
+                      toggleFavorite({
+                        id: bouquet.id,
+                        title: bouquet.name,
+                        price: bouquet.price,
+                        image: bouquet.image,
+                        description: bouquet.description,
+                        featured: bouquet.featured
+                      });
                     }}
                   >
-                    <Heart className="w-4 h-4 text-slate-700" strokeWidth={2} />
+                    <Heart 
+                      className={`w-4 h-4 ${isFav ? 'fill-[#dc267f] text-[#dc267f]' : 'text-slate-700'}`} 
+                      strokeWidth={2} 
+                    />
                   </motion.button>
                   
                   <motion.button 

@@ -14,7 +14,11 @@ import Checkout from "./pages/Checkout";
 import ScrollToTop from "@/components/ScrollToTop";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { CartProvider } from "@/contexts/CartContext";
+import { FavoritesProvider } from "@/contexts/FavoritesContext";
+import { FlyingHeartProvider } from "@/contexts/FlyingHeartContext";
 import CartTest from "@/pages/CartTest";
+import Favorites from "@/pages/Favorites";
+import CartPage from "@/components/cart/CartPage";
 
 const queryClient = new QueryClient();
 
@@ -27,22 +31,28 @@ const App = () => {
       <TooltipProvider>
         <ThemeProvider>
           <CartProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <ScrollToTop />
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/collection" element={<Collection />} />
-                <Route path="/product/:id" element={<ProductDetailPage />} />
-                <Route path="/checkout" element={<Checkout />} />
-                <Route path="/about" element={<AboutPage />} />
-                <Route path="/customize" element={<Customize />} />
-                <Route path="/cart-test" element={<CartTest />} />
-                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </BrowserRouter>
+            <FavoritesProvider>
+              <FlyingHeartProvider>
+                <Toaster />
+                <Sonner />
+                <BrowserRouter>
+                  <ScrollToTop />
+                  <Routes>
+                    <Route path="/" element={<Index />} />
+                    <Route path="/collection" element={<Collection />} />
+                    <Route path="/product/:id" element={<ProductDetailPage />} />
+                    <Route path="/checkout" element={<Checkout />} />
+                    <Route path="/about" element={<AboutPage />} />
+                    <Route path="/customize" element={<Customize />} />
+                    <Route path="/favorites" element={<Favorites />} />
+                    <Route path="/cart" element={<CartPage />} />
+                    <Route path="/cart-test" element={<CartTest />} />
+                    {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </BrowserRouter>
+              </FlyingHeartProvider>
+            </FavoritesProvider>
           </CartProvider>
         </ThemeProvider>
       </TooltipProvider>

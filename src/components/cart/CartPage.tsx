@@ -150,7 +150,7 @@ const CartPage: React.FC = () => {
 
                       {/* Remove Button */}
                       <Button
-                        onClick={() => removeFromCart(item.id)}
+                        onClick={() => removeFromCart(item.id, item.size, item.personalNote)}
                         variant="ghost"
                         size="sm"
                         className="text-red-600 hover:text-red-700 hover:bg-red-50"

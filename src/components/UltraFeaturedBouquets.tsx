@@ -67,8 +67,10 @@ const UltraFeaturedBouquets = () => {
   const { addToCart } = useCartWithToast();
   const sectionRef = useRef<HTMLElement>(null);
   const cardsRef = useRef<HTMLDivElement[]>([]);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [selectedBouquet, setSelectedBouquet] = useState<any>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isAutoScroll, setIsAutoScroll] = useState(true);
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -183,6 +185,40 @@ const UltraFeaturedBouquets = () => {
     };
   }, []);
 
+  // Auto-scroll functionality for luxury collection section
+  useEffect(() => {
+    if (!isAutoScroll) return;
+
+    const isMobile = window.innerWidth < 768;
+    if (isMobile) return; // Disable auto-scroll on mobile
+
+    const section = sectionRef.current;
+    if (!section) return;
+
+    // Auto-scroll to the luxury collection section when it comes into view
+    // This creates a smooth, heavy scroll effect using Lenis
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && entry.intersectionRatio > 0.3) {
+            // Section is in view - ensure smooth heavy scroll is active
+            // The heavy scroll is handled by Lenis in useSmoothScroll hook
+          }
+        });
+      },
+      {
+        threshold: 0.3,
+        rootMargin: '-100px 0px'
+      }
+    );
+
+    observer.observe(section);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [isAutoScroll]);
+
   return (
     <>
       {/* Google Fonts Import */}
@@ -248,9 +284,13 @@ const UltraFeaturedBouquets = () => {
 
         <div className="flex justify-center">
           <div 
-            className="grid grid-cols-3 gap-3 sm:gap-4 md:gap-6 lg:gap-8 max-w-6xl mx-auto px-2 sm:px-4 w-full"
+            ref={containerRef}
+            className="w-full"
             style={{ marginTop: '5em' }}
           >
+            <div 
+              className="grid grid-cols-3 gap-3 sm:gap-4 md:gap-6 lg:gap-8 max-w-6xl mx-auto px-2 sm:px-4 w-full"
+            >
           {bouquets.map((bouquet, index) => {
             // Define consistent gold color for all cards
             const currentColor = 'rgb(199, 158, 72)';
@@ -478,6 +518,7 @@ const UltraFeaturedBouquets = () => {
             </motion.div>
              );
            })}
+            </div>
           </div>
         </div>
 
