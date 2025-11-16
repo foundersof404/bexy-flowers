@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Heart, ShoppingCart, ArrowLeft, Sparkles } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { useFavorites } from '@/contexts/FavoritesContext';
 import { useCartWithToast } from '@/hooks/useCartWithToast';
 import UltraNavigation from '@/components/UltraNavigation';
@@ -24,28 +23,6 @@ const Favorites = () => {
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
     document.documentElement.scrollTop = 0;
     document.body.scrollTop = 0;
-
-    // Elegant entrance animation
-    const section = sectionRef.current;
-    const container = containerRef.current;
-
-    if (section && container) {
-      const tl = gsap.timeline();
-      tl.from(section, {
-        opacity: 0,
-        y: 30,
-        duration: 1,
-        ease: "power3.out"
-      })
-      .from(container.children, {
-        opacity: 0,
-        y: 50,
-        scale: 0.9,
-        duration: 0.8,
-        stagger: 0.1,
-        ease: "power3.out"
-      }, "-=0.5");
-    }
 
     return () => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
@@ -68,7 +45,7 @@ const Favorites = () => {
         ref={sectionRef}
         className="relative z-10 py-24 px-4 sm:px-6 lg:px-8"
       >
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-6xl mx-auto">
           {/* Header Section - Elegant and Powerful */}
           <motion.div
             className="text-center mb-16"
@@ -76,44 +53,95 @@ const Favorites = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
           >
-            {/* Decorative Elements */}
-            <div className="flex items-center justify-center gap-4 mb-6">
-              <div className="h-px w-20 bg-gradient-to-r from-transparent via-[#dc267f] to-transparent" />
-              <motion.div
-                animate={{ rotate: [0, 360] }}
-                transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+            {/* Sharp Header Text Above */}
+            <motion.div
+              className="mb-8"
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+            >
+              <p 
+                className="text-xs sm:text-sm font-bold tracking-[0.3em] uppercase mb-2"
+                style={{
+                  color: '#1a1a1a',
+                  textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)',
+                  letterSpacing: '0.3em'
+                }}
               >
-                <Sparkles className="w-8 h-8 text-[#dc267f]" />
-              </motion.div>
-              <div className="h-px w-20 bg-gradient-to-r from-transparent via-[#dc267f] to-transparent" />
-            </div>
+                YOUR CURATED COLLECTION
+              </p>
+              <div className="flex items-center justify-center gap-3">
+                <div className="h-[2px] w-12 bg-gradient-to-r from-transparent to-[#dc267f]" />
+                <div className="h-1 w-1 rounded-full bg-[#dc267f]" />
+                <div className="h-[2px] w-12 bg-gradient-to-l from-transparent to-[#dc267f]" />
+              </div>
+            </motion.div>
 
-            <h1 className="font-luxury text-5xl sm:text-6xl lg:text-7xl font-bold mb-6 bg-gradient-to-r from-[#dc267f] via-[#e91e63] to-[#f06292] bg-clip-text text-transparent">
-              My Favorites
-            </h1>
+            {/* My Favorites Title */}
+            <motion.div
+              className="mb-8"
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+            >
+              <h1 
+                className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-[0.3em] uppercase mb-2"
+                style={{
+                  color: '#1a1a1a',
+                  textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)',
+                  letterSpacing: '0.3em'
+                }}
+              >
+                MY FAVORITES
+              </h1>
+              <div className="flex items-center justify-center gap-3">
+                <div className="h-[2px] w-12 bg-gradient-to-r from-transparent to-[#dc267f]" />
+                <div className="h-1 w-1 rounded-full bg-[#dc267f]" />
+                <div className="h-[2px] w-12 bg-gradient-to-l from-transparent to-[#dc267f]" />
+              </div>
+            </motion.div>
             
-            <p className="font-body text-lg sm:text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed">
+            {/* Description Text */}
+            <motion.p 
+              className="text-xs sm:text-sm font-bold tracking-[0.3em] uppercase mb-8"
+              style={{
+                color: '#1a1a1a',
+                textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)',
+                letterSpacing: '0.3em'
+              }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4 }}
+            >
               {totalFavorites > 0 
-                ? `You have ${totalFavorites} ${totalFavorites === 1 ? 'beautiful item' : 'beautiful items'} saved for later`
-                : 'Your favorites collection is empty. Start adding items you love!'
+                ? `YOU HAVE ${totalFavorites} ${totalFavorites === 1 ? 'BEAUTIFUL ITEM' : 'BEAUTIFUL ITEMS'} SAVED FOR LATER`
+                : 'YOUR FAVORITES COLLECTION IS EMPTY. START ADDING ITEMS YOU LOVE!'
               }
-            </p>
+            </motion.p>
 
             {/* Back Button */}
             <motion.div
-              className="mt-8 flex justify-center"
+              className="flex justify-center"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.3 }}
+              transition={{ delay: 0.5 }}
             >
-              <Button
-                variant="ghost"
+              <button
                 onClick={() => navigate(-1)}
-                className="group flex items-center gap-2 text-slate-600 hover:text-foreground transition-colors"
+                className="group flex items-center gap-2 hover:opacity-70 transition-opacity"
               >
                 <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-                <span>Back to Collection</span>
-              </Button>
+                <span 
+                  className="text-xs sm:text-sm font-bold tracking-[0.3em] uppercase"
+                  style={{
+                    color: '#1a1a1a',
+                    textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)',
+                    letterSpacing: '0.3em'
+                  }}
+                >
+                  BACK TO COLLECTION
+                </span>
+              </button>
             </motion.div>
           </motion.div>
 
@@ -135,23 +163,52 @@ const Favorites = () => {
                   repeat: Infinity,
                   ease: "easeInOut"
                 }}
-                className="inline-block mb-6"
+                className="inline-block mb-8"
               >
                 <Heart className="w-20 h-20 text-slate-300 mx-auto" strokeWidth={1} />
               </motion.div>
-              <h2 className="font-luxury text-3xl text-slate-400 mb-4">No favorites yet</h2>
-              <p className="font-body text-slate-500 mb-8">Start exploring and add items you love to your favorites</p>
-              <Button
-                onClick={() => navigate('/collection')}
-                className="bg-gradient-to-r from-[#dc267f] to-[#e91e63] text-white hover:from-[#c2185b] hover:to-[#d81b60] transition-all duration-300"
+              <h2 
+                className="text-2xl sm:text-3xl font-bold tracking-[0.3em] uppercase mb-4"
+                style={{
+                  color: '#1a1a1a',
+                  textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)',
+                  letterSpacing: '0.3em'
+                }}
               >
-                Explore Collection
-              </Button>
+                NO FAVORITES YET
+              </h2>
+              <p 
+                className="text-xs sm:text-sm font-bold tracking-[0.3em] uppercase mb-8"
+                style={{
+                  color: '#1a1a1a',
+                  textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)',
+                  letterSpacing: '0.3em'
+                }}
+              >
+                START EXPLORING AND ADD ITEMS YOU LOVE TO YOUR FAVORITES
+              </p>
+              <button
+                onClick={() => navigate('/collection')}
+                className="px-8 py-4 hover:opacity-70 transition-opacity"
+                style={{
+                  background: 'linear-gradient(90deg, #dc267f 0%, #e91e63 100%)',
+                  boxShadow: '0 4px 12px rgba(220, 38, 127, 0.3)'
+                }}
+              >
+                <span 
+                  className="text-xs sm:text-sm font-bold tracking-[0.3em] uppercase text-white"
+                  style={{
+                    letterSpacing: '0.3em'
+                  }}
+                >
+                  EXPLORE COLLECTION
+                </span>
+              </button>
             </motion.div>
           ) : (
             <div 
               ref={containerRef}
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-8 sm:gap-10"
+              className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 xl:gap-10"
             >
               <AnimatePresence mode="popLayout">
                 {favorites.map((favorite, index) => {
@@ -184,11 +241,11 @@ const Favorites = () => {
                             : '0 12px 48px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.8)'
                         }}
                         animate={{
-                          y: isHovered ? -20 : 0,
-                          scale: isHovered ? 1.02 : 1,
+                          y: isHovered ? -4 : 0,
+                          scale: isHovered ? 1.04 : 1,
                         }}
                         transition={{ 
-                          duration: 0.4, 
+                          duration: 0.3, 
                           ease: [0.23, 1, 0.32, 1] 
                         }}
                         onClick={() => {
@@ -229,7 +286,7 @@ const Favorites = () => {
                         )}
 
                         {/* Image Section - Enhanced */}
-                        <div className="relative h-72 sm:h-80 overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100">
+                        <div className="relative h-48 sm:h-72 lg:h-80 overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100">
                           <motion.img
                             src={favorite.image || favorite.imageUrl}
                             alt={favorite.title || favorite.name || 'Favorite'}
@@ -262,9 +319,9 @@ const Favorites = () => {
                           )}
 
                           {/* Floating Action Buttons */}
-                          <div className="absolute top-4 right-4 flex gap-2 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                          <div className="absolute top-2 right-2 sm:top-4 sm:right-4 flex gap-1 sm:gap-2 z-20 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                             <motion.button
-                              className="w-10 h-10 rounded-full backdrop-blur-md flex items-center justify-center relative overflow-visible"
+                              className="w-8 h-8 sm:w-10 sm:h-10 rounded-full backdrop-blur-md flex items-center justify-center relative overflow-visible"
                               style={{
                                 background: isFav ? 'rgba(220, 38, 127, 0.9)' : 'rgba(255, 255, 255, 0.9)',
                                 boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)'
@@ -281,7 +338,7 @@ const Favorites = () => {
                               }}
                             >
                               <Heart 
-                                className={`w-4 h-4 ${isFav ? 'fill-white text-white' : 'text-slate-700'}`} 
+                                className={`w-3 h-3 sm:w-4 sm:h-4 ${isFav ? 'fill-white text-white' : 'text-slate-700'}`} 
                                 strokeWidth={2.5} 
                               />
                             </motion.button>
@@ -302,43 +359,63 @@ const Favorites = () => {
                         </div>
 
                         {/* Content Section - Sharper Typography */}
-                        <div className="p-7 bg-gradient-to-b from-white to-slate-50/50">
-                          <h3 className="font-luxury text-2xl sm:text-3xl font-bold text-slate-900 mb-3 line-clamp-1 tracking-tight">
+                        <div className="p-4 sm:p-5 lg:p-7 bg-gradient-to-b from-white to-slate-50/50">
+                          <h3 
+                            className="text-[10px] sm:text-xs lg:text-sm font-bold tracking-[0.3em] uppercase mb-2 sm:mb-3 line-clamp-1"
+                            style={{
+                              color: '#1a1a1a',
+                              textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)',
+                              letterSpacing: '0.3em'
+                            }}
+                          >
                             {favorite.title || favorite.name}
                           </h3>
                           
                           {/* Sharp Pink Underline */}
                           <motion.div 
-                            className="h-[3px] bg-gradient-to-r from-[#dc267f] via-[#e91e63] to-[#f06292] mb-5 rounded-full"
-                            initial={{ width: '48px' }}
-                            animate={{ width: isHovered ? '80px' : '48px' }}
+                            className="h-[2px] sm:h-[3px] bg-gradient-to-r from-[#dc267f] via-[#e91e63] to-[#f06292] mb-3 sm:mb-5 rounded-full"
+                            initial={{ width: '32px' }}
+                            animate={{ width: isHovered ? '60px' : '32px' }}
                             transition={{ duration: 0.4 }}
                           />
 
-                          <p className="font-body text-slate-800 text-base sm:text-lg mb-6 line-clamp-3 min-h-[4rem] leading-tight font-semibold tracking-wide" 
-                             style={{
-                               textShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
-                               letterSpacing: '0.025em'
-                             }}>
-                            <span className="bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800 bg-clip-text text-transparent">
-                              {favorite.description || 'Premium floral arrangement crafted with exquisite attention to detail'}
-                            </span>
+                          <p 
+                            className="font-serif text-xs sm:text-sm lg:text-base font-normal mb-4 sm:mb-6 line-clamp-2 sm:line-clamp-3 min-h-[3rem] sm:min-h-[4rem] leading-relaxed text-slate-700" 
+                            style={{
+                              letterSpacing: '0.02em'
+                            }}
+                          >
+                            {favorite.description || 'Premium floral arrangement crafted with exquisite attention to detail'}
                           </p>
 
                           {/* Price and Actions - Enhanced */}
                           <div className="flex items-end justify-between pt-2 border-t border-slate-200/60">
-                            <div>
-                              <div className="flex items-baseline gap-1">
-                                <span className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-[#dc267f] via-[#e91e63] to-[#f06292] bg-clip-text text-transparent leading-none">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-baseline gap-1 flex-wrap">
+                                <span className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-bold bg-gradient-to-r from-[#dc267f] via-[#e91e63] to-[#f06292] bg-clip-text text-transparent leading-none">
                                   ${favorite.price}
                                 </span>
-                                <span className="text-slate-500 text-xs sm:text-sm font-medium mb-0.5">USD</span>
+                                <span 
+                                  className="font-serif text-[10px] sm:text-xs lg:text-sm font-normal mb-0.5 text-slate-600"
+                                  style={{
+                                    letterSpacing: '0.05em'
+                                  }}
+                                >
+                                  USD
+                                </span>
                               </div>
-                              <p className="text-xs text-slate-500 mt-1 font-medium">Per arrangement</p>
+                              <p 
+                                className="font-serif text-[10px] sm:text-xs lg:text-sm font-normal mt-1 text-slate-600"
+                                style={{
+                                  letterSpacing: '0.05em'
+                                }}
+                              >
+                                Per arrangement
+                              </p>
                             </div>
 
                             <motion.button
-                              className="w-14 h-14 rounded-2xl flex items-center justify-center relative overflow-hidden group/btn border-2 border-[#dc267f]/20"
+                              className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 rounded-xl lg:rounded-2xl flex items-center justify-center relative overflow-hidden group/btn border-2 border-[#dc267f]/20 flex-shrink-0 ml-2"
                               style={{
                                 background: isHovered 
                                   ? 'linear-gradient(135deg, #dc267f 0%, #e91e63 50%, #f06292 100%)'
@@ -362,7 +439,7 @@ const Favorites = () => {
                                 });
                               }}
                             >
-                              <ShoppingCart className="w-6 h-6 text-white" strokeWidth={2.5} />
+                              <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-white" strokeWidth={2.5} />
                               
                               {/* Enhanced Shimmer Effect */}
                               <motion.div
