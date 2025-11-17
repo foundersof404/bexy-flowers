@@ -352,6 +352,89 @@ const Customize: React.FC = () => {
     setIsGenerating(true);
     
     try {
+      // FIRST: Try local backend with fine-tuned model
+      try {
+        // Prepare flowers array for backend
+        const flowersForBackend = Object.entries(colorQuantities)
+          .flatMap(([flowerId, colors]) => {
+            const flower = flowers.find(f => f.id === flowerId);
+            return Object.entries(colors)
+              .filter(([_, count]) => count > 0)
+              .map(([colorId, count]) => {
+                const colorObj = flower?.colors.find(c => c.id === colorId);
+                return {
+                  type: flower?.name.toLowerCase() || '',
+                  color: colorObj?.name.toLowerCase() || '',
+                  quantity: count
+                };
+              });
+          });
+
+        const requestBody = {
+          packaging_type: selectedPackage?.type || 'box',
+          box_color: selectedBoxColor?.name.toLowerCase() || 'red',
+          box_shape: selectedBoxShape?.name.toLowerCase() || 'heart',
+          wrap_color: selectedWrapColor?.name.toLowerCase() || 'pink',
+          flowers: flowersForBackend,
+          accessories: selectedAccessories,
+          glitter: withGlitter,
+          refinement: aiRefinementText.trim(),
+          steps: 15,  // Fast mode: 15 steps (minimum for good quality, ~10-12 seconds)
+          guidance: 7.0,  // Slightly lower guidance for faster generation
+          width: 384,  // Fast mode: 384x384 (good for preview, ~2x faster than 512)
+          height: 384
+        };
+
+        console.log('🎨 Using LOCAL fine-tuned backend...');
+        console.log('Request body:', requestBody);
+        
+        const response = await fetch('http://localhost:5000/generate', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(requestBody),
+          // Add timeout to prevent hanging (reduced since we're faster now)
+          signal: AbortSignal.timeout(120000) // 2 minutes timeout (should be enough for fast mode)
+        });
+
+        if (response.ok) {
+          const blob = await response.blob();
+          const imageUrl = URL.createObjectURL(blob);
+          setGeneratedImage(imageUrl);
+          
+          toast.success("✨ Generated with your fine-tuned AI! 🌹", {
+            duration: 3000,
+            icon: "🎨"
+          });
+          return;
+        } else {
+          // Log the error response
+          const errorText = await response.text();
+          console.error('Backend error:', response.status, errorText);
+          throw new Error(`Backend returned ${response.status}: ${errorText}`);
+        }
+      } catch (localError: any) {
+        console.log("Local backend error:", localError);
+        
+        // Show user-friendly error message
+        if (localError.name === 'AbortError') {
+          toast.error("⏱️ Generation timed out. The backend might be slow or not responding.", {
+            duration: 5000
+          });
+        } else if (localError.message?.includes('fetch')) {
+          toast.error("❌ Can't connect to backend. Is server.py running on port 5000?", {
+            duration: 5000
+          });
+        } else {
+          toast.error(`⚠️ Backend error: ${localError.message || 'Unknown error'}`, {
+            duration: 5000
+          });
+        }
+        
+        console.log("Falling back to online APIs...");
+      }
+
       // Build ULTRA PRECISE prompt with NUMBERED flower list and multiple verifications
       const flowerDetailsList: string[] = [];
       let flowerNumber = 1;
@@ -812,8 +895,8 @@ const Customize: React.FC = () => {
                           <div key={`${flowerId}-${colorId}`} className="flex justify-between text-sm ml-4">
                             <span>{count}x {colorObj?.name} {flower?.name}</span>
                             <span>${(flower?.price || 0) * count}</span>
-                          </div>
-                        );
+    </div>
+  );
                       });
                   })}
                 </div>

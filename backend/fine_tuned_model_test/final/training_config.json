@@ -1,0 +1,14 @@
+{
+  "model_id": "runwayml/stable-diffusion-v1-5",
+  "training_images_dir": "training_data/test_red_roses",
+  "captions_file": "training_data/test_captions.json",
+  "output_dir": "fine_tuned_model_test",
+  "lora_rank": 4,
+  "learning_rate": 0.0001,
+  "num_epochs": 30,
+  "batch_size": 1,
+  "gradient_accumulation_steps": 4,
+  "save_every": 10,
+  "resolution": 512,
+  "device": "cuda"
+}

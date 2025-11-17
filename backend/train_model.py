@@ -11,9 +11,9 @@ Date: 2025
 
 import os
 import torch
-from diffusers import StableDiffusionPipeline, DPMSolverMultistepScheduler
-from diffusers.loaders import AttnProcsLayers
-from diffusers.models.attention_processor import LoRAAttnProcessor
+import numpy as np
+from diffusers import StableDiffusionPipeline, DDPMScheduler
+from peft import LoraConfig, get_peft_model, PeftModel
 from transformers import CLIPTokenizer
 from torch.utils.data import Dataset, DataLoader
 from PIL import Image
@@ -87,36 +87,44 @@ class BexyFlowersDataset(Dataset):
         }
 
 
-def setup_lora_layers(unet, lora_rank=4):
-    """Add LoRA layers to UNet for efficient fine-tuning."""
+def setup_lora_with_peft(unet, lora_rank=4):
+    """Setup LoRA using PEFT library (modern approach)."""
     
-    lora_attn_procs = {}
-    for name in unet.attn_processors.keys():
-        cross_attention_dim = None if name.endswith("attn1.processor") else unet.config.cross_attention_dim
-        if name.startswith("mid_block"):
-            hidden_size = unet.config.block_out_channels[-1]
-        elif name.startswith("up_blocks"):
-            block_id = int(name[len("up_blocks.")])
-            hidden_size = list(reversed(unet.config.block_out_channels))[block_id]
-        elif name.startswith("down_blocks"):
-            block_id = int(name[len("down_blocks.")])
-            hidden_size = unet.config.block_out_channels[block_id]
-        
-        lora_attn_procs[name] = LoRAAttnProcessor(
-            hidden_size=hidden_size,
-            cross_attention_dim=cross_attention_dim,
-            rank=lora_rank
-        )
+    # Configure LoRA
+    lora_config = LoraConfig(
+        r=lora_rank,  # LoRA rank
+        lora_alpha=lora_rank,  # LoRA alpha (usually same as rank)
+        init_lora_weights="gaussian",
+        target_modules=[
+            "to_k",
+            "to_q",
+            "to_v",
+            "to_out.0",
+            "proj_in",
+            "proj_out",
+            "ff.net.0.proj",
+            "ff.net.2",
+            "conv1",
+            "conv2",
+            "conv_shortcut",
+            "time_emb_proj",
+        ],
+    )
     
-    unet.set_attn_processor(lora_attn_procs)
-    return lora_attn_procs
+    # Apply LoRA to UNet
+    unet = get_peft_model(unet, lora_config)
+    
+    logger.info("LoRA layers successfully added using PEFT!")
+    unet.print_trainable_parameters()
+    
+    return unet
 
 
 def train_bexy_flowers_model():
     """Main training function."""
     
     logger.info("=" * 60)
-    logger.info("🌸 Bexy Flowers Model Fine-Tuning 🌸")
+    logger.info("Bexy Flowers Model Fine-Tuning")
     logger.info("=" * 60)
     
     config = TRAINING_CONFIG
@@ -140,28 +148,23 @@ def train_bexy_flowers_model():
     vae = pipeline.vae
     text_encoder = pipeline.text_encoder
     tokenizer = pipeline.tokenizer
+    noise_scheduler = DDPMScheduler.from_pretrained(config["model_id"], subfolder="scheduler")
     
     # Move to device
-    unet.to(device)
     vae.to(device)
     text_encoder.to(device)
     
-    # Setup LoRA layers
+    # Setup LoRA using PEFT
     logger.info(f"Setting up LoRA layers (rank={config['lora_rank']})")
-    lora_layers = setup_lora_layers(unet, config["lora_rank"])
+    unet = setup_lora_with_peft(unet, config["lora_rank"])
+    unet.to(device)
     
-    # Get trainable parameters
-    trainable_params = []
-    for name, param in unet.named_parameters():
-        if "lora" in name:
-            param.requires_grad = True
-            trainable_params.append(param)
-        else:
-            param.requires_grad = False
+    # Freeze non-LoRA parameters (PEFT handles this automatically)
+    vae.requires_grad_(False)
+    text_encoder.requires_grad_(False)
     
-    logger.info(f"Trainable parameters: {sum(p.numel() for p in trainable_params):,}")
-    
-    # Setup optimizer
+    # Setup optimizer (only LoRA parameters)
+    trainable_params = [p for p in unet.parameters() if p.requires_grad]
     optimizer = torch.optim.AdamW(
         trainable_params,
         lr=config["learning_rate"]
@@ -185,7 +188,7 @@ def train_bexy_flowers_model():
     except Exception as e:
         logger.error(f"Error loading dataset: {str(e)}")
         logger.info("\n" + "=" * 60)
-        logger.info("📸 SETUP REQUIRED:")
+        logger.info("SETUP REQUIRED:")
         logger.info("=" * 60)
         logger.info(f"1. Add your flower images to: {config['training_images_dir']}/")
         logger.info(f"2. Create captions file: {config['captions_file']}")
@@ -216,12 +219,17 @@ def train_bexy_flowers_model():
             # Encode images to latent space
             with torch.no_grad():
                 latents = vae.encode(images).latent_dist.sample()
-                latents = latents * 0.18215
+                latents = latents * vae.config.scaling_factor
             
             # Add noise
             noise = torch.randn_like(latents)
-            timesteps = torch.randint(0, 1000, (latents.shape[0],), device=device)
-            noisy_latents = pipeline.scheduler.add_noise(latents, noise, timesteps)
+            timesteps = torch.randint(
+                0, 
+                noise_scheduler.config.num_train_timesteps,
+                (latents.shape[0],), 
+                device=device
+            ).long()
+            noisy_latents = noise_scheduler.add_noise(latents, noise, timesteps)
             
             # Encode text
             text_inputs = tokenizer(
@@ -236,7 +244,11 @@ def train_bexy_flowers_model():
                 text_embeddings = text_encoder(text_inputs.input_ids.to(device))[0]
             
             # Predict noise
-            noise_pred = unet(noisy_latents, timesteps, text_embeddings).sample
+            noise_pred = unet(
+                noisy_latents,
+                timesteps,
+                encoder_hidden_states=text_embeddings
+            ).sample
             
             # Calculate loss
             loss = torch.nn.functional.mse_loss(noise_pred, noise)
@@ -256,14 +268,9 @@ def train_bexy_flowers_model():
             checkpoint_dir = Path(config["output_dir"]) / f"checkpoint-{epoch + 1}"
             checkpoint_dir.mkdir(parents=True, exist_ok=True)
             
-            # Save LoRA weights
-            lora_state_dict = {}
-            for name, param in unet.named_parameters():
-                if "lora" in name:
-                    lora_state_dict[name] = param.cpu().detach()
-            
-            torch.save(lora_state_dict, checkpoint_dir / "lora_weights.pt")
-            logger.info(f"✅ Saved checkpoint to {checkpoint_dir}")
+            # Save using PEFT's built-in save method
+            unet.save_pretrained(checkpoint_dir)
+            logger.info(f"Saved checkpoint to {checkpoint_dir}")
     
     # Save final model
     logger.info("\n" + "=" * 60)
@@ -271,21 +278,16 @@ def train_bexy_flowers_model():
     final_dir = Path(config["output_dir"]) / "final"
     final_dir.mkdir(parents=True, exist_ok=True)
     
-    # Save LoRA weights
-    lora_state_dict = {}
-    for name, param in unet.named_parameters():
-        if "lora" in name:
-            lora_state_dict[name] = param.cpu().detach()
-    
-    torch.save(lora_state_dict, final_dir / "lora_weights.pt")
+    # Save using PEFT
+    unet.save_pretrained(final_dir)
     
     # Save config
     with open(final_dir / "training_config.json", "w") as f:
         json.dump(config, f, indent=2)
     
-    logger.info(f"✅ Final model saved to {final_dir}")
+    logger.info(f"Final model saved to {final_dir}")
     logger.info("=" * 60)
-    logger.info("🎉 Training complete!")
+    logger.info("Training complete!")
     logger.info("\nTo use your fine-tuned model:")
     logger.info("1. Update server.py to load LoRA weights")
     logger.info("2. Restart the backend server")
@@ -294,6 +296,5 @@ def train_bexy_flowers_model():
 
 
 if __name__ == "__main__":
-    import numpy as np
     train_bexy_flowers_model()
 
