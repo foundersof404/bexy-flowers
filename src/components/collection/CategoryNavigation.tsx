@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
@@ -13,7 +14,7 @@ interface CategoryNavigationProps {
   onCategoryChange: (categoryId: string) => void;
 }
 
-export const CategoryNavigation = ({ 
+const CategoryNavigationComponent = ({ 
   categories, 
   selectedCategory, 
   onCategoryChange 
@@ -80,3 +81,6 @@ export const CategoryNavigation = ({
     </motion.nav>
   );
 };
+
+// Export memoized version for better performance
+export const CategoryNavigation = memo(CategoryNavigationComponent);

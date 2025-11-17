@@ -1,5 +1,17 @@
-import React, { Suspense } from "react";
-import { Sparkles, Wand2, Palette, Flower2, ChevronRight } from "lucide-react";
+import React, { Suspense, useRef } from "react";
+import { motion, useInView } from "framer-motion";
+import {
+  Sparkles,
+  Wand2,
+  Palette,
+  Flower2,
+  ChevronRight,
+  ArrowRight,
+  Layers,
+  Pen,
+  Sparkle,
+  Award
+} from "lucide-react";
 import LazySection from "@/components/LazySection";
 import UltraNavigation from "@/components/UltraNavigation";
 const InteractiveBackground = React.lazy(() => import("@/components/interactive/InteractiveBackground"));
@@ -11,6 +23,477 @@ const UltraCategories = React.lazy(() => import("@/components/UltraCategories"))
 const ZodiacBouquetQuiz = React.lazy(() => import("@/components/culture/ZodiacBouquetQuiz"));
 const FlowerCareGuide = React.lazy(() => import("@/components/culture/FlowerCareGuide"));
 const Footer = React.lazy(() => import("@/components/Footer"));
+
+// Professional Custom Bouquet Section Component
+const ProfessionalCustomSection = () => {
+
+  const features = [
+    {
+      icon: Pen,
+      title: "ARTISAN CRAFTED",
+      subtitle: "Style Presets",
+      description: "Start with romantic, modern, or avant-garde styles. Our master florists guide your creative vision.",
+      gradientColors: ["#C29A43", "#D4A85A", "#E8C882"],
+      direction: "left"
+    },
+    {
+      icon: Sparkle,
+      title: "BESPOKE PALETTES",
+      subtitle: "Color Stories",
+      description: "Explore professionally curated color harmonies. Each palette tells a unique story for your occasion.",
+      gradientColors: ["#B7893C", "#C79E48", "#D4A85A"],
+      direction: "center"
+    },
+    {
+      icon: Award,
+      title: "LUXURY BLOOMS",
+      subtitle: "Premium Selection",
+      description: "Exclusively sourced seasonal flowers. Hand-selected for uncompromising quality and elegance.",
+      gradientColors: ["#A67C37", "#B88A44", "#CFA340"],
+      direction: "right"
+    }
+  ];
+
+  return (
+    <section 
+      className="relative py-32 px-4 sm:px-6 lg:px-8 overflow-hidden"
+      style={{
+        background: 'linear-gradient(180deg, #faf7f3 0%, #ffffff 100%)'
+      }}
+    >
+      {/* Floating Background Elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <motion.div
+          className="absolute top-20 -left-20 w-96 h-96 bg-gradient-to-br from-[#C79E48]/10 to-transparent rounded-full blur-3xl"
+          animate={{
+            scale: [1, 1.2, 1],
+            opacity: [0.3, 0.5, 0.3]
+          }}
+          transition={{
+            duration: 8,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        />
+        <motion.div
+          className="absolute bottom-20 -right-20 w-96 h-96 bg-gradient-to-br from-[#B88A44]/10 to-transparent rounded-full blur-3xl"
+          animate={{
+            scale: [1.2, 1, 1.2],
+            opacity: [0.5, 0.3, 0.5]
+          }}
+          transition={{
+            duration: 8,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 1
+          }}
+        />
+        <motion.div
+          className="absolute top-1/3 left-1/2 w-80 h-80 -translate-x-1/2 rounded-full bg-[#F2DFC6]/40 blur-3xl opacity-30"
+          animate={{ scale: [1, 1.1, 1] }}
+          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="absolute bottom-10 left-20 w-48 h-48 rounded-full bg-[#F8E8D3]/40 blur-2xl opacity-40"
+          animate={{ y: [0, -10, 0], opacity: [0.3, 0.5, 0.3] }}
+          transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="absolute top-10 right-16 w-64 h-32 bg-gradient-to-r from-transparent via-[#C79E48]/15 to-transparent blur-3xl opacity-50"
+          animate={{ x: [0, 12, 0] }}
+          transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
+        />
+      </div>
+
+      <div className="relative z-10 max-w-7xl mx-auto">
+        {/* Premium Header */}
+        <motion.div
+          className="text-center mb-20"
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.5, margin: "0px 0px -100px 0px" }}
+          transition={{ duration: 0.8, ease: [0.23, 1, 0.32, 1] }}
+        >
+          {/* Professional Badge */}
+          <motion.div
+            className="inline-flex items-center gap-2 px-4 py-2 mb-8 rounded-full"
+            style={{
+              background: 'linear-gradient(90deg, rgba(194, 154, 67, 0.1) 0%, rgba(184, 138, 68, 0.15) 100%)',
+              border: '1px solid rgba(194, 154, 67, 0.2)'
+            }}
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true, amount: 0.5, margin: "0px 0px -100px 0px" }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            <Layers className="w-4 h-4 text-[#B88A44]" />
+            <span 
+              className="text-xs font-bold tracking-[0.25em] uppercase"
+              style={{
+                color: '#1a1a1a',
+                letterSpacing: '0.25em'
+              }}
+            >
+              PROFESSIONAL CUSTOMIZATION
+            </span>
+          </motion.div>
+
+          {/* Main Title - Sharp & Bold */}
+          <motion.h2
+            className="font-bold mb-6 leading-tight"
+            style={{
+              fontSize: 'clamp(2.5rem, 7vw, 5rem)',
+              color: '#0a0a0a',
+              letterSpacing: '-0.02em',
+              fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
+              textShadow: '0 2px 4px rgba(0, 0, 0, 0.05)'
+            }}
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.5, margin: "0px 0px -100px 0px" }}
+            transition={{ duration: 0.8, delay: 0.3, ease: [0.23, 1, 0.32, 1] }}
+          >
+            DESIGN YOUR
+            <br />
+            <span 
+              className="relative inline-block"
+              style={{
+                backgroundImage: 'linear-gradient(90deg, #B7893C 0%, #D4A85A 50%, #CFA340 100%)',
+                backgroundClip: 'text',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                color: 'transparent'
+              }}
+            >
+              PERFECT BOUQUET
+              {/* Underline Accent */}
+              <motion.div
+                className="absolute -bottom-2 left-0 h-1 rounded-full"
+                style={{
+                  background: 'linear-gradient(90deg, #B7893C 0%, #D4A85A 100%)'
+                }}
+                initial={{ width: 0 }}
+                whileInView={{ width: '100%' }}
+                viewport={{ once: true, amount: 0.5, margin: "0px 0px -100px 0px" }}
+                transition={{ duration: 1, delay: 0.8, ease: "easeOut" }}
+              />
+            </span>
+          </motion.h2>
+
+          {/* Subtitle - Professional */}
+          <motion.p
+            className="text-lg max-w-3xl mx-auto leading-relaxed"
+            style={{
+              color: '#525252',
+              fontFamily: 'Inter, sans-serif',
+              letterSpacing: '0.01em'
+            }}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.5, margin: "0px 0px -100px 0px" }}
+            transition={{ duration: 0.8, delay: 0.5 }}
+          >
+            Create a bespoke floral masterpiece with unlimited creative freedom.
+            <br className="hidden sm:block" />
+            Choose from our curated premium selection and design something uniquely yours.
+          </motion.p>
+
+          {/* Decorative Line */}
+          <motion.div 
+            className="flex items-center justify-center gap-3 mt-8 mb-16"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true, amount: 0.5, margin: "0px 0px -100px 0px" }}
+            transition={{ duration: 0.8, delay: 0.6 }}
+          >
+            <div className="h-[1px] w-16 bg-gradient-to-r from-transparent to-[#C79E48]" />
+            <div className="w-2 h-2 rounded-full bg-[#C79E48]" />
+            <div className="h-[1px] w-16 bg-gradient-to-l from-transparent to-[#C79E48]" />
+          </motion.div>
+        </motion.div>
+
+        {/* Feature Cards - Premium Grid */}
+        <div className="relative mb-16">
+          <div className="pointer-events-none absolute inset-0 -z-10">
+            <div className="absolute top-6 left-8 w-40 h-40 rounded-full bg-[#F1E2CE]/40 blur-3xl" />
+            <div className="absolute bottom-4 right-20 w-48 h-48 rounded-full bg-[#F6EADC]/30 blur-2xl" />
+            <div className="absolute inset-x-1/2 -translate-x-1/2 top-1/2 w-[85%] h-32 bg-gradient-to-r from-transparent via-[#C79E48]/10 to-transparent blur-3xl opacity-70" />
+            <div className="absolute top-1/4 right-1/3 w-24 h-24 rounded-full bg-[#F8EDDD]/40 blur-2xl" />
+          </div>
+          <div className="grid md:grid-cols-3 gap-8 lg:gap-10 xl:gap-12">
+            {features.map((feature, index) => {
+              const getInitialState = () => {
+                if (feature.direction === "left") {
+                  return { opacity: 0, x: -100, scale: 0.9 };
+                } else if (feature.direction === "right") {
+                  return { opacity: 0, x: 100, scale: 0.9 };
+                }
+                return { opacity: 0, scale: 0.5, filter: "blur(10px)" };
+              };
+
+              const getAnimateState = () => {
+                if (feature.direction === "left" || feature.direction === "right") {
+                  return { opacity: 1, x: 0, scale: 1 };
+                }
+                return { opacity: 1, scale: 1, filter: "blur(0px)" };
+              };
+
+              const gradient135 = `linear-gradient(135deg, ${feature.gradientColors[0]} 0%, ${feature.gradientColors[1]} 50%, ${feature.gradientColors[2]} 100%)`;
+              const gradient90 = `linear-gradient(90deg, ${feature.gradientColors[0]} 0%, ${feature.gradientColors[1]} 50%, ${feature.gradientColors[2]} 100%)`;
+              const gradient225 = `linear-gradient(225deg, ${feature.gradientColors[0]} 0%, ${feature.gradientColors[1]} 50%, ${feature.gradientColors[2]} 100%)`;
+              const Icon = feature.icon;
+
+              return (
+                <motion.div
+                  key={index}
+                  className="group relative"
+                initial={getInitialState()}
+                whileInView={getAnimateState()}
+                viewport={{ once: true, amount: 0.5, margin: "0px 0px -100px 0px" }}
+                transition={{
+                  duration: feature.direction === "center" ? 1 : 0.8,
+                  delay: index * 0.2,
+                  ease: feature.direction === "center" ? [0.34, 1.56, 0.64, 1] : [0.23, 1, 0.32, 1]
+                }}
+                >
+                  <motion.div
+                    className="relative h-full p-8 rounded-3xl overflow-hidden border border-[#C6A15B]/20 bg-white/95 backdrop-blur-sm shadow-[0_10px_35px_rgba(0,0,0,0.05)] transition-all duration-300"
+                    style={{
+                      background: 'linear-gradient(180deg, #ffffff 0%, #fafaf9 100%)',
+                      border: '1px solid rgba(0, 0, 0, 0.06)',
+                      boxShadow: '0 4px 24px rgba(0, 0, 0, 0.06)'
+                    }}
+                    whileHover={{
+                      y: -12,
+                      boxShadow: '0 20px 45px rgba(0,0,0,0.10)',
+                      borderColor: 'rgba(194, 154, 67, 0.35)'
+                    }}
+                    transition={{ duration: 0.35 }}
+                  >
+                    <motion.div
+                      className="absolute inset-0 opacity-0 group-hover:opacity-100 pointer-events-none"
+                      style={{ background: 'linear-gradient(180deg, transparent 0%, rgba(194, 154, 67, 0.03) 100%)' }}
+                      transition={{ duration: 0.4 }}
+                    />
+
+                    <motion.div
+                      className="relative w-[72px] h-[72px] mb-6 rounded-2xl flex items-center justify-center shadow-[0_3px_12px_rgba(198,161,91,0.25)]"
+                      style={{ background: gradient135, boxShadow: '0 8px 24px rgba(194, 154, 67, 0.3)' }}
+                      whileHover={{ scale: 1.12, rotate: 8 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      {/* Icon - Ensure it stays visible with proper z-index */}
+                      <Icon 
+                        className="w-9 h-9 text-white drop-shadow-[0_4px_16px_rgba(0,0,0,0.25)] relative z-10" 
+                        strokeWidth={1.6} 
+                        style={{ pointerEvents: 'none' }}
+                      />
+                      {/* Glow Effect - Behind icon with lower z-index */}
+                      <motion.div
+                        className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 pointer-events-none -z-10"
+                        style={{ background: gradient135, filter: 'blur(12px)' }}
+                        transition={{ duration: 0.4 }}
+                      />
+                    </motion.div>
+
+                    <h3
+                      className="text-xs font-bold tracking-[0.25em] uppercase mb-2"
+                      style={{ color: '#B88A44', letterSpacing: '0.25em' }}
+                    >
+                      {feature.title}
+                    </h3>
+
+                    <motion.h4
+                      className="text-2xl font-bold mb-4 transition-all duration-300"
+                      style={{ color: '#0a0a0a', letterSpacing: '-0.01em', fontFamily: 'Inter, sans-serif' }}
+                      whileHover={{ color: '#B88A44' }}
+                    >
+                      {feature.subtitle}
+                    </motion.h4>
+
+                    <motion.div
+                      className="h-[2px] mb-4 rounded-full"
+                      style={{ background: gradient90, width: '48px' }}
+                      whileHover={{ width: '80px' }}
+                      transition={{ duration: 0.4 }}
+                    />
+
+                    <p
+                      className="leading-relaxed"
+                      style={{ color: '#525252', fontSize: '0.95rem', lineHeight: '1.7' }}
+                    >
+                      {feature.description}
+                    </p>
+
+                    <div
+                      className="absolute top-0 right-0 w-32 h-32 opacity-5 pointer-events-none"
+                      style={{ background: gradient225, borderRadius: '0 16px 0 100%' }}
+                    />
+                  </motion.div>
+                </motion.div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* CTA Button Section - Elegant Frame */}
+        <motion.div
+          className="relative text-center mt-8"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.5, margin: "0px 0px -100px 0px" }}
+          transition={{ duration: 0.8, delay: 0.6 }}
+        >
+          {/* Elegant Decorative Frame */}
+          <div className="relative inline-block px-16 py-12">
+            {/* Top Left Corner */}
+            <motion.div
+              className="absolute top-0 left-0 w-16 h-16"
+              style={{
+                borderTop: '2px solid rgba(194, 154, 67, 0.3)',
+                borderLeft: '2px solid rgba(194, 154, 67, 0.3)',
+              }}
+              initial={{ opacity: 0, scale: 0 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true, amount: 0.5, margin: "0px 0px -100px 0px" }}
+              transition={{ duration: 0.6, delay: 0.8 }}
+            />
+            
+            {/* Top Right Corner */}
+            <motion.div
+              className="absolute top-0 right-0 w-16 h-16"
+              style={{
+                borderTop: '2px solid rgba(194, 154, 67, 0.3)',
+                borderRight: '2px solid rgba(194, 154, 67, 0.3)',
+              }}
+              initial={{ opacity: 0, scale: 0 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true, amount: 0.5, margin: "0px 0px -100px 0px" }}
+              transition={{ duration: 0.6, delay: 0.8 }}
+            />
+            
+            {/* Bottom Left Corner */}
+            <motion.div
+              className="absolute bottom-0 left-0 w-16 h-16"
+              style={{
+                borderBottom: '2px solid rgba(194, 154, 67, 0.3)',
+                borderLeft: '2px solid rgba(194, 154, 67, 0.3)',
+              }}
+              initial={{ opacity: 0, scale: 0 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true, amount: 0.5, margin: "0px 0px -100px 0px" }}
+              transition={{ duration: 0.6, delay: 0.8 }}
+            />
+            
+            {/* Bottom Right Corner */}
+            <motion.div
+              className="absolute bottom-0 right-0 w-16 h-16"
+              style={{
+                borderBottom: '2px solid rgba(194, 154, 67, 0.3)',
+                borderRight: '2px solid rgba(194, 154, 67, 0.3)',
+              }}
+              initial={{ opacity: 0, scale: 0 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true, amount: 0.5, margin: "0px 0px -100px 0px" }}
+              transition={{ duration: 0.6, delay: 0.8 }}
+            />
+
+            {/* Floating Particles Around Button */}
+            {[...Array(8)].map((_, i) => (
+              <motion.div
+                key={i}
+                className="absolute w-1 h-1 rounded-full bg-[#C79E48]"
+                style={{
+                  top: `${20 + Math.sin(i * Math.PI / 4) * 40}%`,
+                  left: `${50 + Math.cos(i * Math.PI / 4) * 45}%`,
+                }}
+                animate={{
+                  y: [0, -10, 0],
+                  opacity: [0.3, 0.8, 0.3],
+                  scale: [1, 1.5, 1]
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  delay: i * 0.3,
+                  ease: "easeInOut"
+                }}
+              />
+            ))}
+
+            {/* CTA Button */}
+            <motion.a
+              href="/customize"
+              className="group inline-flex items-center gap-4 px-10 py-5 rounded-2xl font-bold text-white relative overflow-hidden"
+              style={{
+                background: 'linear-gradient(90deg, #B88A44 0%, #D4A85A 50%, #CFA340 100%)',
+                boxShadow: '0 8px 32px rgba(184, 138, 68, 0.4)',
+                fontSize: '1.1rem',
+                letterSpacing: '0.05em'
+              }}
+              whileHover={{
+                scale: 1.05,
+                boxShadow: '0 12px 48px rgba(194, 154, 67, 0.5)'
+              }}
+              whileTap={{ scale: 0.98 }}
+              transition={{ duration: 0.3 }}
+            >
+            {/* Shimmer Effect */}
+            <motion.div
+              className="absolute inset-0 -left-full w-1/2 h-full"
+              style={{
+                background: 'linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.3) 50%, transparent 100%)',
+                transform: 'skewX(-20deg)'
+              }}
+              animate={{
+                left: ['100%', '-50%']
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: "linear",
+                repeatDelay: 1
+              }}
+            />
+
+            <span className="relative z-10 uppercase tracking-wider">
+              Start Designing Now
+            </span>
+            <motion.div
+              className="relative z-10"
+              animate={{
+                x: [0, 4, 0]
+              }}
+              transition={{
+                duration: 1.5,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+            >
+              <ArrowRight className="w-5 h-5" strokeWidth={2.5} />
+            </motion.div>
+            </motion.a>
+
+            {/* Trust Badge */}
+            <motion.p
+              className="mt-6 text-sm"
+              style={{
+                color: '#737373',
+                letterSpacing: '0.02em'
+              }}
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true, amount: 0.5, margin: "0px 0px -100px 0px" }}
+              transition={{ duration: 0.6, delay: 0.9 }}
+            >
+              ✨ Trusted by over 10,000+ satisfied customers worldwide
+            </motion.p>
+          </div>
+        </motion.div>
+      </div>
+    </section>
+  );
+};
 
 const Index = () => {
   return (
@@ -33,54 +516,9 @@ const Index = () => {
             <UltraCategories />
           </Suspense>
         </LazySection>
-        {/* Simple and Modern Design Your Perfect Bouquet Section */}
+        {/* Professional Custom Bouquet Design Section - Premium Redesign */}
         <LazySection rootMargin="400px 0px">
-          <section className="py-20 px-6 bg-white">
-            <div className="max-w-6xl mx-auto">
-              <div className="text-center mb-16">
-                <h2 className="font-luxury text-5xl md:text-6xl font-bold text-slate-800 mb-6">
-                  Design Your Perfect Bouquet
-                </h2>
-                <div className="w-24 h-1 bg-gradient-to-r from-[#C79E48] to-[#D4A85A] mx-auto mb-6"></div>
-                <p className="font-body text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
-                  Create a custom arrangement with unlimited creativity. Choose from premium flowers and design something uniquely yours.
-                </p>
-              </div>
-
-              <div className="grid md:grid-cols-3 gap-8 mb-12">
-                <div className="text-center p-8 rounded-2xl bg-slate-50 hover:bg-slate-100 transition-colors duration-300">
-                  <div className="w-16 h-16 bg-gradient-to-br from-[#C79E48] to-[#D4A85A] rounded-full flex items-center justify-center mx-auto mb-6">
-                    <Wand2 className="h-8 w-8 text-white" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-slate-800 mb-4">Style Presets</h3>
-                  <p className="text-slate-600 leading-relaxed">Start with romantic, modern, or boho styles and personalize to your taste.</p>
-                </div>
-
-                <div className="text-center p-8 rounded-2xl bg-slate-50 hover:bg-slate-100 transition-colors duration-300">
-                  <div className="w-16 h-16 bg-gradient-to-br from-[#C79E48] to-[#D4A85A] rounded-full flex items-center justify-center mx-auto mb-6">
-                    <Palette className="h-8 w-8 text-white" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-slate-800 mb-4">Color Stories</h3>
-                  <p className="text-slate-600 leading-relaxed">Explore curated color palettes perfect for any occasion or mood.</p>
-                </div>
-
-                <div className="text-center p-8 rounded-2xl bg-slate-50 hover:bg-slate-100 transition-colors duration-300">
-                  <div className="w-16 h-16 bg-gradient-to-br from-[#C79E48] to-[#D4A85A] rounded-full flex items-center justify-center mx-auto mb-6">
-                    <Flower2 className="h-8 w-8 text-white" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-slate-800 mb-4">Premium Blooms</h3>
-                  <p className="text-slate-600 leading-relaxed">Only the finest flowers sourced seasonally and responsibly.</p>
-                </div>
-              </div>
-
-              <div className="text-center">
-                <a href="/customize" className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-[#C79E48] to-[#D4A85A] text-white font-semibold text-lg rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
-                  Start Designing
-                  <ChevronRight className="h-5 w-5" />
-                </a>
-              </div>
-            </div>
-          </section>
+          <ProfessionalCustomSection />
         </LazySection>
         <LazySection rootMargin="400px 0px">
           <Suspense fallback={null}>

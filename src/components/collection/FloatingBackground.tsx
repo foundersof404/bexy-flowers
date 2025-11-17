@@ -6,8 +6,8 @@ import * as THREE from "three";
 const FloatingParticles = () => {
   const ref = useRef<THREE.Points>(null);
   
-  // Generate particle positions
-  const particleCount = 100;
+  // Reduced particle count for better performance
+  const particleCount = 50;
   const positions = new Float32Array(particleCount * 3);
   const colors = new Float32Array(particleCount * 3);
   
@@ -22,17 +22,25 @@ const FloatingParticles = () => {
     colors[i * 3 + 2] = 0.2 + Math.random() * 0.3; // B
   }
 
+  // Throttle animation updates for better performance
+  let lastUpdate = 0;
+  const updateInterval = 1 / 30; // 30 FPS instead of 60
+
   useFrame((state) => {
     if (ref.current) {
       const time = state.clock.getElapsedTime();
+      
+      // Throttle updates
+      if (time - lastUpdate < updateInterval) return;
+      lastUpdate = time;
       
       // Gentle floating animation
       ref.current.rotation.x = Math.sin(time * 0.1) * 0.1;
       ref.current.rotation.y = Math.sin(time * 0.15) * 0.1;
       
-      // Update particle positions for floating effect
+      // Update particle positions for floating effect - only every other particle for performance
       const positions = ref.current.geometry.attributes.position.array as Float32Array;
-      for (let i = 0; i < particleCount; i++) {
+      for (let i = 0; i < particleCount; i += 2) {
         const i3 = i * 3;
         positions[i3 + 1] += Math.sin(time * 0.5 + i * 0.1) * 0.002;
       }
@@ -57,31 +65,41 @@ const FloatingParticles = () => {
 const FloatingPetals = () => {
   const groupRef = useRef<THREE.Group>(null);
   
+  // Throttle animation updates for better performance
+  let lastUpdate = 0;
+  const updateInterval = 1 / 30; // 30 FPS instead of 60
+  
   useFrame((state) => {
     if (groupRef.current) {
       const time = state.clock.getElapsedTime();
+      
+      // Throttle updates
+      if (time - lastUpdate < updateInterval) return;
+      lastUpdate = time;
       
       // Gentle rotation and floating
       groupRef.current.rotation.y = Math.sin(time * 0.1) * 0.2;
       groupRef.current.position.y = Math.sin(time * 0.2) * 0.5;
       
-      // Individual petal movements
+      // Individual petal movements - reduced complexity
       groupRef.current.children.forEach((child, index) => {
-        child.rotation.z = Math.sin(time * 0.3 + index) * 0.3;
-        child.position.y = Math.sin(time * 0.4 + index * 0.5) * 0.3;
+        if (index % 2 === 0) { // Only update every other petal
+          child.rotation.z = Math.sin(time * 0.3 + index) * 0.3;
+          child.position.y = Math.sin(time * 0.4 + index * 0.5) * 0.3;
+        }
       });
     }
   });
 
   return (
     <group ref={groupRef}>
-      {Array.from({ length: 12 }, (_, i) => (
+      {Array.from({ length: 8 }, (_, i) => (
         <mesh
           key={i}
           position={[
-            Math.cos((i / 12) * Math.PI * 2) * 3,
+            Math.cos((i / 8) * Math.PI * 2) * 3,
             (Math.random() - 0.5) * 2,
-            Math.sin((i / 12) * Math.PI * 2) * 3
+            Math.sin((i / 8) * Math.PI * 2) * 3
           ]}
           rotation={[
             Math.random() * Math.PI,
@@ -108,6 +126,9 @@ export const FloatingBackground = () => {
       <Canvas
         camera={{ position: [0, 0, 10], fov: 75 }}
         style={{ background: "transparent" }}
+        dpr={[1, 1.5]} // Limit device pixel ratio for better performance
+        performance={{ min: 0.5 }} // Allow performance throttling
+        frameloop="always"
       >
         <ambientLight intensity={0.5} />
         <pointLight position={[10, 10, 10]} />

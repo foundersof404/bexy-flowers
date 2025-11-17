@@ -51,14 +51,14 @@ const Favorites = () => {
             className="text-center mb-16"
             initial={{ opacity: 0, y: -30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
           >
             {/* Sharp Header Text Above */}
             <motion.div
               className="mb-8"
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
             >
               <p 
                 className="text-xs sm:text-sm font-bold tracking-[0.3em] uppercase mb-2"
@@ -371,12 +371,10 @@ const Favorites = () => {
                             {favorite.title || favorite.name}
                           </h3>
                           
-                          {/* Sharp Pink Underline */}
-                          <motion.div 
-                            className="h-[2px] sm:h-[3px] bg-gradient-to-r from-[#dc267f] via-[#e91e63] to-[#f06292] mb-3 sm:mb-5 rounded-full"
-                            initial={{ width: '32px' }}
-                            animate={{ width: isHovered ? '60px' : '32px' }}
-                            transition={{ duration: 0.4 }}
+                          {/* Sharp Pink Underline - Simplified */}
+                          <div 
+                            className="h-[2px] sm:h-[3px] bg-gradient-to-r from-[#dc267f] via-[#e91e63] to-[#f06292] mb-3 sm:mb-5 rounded-full transition-all duration-300"
+                            style={{ width: isHovered ? '60px' : '32px' }}
                           />
 
                           <p 

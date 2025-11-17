@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState } from "react";
-import { motion, useAnimation } from "framer-motion";
+import { useEffect, useRef, useState, memo, useCallback } from "react";
+import { motion } from "framer-motion";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { Heart, Eye, ShoppingCart, Crown, Sparkles, ArrowUpRight } from "lucide-react";
+import { Heart, Eye, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCartWithToast } from "@/hooks/useCartWithToast";
 import { useFavorites } from "@/contexts/FavoritesContext";
@@ -41,7 +41,7 @@ const getBouquetTags = (bouquet: Bouquet) => {
   return [allTags[4]];
 };
 
-export const BouquetGrid = ({ bouquets, onBouquetClick }: BouquetGridProps) => {
+const BouquetGridComponent = ({ bouquets, onBouquetClick }: BouquetGridProps) => {
   const gridRef = useRef<HTMLDivElement>(null);
   const heartButtonRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({});
   const { addToCart } = useCartWithToast();
@@ -50,34 +50,8 @@ export const BouquetGrid = ({ bouquets, onBouquetClick }: BouquetGridProps) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (gridRef.current && gridRef.current.children.length > 0) {
-      const cards = gridRef.current.children;
-      gsap.set(cards, { clearProps: "all" });
-      
-      gsap.fromTo(cards, 
-        {
-          opacity: 0,
-          y: 50,
-          scale: 0.95
-        },
-        {
-          opacity: 1,
-          y: 0,
-          scale: 1,
-          duration: 0.6,
-          ease: "power2.out",
-          stagger: 0.08,
-          force3D: true,
-          scrollTrigger: {
-            trigger: gridRef.current,
-            start: "top 85%",
-            toggleActions: "play none none none",
-            refreshPriority: -1
-          }
-        }
-      );
-    }
-
+    // Simplified animation - removed GSAP ScrollTrigger for better scroll performance
+    // Framer Motion handles the initial animations on individual cards
     return () => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
@@ -152,30 +126,29 @@ export const BouquetGrid = ({ bouquets, onBouquetClick }: BouquetGridProps) => {
                 transition={{ duration: 0.4 }}
               />
 
-              {/* Ambient Floral Particles - Subtle Gold Dust */}
+              {/* Simplified Ambient Particles - Reduced for performance */}
               {isHovered && (
                 <>
-                  {[...Array(8)].map((_, i) => (
+                  {[...Array(3)].map((_, i) => (
                     <motion.div
                       key={i}
                       className="absolute w-1 h-1 rounded-full pointer-events-none"
                       style={{
                         background: 'radial-gradient(circle, rgba(194, 154, 67, 0.6) 0%, transparent 70%)',
                         boxShadow: '0 0 4px rgba(194, 154, 67, 0.4)',
-                        left: `${15 + i * 10}%`,
-                        top: `${20 + (i % 3) * 20}%`,
+                        left: `${25 + i * 25}%`,
+                        top: `${30 + (i % 2) * 20}%`,
                         zIndex: 5
                       }}
                       animate={{
-                        y: [0, -30, -60],
-                        x: [0, Math.sin(i) * 15, Math.sin(i) * 30],
+                        y: [0, -40],
                         opacity: [0, 0.6, 0],
                         scale: [0, 1, 0]
                       }}
                       transition={{
-                        duration: 2.5,
+                        duration: 2,
                         repeat: Infinity,
-                        delay: i * 0.3,
+                        delay: i * 0.5,
                         ease: "easeOut"
                       }}
                     />
@@ -212,47 +185,26 @@ export const BouquetGrid = ({ bouquets, onBouquetClick }: BouquetGridProps) => {
                   transition={{ duration: 0.6 }}
                 />
 
-                {/* Soft Bokeh Effect */}
+                {/* Simplified Bokeh Effect - Single Element for performance */}
                 {isHovered && (
-                  <>
-                    <motion.div
-                      className="absolute w-24 h-24 rounded-full pointer-events-none"
-                      style={{
-                        background: 'radial-gradient(circle, rgba(246, 228, 194, 0.3) 0%, transparent 70%)',
-                        filter: 'blur(20px)',
-                        top: '20%',
-                        right: '15%'
-                      }}
-                      animate={{
-                        scale: [1, 1.2, 1],
-                        opacity: [0.3, 0.5, 0.3]
-                      }}
-                      transition={{
-                        duration: 3,
-                        repeat: Infinity,
-                        ease: "easeInOut"
-                      }}
-                    />
-                    <motion.div
-                      className="absolute w-20 h-20 rounded-full pointer-events-none"
-                      style={{
-                        background: 'radial-gradient(circle, rgba(194, 154, 67, 0.25) 0%, transparent 70%)',
-                        filter: 'blur(18px)',
-                        bottom: '30%',
-                        left: '20%'
-                      }}
-                      animate={{
-                        scale: [1, 1.3, 1],
-                        opacity: [0.2, 0.4, 0.2]
-                      }}
-                      transition={{
-                        duration: 2.5,
-                        repeat: Infinity,
-                        ease: "easeInOut",
-                        delay: 0.5
-                      }}
-                    />
-                  </>
+                  <motion.div
+                    className="absolute w-24 h-24 rounded-full pointer-events-none"
+                    style={{
+                      background: 'radial-gradient(circle, rgba(246, 228, 194, 0.3) 0%, transparent 70%)',
+                      filter: 'blur(20px)',
+                      top: '20%',
+                      right: '15%'
+                    }}
+                    animate={{
+                      scale: [1, 1.2, 1],
+                      opacity: [0.3, 0.5, 0.3]
+                    }}
+                    transition={{
+                      duration: 3,
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }}
+                  />
                 )}
 
                 {/* Featured Badge - Gold Gradient Pill */}
@@ -436,28 +388,17 @@ export const BouquetGrid = ({ bouquets, onBouquetClick }: BouquetGridProps) => {
                   </div>
 
                   <motion.button
-                    className="w-44 h-12 rounded-xl font-semibold text-white flex items-center justify-center gap-2 relative overflow-hidden group/btn"
+                    className="w-44 h-12 rounded-xl font-semibold text-white flex items-center justify-center gap-2 relative overflow-hidden"
                     style={{
                       background: 'linear-gradient(90deg, #B88A44 0%, #F6E3B5 100%)',
                       boxShadow: '0 4px 12px rgba(184, 138, 68, 0.3)'
                     }}
-                    animate={{
-                      scale: isHovered ? 1.03 : 1,
-                      boxShadow: isHovered 
-                        ? '0 6px 20px rgba(184, 138, 68, 0.4), inset 0 1px 2px rgba(255, 255, 255, 0.3)'
-                        : '0 4px 12px rgba(184, 138, 68, 0.3)'
-                    }}
                     whileHover={{
-                      background: 'linear-gradient(90deg, #C29A43 0%, #F8D7A3 50%, #E8C882 100%)',
-                      scale: 1.05,
-                      boxShadow: '0 8px 24px rgba(194, 154, 67, 0.5), inset 0 1px 3px rgba(255, 255, 255, 0.4)'
+                      scale: 1.04,
+                      boxShadow: '0 8px 24px rgba(194, 154, 67, 0.5)'
                     }}
                     whileTap={{ scale: 0.97 }}
-                    transition={{ 
-                      duration: 0.4, 
-                      ease: [0.23, 1, 0.32, 1],
-                      background: { duration: 0.3 }
-                    }}
+                    transition={{ duration: 0.3 }}
                     onClick={(e) => {
                       e.stopPropagation();
                       addToCart({
@@ -468,46 +409,6 @@ export const BouquetGrid = ({ bouquets, onBouquetClick }: BouquetGridProps) => {
                       });
                     }}
                   >
-                    {/* Powerful Color Transition Background */}
-                    <motion.div
-                      className="absolute inset-0 rounded-xl"
-                      style={{
-                        background: 'linear-gradient(90deg, #C29A43 0%, #F8D7A3 50%, #E8C882 100%)',
-                        opacity: 0
-                      }}
-                      whileHover={{ opacity: 1 }}
-                      transition={{ duration: 0.3 }}
-                    />
-                    
-                    {/* Secondary Color Wave on Hover */}
-                    <motion.div
-                      className="absolute inset-0 rounded-xl"
-                      style={{
-                        background: 'linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.2) 50%, transparent 100%)',
-                        opacity: 0
-                      }}
-                      whileHover={{
-                        opacity: [0, 1, 0],
-                        x: ['-100%', '200%']
-                      }}
-                      transition={{
-                        duration: 1.2,
-                        repeat: Infinity,
-                        ease: "easeInOut"
-                      }}
-                    />
-                    
-                    {/* Inner Glow on Hover */}
-                    <motion.div
-                      className="absolute inset-0 rounded-xl"
-                      style={{
-                        background: 'radial-gradient(circle at center, rgba(255, 255, 255, 0.3) 0%, transparent 70%)',
-                      }}
-                      initial={{ opacity: 0 }}
-                      whileHover={{ opacity: 1 }}
-                      transition={{ duration: 0.3 }}
-                    />
-                    
                     {/* Light Bevel Effect */}
                     <div 
                       className="absolute inset-0 rounded-xl"
@@ -516,29 +417,8 @@ export const BouquetGrid = ({ bouquets, onBouquetClick }: BouquetGridProps) => {
                       }}
                     />
                     
-                    {/* Icon with Slide Animation */}
-                    <motion.div
-                      className="relative z-10"
-                      animate={{
-                        x: isHovered ? 0 : -4,
-                        opacity: isHovered ? 1 : 0.8
-                      }}
-                      whileHover={{
-                        scale: 1.1,
-                        rotate: [0, -10, 10, 0]
-                      }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <ShoppingCart className="w-4 h-4" strokeWidth={2} />
-                    </motion.div>
-                    
-                    <motion.span 
-                      className="relative z-10"
-                      whileHover={{ letterSpacing: '0.5px' }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      Add to Cart
-                    </motion.span>
+                    <ShoppingCart className="w-4 h-4 relative z-10" strokeWidth={2} />
+                    <span className="relative z-10">Add to Cart</span>
                   </motion.button>
                 </div>
               </div>
@@ -549,3 +429,6 @@ export const BouquetGrid = ({ bouquets, onBouquetClick }: BouquetGridProps) => {
     </div>
   );
 };
+
+// Export memoized version for better performance
+export const BouquetGrid = memo(BouquetGridComponent);

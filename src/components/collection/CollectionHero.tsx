@@ -1,10 +1,10 @@
-import { useEffect, useRef, useMemo } from "react";
+import { useEffect, useRef, useMemo, memo } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { gsap } from "gsap";
 import heroBackground from "@/assets/hero-bg.jpg";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-export const CollectionHero = () => {
+const CollectionHeroComponent = () => {
   const heroRef = useRef<HTMLElement>(null);
   const particlesRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
@@ -74,8 +74,8 @@ export const CollectionHero = () => {
       ease: "power3.out"
     }, "+=0.1");
 
-    // Floating particles animation - Disabled on mobile
-    if (!isMobile && particlesRef.current) {
+    // Floating particles animation - Further optimized
+    if (!isMobile && !shouldReduceMotion && particlesRef.current) {
       const particles = particlesRef.current.children;
       gsap.set(particles, {
         x: () => gsap.utils.random(-200, 200),
@@ -86,11 +86,11 @@ export const CollectionHero = () => {
 
       gsap.to(particles, {
         y: "-=100",
-        rotation: 360,
-        duration: () => gsap.utils.random(10, 20),
+        rotation: 180, // Reduced rotation
+        duration: () => gsap.utils.random(15, 25), // Slower animation
         ease: "none",
         repeat: -1,
-        stagger: { each: 0.5, repeat: -1 },
+        stagger: { each: 1, repeat: -1 }, // Increased stagger for less simultaneous animations
         force3D: true
       });
     }
@@ -151,25 +151,24 @@ export const CollectionHero = () => {
       {/* Gradient Overlay */}
       <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/50 to-background/70 z-10" />
 
-      {/* Floating Particles Background - Reduced on mobile */}
-      {!isMobile && (
+      {/* Floating Particles Background - Further reduced for performance */}
+      {!isMobile && !shouldReduceMotion && (
         <div ref={particlesRef} className="absolute inset-0 pointer-events-none z-15" aria-hidden="true">
-          {Array.from({ length: 20 }, (_, i) => (
+          {Array.from({ length: 10 }, (_, i) => (
             <motion.div
               key={i}
               className="absolute w-1 h-1 bg-primary rounded-full"
               style={{
                 filter: "blur(0.5px)",
-                boxShadow: "0 0 10px hsl(var(--primary))",
-                willChange: "transform"
+                boxShadow: "0 0 10px hsl(var(--primary))"
               }}
             />
           ))}
         </div>
       )}
 
-      {/* Gradient Orbs - Hidden on mobile */}
-      {!isMobile && (
+      {/* Gradient Orbs - Hidden on mobile and reduced motion */}
+      {!isMobile && !shouldReduceMotion && (
         <>
           <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-pulse-gold"></div>
           <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-primary/15 rounded-full blur-3xl animate-float"></div>
@@ -221,3 +220,6 @@ export const CollectionHero = () => {
     </section>
   );
 };
+
+// Export memoized version for better performance
+export const CollectionHero = memo(CollectionHeroComponent);

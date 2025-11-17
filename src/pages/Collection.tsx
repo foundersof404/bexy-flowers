@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -112,21 +112,35 @@ const Collection = () => {
     document.documentElement.scrollTop = 0;
     document.body.scrollTop = 0;
 
-    // Curtain reveal animation on page load
+    // Simplified curtain reveal animation - shorter duration for better performance
     const tl = gsap.timeline();
     
     tl.set(".curtain-left", { x: 0 })
       .set(".curtain-right", { x: 0 })
-      .to(".curtain-left", { x: "-100%", duration: 1.5, ease: "power3.inOut" })
-      .to(".curtain-right", { x: "100%", duration: 1.5, ease: "power3.inOut" }, "-=1.5")
-      .from(".collection-content", { opacity: 0, y: 50, duration: 1, ease: "power2.out" }, "-=0.5");
+      .to(".curtain-left", { x: "-100%", duration: 1, ease: "power2.inOut" })
+      .to(".curtain-right", { x: "100%", duration: 1, ease: "power2.inOut" }, "-=1")
+      .from(".collection-content", { opacity: 0, duration: 0.5, ease: "power2.out" }, "-=0.3");
 
     return () => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
   }, []);
 
-  const featuredBouquets = bouquets.filter(b => b.featured);
+  // Memoize featured bouquets calculation
+  const featuredBouquets = useMemo(() => bouquets.filter(b => b.featured), []);
+  
+  // Use callback for handlers
+  const handleCategoryChange = useCallback((category: string) => {
+    setSelectedCategory(category);
+  }, []);
+  
+  const handleBouquetClick = useCallback((bouquet: Bouquet) => {
+    setSelectedBouquet(bouquet);
+  }, []);
+  
+  const handleModalClose = useCallback(() => {
+    setSelectedBouquet(null);
+  }, []);
 
   return (
     <div ref={containerRef} className="relative min-h-screen bg-background overflow-hidden">
@@ -148,7 +162,7 @@ const Collection = () => {
         <CategoryNavigation 
           categories={categories}
           selectedCategory={selectedCategory}
-          onCategoryChange={setSelectedCategory}
+          onCategoryChange={handleCategoryChange}
         />
         
         {/* Main Bouquet Grid - No Gaps */}
@@ -158,41 +172,32 @@ const Collection = () => {
               <BouquetGrid 
                 key={selectedCategory}
                 bouquets={filteredBouquets}
-                onBouquetClick={setSelectedBouquet}
+                onBouquetClick={handleBouquetClick}
               />
             </AnimatePresence>
           </div>
         </section>
         
-        {/* Animated Category Divider */}
+        {/* Simplified Category Divider - Reduced animation complexity */}
         <motion.div 
           className="relative py-16"
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
-          transition={{ duration: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
         >
           <div className="absolute inset-0 flex items-center justify-center">
-            <motion.div 
-              className="h-px bg-gradient-to-r from-transparent via-primary to-transparent"
-              initial={{ width: 0 }}
-              whileInView={{ width: "100%" }}
-              transition={{ duration: 2, ease: "easeOut" }}
-            />
+            <div className="h-px w-full bg-gradient-to-r from-transparent via-primary to-transparent" />
           </div>
-          <motion.h2 
-            className="text-center text-3xl font-luxury text-primary relative z-10 bg-background px-8"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.5 }}
-          >
+          <h2 className="text-center text-3xl font-luxury text-primary relative z-10 bg-background px-8">
             Featured Collections
-          </motion.h2>
+          </h2>
         </motion.div>
         
         {/* Featured Carousel */}
         <FeaturedCarousel 
           bouquets={featuredBouquets}
-          onBouquetClick={setSelectedBouquet}
+          onBouquetClick={handleBouquetClick}
         />
         
         {/* Footer */}
@@ -204,7 +209,7 @@ const Collection = () => {
         {selectedBouquet && (
           <ProductModal 
             bouquet={selectedBouquet}
-            onClose={() => setSelectedBouquet(null)}
+            onClose={handleModalClose}
           />
         )}
       </AnimatePresence>
