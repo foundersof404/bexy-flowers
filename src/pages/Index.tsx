@@ -24,8 +24,8 @@ const ZodiacBouquetQuiz = React.lazy(() => import("@/components/culture/ZodiacBo
 const FlowerCareGuide = React.lazy(() => import("@/components/culture/FlowerCareGuide"));
 const Footer = React.lazy(() => import("@/components/Footer"));
 
-// Professional Custom Bouquet Section Component
-const ProfessionalCustomSection = () => {
+// Professional Custom Bouquet Section Component - Optimized for performance
+const ProfessionalCustomSection = React.memo(() => {
 
   const features = [
     {
@@ -61,47 +61,34 @@ const ProfessionalCustomSection = () => {
         background: 'linear-gradient(180deg, #faf7f3 0%, #ffffff 100%)'
       }}
     >
-      {/* Floating Background Elements */}
+      {/* Optimized Floating Background Elements - Reduced for performance */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
-          className="absolute top-20 -left-20 w-96 h-96 bg-gradient-to-br from-[#C79E48]/10 to-transparent rounded-full blur-3xl"
+          className="absolute top-20 -left-20 w-96 h-96 bg-gradient-to-br from-[#C79E48]/8 to-transparent rounded-full blur-2xl opacity-60"
           animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.3, 0.5, 0.3]
+            scale: [1, 1.15, 1],
+            opacity: [0.4, 0.6, 0.4]
           }}
           transition={{
-            duration: 8,
+            duration: 10,
             repeat: Infinity,
             ease: "easeInOut"
           }}
+          style={{ willChange: 'transform, opacity' }}
         />
         <motion.div
-          className="absolute bottom-20 -right-20 w-96 h-96 bg-gradient-to-br from-[#B88A44]/10 to-transparent rounded-full blur-3xl"
+          className="absolute bottom-20 -right-20 w-96 h-96 bg-gradient-to-br from-[#B88A44]/8 to-transparent rounded-full blur-2xl opacity-60"
           animate={{
-            scale: [1.2, 1, 1.2],
-            opacity: [0.5, 0.3, 0.5]
+            scale: [1.15, 1, 1.15],
+            opacity: [0.6, 0.4, 0.6]
           }}
           transition={{
-            duration: 8,
+            duration: 10,
             repeat: Infinity,
             ease: "easeInOut",
             delay: 1
           }}
-        />
-        <motion.div
-          className="absolute top-1/3 left-1/2 w-80 h-80 -translate-x-1/2 rounded-full bg-[#F2DFC6]/40 blur-3xl opacity-30"
-          animate={{ scale: [1, 1.1, 1] }}
-          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <motion.div
-          className="absolute bottom-10 left-20 w-48 h-48 rounded-full bg-[#F8E8D3]/40 blur-2xl opacity-40"
-          animate={{ y: [0, -10, 0], opacity: [0.3, 0.5, 0.3] }}
-          transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <motion.div
-          className="absolute top-10 right-16 w-64 h-32 bg-gradient-to-r from-transparent via-[#C79E48]/15 to-transparent blur-3xl opacity-50"
-          animate={{ x: [0, 12, 0] }}
-          transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
+          style={{ willChange: 'transform, opacity' }}
         />
       </div>
 
@@ -214,11 +201,10 @@ const ProfessionalCustomSection = () => {
 
         {/* Feature Cards - Premium Grid */}
         <div className="relative mb-16">
+          {/* Optimized decorative elements - reduced for performance */}
           <div className="pointer-events-none absolute inset-0 -z-10">
-            <div className="absolute top-6 left-8 w-40 h-40 rounded-full bg-[#F1E2CE]/40 blur-3xl" />
-            <div className="absolute bottom-4 right-20 w-48 h-48 rounded-full bg-[#F6EADC]/30 blur-2xl" />
-            <div className="absolute inset-x-1/2 -translate-x-1/2 top-1/2 w-[85%] h-32 bg-gradient-to-r from-transparent via-[#C79E48]/10 to-transparent blur-3xl opacity-70" />
-            <div className="absolute top-1/4 right-1/3 w-24 h-24 rounded-full bg-[#F8EDDD]/40 blur-2xl" />
+            <div className="absolute top-6 left-8 w-40 h-40 rounded-full bg-[#F1E2CE]/30 blur-xl opacity-60" />
+            <div className="absolute bottom-4 right-20 w-48 h-48 rounded-full bg-[#F6EADC]/25 blur-xl opacity-60" />
           </div>
           <div className="grid md:grid-cols-3 gap-8 lg:gap-10 xl:gap-12">
             {features.map((feature, index) => {
@@ -228,14 +214,12 @@ const ProfessionalCustomSection = () => {
                 } else if (feature.direction === "right") {
                   return { opacity: 0, x: 100, scale: 0.9 };
                 }
-                return { opacity: 0, scale: 0.5, filter: "blur(10px)" };
+                // Optimized: removed expensive blur filter animation for center card
+                return { opacity: 0, scale: 0.6 };
               };
 
               const getAnimateState = () => {
-                if (feature.direction === "left" || feature.direction === "right") {
-                  return { opacity: 1, x: 0, scale: 1 };
-                }
-                return { opacity: 1, scale: 1, filter: "blur(0px)" };
+                return { opacity: 1, x: 0, scale: 1 };
               };
 
               const gradient135 = `linear-gradient(135deg, ${feature.gradientColors[0]} 0%, ${feature.gradientColors[1]} 50%, ${feature.gradientColors[2]} 100%)`;
@@ -257,11 +241,12 @@ const ProfessionalCustomSection = () => {
                 }}
                 >
                   <motion.div
-                    className="relative h-full p-8 rounded-3xl overflow-hidden border border-[#C6A15B]/20 bg-white/95 backdrop-blur-sm shadow-[0_10px_35px_rgba(0,0,0,0.05)] transition-all duration-300"
+                    className="relative h-full p-8 rounded-3xl overflow-hidden border border-[#C6A15B]/20 bg-white shadow-[0_10px_35px_rgba(0,0,0,0.05)] transition-all duration-300"
                     style={{
                       background: 'linear-gradient(180deg, #ffffff 0%, #fafaf9 100%)',
                       border: '1px solid rgba(0, 0, 0, 0.06)',
-                      boxShadow: '0 4px 24px rgba(0, 0, 0, 0.06)'
+                      boxShadow: '0 4px 24px rgba(0, 0, 0, 0.06)',
+                      willChange: 'transform, box-shadow'
                     }}
                     whileHover={{
                       y: -12,
@@ -278,7 +263,11 @@ const ProfessionalCustomSection = () => {
 
                     <motion.div
                       className="relative w-[72px] h-[72px] mb-6 rounded-2xl flex items-center justify-center shadow-[0_3px_12px_rgba(198,161,91,0.25)]"
-                      style={{ background: gradient135, boxShadow: '0 8px 24px rgba(194, 154, 67, 0.3)' }}
+                      style={{ 
+                        background: gradient135, 
+                        boxShadow: '0 8px 24px rgba(194, 154, 67, 0.3)',
+                        willChange: 'transform'
+                      }}
                       whileHover={{ scale: 1.12, rotate: 8 }}
                       transition={{ duration: 0.3 }}
                     >
@@ -288,10 +277,10 @@ const ProfessionalCustomSection = () => {
                         strokeWidth={1.6} 
                         style={{ pointerEvents: 'none' }}
                       />
-                      {/* Glow Effect - Behind icon with lower z-index */}
+                      {/* Optimized Glow Effect - Removed expensive blur filter */}
                       <motion.div
-                        className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 pointer-events-none -z-10"
-                        style={{ background: gradient135, filter: 'blur(12px)' }}
+                        className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-30 pointer-events-none -z-10"
+                        style={{ background: gradient135, transform: 'scale(1.2)' }}
                         transition={{ duration: 0.4 }}
                       />
                     </motion.div>
@@ -398,24 +387,24 @@ const ProfessionalCustomSection = () => {
               transition={{ duration: 0.6, delay: 0.8 }}
             />
 
-            {/* Floating Particles Around Button */}
-            {[...Array(8)].map((_, i) => (
+            {/* Optimized Floating Particles Around Button - Reduced for performance */}
+            {[...Array(4)].map((_, i) => (
               <motion.div
                 key={i}
-                className="absolute w-1 h-1 rounded-full bg-[#C79E48]"
+                className="absolute w-1 h-1 rounded-full bg-[#C79E48] opacity-60"
                 style={{
-                  top: `${20 + Math.sin(i * Math.PI / 4) * 40}%`,
-                  left: `${50 + Math.cos(i * Math.PI / 4) * 45}%`,
+                  top: `${20 + Math.sin(i * Math.PI / 2) * 40}%`,
+                  left: `${50 + Math.cos(i * Math.PI / 2) * 45}%`,
+                  willChange: 'transform, opacity'
                 }}
                 animate={{
                   y: [0, -10, 0],
-                  opacity: [0.3, 0.8, 0.3],
-                  scale: [1, 1.5, 1]
+                  opacity: [0.4, 0.8, 0.4]
                 }}
                 transition={{
-                  duration: 3,
+                  duration: 4,
                   repeat: Infinity,
-                  delay: i * 0.3,
+                  delay: i * 0.4,
                   ease: "easeInOut"
                 }}
               />
@@ -429,7 +418,8 @@ const ProfessionalCustomSection = () => {
                 background: 'linear-gradient(90deg, #B88A44 0%, #D4A85A 50%, #CFA340 100%)',
                 boxShadow: '0 8px 32px rgba(184, 138, 68, 0.4)',
                 fontSize: '1.1rem',
-                letterSpacing: '0.05em'
+                letterSpacing: '0.05em',
+                willChange: 'transform, box-shadow'
               }}
               whileHover={{
                 scale: 1.05,
@@ -438,21 +428,22 @@ const ProfessionalCustomSection = () => {
               whileTap={{ scale: 0.98 }}
               transition={{ duration: 0.3 }}
             >
-            {/* Shimmer Effect */}
+            {/* Optimized Shimmer Effect */}
             <motion.div
-              className="absolute inset-0 -left-full w-1/2 h-full"
+              className="absolute inset-0 -left-full w-1/2 h-full pointer-events-none"
               style={{
                 background: 'linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.3) 50%, transparent 100%)',
-                transform: 'skewX(-20deg)'
+                transform: 'skewX(-20deg)',
+                willChange: 'left'
               }}
               animate={{
                 left: ['100%', '-50%']
               }}
               transition={{
-                duration: 2,
+                duration: 2.5,
                 repeat: Infinity,
                 ease: "linear",
-                repeatDelay: 1
+                repeatDelay: 1.5
               }}
             />
 
@@ -493,7 +484,9 @@ const ProfessionalCustomSection = () => {
       </div>
     </section>
   );
-};
+});
+
+ProfessionalCustomSection.displayName = 'ProfessionalCustomSection';
 
 const Index = () => {
   return (

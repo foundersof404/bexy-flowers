@@ -149,10 +149,34 @@ const UltraCategories = () => {
     const container = containerRef.current;
     if (!container) return;
 
-    // Auto scroll disabled - no automatic animation
-    // Users can manually scroll through categories
+    // Auto scroll - infinite seamless loop
+    const cardWidth = 352; // Card width (w-80 = 320px + gap-8 = 32px = 352px)
+    const singleSetWidth = categories.length * cardWidth;
+    
+    // Set initial position
+    gsap.set(container, { x: 0 });
+    
+    const tween = gsap.to(container, {
+      x: -singleSetWidth,
+      duration: 30,
+      ease: "none",
+      force3D: true,
+      repeat: -1,
+      repeatDelay: 0,
+      modifiers: {
+        x: (x) => {
+          const val = parseFloat(x);
+          // Seamless loop: when we reach the end of first set, reset to start position
+          if (val <= -singleSetWidth) {
+            return `${val % singleSetWidth}px`;
+          }
+          return `${val}px`;
+        }
+      }
+    });
 
     return () => {
+      tween.kill();
       gsap.killTweensOf(container);
     };
   }, []);
