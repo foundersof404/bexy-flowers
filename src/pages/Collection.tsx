@@ -10,87 +10,18 @@ import { FeaturedCarousel } from "@/components/collection/FeaturedCarousel";
 import { ProductModal } from "@/components/collection/ProductModal";
 import { CollectionFooter } from "@/components/collection/CollectionFooter";
 import { FloatingBackground } from "@/components/collection/FloatingBackground";
+import type { Bouquet } from "@/types/bouquet";
+import {
+  generatedBouquets,
+  generatedCategories
+} from "@/data/generatedBouquets";
 
 gsap.registerPlugin(ScrollTrigger);
-
-export interface Bouquet {
-  id: string;
-  name: string;
-  price: number;
-  image: string;
-  description: string;
-  category: string;
-  featured?: boolean;
-}
-
-const bouquets: Bouquet[] = [
-  {
-    id: "1",
-    name: "Royal Elegance",
-    price: 299,
-    image: "/src/assets/bouquet-1.jpg",
-    description: "A stunning arrangement of premium roses and peonies with gold accents",
-    category: "luxury",
-    featured: true
-  },
-  {
-    id: "2", 
-    name: "Valentine's Passion",
-    price: 199,
-    image: "/src/assets/bouquet-2.jpg",
-    description: "Deep red roses with silk ribbons for the perfect romantic gesture",
-    category: "valentine",
-    featured: true
-  },
-  {
-    id: "3",
-    name: "Wedding Dreams",
-    price: 450,
-    image: "/src/assets/bouquet-3.jpg", 
-    description: "Classic white roses and eucalyptus for your special day",
-    category: "wedding"
-  },
-  {
-    id: "4",
-    name: "Mother's Love",
-    price: 189,
-    image: "/src/assets/bouquet-4.jpg",
-    description: "Soft pink carnations and baby's breath for Mom",
-    category: "mothers-day"
-  },
-  {
-    id: "5",
-    name: "Graduation Glory",
-    price: 159,
-    image: "/src/assets/bouquet-5.jpg",
-    description: "Bright sunflowers and daisies to celebrate achievements", 
-    category: "graduation"
-  },
-  {
-    id: "6",
-    name: "Anniversary Bliss",
-    price: 279,
-    image: "/src/assets/bouquet-6.jpg",
-    description: "Mixed premium flowers with golden touches",
-    category: "anniversary",
-    featured: true
-  }
-];
-
-const categories = [
-  { id: "all", name: "All Collections", count: bouquets.length },
-  { id: "luxury", name: "Luxury Classics", count: bouquets.filter(b => b.category === "luxury").length },
-  { id: "valentine", name: "Valentine's Day", count: bouquets.filter(b => b.category === "valentine").length },
-  { id: "wedding", name: "Weddings", count: bouquets.filter(b => b.category === "wedding").length },
-  { id: "mothers-day", name: "Mother's Day", count: bouquets.filter(b => b.category === "mothers-day").length },
-  { id: "graduation", name: "Graduation", count: bouquets.filter(b => b.category === "graduation").length },
-  { id: "anniversary", name: "Anniversary", count: bouquets.filter(b => b.category === "anniversary").length }
-];
 
 const Collection = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedBouquet, setSelectedBouquet] = useState<Bouquet | null>(null);
-  const [filteredBouquets, setFilteredBouquets] = useState(bouquets);
+  const [filteredBouquets, setFilteredBouquets] = useState<Bouquet[]>(generatedBouquets);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -100,9 +31,11 @@ const Collection = () => {
 
   useEffect(() => {
     if (selectedCategory === "all") {
-      setFilteredBouquets(bouquets);
+      setFilteredBouquets(generatedBouquets);
     } else {
-      setFilteredBouquets(bouquets.filter(b => b.category === selectedCategory));
+      setFilteredBouquets(
+        generatedBouquets.filter((b) => b.category === selectedCategory)
+      );
     }
   }, [selectedCategory]);
 
@@ -127,7 +60,12 @@ const Collection = () => {
   }, []);
 
   // Memoize featured bouquets calculation
-  const featuredBouquets = useMemo(() => bouquets.filter(b => b.featured), []);
+  const featuredBouquets = useMemo(
+    () => generatedBouquets.filter((b) => b.featured),
+    []
+  );
+
+  const categories = useMemo(() => generatedCategories, []);
   
   // Use callback for handlers
   const handleCategoryChange = useCallback((category: string) => {

@@ -1,3 +1,13 @@
+export interface Bouquet {
+  id: string;
+  name: string;
+  price: number;
+  image: string;
+  description: string;
+  category: string;
+  displayCategory?: string;
+  featured?: boolean;
+}
 export interface Flower {
   id: string;
   name: string;
