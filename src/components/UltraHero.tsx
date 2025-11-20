@@ -6,6 +6,7 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import heroBackground from '@/assets/hero-bg.jpg';
 import { useIsMobile } from '@/hooks/use-mobile';
+import logoImage from '/assets/bexy-flowers-logo.png';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -147,40 +148,98 @@ const UltraHero = () => {
   return (
     <section 
       ref={heroRef}
-      className="relative min-h-screen flex items-center justify-center overflow-hidden perspective-1000 pt-16 sm:pt-8 -mt-20"
-      style={{ minHeight: isMobile ? '90vh' : '100vh' }}
+      className={`relative min-h-screen flex items-center justify-center overflow-hidden perspective-1000 text-center ${
+        isMobile ? '-mt-20 md:bg-transparent md:pt-16 md:sm:pt-8' : 'pt-16 sm:pt-8 -mt-20'
+      }`}
+      style={{ 
+        minHeight: '100vh',
+        padding: isMobile ? '5rem 1.4rem' : '6rem 2rem',
+        backgroundImage: isMobile ? "url('/assets/flower1.jpg')" : undefined,
+        backgroundSize: isMobile ? 'cover' : undefined,
+        backgroundPosition: isMobile ? 'center' : undefined,
+        backgroundAttachment: isMobile ? 'fixed' : undefined
+      }}
     >
       {/* Background Image with 3D Parallax */}
-      <div className="absolute inset-0 z-0 -top-4">
-        <motion.img
-          src={heroBackground}
-          alt="Luxury floral background"
-          className="w-full h-full object-cover opacity-20 transform-3d shadow-gold"
-          initial={{ scale: shouldReduceMotion || isMobile ? 1 : 1.2, rotateX: shouldReduceMotion || isMobile ? 0 : -5 }}
-          whileInView={{ scale: 1, rotateX: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ 
-            duration: shouldReduceMotion || isMobile ? 0 : 20, 
-            ease: "linear", 
-            repeat: shouldReduceMotion || isMobile ? 0 : Infinity, 
-            repeatType: "reverse" 
-          }}
-          loading="eager"
-          decoding="async"
-          style={{ willChange: shouldReduceMotion || isMobile ? "auto" : "transform" }}
-        />
-        <div className="absolute inset-0 -top-4 bg-gradient-to-b from-background/90 via-background/70 to-background/90" />
+      <div 
+        className={`absolute inset-0 z-0 ${isMobile ? '' : '-top-4'}`}
+      >
+        {!isMobile && (
+          <motion.img
+            src={heroBackground}
+            alt="Luxury floral background"
+            className="w-full h-full object-cover transform-3d shadow-gold opacity-20"
+            initial={{ scale: shouldReduceMotion ? 1 : 1.2, rotateX: shouldReduceMotion ? 0 : -5 }}
+            whileInView={{ scale: 1, rotateX: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ 
+              duration: shouldReduceMotion ? 0 : 20, 
+              ease: "linear", 
+              repeat: shouldReduceMotion ? 0 : Infinity, 
+              repeatType: "reverse" 
+            }}
+            loading="eager"
+            decoding="async"
+            style={{ willChange: shouldReduceMotion ? "auto" : "transform" }}
+          />
+        )}
+        {!isMobile && (
+          <div className="absolute inset-0 -top-4 bg-gradient-to-b from-background/90 via-background/70 to-background/90" />
+        )}
       </div>
 
 
       
 
+      {/* Background Overlays - Mobile */}
+      {isMobile && (
+        <>
+          {/* Soft translucent overlay */}
+          <div 
+            className="absolute inset-0 z-10"
+            style={{
+              background: 'linear-gradient(180deg, rgba(255,255,255,0.85) 15%, rgba(255,255,250,0.92) 100%)',
+              pointerEvents: 'none'
+            }}
+          />
+          {/* Gold dust subtle particle effect */}
+          <div 
+            className="absolute inset-0 z-10"
+            style={{
+              backgroundImage: `
+                radial-gradient(circle at 10% 20%, rgba(185,136,57,0.03) 0 6%, transparent 7%),
+                radial-gradient(circle at 80% 70%, rgba(185,136,57,0.02) 0 8%, transparent 9%)
+              `,
+              pointerEvents: 'none'
+            }}
+          />
+        </>
+      )}
+
       {/* Modern Hero Content */}
-      <div className="relative z-20 max-w-7xl mx-auto px-4 xs:px-5 sm:px-6 lg:px-8 w-full">
-        <div className={`grid ${isMobile ? 'grid-cols-1' : 'lg:grid-cols-2'} gap-6 sm:gap-8 lg:gap-10 xl:gap-12 items-center ${isMobile ? 'min-h-[60vh]' : 'min-h-[70vh] sm:min-h-[75vh] lg:min-h-[80vh]'}`}>
+      <div className={`relative z-20 max-w-7xl mx-auto w-full ${
+        isMobile ? 'px-4 sm:px-6 h-full flex items-center justify-center py-0' : 'px-4 xs:px-5 sm:px-6 lg:px-8'
+      }`}>
+        <div className={`${isMobile ? 'w-full max-w-[860px]' : 'grid lg:grid-cols-2'} ${isMobile ? '' : 'gap-6 sm:gap-8 lg:gap-10 xl:gap-12'} items-center ${isMobile ? 'h-full py-0' : 'min-h-[70vh] sm:min-h-[75vh] lg:min-h-[80vh]'}`}>
           
-          {/* Left Content */}
-          <div className={`space-y-4 ${isMobile ? 'space-y-4' : 'sm:space-y-6 lg:space-y-8'} text-center lg:text-left`}>
+          {/* Content Container */}
+          <div className={`${isMobile ? 'w-full text-center space-y-4 -mt-[12rem]' : 'space-y-4 sm:space-y-6 lg:space-y-8 text-center lg:text-left'}`}>
+            {/* Brand Badge - Mobile */}
+            {isMobile && (
+              <motion.div
+                className="mb-4"
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+              >
+                <div className="font-sans text-[#b98839] tracking-[4px] font-semibold text-[0.95rem] mb-1">
+                  BEXY FLOWERS
+                </div>
+                <div className="font-sans text-[#b98839] text-xs font-light">
+                  Luxury Floral Boutique
+                </div>
+              </motion.div>
+            )}
              <motion.div
                ref={titleRef}
                className="overflow-hidden"
@@ -195,9 +254,9 @@ const UltraHero = () => {
                }}
                style={{ willChange: shouldReduceMotion || isMobile ? "auto" : "transform, opacity" }}
              >
-               {/* Main Title with Character-by-Character Animation - Simplified on mobile */}
+               {/* Main Title */}
                <motion.h1 
-                 className="font-luxury text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black text-foreground leading-[1.1] sm:leading-tight mb-3 sm:mb-4 px-2 xs:px-3 sm:px-0"
+                 className={`${isMobile ? 'font-serif text-[clamp(1.6rem,7vw,2.6rem)]' : 'font-luxury text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl'} font-black ${isMobile ? 'leading-[1.02] text-[#0f0f0f] tracking-[-0.02em] mb-4 px-2' : 'leading-[1.1] sm:leading-tight mb-3 sm:mb-4 px-2 xs:px-3 sm:px-0'} text-foreground`}
                  initial={{ opacity: 0 }}
                  animate={{ opacity: 1 }}
                  transition={{ duration: shouldReduceMotion || isMobile ? 0 : 0.1, delay: shouldReduceMotion || isMobile ? 0 : 0.4 }}
@@ -217,229 +276,395 @@ const UltraHero = () => {
                      transition={{ duration: 2, delay: 1.5, ease: "easeInOut" }}
                    />
                    
-                   {/* Text with staggered character animation - Simplified on mobile */}
-                   <span className="relative z-10">
-                     {"Elegant Flowers for Every Occasion".split("").map((char, index) => (
-                       <motion.span
-                         key={index}
-                         className="inline-block"
-                         initial={{ 
-                           opacity: shouldReduceMotion || isMobile ? 1 : 0, 
-                           y: shouldReduceMotion || isMobile ? 0 : 50, 
-                           rotateX: shouldReduceMotion || isMobile ? 0 : -90,
-                           filter: shouldReduceMotion || isMobile ? "blur(0px)" : "blur(10px)"
-                         }}
-                         animate={{ 
-                           opacity: 1, 
-                           y: 0, 
-                           rotateX: 0,
-                           filter: "blur(0px)"
-                         }}
-                         transition={{ 
-                           duration: shouldReduceMotion || isMobile ? 0 : 0.6,
-                           delay: shouldReduceMotion || isMobile ? 0 : 0.5 + index * 0.05,
-                           ease: [0.25, 0.46, 0.45, 0.94]
-                         }}
-                         whileHover={isMobile ? {} : {
-                           scale: 1.1,
-                           color: "#c6a151",
-                           textShadow: "0 0 20px rgba(198,161,81,0.5)",
-                           transition: { duration: 0.2 }
-                         }}
-                         style={{ willChange: shouldReduceMotion || isMobile ? "auto" : "transform, filter" }}
-                       >
-                         {char === " " ? "\u00A0" : char}
-                       </motion.span>
-                     ))}
-                   </span>
+                  {/* Text with staggered character animation - Simplified on mobile */}
+                  <div className={`relative z-9 flex flex-col ${isMobile ? 'items-center' : 'items-center lg:items-start'}`}>
+                    {[
+                      "Elegant flower",
+                      "for every single",
+                      "occasion"
+                    ].map((line, lineIndex) => (
+                      <span key={lineIndex} className="block">
+                        {line.split("").map((char, charIndex) => (
+                          <motion.span
+                            key={`${lineIndex}-${charIndex}`}
+                            className="inline-block"
+                            initial={{ 
+                              opacity: shouldReduceMotion || isMobile ? 1 : 0, 
+                              y: shouldReduceMotion || isMobile ? 0 : 50, 
+                              rotateX: shouldReduceMotion || isMobile ? 0 : -90,
+                              filter: shouldReduceMotion || isMobile ? "blur(0px)" : "blur(10px)"
+                            }}
+                            animate={{ 
+                              opacity: 1, 
+                              y: 0, 
+                              rotateX: 0,
+                              filter: "blur(0px)"
+                            }}
+                            transition={{ 
+                              duration: shouldReduceMotion || isMobile ? 0 : 0.6,
+                              delay: shouldReduceMotion || isMobile ? 0 : 0.5 + lineIndex * 0.3 + charIndex * 0.05,
+                              ease: [0.25, 0.46, 0.45, 0.94]
+                            }}
+                            whileHover={isMobile ? {} : {
+                              scale: 1.1,
+                              color: "#c6a151",
+                              textShadow: "0 0 20px rgba(198,161,81,0.5)",
+                              transition: { duration: 0.2 }
+                            }}
+                            style={{ willChange: shouldReduceMotion || isMobile ? "auto" : "transform, filter" }}
+                          >
+                            {char === " " ? "\u00A0" : char}
+                          </motion.span>
+                        ))}
+                      </span>
+                    ))}
+                  </div>
                    
-                   {/* Animated underline with morphing effect */}
-                   <motion.div
-                     className="absolute -bottom-2 left-0 h-1 bg-gradient-to-r from-primary via-yellow-400 to-transparent"
-                     initial={{ width: 0, opacity: 0 }}
-                     animate={{ 
-                       width: "100%", 
-                       opacity: 1,
-                       boxShadow: "0 0 20px rgba(198,161,81,0.5)"
-                     }}
-                     transition={{ 
-                       duration: 2, 
-                       delay: 2.2, 
-                       ease: "easeOut"
-                     }}
-                   />
+                   {/* Gold Arc - Mobile Only */}
+                   {isMobile && (
+                     <motion.div
+                       className="block w-[320px] h-[32px] mx-auto my-4"
+                       style={{ transformOrigin: 'center' }}
+                       initial={{ opacity: 0, y: 6, scaleX: 0.95 }}
+                       animate={{ opacity: 1, y: 0, scaleX: 1 }}
+                       transition={{ duration: 0.8, delay: 0.6 }}
+                     >
+                       <svg 
+                         width="100%" 
+                         height="100%" 
+                         viewBox="0 0 320 32" 
+                         fill="none" 
+                         xmlns="http://www.w3.org/2000/svg"
+                         className="mx-auto"
+                         style={{ filter: 'drop-shadow(0 2px 8px rgba(185,136,57,0.3))' }}
+                       >
+                         {/* Main elegant brush stroke arc */}
+                         <path 
+                           d="M20 22 Q80 8, 160 6 T300 22" 
+                           stroke="url(#goldGradient)" 
+                           strokeWidth="3" 
+                           fill="none"
+                           strokeLinecap="round"
+                           strokeLinejoin="round"
+                           opacity="0.95"
+                         />
+                         {/* Subtle secondary stroke for depth */}
+                         <path 
+                           d="M25 24 Q85 10, 160 8 T295 24" 
+                           stroke="#d4a574" 
+                           strokeWidth="1.5" 
+                           fill="none"
+                           strokeLinecap="round"
+                           opacity="0.5"
+                         />
+                         {/* Accent highlights */}
+                         <path 
+                           d="M30 23 Q90 11, 160 9 T290 23" 
+                           stroke="#f0d9b5" 
+                           strokeWidth="0.8" 
+                           fill="none"
+                           strokeLinecap="round"
+                           opacity="0.3"
+                         />
+                         
+                         {/* Decorative Gold Flowers Along Arc */}
+                         {/* Left flower */}
+                         <g transform="translate(60, 12)" opacity="0.8">
+                           <circle cx="0" cy="0" r="1.5" fill="#d4a574"/>
+                           <circle cx="-2" cy="0" r="1.2" fill="#b98839"/>
+                           <circle cx="2" cy="0" r="1.2" fill="#b98839"/>
+                           <circle cx="0" cy="-2" r="1.2" fill="#b98839"/>
+                           <circle cx="0" cy="2" r="1.2" fill="#b98839"/>
+                           <circle cx="-1.4" cy="-1.4" r="0.8" fill="#f0d9b5"/>
+                           <circle cx="1.4" cy="-1.4" r="0.8" fill="#f0d9b5"/>
+                           <circle cx="-1.4" cy="1.4" r="0.8" fill="#f0d9b5"/>
+                           <circle cx="1.4" cy="1.4" r="0.8" fill="#f0d9b5"/>
+                         </g>
+                         
+                         {/* Center flower (larger) */}
+                         <g transform="translate(160, 6)" opacity="0.9">
+                           <circle cx="0" cy="0" r="2" fill="#d4a574"/>
+                           <circle cx="-2.5" cy="0" r="1.5" fill="#b98839"/>
+                           <circle cx="2.5" cy="0" r="1.5" fill="#b98839"/>
+                           <circle cx="0" cy="-2.5" r="1.5" fill="#b98839"/>
+                           <circle cx="0" cy="2.5" r="1.5" fill="#b98839"/>
+                           <circle cx="-1.8" cy="-1.8" r="1" fill="#f0d9b5"/>
+                           <circle cx="1.8" cy="-1.8" r="1" fill="#f0d9b5"/>
+                           <circle cx="-1.8" cy="1.8" r="1" fill="#f0d9b5"/>
+                           <circle cx="1.8" cy="1.8" r="1" fill="#f0d9b5"/>
+                         </g>
+                         
+                         {/* Right flower */}
+                         <g transform="translate(260, 12)" opacity="0.8">
+                           <circle cx="0" cy="0" r="1.5" fill="#d4a574"/>
+                           <circle cx="-2" cy="0" r="1.2" fill="#b98839"/>
+                           <circle cx="2" cy="0" r="1.2" fill="#b98839"/>
+                           <circle cx="0" cy="-2" r="1.2" fill="#b98839"/>
+                           <circle cx="0" cy="2" r="1.2" fill="#b98839"/>
+                           <circle cx="-1.4" cy="-1.4" r="0.8" fill="#f0d9b5"/>
+                           <circle cx="1.4" cy="-1.4" r="0.8" fill="#f0d9b5"/>
+                           <circle cx="-1.4" cy="1.4" r="0.8" fill="#f0d9b5"/>
+                           <circle cx="1.4" cy="1.4" r="0.8" fill="#f0d9b5"/>
+                         </g>
+                         
+                         {/* Small accent flowers */}
+                         <g transform="translate(110, 9)" opacity="0.6">
+                           <circle cx="0" cy="0" r="1" fill="#d4a574"/>
+                           <circle cx="-1.2" cy="0" r="0.7" fill="#b98839"/>
+                           <circle cx="1.2" cy="0" r="0.7" fill="#b98839"/>
+                           <circle cx="0" cy="-1.2" r="0.7" fill="#b98839"/>
+                           <circle cx="0" cy="1.2" r="0.7" fill="#b98839"/>
+                         </g>
+                         
+                         <g transform="translate(210, 9)" opacity="0.6">
+                           <circle cx="0" cy="0" r="1" fill="#d4a574"/>
+                           <circle cx="-1.2" cy="0" r="0.7" fill="#b98839"/>
+                           <circle cx="1.2" cy="0" r="0.7" fill="#b98839"/>
+                           <circle cx="0" cy="-1.2" r="0.7" fill="#b98839"/>
+                           <circle cx="0" cy="1.2" r="0.7" fill="#b98839"/>
+                         </g>
+                         
+                         <defs>
+                           <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                             <stop offset="0%" stopColor="#b98839" stopOpacity="0.6" />
+                             <stop offset="50%" stopColor="#d4a574" stopOpacity="0.95" />
+                             <stop offset="100%" stopColor="#b98839" stopOpacity="0.6" />
+                           </linearGradient>
+                         </defs>
+                       </svg>
+                     </motion.div>
+                   )}
+                   
+                   {/* Animated underline with morphing effect - Desktop Only */}
+                   {!isMobile && (
+                     <motion.div
+                       className="absolute -bottom-2 left-0 h-1 bg-gradient-to-r from-primary via-yellow-400 to-transparent"
+                       initial={{ width: 0, opacity: 0 }}
+                       animate={{ 
+                         width: "100%", 
+                         opacity: 1,
+                         boxShadow: "0 0 20px rgba(198,161,81,0.5)"
+                       }}
+                       transition={{ 
+                         duration: 2, 
+                         delay: 2.2, 
+                         ease: "easeOut"
+                       }}
+                     />
+                   )}
                    
                  </motion.span>
                </motion.h1>
                
                {/* Subtitle with elegant reveal */}
                <motion.div
-                 className="relative overflow-hidden"
+                 className={`relative overflow-hidden ${isMobile ? '-mt-8' : ''}`}
                  initial={{ opacity: 0, y: shouldReduceMotion || isMobile ? 0 : 30 }}
                  animate={{ opacity: 1, y: 0 }}
                  transition={{ duration: shouldReduceMotion || isMobile ? 0 : 1, delay: shouldReduceMotion || isMobile ? 0 : 0.8 }}
                  style={{ willChange: shouldReduceMotion || isMobile ? "auto" : "transform, opacity" }}
                >
                 <motion.p 
-                  className="font-serif text-sm xs:text-base sm:text-lg text-primary/100 font-light tracking-wide mb-2 relative px-2 sm:px-0"
+                  className={`${isMobile ? 'text-[1.05rem] text-gray-600 font-light max-w-[62ch] mx-auto mb-6' : 'text-sm xs:text-base sm:text-lg'} font-light tracking-wide ${isMobile ? '' : 'mb-2 px-2 sm:px-0'} ${
+                    isMobile 
+                      ? 'font-sans' 
+                      : 'font-serif text-primary/100'
+                  }`}
                    initial={{ opacity: shouldReduceMotion || isMobile ? 1 : 0.5, x: shouldReduceMotion || isMobile ? 0 : -50 }}
                    animate={{ opacity: 1, x: 0 }}
                    transition={{ duration: shouldReduceMotion || isMobile ? 0 : 1.2, delay: shouldReduceMotion || isMobile ? 0 : 1, ease: "easeOut" }}
                    style={{ willChange: shouldReduceMotion || isMobile ? "auto" : "transform, opacity" }}
                 >
-                  <motion.span
-                    className="inline-block drop-shadow-[0_2px_6px_rgba(0,0,0,0.7)] drop-shadow-md"
-                    style={{ 
-                      color: "rgb(198, 161, 81)", 
-                      WebkitTextStroke: "1px #000", 
-                      paintOrder: "stroke fill", 
-                      textShadow: "0 1px 0 #000, 0 -1px 0 #000, 1px 0 0 #000, -1px 0 0 #000" 
-                    }}
-                    whileHover={{
-                      scale: 1.03,
-                      transition: { duration: 0.3 }
-                    }}
-                  >
-                    𝙲𝚛𝚊𝚏𝚝𝚒𝚗𝚐 𝚝𝚒𝚖𝚎𝚕𝚎𝚜𝚜 𝚋𝚎𝚊𝚞𝚝𝚢 𝚝𝚑𝚛𝚘𝚞𝚐𝚑 𝚏𝚕𝚘𝚛𝚊𝚕 𝚊𝚛𝚝𝚒𝚜𝚝𝚛𝚢
-                   </motion.span>
+                  {isMobile ? (
+                    <span>Embrace your natural form with confidence.</span>
+                  ) : (
+                    <motion.span
+                      className="inline-block drop-shadow-[0_2px_6px_rgba(0,0,0,0.7)] drop-shadow-md"
+                      style={{ 
+                        color: "rgb(198, 161, 81)", 
+                        WebkitTextStroke: "1px #000", 
+                        paintOrder: "stroke fill", 
+                        textShadow: "0 1px 0 #000, 0 -1px 0 #000, 1px 0 0 #000, -1px 0 0 #000" 
+                      }}
+                      whileHover={{
+                        scale: 1.03,
+                        transition: { duration: 0.3 }
+                      }}
+                    >
+                      𝙲𝚛𝚊𝚏𝚝𝚒𝚗𝚐 𝚝𝚒𝚖𝚎𝚕𝚎𝚜𝚜 𝚋𝚎𝚊𝚞𝚝𝚢 𝚝𝚑𝚛𝚘𝚞𝚐𝚑 𝚏𝚕𝚘𝚛𝚊𝚕 𝚊𝚛𝚝𝚒𝚜𝚝𝚛𝚢
+                    </motion.span>
+                  )}
                    
-                   {/* Decorative line */}
-                   <motion.div
-                     className="absolute -bottom-1 left-0 h-px bg-gradient-to-r from-primary/50 to-transparent"
-                     initial={{ width: 0 }}
-                     animate={{ width: "60%" }}
-                     transition={{ duration: 1.5, delay: 1.8, ease: "easeOut" }}
-                   />
+                   {/* Decorative line - hidden on mobile */}
+                   {!isMobile && (
+                     <motion.div
+                       className="absolute -bottom-1 left-0 h-px bg-gradient-to-r from-primary/50 to-transparent"
+                       initial={{ width: 0 }}
+                       animate={{ width: "60%" }}
+                       transition={{ duration: 1.5, delay: 1.8, ease: "easeOut" }}
+                     />
+                   )}
                  </motion.p>
                </motion.div>
                
-               {/* Description with typewriter effect */}
-               <motion.div
-                 className="relative overflow-hidden"
-                 initial={{ opacity: 0, y: shouldReduceMotion || isMobile ? 0 : 30 }}
-                 animate={{ opacity: 1, y: 0 }}
-                 transition={{ duration: shouldReduceMotion || isMobile ? 0 : 1, delay: shouldReduceMotion || isMobile ? 0 : 1.2 }}
-                 style={{ willChange: shouldReduceMotion || isMobile ? "auto" : "transform, opacity" }}
-               >
-                 <motion.p 
-                   className="font-body text-xs xs:text-sm sm:text-base text-muted-foreground leading-relaxed max-w-2xl relative px-2 sm:px-0"
-                   initial={{ opacity: shouldReduceMotion || isMobile ? 1 : 0 }}
-                   animate={{ opacity: 1 }}
-                   transition={{ duration: shouldReduceMotion || isMobile ? 0 : 0.5, delay: shouldReduceMotion || isMobile ? 0 : 1.4 }}
-                   style={{ willChange: shouldReduceMotion || isMobile ? "auto" : "opacity" }}
+               {/* Mobile CTA Button - After subtitle */}
+               {isMobile && (
+                 <motion.a
+                   href="/collection"
+                   className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-[#0f0f0f] text-white rounded-sm font-semibold tracking-[0.06em] shadow-[0_8px_20px_rgba(11,11,11,0.18)] transition-all duration-180 border-2 border-white/[0.02] mx-auto mb-6 w-[60%] max-w-[250px]"
+                   initial={{ opacity: 0, y: 20 }}
+                   animate={{ opacity: 1, y: 0 }}
+                   transition={{ duration: 0.6, delay: 1.2 }}
+                   onMouseEnter={(e) => {
+                     e.currentTarget.style.transform = 'translateY(-4px) scale(1.02)';
+                     e.currentTarget.style.boxShadow = '0 18px 36px rgba(11,11,11,0.22), 0 0 18px rgba(185,136,57,0.12)';
+                   }}
+                   onMouseLeave={(e) => {
+                     e.currentTarget.style.transform = 'translateY(0) scale(1)';
+                     e.currentTarget.style.boxShadow = '0 8px 20px rgba(11,11,11,0.18)';
+                   }}
                  >
-                   <motion.span
-                     className="inline-block"
+                   SHOP NOW
+                   <span className="inline-block w-[18px] h-[18px] rounded-full bg-gradient-to-r from-[rgba(185,136,57,0.95)] to-[rgba(185,136,57,0.85)] text-white text-[0.8rem] leading-[18px] text-center">
+                     →
+                   </span>
+                 </motion.a>
+               )}
+               
+               {/* Description with typewriter effect - Hidden on mobile */}
+               {!isMobile && (
+                 <motion.div
+                   className="relative overflow-hidden"
+                   initial={{ opacity: 0, y: 30 }}
+                   animate={{ opacity: 1, y: 0 }}
+                   transition={{ duration: 1, delay: 1.2 }}
+                   style={{ willChange: "transform, opacity" }}
+                 >
+                   <motion.p 
+                     className="font-body text-xs xs:text-sm sm:text-base text-muted-foreground leading-relaxed max-w-2xl relative px-2 sm:px-0"
                      initial={{ opacity: 0 }}
                      animate={{ opacity: 1 }}
-                     transition={{ duration: 0.1, delay: 1.6 }}
+                     transition={{ duration: 0.5, delay: 1.4 }}
+                     style={{ willChange: "opacity" }}
                    >
-                     From intimate weddings to grand celebrations, we create bespoke arrangements that capture life's most precious moments with unparalleled elegance.
-                   </motion.span>
-                   
-                  {/* Removed typing cursor */}
-                   
-                   {/* Background highlight */}
-                   <motion.div
-                     className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-yellow-400/5 rounded-lg"
-                     initial={{ scaleX: 0, opacity: 0 }}
-                     animate={{ scaleX: 1, opacity: 1 }}
-                     transition={{ duration: 2, delay: 2, ease: "easeOut" }}
-                     style={{ transformOrigin: "left" }}
-                   />
-                 </motion.p>
-               </motion.div>
+                     <motion.span
+                       className="inline-block"
+                       initial={{ opacity: 0 }}
+                       animate={{ opacity: 1 }}
+                       transition={{ duration: 0.1, delay: 1.6 }}
+                     >
+                       From intimate weddings to grand celebrations, we create bespoke arrangements that capture life's most precious moments with unparalleled elegance.
+                     </motion.span>
+                     
+                    {/* Removed typing cursor */}
+                     
+                     {/* Background highlight */}
+                     <motion.div
+                       className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-yellow-400/5 rounded-lg"
+                       initial={{ scaleX: 0, opacity: 0 }}
+                       animate={{ scaleX: 1, opacity: 1 }}
+                       transition={{ duration: 2, delay: 2, ease: "easeOut" }}
+                       style={{ transformOrigin: "left" }}
+                     />
+                   </motion.p>
+                 </motion.div>
+               )}
              </motion.div>
 
 
-            {/* Action Buttons */}
-            <motion.div
-              ref={buttonRef}
-              className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start"
-              initial={{ opacity: 0, y: shouldReduceMotion || isMobile ? 0 : 30, scale: shouldReduceMotion || isMobile ? 1 : 0.9 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ 
-                duration: shouldReduceMotion || isMobile ? 0 : 1, 
-                delay: shouldReduceMotion || isMobile ? 0 : 0.6,
-                type: shouldReduceMotion || isMobile ? "tween" : "spring",
-                stiffness: shouldReduceMotion || isMobile ? undefined : 100,
-                damping: shouldReduceMotion || isMobile ? undefined : 15
-              }}
-              style={{ willChange: shouldReduceMotion || isMobile ? "auto" : "transform, opacity" }}
-            >
+            {/* Action Buttons - Desktop */}
+            {!isMobile && (
               <motion.div
-                whileHover={{ 
-                  scale: 1.05,
-                  y: -2,
-                  transition: { duration: 0.3 }
+                ref={buttonRef}
+                className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start"
+                initial={{ opacity: 0, y: 30, scale: 0.9 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ 
+                  duration: 1, 
+                  delay: 0.6,
+                  type: "spring",
+                  stiffness: 100,
+                  damping: 15
                 }}
-                whileTap={{ scale: 0.95 }}
+                style={{ willChange: "transform, opacity" }}
               >
-                <Button
-                  size="lg"
-                  className="font-body text-sm xs:text-base sm:text-lg px-5 xs:px-6 sm:px-8 py-2.5 xs:py-3 sm:py-4 bg-gradient-to-r from-[rgb(209,162,73)] via-[rgb(229,182,93)] to-[rgb(209,162,73)] text-white font-semibold shadow-lg hover:shadow-xl hover:shadow-[rgba(209,162,73,0.3)] transition-all duration-300 rounded-full relative overflow-hidden group touch-target min-h-[44px] sm:min-h-[auto] w-full sm:w-auto"
-                  onClick={() => {
-                    const el = document.querySelector('[data-section="signature-collection"]');
-                    if (el) {
-                      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }
+                <motion.div
+                  whileHover={{ 
+                    scale: 1.05,
+                    y: -2,
+                    transition: { duration: 0.3 }
                   }}
+                  whileTap={{ scale: 0.95 }}
                 >
-                  <motion.span
-                    className="relative z-10"
-                    initial={{ opacity: 1 }}
-                    whileHover={{ opacity: 0.9 }}
+                  <Button
+                    size="lg"
+                    className="font-body text-sm xs:text-base sm:text-lg px-5 xs:px-6 sm:px-8 py-2.5 xs:py-3 sm:py-4 font-semibold shadow-lg transition-all duration-300 relative overflow-hidden group touch-target min-h-[44px] sm:min-h-[auto] w-full sm:w-auto bg-gradient-to-r from-[rgb(209,162,73)] via-[rgb(229,182,93)] to-[rgb(209,162,73)] text-white hover:shadow-xl hover:shadow-[rgba(209,162,73,0.3)] rounded-full"
+                    onClick={() => {
+                      const el = document.querySelector('[data-section="signature-collection"]');
+                      if (el) {
+                        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      } else {
+                        window.location.href = '/collection';
+                      }
+                    }}
                   >
-                    Start Project
-                  </motion.span>
-                  <motion.div
-                    className="absolute inset-0 bg-gradient-to-r from-yellow-400/20 to-transparent opacity-0 group-hover:opacity-100"
-                    initial={{ x: "-100%" }}
-                    whileHover={{ x: "100%" }}
-                    transition={{ duration: 0.6 }}
-                  />
-                </Button>
-              </motion.div>
+                    <motion.span
+                      className="relative z-10"
+                      initial={{ opacity: 1 }}
+                      whileHover={{ opacity: 0.9 }}
+                    >
+                      Start Project
+                    </motion.span>
+                    <motion.div
+                      className="absolute inset-0 bg-gradient-to-r from-yellow-400/20 to-transparent opacity-0 group-hover:opacity-100"
+                      initial={{ x: "-100%" }}
+                      whileHover={{ x: "100%" }}
+                      transition={{ duration: 0.6 }}
+                    />
+                  </Button>
+                </motion.div>
               
-              <motion.div
-                whileHover={{ 
-                  scale: 1.05,
-                  y: -2,
-                  transition: { duration: 0.3 }
-                }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="font-body text-sm xs:text-base sm:text-lg px-5 xs:px-6 sm:px-8 py-2.5 xs:py-3 sm:py-4 border-2 border-muted-foreground/30 text-muted-foreground hover:border-primary hover:bg-primary/5 hover:text-primary transition-all duration-300 rounded-full backdrop-blur-sm relative overflow-hidden group touch-target min-h-[44px] sm:min-h-[auto] w-full sm:w-auto"
-                  onClick={() => {
-                    const el = document.querySelector('[data-section="custom-bouquet"]');
-                    if (el) {
-                      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }
+                <motion.div
+                  whileHover={{ 
+                    scale: 1.05,
+                    y: -2,
+                    transition: { duration: 0.3 }
                   }}
+                  whileTap={{ scale: 0.95 }}
                 >
-                  <motion.span
-                    className="relative z-10"
-                    initial={{ opacity: 1 }}
-                    whileHover={{ opacity: 0.9 }}
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="font-body text-sm xs:text-base sm:text-lg px-5 xs:px-6 sm:px-8 py-2.5 xs:py-3 sm:py-4 border-2 border-muted-foreground/30 text-muted-foreground hover:border-primary hover:bg-primary/5 hover:text-primary transition-all duration-300 rounded-full backdrop-blur-sm relative overflow-hidden group touch-target min-h-[44px] sm:min-h-[auto] w-full sm:w-auto"
+                    onClick={() => {
+                      const el = document.querySelector('[data-section="custom-bouquet"]');
+                      if (el) {
+                        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      }
+                    }}
                   >
-                    Let's Talk
-                  </motion.span>
-                  <motion.div
-                    className="absolute inset-0 bg-gradient-to-r from-primary/10 to-transparent opacity-0 group-hover:opacity-100"
-                    initial={{ x: "-100%" }}
-                    whileHover={{ x: "100%" }}
-                    transition={{ duration: 0.6 }}
-                  />
-                </Button>
+                    <motion.span
+                      className="relative z-10"
+                      initial={{ opacity: 1 }}
+                      whileHover={{ opacity: 0.9 }}
+                    >
+                      Let's Talk
+                    </motion.span>
+                    <motion.div
+                      className="absolute inset-0 bg-gradient-to-r from-primary/10 to-transparent opacity-0 group-hover:opacity-100"
+                      initial={{ x: "-100%" }}
+                      whileHover={{ x: "100%" }}
+                      transition={{ duration: 0.6 }}
+                    />
+                  </Button>
+                </motion.div>
               </motion.div>
-            </motion.div>
+            )}
 
-             {/* Statistics with Enhanced Animations */}
-             <motion.div
-               className="grid grid-cols-3 gap-2 xs:gap-3 sm:gap-4 lg:gap-6 xl:gap-8 pt-4 sm:pt-6 lg:pt-8"
+             {/* Statistics with Enhanced Animations - Hidden on mobile */}
+             {!isMobile && (
+               <motion.div
+                 className="grid grid-cols-3 gap-2 xs:gap-3 sm:gap-4 lg:gap-6 xl:gap-8 pt-4 sm:pt-6 lg:pt-8"
                initial={{ opacity: 0, y: shouldReduceMotion || isMobile ? 0 : 50, scale: shouldReduceMotion || isMobile ? 1 : 0.9 }}
                animate={{ opacity: 1, y: 0, scale: 1 }}
                transition={{ 
@@ -572,6 +797,7 @@ const UltraHero = () => {
                  </motion.div>
                ))}
              </motion.div>
+             )}
           </div>
 
           {/* Right Content - Hidden on mobile if single column */}
@@ -743,7 +969,7 @@ const UltraHero = () => {
         </div>
       </div>
 
-      {/* Advanced Scroll Indicator - Hidden on mobile */}
+      {/* Advanced Scroll Indicator - Desktop */}
       {!isMobile && (
         <motion.div
           className="absolute bottom-8 left-[47%] transform -translate-x-1/2 z-30"
@@ -773,6 +999,67 @@ const UltraHero = () => {
               )}
             </div>
           </motion.div>
+        </motion.div>
+      )}
+
+      {/* Mobile Bouquet Images - Positioned on Left and Right */}
+      {isMobile && (
+        <>
+          {/* Left Bouquet - Positioned lower-left */}
+          <motion.div
+            className="absolute left-5 bottom-[25%] z-30"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 1 }}
+          >
+            <img
+              src="/assets/HEROFLOWER.png"
+              alt="White bouquet"
+              className="w-[90px] h-[130px] object-cover rounded-xl shadow-[0_10px_30px_rgba(12,12,12,0.08)]"
+            />
+          </motion.div>
+
+          {/* Right Bouquet - Positioned lower-right, slightly higher */}
+          <motion.div
+            className="absolute right-5 bottom-[17%] z-30"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 1.2 }}
+          >
+            <img
+              src="/assets/HEROFLOWER.png"
+              alt="White bouquet"
+              className="w-[120px] h-[150px] object-cover rounded-xl shadow-[0_10px_30px_rgba(12,12,12,0.08)]"
+            />
+          </motion.div>
+        </>
+      )}
+
+      {/* Mobile Scroll Hint */}
+      {isMobile && (
+        <motion.div
+          className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20 flex flex-col items-center gap-3 text-black text-[0.98rem] cursor-pointer"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 1.4 }}
+          onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}
+        >
+          <span className="whitespace-nowrap">Scroll to discover our premium collections ↓</span>
+          <div className="relative w-[30px] h-[48px] rounded-[18px] border-2 border-black">
+            <motion.div
+              className="absolute left-1/2 top-3 w-1.5 h-1.5 bg-black rounded-full"
+              style={{ transform: 'translateX(-50%)' }}
+              animate={{ 
+                y: [0, 14, 0],
+                opacity: [1, 0, 1]
+              }}
+              transition={{ 
+                duration: 1.6, 
+                repeat: Infinity, 
+                ease: "easeInOut" 
+              }}
+            />
+          </div>
         </motion.div>
       )}
     </section>

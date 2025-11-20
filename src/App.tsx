@@ -9,6 +9,7 @@ import Collection from "./pages/Collection";
 import AboutPage from "./pages/About";
 import NotFound from "./pages/NotFound";
 import Customize from "./pages/Customize";
+import WeddingAndEvents from "./pages/WeddingAndEvents";
 import ProductDetailPage from "./pages/ProductDetailPage";
 import Checkout from "./pages/Checkout";
 import ScrollToTop from "@/components/ScrollToTop";
@@ -44,6 +45,7 @@ const App = () => {
                     <Route path="/checkout" element={<Checkout />} />
                     <Route path="/about" element={<AboutPage />} />
                     <Route path="/customize" element={<Customize />} />
+                    <Route path="/wedding-and-events" element={<WeddingAndEvents />} />
                     <Route path="/favorites" element={<Favorites />} />
                     <Route path="/cart" element={<CartPage />} />
                     <Route path="/cart-test" element={<CartTest />} />
