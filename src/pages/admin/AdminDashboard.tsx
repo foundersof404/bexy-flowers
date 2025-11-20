@@ -78,7 +78,7 @@ const AdminDashboard = () => {
 
   const handleLogout = () => {
     localStorage.removeItem("adminAuthenticated");
-    localStorage.removeItem("adminEmail");
+    localStorage.removeItem("adminUsername");
     toast({
       title: "Logged out",
       description: "You've been successfully logged out.",

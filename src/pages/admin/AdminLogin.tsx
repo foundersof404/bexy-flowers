@@ -5,13 +5,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Lock, Mail, Sparkles } from "lucide-react";
+import { Lock, User, Sparkles } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const GOLD_COLOR = "rgb(199, 158, 72)";
 
+const ADMIN_USERNAME = "admin";
+const ADMIN_PASSWORD = "admin123";
+
 const AdminLogin = () => {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
@@ -21,12 +24,11 @@ const AdminLogin = () => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simple authentication (replace with real auth later)
-    // For now, any admin credentials work
-    if (email && password) {
+    // Check credentials
+    if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
       setTimeout(() => {
         localStorage.setItem("adminAuthenticated", "true");
-        localStorage.setItem("adminEmail", email);
+        localStorage.setItem("adminUsername", username);
         setIsLoading(false);
         toast({
           title: "Welcome back!",
@@ -37,8 +39,8 @@ const AdminLogin = () => {
     } else {
       setIsLoading(false);
       toast({
-        title: "Error",
-        description: "Please enter both email and password.",
+        title: "Authentication Failed",
+        description: "Invalid username or password. Please try again.",
         variant: "destructive",
       });
     }
@@ -72,17 +74,17 @@ const AdminLogin = () => {
           <CardContent>
             <form onSubmit={handleLogin} className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-sm font-semibold">
-                  Email Address
+                <Label htmlFor="username" className="text-sm font-semibold">
+                  Username
                 </Label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+                  <User className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
                   <Input
-                    id="email"
-                    type="email"
-                    placeholder="admin@bexyflowers.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    id="username"
+                    type="text"
+                    placeholder="Enter username"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
                     className="pl-10 h-12"
                     required
                   />
@@ -122,7 +124,7 @@ const AdminLogin = () => {
 
             <div className="mt-6 text-center">
               <p className="text-xs text-gray-500">
-                Demo: Enter any email and password to continue
+                Admin Portal - Secure Access Only
               </p>
             </div>
           </CardContent>

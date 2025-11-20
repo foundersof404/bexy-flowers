@@ -14,7 +14,8 @@ import {
   Crown,
   Heart,
   Star,
-  Calendar
+  Calendar,
+  Settings
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/contexts/CartContext';
@@ -62,14 +63,10 @@ const navigationItems: NavigationItem[] = [
     path: "/wedding-and-events",
     icon: <Calendar className="w-5 h-5" />,
     description: "Special Occasions"
-  },
-  {
-    name: "Favorites",
-    path: "/favorites",
-    icon: <Heart className="w-5 h-5" />,
-    description: "Saved Items"
   }
 ];
+
+const GOLD_COLOR = "rgb(199, 158, 72)";
 
 const UltraNavigation = () => {
   const navigate = useNavigate();
@@ -198,12 +195,12 @@ const UltraNavigation = () => {
             }}
           >
         <div className="max-w-7xl mx-auto px-3 xs:px-4 sm:px-6 py-2 xs:py-3 sm:py-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center">
             
-            {/* Logo and Brand - Elegant Glow Only, No Movement */}
+            {/* Logo and Brand - Absolute Left */}
             <motion.div
               ref={logoRef}
-              className="flex items-center flex-shrink-0"
+              className="flex items-center flex-shrink-0 mr-auto"
             >
               <Button
                 variant="ghost"
@@ -264,114 +261,149 @@ const UltraNavigation = () => {
               </Button>
             </motion.div>
 
-            {/* Spacer */}
-            <div className="flex-1"></div>
-
-            {/* Desktop Navigation with Advanced Hover Effects */}
-            <div className="hidden lg:flex items-center space-x-2 xl:space-x-4">
-              {navigationItems.map((item, index) => (
-                <motion.div
-                  key={item.name}
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.8 + index * 0.1, duration: 0.6 }}
-                >
-                  <Button
-                    variant="ghost"
-                    className={`relative group font-body font-medium px-3 xl:px-6 py-2 xl:py-3 transition-all duration-500 overflow-hidden ${
-                      location.pathname === item.path
-                        ? 'text-primary'
-                        : 'text-foreground hover:text-primary'
-                    }`}
-                    onClick={() => handleNavigation(item.path)}
+            {/* Desktop Navigation - Centered with Close Spacing */}
+            <div className="hidden lg:flex items-center justify-center flex-1 gap-1 xl:gap-2">
+              {navigationItems.map((item, index) => {
+                const isActive = location.pathname === item.path;
+                return (
+                  <motion.div
+                    key={item.name}
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.8 + index * 0.1, duration: 0.6 }}
                   >
-                    <span className="relative z-10 flex items-center space-x-2">
-                      {/* Icon with Advanced 3D Hover Effects */}
-                      <motion.span 
-                        className="transition-all duration-500 relative inline-flex items-center justify-center"
-                        whileHover={isMobile || shouldReduceMotion ? {} : { 
-                          scale: 1.15, 
-                          rotate: [0, -5, 5, 0],
-                          color: "rgb(194, 154, 67)",
-                          filter: "drop-shadow(0 0 12px rgba(194, 154, 67, 0.8))"
-                        }}
-                        transition={{ 
-                          duration: shouldReduceMotion ? 0 : 0.5, 
-                          ease: [0.23, 1, 0.32, 1],
-                          rotate: shouldReduceMotion ? {} : { duration: 0.4, repeat: 1, repeatType: "reverse" }
-                        }}
-                        style={{ willChange: isMobile || shouldReduceMotion ? "auto" : "transform" }}
-                      >
-                        {item.icon}
+                    <Button
+                      variant="ghost"
+                      className={`relative group font-body font-medium px-3 xl:px-4 py-2 xl:py-3 transition-all duration-500 overflow-hidden ${
+                        isActive
+                          ? 'text-foreground'
+                          : 'text-foreground hover:text-foreground'
+                      }`}
+                      onClick={() => handleNavigation(item.path)}
+                    >
+                      <span className="relative z-10 flex items-center gap-2">
+                        {/* Icon */}
+                        <motion.span 
+                          className="transition-all duration-300 relative inline-flex items-center justify-center"
+                          whileHover={isMobile || shouldReduceMotion ? {} : { 
+                            scale: 1.15,
+                          }}
+                          style={{
+                            color: isActive ? GOLD_COLOR : 'inherit',
+                          }}
+                        >
+                          {item.icon}
+                        </motion.span>
                         
-                        {/* Simplified Icon Glow Effect - Reduced for performance */}
-                        {!isMobile && !shouldReduceMotion && (
-                          <motion.div
-                            className="absolute inset-0 rounded-full"
-                            style={{
-                              background: 'radial-gradient(circle, rgba(194, 154, 67, 0.4) 0%, transparent 70%)',
-                              filter: 'blur(8px)'
-                            }}
-                            initial={{ scale: 0, opacity: 0 }}
-                            whileHover={{ scale: 2, opacity: 1 }}
-                            transition={{ duration: 0.4, ease: "easeOut" }}
-                          />
-                        )}
-                      </motion.span>
+                        {/* Text */}
+                        <motion.span
+                          className="relative whitespace-nowrap"
+                          style={{
+                            color: isActive ? GOLD_COLOR : 'inherit',
+                          }}
+                          whileHover={{ 
+                            scale: 1.05,
+                          }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          {item.name}
+                        </motion.span>
+                      </span>
                       
-                      {/* Text with Morphing Animation */}
-                      <motion.span
-                        className="relative"
-                        whileHover={{ 
-                          x: 3,
-                          scale: 1.05,
-                          textShadow: "0 0 10px rgba(196,166,105,0.5)"
-                        }}
-                        transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
-                      >
-                        {item.name}
-                        
-                        {/* Text Underline Animation */}
+                      {/* Active Gold Background */}
+                      {isActive && (
                         <motion.div
-                          className="absolute -bottom-1 left-0 h-0.5 bg-primary"
-                          initial={{ width: 0, opacity: 0 }}
-                          whileHover={{ width: "100%", opacity: 1 }}
-                          transition={{ duration: 0.5, ease: "easeOut" }}
+                          className="absolute inset-0 rounded-lg"
+                          style={{
+                            background: `linear-gradient(135deg, ${GOLD_COLOR}20 0%, ${GOLD_COLOR}10 100%)`,
+                            border: `1px solid ${GOLD_COLOR}40`,
+                          }}
+                          layoutId="activeNavBg"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ duration: 0.3 }}
                         />
-                      </motion.span>
-                    </span>
-                    
-                    {/* Simplified Background Effects - Reduced for performance */}
-                    
-                    {/* Primary Background Gradient */}
-                    <motion.div
-                      className="absolute inset-0 bg-gradient-to-r from-primary/5 via-primary/20 to-primary/5 rounded-lg"
-                      initial={{ scale: 0, opacity: 0 }}
-                      whileHover={{ scale: 1, opacity: 1 }}
-                      transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
-                    />
-                    
-                    {/* Active Indicator */}
-                    {location.pathname === item.path && (
+                      )}
+                      
+                      {/* Hover Effect */}
                       <motion.div
-                        className="absolute bottom-0 left-1/2 w-2 h-2 bg-primary rounded-full"
-                        layoutId="activeIndicator"
-                        initial={{ scale: 0, opacity: 0 }}
-                        animate={{ 
-                          scale: 1, 
-                          opacity: 1,
-                          x: '-50%'
+                        className="absolute inset-0 rounded-lg"
+                        style={{
+                          background: `linear-gradient(135deg, ${GOLD_COLOR}15 0%, ${GOLD_COLOR}05 100%)`,
                         }}
-                        transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+                        initial={{ scale: 0, opacity: 0 }}
+                        whileHover={{ scale: 1, opacity: 1 }}
+                        transition={{ duration: 0.3 }}
                       />
+                    </Button>
+                  </motion.div>
+                );
+              })}
+              
+              {/* Favorites - Icon Only */}
+              <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.8 + navigationItems.length * 0.1, duration: 0.6 }}
+              >
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={`relative group font-body font-medium p-3 xl:p-4 transition-all duration-500 overflow-hidden ${
+                    location.pathname === "/favorites"
+                      ? 'text-foreground'
+                      : 'text-foreground'
+                  }`}
+                  onClick={() => handleNavigation("/favorites")}
+                >
+                  <motion.span 
+                    className="relative inline-flex items-center justify-center"
+                    whileHover={isMobile || shouldReduceMotion ? {} : { 
+                      scale: 1.15,
+                    }}
+                    style={{
+                      color: location.pathname === "/favorites" ? GOLD_COLOR : 'inherit',
+                    }}
+                  >
+                    <Heart className="w-5 h-5" />
+                    {favoritesCount > 0 && (
+                      <span className="absolute -top-1 -right-1 w-4 h-4 bg-pink-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
+                        {favoritesCount}
+                      </span>
                     )}
-                  </Button>
-                </motion.div>
-              ))}
+                  </motion.span>
+                  
+                  {/* Active Gold Background */}
+                  {location.pathname === "/favorites" && (
+                    <motion.div
+                      className="absolute inset-0 rounded-lg"
+                      style={{
+                        background: `linear-gradient(135deg, ${GOLD_COLOR}20 0%, ${GOLD_COLOR}10 100%)`,
+                        border: `1px solid ${GOLD_COLOR}40`,
+                      }}
+                      layoutId="activeNavBg"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.3 }}
+                    />
+                  )}
+                  
+                  {/* Hover Effect */}
+                  <motion.div
+                    className="absolute inset-0 rounded-lg"
+                    style={{
+                      background: `linear-gradient(135deg, ${GOLD_COLOR}15 0%, ${GOLD_COLOR}05 100%)`,
+                    }}
+                    initial={{ scale: 0, opacity: 0 }}
+                    whileHover={{ scale: 1, opacity: 1 }}
+                    transition={{ duration: 0.3 }}
+                  />
+                </Button>
+              </motion.div>
             </div>
 
-            {/* Cart & Menu with Enhanced Hover Effects */}
-            <div className="flex items-center space-x-2 sm:space-x-4 ml-2 sm:ml-4">
+            {/* Cart - Absolute Right */}
+            <div className="flex items-center ml-auto">
               {/* Cart with Simplified Hover Effects */}
               <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
@@ -442,6 +474,52 @@ const UltraNavigation = () => {
                 </Button>
               </motion.div>
 
+              {/* Favorites Icon - Mobile/Desktop (shows on mobile when cart is shown) */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 1.3, duration: 0.6 }}
+                className="lg:hidden mr-2"
+              >
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handleNavigation("/favorites")}
+                  className={`relative group hover:bg-primary/10 transition-all duration-300 overflow-hidden rounded-lg w-10 h-10 sm:w-12 sm:h-12 ${
+                    location.pathname === "/favorites" ? 'text-foreground' : 'text-foreground'
+                  }`}
+                >
+                  <motion.span 
+                    className="relative z-10"
+                    whileHover={!isMobile && !shouldReduceMotion ? { 
+                      scale: 1.15,
+                    } : {}}
+                    style={{
+                      color: location.pathname === "/favorites" ? GOLD_COLOR : 'inherit',
+                    }}
+                  >
+                    <Heart className="w-5 h-5 sm:w-6 sm:h-6" />
+                    {favoritesCount > 0 && (
+                      <span className="absolute -top-1 -right-1 w-4 h-4 bg-pink-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
+                        {favoritesCount}
+                      </span>
+                    )}
+                  </motion.span>
+                  {location.pathname === "/favorites" && (
+                    <motion.div
+                      className="absolute inset-0 rounded-lg"
+                      style={{
+                        background: `linear-gradient(135deg, ${GOLD_COLOR}20 0%, ${GOLD_COLOR}10 100%)`,
+                        border: `1px solid ${GOLD_COLOR}40`,
+                      }}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.3 }}
+                    />
+                  )}
+                </Button>
+              </motion.div>
+
               {/* Mobile Menu Button - Simplified */}
               <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
@@ -508,68 +586,158 @@ const UltraNavigation = () => {
               transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
             >
               <div className="px-4 sm:px-6 py-6 sm:py-8 space-y-3 sm:space-y-4">
-                {navigationItems.map((item, index) => (
-                  <motion.div
-                    key={item.name}
-                    initial={{ opacity: 0, x: -50, scale: 0.95 }}
-                    animate={{ opacity: 1, x: 0, scale: 1 }}
-                    transition={{ 
-                      delay: index * 0.1, 
-                      duration: 0.6,
-                      type: "spring",
-                      stiffness: 100,
-                      damping: 15
-                    }}
-                  >
-                    <Button
-                      variant="ghost"
-                      className={`w-full justify-start p-3 sm:p-4 text-left group relative overflow-hidden rounded-xl transition-all duration-500 ${
-                        location.pathname === item.path
-                          ? 'text-primary bg-primary/10'
-                          : 'text-foreground hover:text-primary hover:bg-primary/5'
-                      }`}
-                      onClick={() => handleNavigation(item.path)}
+                {navigationItems.map((item, index) => {
+                  const isActive = location.pathname === item.path;
+                  return (
+                    <motion.div
+                      key={item.name}
+                      initial={{ opacity: 0, x: -50, scale: 0.95 }}
+                      animate={{ opacity: 1, x: 0, scale: 1 }}
+                      transition={{ 
+                        delay: index * 0.1, 
+                        duration: 0.6,
+                        type: "spring",
+                        stiffness: 100,
+                        damping: 15
+                      }}
                     >
-                      {/* Simplified Background - Reduced for performance */}
-                      <motion.div
-                        className="absolute inset-0 bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 rounded-xl"
-                        initial={{ scale: 0, opacity: 0 }}
-                        whileHover={{ scale: 1, opacity: 1 }}
-                        transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
-                      />
-                      
-                      <div className="flex items-center space-x-3 sm:space-x-4 relative z-10">
-                        {/* Icon - Simplified */}
-                        <motion.span 
-                          className="relative flex-shrink-0"
-                          whileHover={{ 
-                            scale: 1.1, 
-                            color: item.path === '/favorites' ? "rgb(220, 38, 127)" : "rgb(196,166,105)"
-                          }}
-                          transition={{ duration: 0.3 }}
-                        >
-                          <div className="w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center relative">
-                            {item.icon}
-                            {item.path === '/favorites' && favoritesCount > 0 && (
-                              <span className="absolute -top-1 -right-1 w-4 h-4 bg-[#dc267f] text-white rounded-full flex items-center justify-center text-xs font-bold">
-                                {favoritesCount}
-                              </span>
-                            )}
-                          </div>
-                        </motion.span>
+                      <Button
+                        variant="ghost"
+                        className={`w-full justify-start p-3 sm:p-4 text-left group relative overflow-hidden rounded-xl transition-all duration-500 ${
+                          isActive
+                            ? 'text-foreground'
+                            : 'text-foreground hover:text-foreground'
+                        }`}
+                        onClick={() => handleNavigation(item.path)}
+                      >
+                        {/* Active Gold Background */}
+                        {isActive && (
+                          <motion.div
+                            className="absolute inset-0 rounded-xl"
+                            style={{
+                              background: `linear-gradient(135deg, ${GOLD_COLOR}20 0%, ${GOLD_COLOR}10 100%)`,
+                              border: `1px solid ${GOLD_COLOR}40`,
+                            }}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ duration: 0.3 }}
+                          />
+                        )}
                         
-                        <div className="flex-1 min-w-0">
-                          <div className="font-luxury font-semibold relative text-base sm:text-lg">
-                            {item.name}
-                          </div>
-                          <div className="font-body text-xs sm:text-sm text-muted-foreground mt-1">
-                            {item.description}
+                        {/* Hover Effect */}
+                        <motion.div
+                          className="absolute inset-0 rounded-xl"
+                          style={{
+                            background: `linear-gradient(135deg, ${GOLD_COLOR}15 0%, ${GOLD_COLOR}05 100%)`,
+                          }}
+                          initial={{ scale: 0, opacity: 0 }}
+                          whileHover={{ scale: 1, opacity: 1 }}
+                          transition={{ duration: 0.3 }}
+                        />
+                        
+                        <div className="flex items-center space-x-3 sm:space-x-4 relative z-10">
+                          {/* Icon */}
+                          <motion.span 
+                            className="relative flex-shrink-0"
+                            whileHover={{ scale: 1.1 }}
+                            transition={{ duration: 0.3 }}
+                            style={{
+                              color: isActive ? GOLD_COLOR : 'inherit',
+                            }}
+                          >
+                            <div className="w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center relative">
+                              {item.icon}
+                            </div>
+                          </motion.span>
+                          
+                          <div className="flex-1 min-w-0">
+                            <div 
+                              className="font-luxury font-semibold relative text-base sm:text-lg"
+                              style={{
+                                color: isActive ? GOLD_COLOR : 'inherit',
+                              }}
+                            >
+                              {item.name}
+                            </div>
+                            <div className="font-body text-xs sm:text-sm text-muted-foreground mt-1">
+                              {item.description}
+                            </div>
                           </div>
                         </div>
+                      </Button>
+                    </motion.div>
+                  );
+                })}
+                
+                {/* Favorites - Icon Only in Mobile Menu */}
+                <motion.div
+                  initial={{ opacity: 0, x: -50, scale: 0.95 }}
+                  animate={{ opacity: 1, x: 0, scale: 1 }}
+                  transition={{ 
+                    delay: navigationItems.length * 0.1, 
+                    duration: 0.6,
+                    type: "spring",
+                    stiffness: 100,
+                    damping: 15
+                  }}
+                >
+                  <Button
+                    variant="ghost"
+                    className={`w-full justify-start p-3 sm:p-4 text-left group relative overflow-hidden rounded-xl transition-all duration-500 ${
+                      location.pathname === "/favorites"
+                        ? 'text-foreground'
+                        : 'text-foreground'
+                    }`}
+                    onClick={() => handleNavigation("/favorites")}
+                  >
+                    {location.pathname === "/favorites" && (
+                      <motion.div
+                        className="absolute inset-0 rounded-xl"
+                        style={{
+                          background: `linear-gradient(135deg, ${GOLD_COLOR}20 0%, ${GOLD_COLOR}10 100%)`,
+                          border: `1px solid ${GOLD_COLOR}40`,
+                        }}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.3 }}
+                      />
+                    )}
+                    
+                    <div className="flex items-center space-x-3 sm:space-x-4 relative z-10">
+                      <motion.span 
+                        className="relative flex-shrink-0"
+                        whileHover={{ scale: 1.1 }}
+                        transition={{ duration: 0.3 }}
+                        style={{
+                          color: location.pathname === "/favorites" ? GOLD_COLOR : 'inherit',
+                        }}
+                      >
+                        <div className="w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center relative">
+                          <Heart className="w-full h-full" />
+                          {favoritesCount > 0 && (
+                            <span className="absolute -top-1 -right-1 w-4 h-4 bg-pink-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
+                              {favoritesCount}
+                            </span>
+                          )}
+                        </div>
+                      </motion.span>
+                      
+                      <div className="flex-1 min-w-0">
+                        <div 
+                          className="font-luxury font-semibold relative text-base sm:text-lg"
+                          style={{
+                            color: location.pathname === "/favorites" ? GOLD_COLOR : 'inherit',
+                          }}
+                        >
+                          Favorites
+                        </div>
+                        <div className="font-body text-xs sm:text-sm text-muted-foreground mt-1">
+                          Saved Items
+                        </div>
                       </div>
-                    </Button>
-                  </motion.div>
-                ))}
+                    </div>
+                  </Button>
+                </motion.div>
               </div>
             </motion.div>
           )}
