@@ -20,6 +20,9 @@ import { FlyingHeartProvider } from "@/contexts/FlyingHeartContext";
 import CartTest from "@/pages/CartTest";
 import Favorites from "@/pages/Favorites";
 import CartPage from "@/components/cart/CartPage";
+import AdminLogin from "@/pages/admin/AdminLogin";
+import AdminDashboard from "@/pages/admin/AdminDashboard";
+import AdminProducts from "@/pages/admin/AdminProducts";
 
 const queryClient = new QueryClient();
 
@@ -49,6 +52,12 @@ const App = () => {
                     <Route path="/favorites" element={<Favorites />} />
                     <Route path="/cart" element={<CartPage />} />
                     <Route path="/cart-test" element={<CartTest />} />
+                    {/* Admin Routes */}
+                    <Route path="/admin/login" element={<AdminLogin />} />
+                    <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                    <Route path="/admin/products" element={<AdminProducts />} />
+                    <Route path="/admin/products/:id" element={<AdminProducts />} />
+                    <Route path="/admin/products/new" element={<AdminProducts />} />
                     {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                     <Route path="*" element={<NotFound />} />
                   </Routes>

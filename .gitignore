@@ -22,3 +22,21 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# AI Training and Model Files
+backend/fine_tuned_model_test/
+backend/training_data/
+backend/venv/
+backend/*.py
+backend/*.bat
+backend/*.sh
+backend/*.txt
+backend/*.md
+backend/generated_images/
+backend/test_*.py
+backend/train_*.py
+backend/convert_*.py
+backend/prepare_*.py
+backend/setup_*.py
+backend/server.py
+backend/test_backend.py
