@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, memo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { gsap } from 'gsap';
@@ -10,7 +10,7 @@ import UltraNavigation from '@/components/UltraNavigation';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const Favorites = () => {
+const Favorites = memo(() => {
   const navigate = useNavigate();
   const { favorites, removeFromFavorites, isFavorite, toggleFavorite, getTotalFavorites } = useFavorites();
   const { addToCart } = useCartWithToast();
@@ -35,10 +35,23 @@ const Favorites = () => {
     <div className="min-h-screen bg-gradient-to-b from-white via-[#faf9f7] to-white relative overflow-hidden">
       <UltraNavigation />
       
-      {/* Floating Background Elements */}
+      {/* Optimized Floating Background Elements - Reduced for performance */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-gradient-to-br from-[#dc267f]/5 to-transparent rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-gradient-to-br from-[#C79E48]/5 to-transparent rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+        <div 
+          className="absolute top-20 left-10 w-72 h-72 bg-gradient-to-br from-[#dc267f]/4 to-transparent rounded-full blur-2xl opacity-60" 
+          style={{ 
+            animation: 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            willChange: 'opacity'
+          }}
+        />
+        <div 
+          className="absolute bottom-20 right-10 w-96 h-96 bg-gradient-to-br from-[#C79E48]/4 to-transparent rounded-full blur-2xl opacity-60" 
+          style={{ 
+            animation: 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            animationDelay: '1s',
+            willChange: 'opacity'
+          }} 
+        />
       </div>
 
       <section 
@@ -219,26 +232,27 @@ const Favorites = () => {
                     <motion.div
                       key={favorite.id}
                       layout
-                      initial={{ opacity: 0, scale: 0.8, y: 50 }}
+                      initial={{ opacity: 0, scale: 0.9, y: 30 }}
                       animate={{ opacity: 1, scale: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.8, x: -100 }}
+                      exit={{ opacity: 0, scale: 0.9, x: -50 }}
                       transition={{ 
-                        duration: 0.5,
+                        duration: 0.4,
                         ease: [0.23, 1, 0.32, 1],
-                        layout: { duration: 0.4 }
+                        layout: { duration: 0.3 }
                       }}
                       className="group"
                       onHoverStart={() => setHoveredCard(favorite.id)}
                       onHoverEnd={() => setHoveredCard(null)}
                     >
-                      {/* Premium Luxury Card - Sharper Design */}
+                      {/* Premium Luxury Card - Optimized Design */}
                       <motion.div
-                        className="relative rounded-2xl overflow-hidden backdrop-blur-sm cursor-pointer border border-slate-200/80"
+                        className="relative rounded-2xl overflow-hidden cursor-pointer border border-slate-200/80"
                         style={{
                           background: 'linear-gradient(180deg, #ffffff 0%, #fefcfb 100%)',
                           boxShadow: isHovered 
-                            ? '0 32px 72px rgba(220, 38, 127, 0.24), 0 0 0 2px rgba(220, 38, 127, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.9)'
-                            : '0 12px 48px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.8)'
+                            ? '0 24px 48px rgba(220, 38, 127, 0.2), 0 0 0 2px rgba(220, 38, 127, 0.4)'
+                            : '0 8px 32px rgba(0, 0, 0, 0.08)',
+                          willChange: 'transform, box-shadow'
                         }}
                         animate={{
                           y: isHovered ? -4 : 0,
@@ -264,12 +278,12 @@ const Favorites = () => {
                           });
                         }}
                       >
-                        {/* Sharp Pink Border Overlay */}
+                        {/* Optimized Pink Border Overlay - Simplified */}
                         <motion.div
                           className="absolute inset-0 rounded-2xl pointer-events-none z-10"
                           style={{
                             boxShadow: isHovered 
-                              ? 'inset 0 0 0 2px rgba(220, 38, 127, 0.5), inset 0 0 20px rgba(220, 38, 127, 0.1)'
+                              ? 'inset 0 0 0 2px rgba(220, 38, 127, 0.5)'
                               : 'inset 0 0 0 0px rgba(220, 38, 127, 0)',
                           }}
                           transition={{ duration: 0.4 }}
@@ -285,19 +299,19 @@ const Favorites = () => {
                           />
                         )}
 
-                        {/* Image Section - Enhanced */}
+                        {/* Image Section - Optimized */}
                         <div className="relative h-48 sm:h-72 lg:h-80 overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100">
                           <motion.img
                             src={favorite.image || favorite.imageUrl}
                             alt={favorite.title || favorite.name || 'Favorite'}
                             className="w-full h-full object-cover"
                             style={{
-                              filter: isHovered ? 'brightness(1.05) saturate(1.1)' : 'brightness(1) saturate(1)'
+                              willChange: 'transform'
                             }}
                             animate={{
-                              scale: isHovered ? 1.12 : 1,
+                              scale: isHovered ? 1.08 : 1,
                             }}
-                            transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
+                            transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
                           />
                           
                           {/* Sharp Gradient Overlay */}
@@ -318,13 +332,14 @@ const Favorites = () => {
                             />
                           )}
 
-                          {/* Floating Action Buttons */}
+                          {/* Optimized Floating Action Buttons - Removed backdrop-blur */}
                           <div className="absolute top-2 right-2 sm:top-4 sm:right-4 flex gap-1 sm:gap-2 z-20 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                             <motion.button
-                              className="w-8 h-8 sm:w-10 sm:h-10 rounded-full backdrop-blur-md flex items-center justify-center relative overflow-visible"
+                              className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center relative overflow-visible"
                               style={{
-                                background: isFav ? 'rgba(220, 38, 127, 0.9)' : 'rgba(255, 255, 255, 0.9)',
-                                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)'
+                                background: isFav ? 'rgba(220, 38, 127, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+                                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
+                                willChange: 'transform, box-shadow'
                               }}
                               whileHover={{ 
                                 scale: 1.15,
@@ -419,12 +434,12 @@ const Favorites = () => {
                                   ? 'linear-gradient(135deg, #dc267f 0%, #e91e63 50%, #f06292 100%)'
                                   : 'linear-gradient(135deg, #dc267f 0%, #e91e63 100%)',
                                 boxShadow: isHovered
-                                  ? '0 8px 24px rgba(220, 38, 127, 0.5), 0 0 0 3px rgba(220, 38, 127, 0.15)'
-                                  : '0 6px 20px rgba(220, 38, 127, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.3)'
+                                  ? '0 8px 24px rgba(220, 38, 127, 0.5)'
+                                  : '0 6px 20px rgba(220, 38, 127, 0.35)',
+                                willChange: 'transform, box-shadow'
                               }}
                               whileHover={{
-                                scale: 1.1,
-                                rotate: [0, -5, 5, 0]
+                                scale: 1.1
                               }}
                               whileTap={{ scale: 0.95 }}
                               onClick={(e) => {
@@ -437,41 +452,27 @@ const Favorites = () => {
                                 });
                               }}
                             >
-                              <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-white" strokeWidth={2.5} />
+                              <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-white relative z-10" strokeWidth={2.5} />
                               
-                              {/* Enhanced Shimmer Effect */}
+                              {/* Optimized Shimmer Effect - Simplified */}
                               <motion.div
-                                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent"
+                                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent pointer-events-none"
+                                style={{ willChange: 'transform' }}
                                 animate={{
                                   x: ['-100%', '200%']
                                 }}
                                 transition={{
-                                  duration: 1.5,
-                                  repeat: Infinity,
-                                  ease: "linear"
-                                }}
-                              />
-                              
-                              {/* Inner Glow */}
-                              <motion.div
-                                className="absolute inset-0 rounded-2xl"
-                                style={{
-                                  background: 'radial-gradient(circle at center, rgba(255, 255, 255, 0.3) 0%, transparent 70%)'
-                                }}
-                                animate={{
-                                  opacity: [0.5, 1, 0.5]
-                                }}
-                                transition={{
                                   duration: 2,
                                   repeat: Infinity,
-                                  ease: "easeInOut"
+                                  ease: "linear",
+                                  repeatDelay: 0.5
                                 }}
                               />
                             </motion.button>
                           </div>
                         </div>
 
-                        {/* Ambient Particles */}
+                        {/* Optimized Ambient Particles - Reduced for performance */}
                         {isHovered && (
                           <motion.div
                             className="absolute inset-0 pointer-events-none"
@@ -479,24 +480,24 @@ const Favorites = () => {
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
                           >
-                            {[...Array(6)].map((_, i) => (
+                            {[...Array(3)].map((_, i) => (
                               <motion.div
                                 key={i}
                                 className="absolute w-1 h-1 rounded-full"
                                 style={{
-                                  background: 'rgba(220, 38, 127, 0.6)',
-                                  left: `${20 + i * 15}%`,
-                                  top: `${30 + i * 10}%`,
+                                  background: 'rgba(220, 38, 127, 0.5)',
+                                  left: `${25 + i * 25}%`,
+                                  top: `${35 + i * 10}%`,
+                                  willChange: 'transform, opacity'
                                 }}
                                 animate={{
                                   y: [0, -20, 0],
-                                  opacity: [0, 1, 0],
-                                  scale: [0, 1.5, 0]
+                                  opacity: [0, 0.8, 0]
                                 }}
                                 transition={{
-                                  duration: 2,
+                                  duration: 2.5,
                                   repeat: Infinity,
-                                  delay: i * 0.2,
+                                  delay: i * 0.3,
                                   ease: "easeInOut"
                                 }}
                               />
@@ -514,7 +515,9 @@ const Favorites = () => {
       </section>
     </div>
   );
-};
+});
+
+Favorites.displayName = 'Favorites';
 
 export default Favorites;
 

@@ -1,10 +1,20 @@
-import { useEffect } from "react";
+import { useEffect, useLayoutEffect } from "react";
 import { useLocation } from "react-router-dom";
 
 const ScrollToTop = () => {
   const { pathname, search, hash } = useLocation();
 
   useEffect(() => {
+    if ("scrollRestoration" in window.history) {
+      const original = window.history.scrollRestoration;
+      window.history.scrollRestoration = "manual";
+      return () => {
+        window.history.scrollRestoration = original;
+      };
+    }
+  }, []);
+
+  useLayoutEffect(() => {
     // Always jump to top on route changes (robust version)
     const reset = () => {
       window.scrollTo({ top: 0, left: 0, behavior: "auto" });

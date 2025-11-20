@@ -16,6 +16,8 @@ import {
 } from 'lucide-react';
 import { useCartWithToast } from '@/hooks/useCartWithToast';
 import UltraNavigation from '@/components/UltraNavigation';
+import { generatedBouquets } from '@/data/generatedBouquets';
+import type { Bouquet } from '@/types/bouquet';
 
 // Import real images from assets
 import bouquet1 from '@/assets/bouquet-1.jpg';
@@ -527,6 +529,44 @@ const ProductDetailPage = () => {
   const selectedSizeOption = sizeOptions.find(option => option.id === selectedSize);
   const currentPrice = productData.price + (selectedSizeOption?.priceModifier || 0);
 
+  // Smart recommendation logic
+  const getRecommendations = (): Bouquet[] => {
+    const currentCategory = productData.category;
+    const currentId = productData.id;
+    const currentPrice = productData.price;
+    
+    // Find bouquets from the same or related categories
+    let sameCategoryBouquets = generatedBouquets.filter(
+      b => b.displayCategory === currentCategory && b.id !== currentId
+    );
+    
+    // If not enough same category, find similar price range
+    if (sameCategoryBouquets.length < 4) {
+      const similarPriceBouquets = generatedBouquets.filter(
+        b => b.id !== currentId && 
+        Math.abs(b.price - currentPrice) <= 50
+      );
+      sameCategoryBouquets = [...sameCategoryBouquets, ...similarPriceBouquets];
+    }
+    
+    // If still not enough, add featured bouquets
+    if (sameCategoryBouquets.length < 4) {
+      const featuredBouquets = generatedBouquets.filter(
+        b => b.featured && b.id !== currentId
+      );
+      sameCategoryBouquets = [...sameCategoryBouquets, ...featuredBouquets];
+    }
+    
+    // Remove duplicates and take first 4
+    const uniqueBouquets = Array.from(
+      new Map(sameCategoryBouquets.map(b => [b.id, b])).values()
+    );
+    
+    return uniqueBouquets.slice(0, 4);
+  };
+  
+  const recommendedBouquets = getRecommendations();
+
   // Ensure page always loads from the top
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
@@ -751,12 +791,80 @@ const ProductDetailPage = () => {
           </motion.div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {suggestedFlowers.map((flower, index) => (
-              <SuggestedFlowerCard 
-                key={flower.id} 
-                flower={flower} 
-                index={index} 
-              />
+            {recommendedBouquets.map((bouquet, index) => (
+              <motion.div
+                key={bouquet.id}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                viewport={{ once: true }}
+                className="group cursor-pointer"
+                onClick={() => navigate(`/product/${bouquet.id}`, {
+                  state: {
+                    product: {
+                      id: bouquet.id,
+                      title: bouquet.name,
+                      price: bouquet.price,
+                      description: bouquet.description,
+                      imageUrl: bouquet.image,
+                      images: [bouquet.image, bouquet.image, bouquet.image],
+                      category: bouquet.displayCategory
+                    }
+                  }
+                })}
+              >
+                <div className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
+                  <div className="relative overflow-hidden h-64">
+                    <img
+                      src={bouquet.image}
+                      alt={bouquet.name}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      loading="lazy"
+                    />
+                    {bouquet.featured && (
+                      <span className="absolute top-3 left-3 px-2 py-1 bg-gradient-to-r from-amber-400 to-amber-600 text-white text-xs font-semibold rounded-full">
+                        Featured
+                      </span>
+                    )}
+                  </div>
+                  <div className="p-5">
+                    <h3 className="font-serif text-lg font-bold text-slate-800 mb-2 line-clamp-1">
+                      {bouquet.name}
+                    </h3>
+                    <p className="text-slate-600 text-sm mb-3 line-clamp-2">
+                      {bouquet.description}
+                    </p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-2xl font-bold bg-gradient-to-r from-amber-600 to-amber-400 bg-clip-text text-transparent">
+                        ${bouquet.price}
+                      </span>
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-white text-sm font-semibold rounded-lg hover:shadow-lg transition-all"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/product/${bouquet.id}`, {
+                            state: {
+                              product: {
+                                id: bouquet.id,
+                                title: bouquet.name,
+                                price: bouquet.price,
+                                description: bouquet.description,
+                                imageUrl: bouquet.image,
+                                images: [bouquet.image, bouquet.image, bouquet.image],
+                                category: bouquet.displayCategory
+                              }
+                            }
+                          });
+                        }}
+                      >
+                        View Details
+                      </motion.button>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
             ))}
           </div>
         </div>
