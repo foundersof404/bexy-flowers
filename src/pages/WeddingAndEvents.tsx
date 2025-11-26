@@ -671,10 +671,188 @@ const ServiceSection = ({
   );
 };
 
+// Consultation Scheduling Modal Component
+const ConsultationModal = ({ isOpen, onClose, onConfirm }: { 
+  isOpen: boolean; 
+  onClose: () => void; 
+  onConfirm: (date: string, time: string) => void;
+}) => {
+  const [selectedDate, setSelectedDate] = useState('');
+  const [selectedTime, setSelectedTime] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Get today's date in YYYY-MM-DD format for min date
+  const today = new Date().toISOString().split('T')[0];
+  
+  // Generate time slots (9 AM to 6 PM, every hour)
+  const timeSlots = Array.from({ length: 10 }, (_, i) => {
+    const hour = 9 + i;
+    return `${hour.toString().padStart(2, '0')}:00`;
+  });
+
+  const handleSubmit = () => {
+    if (!selectedDate || !selectedTime) {
+      alert('Please select both date and time');
+      return;
+    }
+    setIsSubmitting(true);
+    onConfirm(selectedDate, selectedTime);
+    setIsSubmitting(false);
+    onClose();
+    // Reset form
+    setSelectedDate('');
+    setSelectedTime('');
+  };
+
+  if (!isOpen) return null;
+
+  return createPortal(
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[99999] flex items-center justify-center p-4"
+      style={{ backgroundColor: 'rgba(0, 0, 0, 0.7)' }}
+      onClick={onClose}
+    >
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.9, opacity: 0 }}
+        className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 sm:p-8"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-2xl font-serif font-bold" style={{ color: '#1a1a1a' }}>
+            Schedule a Consultation
+          </h3>
+          <button
+            onClick={onClose}
+            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
+            aria-label="Close"
+          >
+            <span className="text-2xl text-gray-500">×</span>
+          </button>
+        </div>
+
+        <div className="space-y-6">
+          {/* Date Picker */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Select Date
+            </label>
+            <input
+              type="date"
+              min={today}
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              className="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all"
+              style={{
+                borderColor: selectedDate ? GOLD_COLOR : '#e5e7eb',
+              }}
+              onFocus={(e) => {
+                e.target.style.borderColor = GOLD_COLOR;
+                e.target.style.boxShadow = `0 0 0 3px ${GOLD_COLOR}33`;
+              }}
+              onBlur={(e) => {
+                if (!selectedDate) {
+                  e.target.style.borderColor = '#e5e7eb';
+                }
+                e.target.style.boxShadow = 'none';
+              }}
+            />
+          </div>
+
+          {/* Time Picker */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Select Time
+            </label>
+            <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+              {timeSlots.map((time) => (
+                <button
+                  key={time}
+                  onClick={() => setSelectedTime(time)}
+                  className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                    selectedTime === time
+                      ? 'text-white'
+                      : 'text-gray-700 border-2 border-gray-200 hover:border-gray-300'
+                  }`}
+                  style={{
+                    backgroundColor: selectedTime === time ? GOLD_COLOR : 'transparent',
+                    borderColor: selectedTime === time ? GOLD_COLOR : undefined
+                  }}
+                >
+                  {time}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Selected Date & Time Display */}
+          {selectedDate && selectedTime && (
+            <div className="p-4 rounded-lg" style={{ backgroundColor: `${GOLD_COLOR}10` }}>
+              <p className="text-sm text-gray-600 mb-1">Selected:</p>
+              <p className="font-semibold" style={{ color: GOLD_COLOR }}>
+                {new Date(selectedDate).toLocaleDateString('en-US', { 
+                  weekday: 'long', 
+                  year: 'numeric', 
+                  month: 'long', 
+                  day: 'numeric' 
+                })} at {selectedTime}
+              </p>
+            </div>
+          )}
+
+          {/* Action Buttons */}
+          <div className="flex gap-3 pt-4">
+            <Button
+              variant="outline"
+              onClick={onClose}
+              className="flex-1"
+              style={{ borderColor: GOLD_COLOR, color: GOLD_COLOR }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSubmit}
+              disabled={!selectedDate || !selectedTime || isSubmitting}
+              className="flex-1 text-white"
+              style={{ 
+                backgroundColor: (!selectedDate || !selectedTime) ? '#d1d5db' : GOLD_COLOR,
+                cursor: (!selectedDate || !selectedTime) ? 'not-allowed' : 'pointer'
+              }}
+            >
+              {isSubmitting ? 'Scheduling...' : 'Confirm & Send'}
+            </Button>
+          </div>
+        </div>
+      </motion.div>
+    </motion.div>,
+    document.body
+  );
+};
+
 const PackageSection = () => {
   const isMobile = useIsMobile();
   const sectionRef = useRef<HTMLElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
+  const [isConsultationModalOpen, setIsConsultationModalOpen] = useState(false);
+  const CONSULTATION_PHONE = "96176104882";
+
+  const handleConsultationConfirm = (date: string, time: string) => {
+    const formattedDate = new Date(date).toLocaleDateString('en-US', { 
+      weekday: 'long', 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    });
+    
+    const message = `Hello! I would like to schedule a consultation for:\n\n📅 Date: ${formattedDate}\n⏰ Time: ${time}\n\nPlease confirm if this time works for you. Thank you!`;
+    const whatsappUrl = `https://wa.me/${CONSULTATION_PHONE}?text=${encodeURIComponent(message)}`;
+    
+    window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+  };
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -764,6 +942,7 @@ const PackageSection = () => {
   // Modern mobile package section
   if (isMobile) {
   return (
+    <>
       <section ref={sectionRef} className="relative py-12 bg-gradient-to-b from-[#fafafa] to-white overflow-hidden">
         <div className="max-w-7xl mx-auto px-4">
         <motion.div
@@ -867,11 +1046,18 @@ const PackageSection = () => {
           </motion.div>
         </div>
       </section>
+      <ConsultationModal
+        isOpen={isConsultationModalOpen}
+        onClose={() => setIsConsultationModalOpen(false)}
+        onConfirm={handleConsultationConfirm}
+      />
+    </>
     );
   }
 
   // Desktop layout
   return (
+    <>
     <section ref={sectionRef} className="relative py-12 sm:py-16 md:py-24 lg:py-32 bg-gradient-to-b from-[#fafafa] to-white overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <motion.div
@@ -984,6 +1170,12 @@ const PackageSection = () => {
         </div>
       </div>
     </section>
+    <ConsultationModal
+      isOpen={isConsultationModalOpen}
+      onClose={() => setIsConsultationModalOpen(false)}
+      onConfirm={handleConsultationConfirm}
+    />
+    </>
   );
 };
 
@@ -1462,6 +1654,22 @@ const ContactSection = () => {
   const isMobile = useIsMobile();
   const sectionRef = useRef<HTMLElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
+  const [isConsultationModalOpen, setIsConsultationModalOpen] = useState(false);
+  const CONSULTATION_PHONE = "96176104882";
+
+  const handleConsultationConfirm = (date: string, time: string) => {
+    const formattedDate = new Date(date).toLocaleDateString('en-US', { 
+      weekday: 'long', 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    });
+    
+    const message = `Hello! I would like to schedule a consultation for:\n\n📅 Date: ${formattedDate}\n⏰ Time: ${time}\n\nPlease confirm if this time works for you. Thank you!`;
+    const whatsappUrl = `https://wa.me/${CONSULTATION_PHONE}?text=${encodeURIComponent(message)}`;
+    
+    window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+  };
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -1487,6 +1695,7 @@ const ContactSection = () => {
   }, [isMobile]);
 
   return (
+    <>
     <section
       ref={sectionRef}
       id="contact-section"
@@ -1532,9 +1741,7 @@ const ContactSection = () => {
                   background: `linear-gradient(135deg, ${GOLD_COLOR} 0%, rgba(199, 158, 72, 0.9) 100%)`,
                   color: 'white',
                 }}
-                onClick={() => {
-                  window.location.href = 'mailto:info@bexyflowers.com?subject=Wedding Package Inquiry';
-                }}
+                onClick={() => setIsConsultationModalOpen(true)}
               >
                   <span className="flex items-center justify-center gap-2 sm:gap-3">
                     <Calendar className={`${isMobile ? 'w-4 h-4' : 'w-5 h-5'}`} />
@@ -1556,7 +1763,8 @@ const ContactSection = () => {
                   color: GOLD_COLOR,
                 }}
                 onClick={() => {
-                  window.open('https://wa.me/1234567890?text=Hi, I\'m interested in your Wedding Package', '_blank');
+                  const message = "Hi! I'm interested in your Wedding Package. Could you please provide more information?";
+                  window.open(`https://wa.me/${CONSULTATION_PHONE}?text=${encodeURIComponent(message)}`, '_blank');
                 }}
               >
                   <span className="flex items-center justify-center gap-2 sm:gap-3">
@@ -1575,6 +1783,12 @@ const ContactSection = () => {
         </motion.div>
       </div>
     </section>
+    <ConsultationModal
+      isOpen={isConsultationModalOpen}
+      onClose={() => setIsConsultationModalOpen(false)}
+      onConfirm={handleConsultationConfirm}
+    />
+    </>
   );
 };
 

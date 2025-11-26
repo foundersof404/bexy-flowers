@@ -253,7 +253,7 @@ const About = () => {
   return (
     <motion.section 
       ref={sectionRef} 
-      className="relative py-28 px-4 overflow-hidden" 
+      className="relative py-16 md:py-28 px-4 overflow-hidden" 
       style={{ background: 'linear-gradient(180deg, #ffffff 0%, #fff6f9 50%, #fdecef 100%)' }}
       variants={pageTransitionVariants}
       initial="hidden"
@@ -264,7 +264,7 @@ const About = () => {
       <div className="max-w-6xl mx-auto relative z-10">
         {/* Header */}
         <motion.div
-          className="text-center mb-20"
+          className="text-center mb-12 md:mb-20"
           initial="hidden"
           whileInView="show"
           viewport={{ once: true }}
@@ -279,21 +279,20 @@ const About = () => {
         >
           {/* SUGGESTION: Improved SEO-friendly H1 and more engaging copy */}
           <motion.h1 
-            className="text-5xl md:text-6xl font-bold text-slate-800 mb-4" 
-            style={{ fontFamily: 'Playfair Display, serif' }}
+            className="font-luxury text-4xl md:text-6xl font-bold text-slate-800 mb-4" 
             variants={headingReveal}
           >
             The Art of Floral Couture
           </motion.h1>
           <motion.p 
-            className="text-base md:text-lg text-slate-500 max-w-3xl mx-auto leading-relaxed" 
+            className="text-sm md:text-lg text-slate-500 max-w-3xl mx-auto leading-relaxed px-4" 
             style={{ fontFamily: 'Inter, ui-sans-serif, system-ui', lineHeight: 1.8 }}
             variants={paragraphReveal}
           >
             Welcome to Bexy Flowers, where generations of artistry meet modern luxury. Discover Lebanon's first and only glitter flower atelier.
           </motion.p>
           <motion.div
-            className="mx-auto mt-6 mb-2 h-px w-24 bg-amber-300/70"
+            className="mx-auto mt-6 mb-2 h-px w-16 md:w-24 bg-amber-300/70"
             initial={{ scaleX: 0 }}
             whileInView={{ scaleX: 1 }}
             viewport={{ once: true }}
@@ -302,12 +301,11 @@ const About = () => {
         </motion.div>
 
         {/* Main Content (Image-first layout for visual impact) */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-12 gap-y-16 items-center mb-24">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center mb-16 md:mb-24">
           {/* Enhanced Signature Image with Powerful 3D Reveal Effect */}
           <motion.div
             ref={imageRef}
-            className="rounded-full overflow-hidden shadow-xl order-1 lg:order-2 mt-4 lg:mt-6 w-72 h-50
-             sm:w-96 sm:h-96 lg:w-[500px] lg:h-[500px]"
+            className="rounded-3xl lg:rounded-full overflow-hidden shadow-xl order-1 lg:order-2 mx-auto lg:mx-0 w-full max-w-sm lg:w-[500px] aspect-square"
             style={{ 
              
               boxShadow: '0 10px 30px rgb(198, 156, 72), 0 0 24px rgba(198, 157, 72, 0.2)'
@@ -330,22 +328,21 @@ const About = () => {
 
           {/* Narrative */}
           <motion.div
-            className="space-y-8 order-2 lg:order-1"
+            className="space-y-6 md:space-y-8 order-2 lg:order-1"
             variants={sectionVariants}
             initial="hidden"
             whileInView="show"
             viewport={{ once: true, margin: "-10%" }}
           >
-            <div>
+            <div className="text-center lg:text-left">
               <motion.h2 
-                className="text-3xl md:text-4xl font-bold text-slate-800 mb-3" 
-                style={{ fontFamily: 'Playfair Display, serif' }}
+                className="font-luxury text-3xl md:text-4xl font-bold text-slate-800 mb-3" 
                 variants={headingReveal}
               >
                 Our Story
               </motion.h2>
               <motion.div 
-                className="w-24 h-[3px] bg-amber-400/90 rounded-full mb-8 origin-left" 
+                className="w-16 md:w-24 h-[3px] bg-amber-400/90 rounded-full mb-6 md:mb-8 mx-auto lg:mx-0" 
                 initial={{ scaleX: 0 }} 
                 whileInView={{ scaleX: 1 }} 
                 transition={{ type: "spring", stiffness: 280, damping: 12, delay: 0.1 }} 
@@ -354,7 +351,7 @@ const About = () => {
             </div>
 
             {/* SUGGESTION: More personal and compelling story */}
-            <div className="space-y-6 text-slate-700 text-lg leading-relaxed" style={{ fontFamily: 'Inter, ui-sans-serif, system-ui', lineHeight: 1.9 }}>
+            <div className="space-y-4 md:space-y-6 text-slate-700 text-base md:text-lg leading-relaxed px-2 md:px-0" style={{ fontFamily: 'Inter, ui-sans-serif, system-ui', lineHeight: 1.8 }}>
               <motion.p variants={paragraphReveal}>
                 Born in 2024 from a family legacy of over 25 years in floral design, Bexy Flowers introduced a dream to Lebanon: the country's first glitter flower boutique. We blend time-honored techniques with a spark of modern magic.
               </motion.p>
