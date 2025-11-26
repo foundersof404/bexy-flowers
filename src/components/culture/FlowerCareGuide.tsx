@@ -79,17 +79,51 @@ const FlowerCareGuide = () => {
 
       <div className="max-w-5xl mx-auto relative z-10">
         <motion.div
-          className="text-center mb-8"
+          className="text-center mb-12"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
         >
-          <h2 className="font-luxury text-3xl sm:text-4xl font-bold text-slate-800 mb-2 bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
-            Master Flower Care
-          </h2>
-          <p className="text-slate-600 max-w-2xl mx-auto text-sm sm:text-base">
-            Simple steps to keep your flowers fresh and beautiful
+          {/* Modern Floating Badge */}
+          <motion.div 
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-slate-800/10 to-slate-700/10 backdrop-blur-xl border border-slate-600/20 mb-8"
+            initial={{ scale: 0.8, opacity: 0 }}
+            whileInView={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            viewport={{ once: true }}
+          >
+            <div className="w-2 h-2 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 animate-pulse" />
+            <span className="text-sm font-medium text-slate-700 tracking-wider uppercase">EXPERT GUIDANCE</span>
+          </motion.div>
+
+          <motion.h2 
+            className="font-luxury text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 bg-clip-text text-transparent relative inline-block"
+            style={{
+              fontFamily: 'Playfair Display, serif',
+              filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))',
+              letterSpacing: '0.05em'
+            }}
+          >
+            MASTER FLOWER CARE
+            {/* Animated Gold Underline */}
+            <motion.div 
+              className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 h-1 bg-gradient-to-r from-[#C79E48] to-[#D4A85A] rounded-full"
+              initial={{ width: 0 }}
+              whileInView={{ width: '100%' }}
+              viewport={{ once: true }}
+              transition={{ duration: 1.2, delay: 0.4, ease: "easeOut" }}
+            />
+          </motion.h2>
+
+          {/* Decorative Elements */}
+          <div className="relative mb-8 mt-2">
+            <div className="w-40 h-0.5 bg-gradient-to-r from-transparent via-[#C79E48]/60 to-transparent mx-auto" />
+            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-[#C79E48] rotate-45 shadow-lg shadow-[#C79E48]/50" />
+          </div>
+
+          <p className="text-slate-600 max-w-2xl mx-auto text-lg sm:text-xl font-light leading-relaxed">
+            Simple steps to keep your flowers fresh and beautiful for longer
           </p>
         </motion.div>
 

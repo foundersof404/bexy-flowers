@@ -202,7 +202,7 @@ const ZodiacBouquetQuiz = () => {
             {steps.map((step, index) => (
               <div key={index} className="relative group cursor-default flex flex-col items-center">
                 <motion.div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-500 relative z-10 ${
+                  className={`w-14 h-14 rounded-full flex items-center justify-center text-lg font-bold transition-all duration-500 relative z-10 ${
                     index <= currentStep
                       ? 'bg-[#C79E48] text-white shadow-md shadow-[#C79E48]/30 scale-110'
                       : 'bg-white border-2 border-gray-200 text-gray-300'
