@@ -62,15 +62,6 @@ const categories = [
     color: "from-slate-400/80 to-gray-300/90"
   },
   {
-    id: 7,
-    name: "GRADUATION",
-    description: "Respectful memorial arrangements",
-    image: encodeURI("/assets/graduation/IMG_9499.jpg"),
-    gradient: "from-slate-200/20 via-gray-100/30 to-blue-200/20",
-    icon: Flower2,
-    color: "from-slate-400/80 to-blue-300/90"
-  },
-  {
     id: 8,
     name: "SEASONAL",
     description: "Limited edition collections",
@@ -81,7 +72,7 @@ const categories = [
   },
   {
     id: 9,
-    name: "GRADUATIONS",
+    name: "GRADUATION",
     description: "Achievement celebrations",
     image: encodeURI("/assets/graduation/IMG_0295.jpg"),
     gradient: "from-blue-200/20 via-indigo-100/30 to-purple-200/20",
@@ -192,7 +183,7 @@ const UltraCategories = () => {
     const gap = 12; // gap-3 = 12px
     const cardTotalWidth = cardWidth + gap;
     const row1Cards = 5; // First 5 categories
-    const row2Cards = 5; // Last 5 categories
+    const row2Cards = 4; // Last 4 categories
     
     // Calculate the exact width of one complete set
     const singleSetWidth1 = row1Cards * cardTotalWidth;
@@ -654,8 +645,8 @@ const UltraCategories = () => {
                   perspective: '1000px'
                 }}
               >
-              {/* Last 5 categories, tripled for seamless infinite scroll */}
-              {[...categories.slice(5, 10), ...categories.slice(5, 10), ...categories.slice(5, 10)].map((category, index) => (
+              {/* Last 4 categories, tripled for seamless infinite scroll */}
+              {[...categories.slice(5, 9), ...categories.slice(5, 9), ...categories.slice(5, 9)].map((category, index) => (
                 <div
                   key={`row2-${category.id}-${index}`}
                   className="flex-shrink-0 w-[196px] h-56 group cursor-pointer"
