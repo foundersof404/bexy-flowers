@@ -1575,18 +1575,26 @@ const WeddingAndEvents = () => {
     // Add class to body to identify wedding page
     document.body.classList.add('wedding-page');
     
-    // Make navigation transparent with white text for wedding page
+    // Make navigation semi-transparent with white text for wedding page
     const nav = document.querySelector('.ultra-navigation') as HTMLElement;
     if (nav) {
-      // Set transparent background immediately
-      nav.style.backgroundColor = 'rgba(0, 0, 0, 0.1)';
+      // Check if mobile
+      const isMobileDevice = window.innerWidth <= 1024;
+      
+      // Set semi-transparent background - more visible on mobile
+      const initialOpacity = isMobileDevice ? 0.7 : 0.3;
+      const scrolledOpacity = isMobileDevice ? 0.9 : 0.5;
+      
+      nav.style.backgroundColor = `rgba(0, 0, 0, ${initialOpacity})`;
       nav.style.backdropFilter = 'blur(10px)';
       nav.style.transition = 'background-color 0.3s ease';
 
-      // Update on scroll - keep transparent but slightly more opaque when scrolled
+      // Update on scroll - keep semi-transparent but more opaque when scrolled
       const handleScroll = () => {
         const scrolled = window.scrollY > 50;
-        nav.style.backgroundColor = scrolled ? 'rgba(0, 0, 0, 0.3)' : 'rgba(0, 0, 0, 0.1)';
+        nav.style.backgroundColor = scrolled 
+          ? `rgba(0, 0, 0, ${scrolledOpacity})` 
+          : `rgba(0, 0, 0, ${initialOpacity})`;
       };
 
       window.addEventListener('scroll', handleScroll, { passive: true });

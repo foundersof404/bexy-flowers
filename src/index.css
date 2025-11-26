@@ -589,7 +589,7 @@ All colors MUST be HSL. No rounded corners - sharp and architectural.
     body {
       -webkit-overflow-scrolling: touch;
       /* Reduce composite layers for better scroll performance */
-      transform: translateZ(0);
+      /* transform: translateZ(0); - Removed as it breaks position: fixed */
     }
     
     /* Simplify shadows on mobile for better performance */
