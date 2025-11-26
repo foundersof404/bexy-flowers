@@ -11,7 +11,7 @@ const categories = [
     id: 1,
     name: "WEDDINGS",
     description: "Architectural bridal arrangements",
-    image: "/src/assets/bouquet-3.jpg",
+    image: encodeURI("/assets/wedding % events/wedding/IMG-20251126-WA0021.jpg"),
     gradient: "from-rose-200/20 via-amber-100/30 to-yellow-200/20",
     icon: Crown,
     color: "from-rose-400/80 to-amber-300/90"
@@ -20,7 +20,7 @@ const categories = [
     id: 2,
     name: "VALENTINE'S",
     description: "Romantic luxury collections",
-    image: "/src/assets/bouquet-2.jpg",
+    image: encodeURI("/assets/valentine/IMG_4172.jpg"),
     gradient: "from-red-200/20 via-pink-100/30 to-rose-200/20",
     icon: Heart,
     color: "from-red-400/80 to-pink-300/90"
@@ -29,7 +29,7 @@ const categories = [
     id: 3,
     name: "MOTHER'S DAY",
     description: "Elegant tribute arrangements",
-    image: "/src/assets/bouquet-4.jpg",
+    image: encodeURI("/assets/mother day/IMG_8394.JPG"),
     gradient: "from-pink-200/20 via-rose-100/30 to-lavender-200/20",
     icon: Flower2,
     color: "from-pink-400/80 to-rose-300/90"
@@ -38,7 +38,7 @@ const categories = [
     id: 4,
     name: "BIRTHDAYS",
     description: "Celebration masterpieces",
-    image: "/src/assets/bouquet-5.jpg",
+    image: encodeURI("/assets/birthday/IMG_3730 (1).jpg"),
     gradient: "from-purple-200/20 via-violet-100/30 to-indigo-200/20",
     icon: Cake,
     color: "from-purple-400/80 to-violet-300/90"
@@ -47,7 +47,7 @@ const categories = [
     id: 5,
     name: "ANNIVERSARIES",
     description: "Timeless love expressions",
-    image: "/src/assets/bouquet-6.jpg",
+    image: encodeURI("/assets/red roses/red roses the letter J.png"),
     gradient: "from-amber-200/20 via-yellow-100/30 to-gold-200/20",
     icon: Star,
     color: "from-amber-400/80 to-yellow-300/90"
@@ -56,16 +56,16 @@ const categories = [
     id: 6,
     name: "CORPORATE",
     description: "Professional luxury designs",
-    image: "/src/assets/bouquet-1.jpg",
+    image: encodeURI("/assets/wedding % events/events/IMG-20251126-WA0022.jpg"),
     gradient: "from-slate-200/20 via-gray-100/30 to-zinc-200/20",
     icon: Briefcase,
     color: "from-slate-400/80 to-gray-300/90"
   },
   {
     id: 7,
-    name: "SYMPATHY",
+    name: "GRADUATION",
     description: "Respectful memorial arrangements",
-    image: "/src/assets/bouquet-3.jpg",
+    image: encodeURI("/assets/graduation/IMG_9499.jpg"),
     gradient: "from-slate-200/20 via-gray-100/30 to-blue-200/20",
     icon: Flower2,
     color: "from-slate-400/80 to-blue-300/90"
@@ -74,7 +74,7 @@ const categories = [
     id: 8,
     name: "SEASONAL",
     description: "Limited edition collections",
-    image: "/src/assets/bouquet-5.jpg",
+    image: encodeURI("/assets/hand band/IMG_5392.jpg"),
     gradient: "from-emerald-200/20 via-green-100/30 to-teal-200/20",
     icon: Sparkles,
     color: "from-emerald-400/80 to-green-300/90"
@@ -83,7 +83,7 @@ const categories = [
     id: 9,
     name: "GRADUATIONS",
     description: "Achievement celebrations",
-    image: "/src/assets/bouquet-6.jpg",
+    image: encodeURI("/assets/graduation/IMG_0295.jpg"),
     gradient: "from-blue-200/20 via-indigo-100/30 to-purple-200/20",
     icon: Star,
     color: "from-blue-400/80 to-indigo-300/90"
@@ -92,7 +92,7 @@ const categories = [
     id: 10,
     name: "LUXURY GIFTS",
     description: "Premium gift arrangements",
-    image: "/src/assets/bouquet-1.jpg",
+    image: encodeURI("/assets/red roses/large red roses flower bouquet with gliter.png"),
     gradient: "from-orange-200/20 via-amber-100/30 to-yellow-200/20",
     icon: Gift,
     color: "from-orange-400/80 to-amber-300/90"
