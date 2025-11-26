@@ -321,7 +321,7 @@ const ServiceSection = ({
             trigger: sectionRef.current,
             start: "top 85%",
             end: "top 20%",
-            toggleActions: "play none none reverse",
+            toggleActions: "play none none none",
           },
         }
       );
@@ -345,7 +345,7 @@ const ServiceSection = ({
             trigger: sectionRef.current,
             start: "top 85%",
             end: "top 20%",
-            toggleActions: "play none none reverse",
+            toggleActions: "play none none none",
           },
         }
       );
@@ -675,7 +675,7 @@ const PackageSection = () => {
           scrollTrigger: {
             trigger: sectionRef.current,
             start: "top 75%",
-            toggleActions: "play none none reverse",
+            toggleActions: "play none none none",
           },
         }
       );
@@ -694,7 +694,7 @@ const PackageSection = () => {
             scrollTrigger: {
               trigger: card,
               start: "top 85%",
-              toggleActions: "play none none reverse",
+              toggleActions: "play none none none",
             },
           }
         );
@@ -1196,7 +1196,7 @@ const ImageGallery = () => {
             scrollTrigger: {
               trigger: item,
               start: "top 85%",
-              toggleActions: "play none none reverse",
+              toggleActions: "play none none none",
             },
           }
         );
@@ -1467,7 +1467,7 @@ const ContactSection = () => {
           scrollTrigger: {
             trigger: sectionRef.current,
             start: "top 75%",
-            toggleActions: "play none none reverse",
+            toggleActions: "play none none none",
           },
         }
       );

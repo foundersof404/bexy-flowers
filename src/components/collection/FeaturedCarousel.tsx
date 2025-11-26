@@ -34,7 +34,7 @@ export const FeaturedCarousel = ({ bouquets, onBouquetClick }: FeaturedCarouselP
           scrollTrigger: {
             trigger: carouselRef.current,
             start: "top 80%",
-            toggleActions: "play none none reverse"
+            toggleActions: "play none none none"
           }
         }
       );
@@ -52,6 +52,7 @@ export const FeaturedCarousel = ({ bouquets, onBouquetClick }: FeaturedCarouselP
           className="text-center mb-16"
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
           transition={{ duration: 0.8, ease: "easeOut" }}
         >
           <h2 className="text-4xl lg:text-5xl font-luxury text-foreground mb-4">
