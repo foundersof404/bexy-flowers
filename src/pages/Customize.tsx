@@ -372,14 +372,12 @@ const Customize: React.FC = () => {
     });
   };
 
-  // --- AI Generation Logic (Preserved) ---
+  // --- AI Generation Logic ---
   const generateBouquetImage = async () => {
     setIsGenerating(true);
     try {
-        // ... (Previous AI logic implementation)
-      // Simplified for brevity, assuming same backend logic
-      // Using the simple fallback for reliability in this refactor
-      const finalFlowerList = Object.entries(colorQuantities)
+      // 1. Flower List with exact counts
+      const flowerDetails = Object.entries(colorQuantities)
         .flatMap(([flowerId, colors]) => {
           const flower = flowers.find(f => f.id === flowerId);
           return Object.entries(colors)
@@ -389,17 +387,32 @@ const Customize: React.FC = () => {
               return `${count} ${colorObj?.name} ${flower?.name}`;
             });
         })
-        .join(", ");
-      
-      const finalPackaging = selectedPackage?.type === "box" 
-        ? `${selectedBoxColor?.name || ""} gift box`
-        : `${selectedWrapColor?.name} wrapping paper`;
-      
-      const extras = selectedAccessories.length > 0 ? "with accessories" : "";
-      const glitter = withGlitter ? "glitter on petals" : "";
+        .join(" and ");
 
-      const prompt = `Beautiful luxury bouquet with ${finalFlowerList} in ${finalPackaging} ${extras} ${glitter}, professional studio lighting, white background, high resolution, 8k`;
-      const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&height=1024&nologo=true&seed=${Date.now()}`;
+      // 2. Packaging Description - Crucial for "No stems/greens" in box
+      let packagingPrompt = "";
+      if (selectedPackage?.type === "box") {
+        const sizeDesc = selectedSize?.id === 'small' ? "compact small" : selectedSize?.id === 'large' ? "large grand" : "medium";
+        packagingPrompt = `arranged tightly packed inside a ${sizeDesc} ${selectedBoxColor?.name} ${selectedBoxShape?.name}-shaped luxury box. The flowers must be packed very close together showing ONLY the flower heads. ABSOLUTELY NO STEMS VISIBLE, NO GREEN LEAVES VISIBLE. The box features a "Bexy Flowers" logo in gold. View is from slightly above looking down at the flower heads.`;
+      } else {
+        packagingPrompt = `wrapped in ${selectedWrapColor?.name} paper with "Bexy Flowers" printed on it. Elegant wrapping style showing stems at the bottom.`;
+      }
+
+      // 3. Glitter - "Diamond dust" look
+      const glitterPrompt = withGlitter 
+        ? "The flower petals are covered in heavy fine diamond dust glitter, creating a strong sparkling and shimmering effect identical to red glitter roses." 
+        : "Natural flower texture, no glitter.";
+
+      // 4. Accessories
+      const accessoriesPrompt = selectedAccessories.length > 0 
+        ? `Includes ${selectedAccessories.map(id => accessories.find(a => a.id === id)?.name).join(", ")} placed nicely.` 
+        : "";
+
+      // Combined Prompt
+      const fullPrompt = `Professional product photography of ${flowerDetails}, ${packagingPrompt} ${glitterPrompt} ${accessoriesPrompt} White background, studio lighting, 8k resolution, photorealistic, sharp focus. ${aiRefinementText}`;
+
+      // Use Pollinations AI
+      const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(fullPrompt)}?width=1024&height=1024&nologo=true&seed=${Date.now()}&model=flux`;
       
       const response = await fetch(url);
       if (response.ok) {
