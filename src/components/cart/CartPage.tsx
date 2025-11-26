@@ -283,6 +283,7 @@ const CartPage: React.FC = () => {
           </motion.div>
         </div>
       </div>
+      </div>
       <Footer />
       <BackToTop />
     </>
