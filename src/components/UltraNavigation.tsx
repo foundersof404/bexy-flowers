@@ -239,12 +239,11 @@ const UltraNavigation = () => {
         <>
           <nav
             ref={navRef}
-            className="ultra-navigation fixed top-0 left-0 right-0 z-[100] backdrop-blur-xl shadow-luxury"
+            className={`ultra-navigation ${isMobile ? 'absolute' : 'fixed'} top-0 left-0 right-0 z-[100] backdrop-blur-xl shadow-luxury`}
             style={{
               backgroundColor: 'transparent', // Make header transparent
               transition: 'none', // Remove transition to prevent black flash
               pointerEvents: 'auto', // Ensure navigation is clickable
-              position: 'fixed', // Explicitly set fixed for mobile
               width: '100%',
               // Removed will-change as it causes performance issues with scroll
             }}
