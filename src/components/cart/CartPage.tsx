@@ -39,10 +39,11 @@ const CartPage: React.FC = () => {
     const tax = total * 0.08;
     const finalTotal = total + tax;
 
-    const finalMessage = `Hello, I would like to place an order:\n\n${orderDetails}\n\n*Subtotal:* $${total.toFixed(2)}\n*Tax:* $${tax.toFixed(2)}\n*TOTAL:* $${finalTotal.toFixed(2)}`;
+    const finalMessage = `Hello, I would like to place an order:\n\n${orderDetails}\n\n*Subtotal:* $${total.toFixed(2)}\n*Tax:* $${tax.toFixed(2)}\n*TOTAL:* $${finalTotal.toFixed(2)}\n\n*Payment Method:* Whish Money / Cash on Delivery`;
     
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(finalMessage)}`;
-    window.open(whatsappUrl, '_blank');
+    // Use window.location.href for better mobile deep link support
+    window.location.href = whatsappUrl;
   };
 
   if (isEmpty) {
