@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { ShoppingCart, ArrowLeft, CreditCard, MapPin, Clock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '@/contexts/CartContext';
+import BackToTop from '@/components/BackToTop';
 
 const Checkout = () => {
   const navigate = useNavigate();
@@ -21,6 +22,7 @@ const Checkout = () => {
 
   if (cartItems.length === 0) {
     return (
+      <>
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-amber-50/30 flex items-center justify-center">
         <motion.div
           className="text-center space-y-6"
@@ -41,6 +43,8 @@ const Checkout = () => {
           </motion.button>
         </motion.div>
       </div>
+      <BackToTop />
+    </>
     );
   }
 
@@ -196,6 +200,7 @@ const Checkout = () => {
           </motion.button>
         </motion.div>
       </div>
+      <BackToTop />
     </motion.div>
   );
 };

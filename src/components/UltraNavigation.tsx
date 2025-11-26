@@ -250,10 +250,10 @@ const UltraNavigation = () => {
                   />
                 </div>
                 
-                {/* Brand Name - Hidden on very small screens - Elegant Glow Only */}
-                <div className="ml-1 sm:ml-2 hidden xs:block">
+                {/* Brand Name - Visible on mobile and all screens - Elegant Glow Only */}
+                <div className="ml-1 sm:ml-2">
                   <h1 
-                    className="font-luxury text-lg sm:text-xl lg:text-2xl font-bold text-foreground drop-shadow-[0_0_8px_rgba(196,166,105,0.6)] [text-shadow:_0_0_12px_rgba(196,166,105,0.8)] transition-all duration-700 group-hover:[text-shadow:_0_0_20px_rgba(196,166,105,1),_0_0_30px_rgba(196,166,105,0.8),_0_0_40px_rgba(196,166,105,0.6)]"
+                    className="font-luxury text-sm sm:text-lg md:text-xl lg:text-2xl font-bold text-foreground drop-shadow-[0_0_8px_rgba(196,166,105,0.6)] [text-shadow:_0_0_12px_rgba(196,166,105,0.8)] transition-all duration-700 group-hover:[text-shadow:_0_0_20px_rgba(196,166,105,1),_0_0_30px_rgba(196,166,105,0.8),_0_0_40px_rgba(196,166,105,0.6)]"
                   >
                     𝓑𝓮𝔁𝔂 𝓯𝓵𝓸𝔀𝓮𝓻
                   </h1>
@@ -339,41 +339,41 @@ const UltraNavigation = () => {
                   </motion.div>
                 );
               })}
-              
-              {/* Favorites - Icon Only */}
+            </div>
+
+            {/* Cart - Absolute Right */}
+            <div className="flex items-center ml-auto gap-2">
+              {/* Favorites Icon - Desktop (next to cart) */}
               <motion.div
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.8 + navigationItems.length * 0.1, duration: 0.6 }}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 1.3, duration: 0.6 }}
+                className="hidden lg:block"
               >
                 <Button
                   variant="ghost"
                   size="icon"
-                  className={`relative group font-body font-medium p-3 xl:p-4 transition-all duration-500 overflow-hidden ${
-                    location.pathname === "/favorites"
-                      ? 'text-foreground'
-                      : 'text-foreground'
-                  }`}
                   onClick={() => handleNavigation("/favorites")}
+                  className={`relative group hover:bg-primary/10 transition-all duration-500 overflow-hidden rounded-lg w-10 h-10 sm:w-12 sm:h-12 ${
+                    location.pathname === "/favorites" ? 'text-foreground' : 'text-foreground'
+                  }`}
                 >
                   <motion.span 
-                    className="relative inline-flex items-center justify-center"
-                    whileHover={isMobile || shouldReduceMotion ? {} : { 
+                    className="relative z-10"
+                    whileHover={!isMobile && !shouldReduceMotion ? { 
                       scale: 1.15,
-                    }}
+                    } : {}}
                     style={{
                       color: location.pathname === "/favorites" ? GOLD_COLOR : 'inherit',
                     }}
                   >
-                    <Heart className="w-5 h-5" />
+                    <Heart className="w-5 h-5 sm:w-6 sm:h-6" />
                     {favoritesCount > 0 && (
                       <span className="absolute -top-1 -right-1 w-4 h-4 bg-pink-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
                         {favoritesCount}
                       </span>
                     )}
                   </motion.span>
-                  
-                  {/* Active Gold Background */}
                   {location.pathname === "/favorites" && (
                     <motion.div
                       className="absolute inset-0 rounded-lg"
@@ -381,13 +381,11 @@ const UltraNavigation = () => {
                         background: `linear-gradient(135deg, ${GOLD_COLOR}20 0%, ${GOLD_COLOR}10 100%)`,
                         border: `1px solid ${GOLD_COLOR}40`,
                       }}
-                      layoutId="activeNavBg"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ duration: 0.3 }}
                     />
                   )}
-                  
                   {/* Hover Effect */}
                   <motion.div
                     className="absolute inset-0 rounded-lg"
@@ -400,10 +398,7 @@ const UltraNavigation = () => {
                   />
                 </Button>
               </motion.div>
-            </div>
 
-            {/* Cart - Absolute Right */}
-            <div className="flex items-center ml-auto">
               {/* Cart with Simplified Hover Effects */}
               <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
@@ -474,7 +469,7 @@ const UltraNavigation = () => {
                 </Button>
               </motion.div>
 
-              {/* Favorites Icon - Mobile/Desktop (shows on mobile when cart is shown) */}
+              {/* Favorites Icon - Mobile (shows on mobile when cart is shown) */}
               <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}

@@ -10,6 +10,7 @@ import { FeaturedCarousel } from "@/components/collection/FeaturedCarousel";
 import { ProductModal } from "@/components/collection/ProductModal";
 import { CollectionFooter } from "@/components/collection/CollectionFooter";
 import { FloatingBackground } from "@/components/collection/FloatingBackground";
+import BackToTop from "@/components/BackToTop";
 import type { Bouquet } from "@/types/bouquet";
 import {
   generatedBouquets,
@@ -151,6 +152,7 @@ const Collection = () => {
           />
         )}
       </AnimatePresence>
+      <BackToTop />
     </div>
   );
 };

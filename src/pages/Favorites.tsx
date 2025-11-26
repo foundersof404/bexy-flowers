@@ -7,6 +7,7 @@ import { Heart, ShoppingCart, ArrowLeft, Sparkles } from 'lucide-react';
 import { useFavorites } from '@/contexts/FavoritesContext';
 import { useCartWithToast } from '@/hooks/useCartWithToast';
 import UltraNavigation from '@/components/UltraNavigation';
+import BackToTop from '@/components/BackToTop';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -513,6 +514,7 @@ const Favorites = memo(() => {
           )}
         </div>
       </section>
+      <BackToTop />
     </div>
   );
 });

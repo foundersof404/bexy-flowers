@@ -2,7 +2,7 @@ import React, { Suspense, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Calendar, ArrowRight, Sparkles, Flower2, Palette, Heart } from "lucide-react";
+import { Calendar, ArrowRight, Sparkles, Flower2, Palette, Heart, ArrowUp } from "lucide-react";
 import LazySection from "@/components/LazySection";
 import UltraNavigation from "@/components/UltraNavigation";
 import Footer from "@/components/Footer";
@@ -1568,6 +1568,8 @@ const ContactSection = () => {
   );
 };
 
+import BackToTop from "@/components/BackToTop";
+
 const WeddingAndEvents = () => {
   useEffect(() => {
     // Add class to body to identify wedding page
@@ -1679,6 +1681,7 @@ const WeddingAndEvents = () => {
           </Suspense>
         </LazySection>
       </div>
+      <BackToTop />
     </div>
   );
 };

@@ -4,6 +4,7 @@ import { CartProvider } from '@/contexts/CartContext';
 import CartNavbar from '@/components/cart/CartNavbar';
 import ProductList from '@/components/cart/ProductList';
 import CartPage from '@/components/cart/CartPage';
+import BackToTop from '@/components/BackToTop';
 
 const CartApp: React.FC = () => {
   return (
@@ -19,6 +20,7 @@ const CartApp: React.FC = () => {
             <Route path="/" element={<ProductList />} />
             <Route path="/cart" element={<CartPage />} />
           </Routes>
+          <BackToTop />
         </div>
       </Router>
     </CartProvider>

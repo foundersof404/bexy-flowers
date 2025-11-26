@@ -3,6 +3,7 @@ import LazySection from "@/components/LazySection";
 import UltraNavigation from "@/components/UltraNavigation";
 import About from "@/components/About";
 import Footer from "@/components/Footer";
+import BackToTop from "@/components/BackToTop";
 
 const AboutPage = () => {
   return (
@@ -20,6 +21,7 @@ const AboutPage = () => {
           </Suspense>
         </LazySection>
       </div>
+      <BackToTop />
     </div>
   );
 };

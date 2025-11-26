@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Box, Gift, ChevronLeft, ShoppingCart, Plus, Minus, Check, Sparkles, Heart, Star, Square, Circle, Triangle, Wand2, RefreshCw, Download, MessageCircle, Eye, Crown, Candy, CreditCard } from "lucide-react";
 import UltraNavigation from "@/components/UltraNavigation";
 import Footer from "@/components/Footer";
+import BackToTop from "@/components/BackToTop";
 import { useCart } from "@/contexts/CartContext";
 import { toast } from "sonner";
 
@@ -2015,6 +2016,7 @@ const Customize: React.FC = () => {
 
       {/* Footer */}
       <Footer />
+      <BackToTop />
     </div>
   );
 };

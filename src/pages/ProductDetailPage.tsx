@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { useCartWithToast } from '@/hooks/useCartWithToast';
 import UltraNavigation from '@/components/UltraNavigation';
+import BackToTop from '@/components/BackToTop';
 import { generatedBouquets } from '@/data/generatedBouquets';
 import type { Bouquet } from '@/types/bouquet';
 
@@ -905,6 +906,7 @@ const ProductDetailPage = () => {
           </div>
         </div>
       </motion.section>
+      <BackToTop />
     </motion.div>
   );
 };

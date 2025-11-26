@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { useCart } from '@/contexts/CartContext';
 import { Button } from '@/components/ui/button';
 import { ShoppingCart, Trash2, Plus, Minus } from 'lucide-react';
+import BackToTop from '@/components/BackToTop';
 
 const CartTest: React.FC = () => {
   const { cartItems, addToCart, removeFromCart, getTotalItems, getTotalPrice, clearCart } = useCart();
@@ -178,6 +179,7 @@ const CartTest: React.FC = () => {
           </ul>
         </motion.div>
       </div>
+      <BackToTop />
     </div>
   );
 };

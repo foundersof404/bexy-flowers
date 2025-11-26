@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import LazySection from "@/components/LazySection";
 import UltraNavigation from "@/components/UltraNavigation";
+import BackToTop from "@/components/BackToTop";
 const InteractiveBackground = React.lazy(() => import("@/components/interactive/InteractiveBackground"));
 const UltraHero = React.lazy(() => import("@/components/UltraHero"));
 const UltraFeaturedBouquets = React.lazy(() => import("@/components/UltraFeaturedBouquets"));
@@ -529,6 +530,7 @@ const Index = () => {
           </Suspense>
         </LazySection>
       </div>
+      <BackToTop />
     </div>
   );
 };
