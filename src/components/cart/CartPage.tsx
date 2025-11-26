@@ -17,7 +17,10 @@ const CartPage: React.FC = () => {
     navigate('/');
   };
 
-  const handleCheckout = () => {
+  const handleCheckout = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
     const phoneNumber = "96176104882";
     
     const orderDetails = cartItems.map((item) => {
@@ -26,10 +29,18 @@ const CartPage: React.FC = () => {
       if (item.description) itemStr += `\n*Details:* ${item.description}`;
       if (item.size) itemStr += `\n*Size:* ${item.size}`;
       if (item.personalNote) itemStr += `\n*Personal Note:* ${item.personalNote}`;
-      // Only include image link if it's a real URL (not a blob or local asset if possible, but local won't work anyway)
-      // Pollinations URL will start with https
-      if (item.image && item.image.startsWith('http')) {
-        itemStr += `\n*Image Reference:* ${item.image}`;
+      
+      // Handle image links
+      if (item.image) {
+        // If it's a Pollinations URL, it's already a public link
+        if (item.image.includes('pollinations.ai')) {
+             // Use the URL as is, it's likely long but WhatsApp usually handles it if encoded properly
+             itemStr += `\n*Image Reference:* ${item.image}`;
+        } 
+        // If it's a local asset path (starts with /), we can't link it externally
+        else if (item.image.startsWith('http')) {
+             itemStr += `\n*Image Reference:* ${item.image}`;
+        }
       }
       
       return itemStr;
@@ -42,8 +53,9 @@ const CartPage: React.FC = () => {
     const finalMessage = `Hello, I would like to place an order:\n\n${orderDetails}\n\n*Subtotal:* $${total.toFixed(2)}\n*Tax:* $${tax.toFixed(2)}\n*TOTAL:* $${finalTotal.toFixed(2)}\n\n*Payment Method:* Whish Money / Cash on Delivery`;
     
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(finalMessage)}`;
-    // Use window.location.href for better mobile deep link support
-    window.location.href = whatsappUrl;
+    
+    // Open in new tab to avoid navigating away and potentially losing state if not persisted well
+    window.open(whatsappUrl, '_blank');
   };
 
   if (isEmpty) {
@@ -226,6 +238,7 @@ const CartPage: React.FC = () => {
 
               <div className="space-y-3">
                 <Button
+                  type="button"
                   onClick={handleCheckout}
                   className="w-full bg-gradient-to-r from-amber-400 to-amber-600 hover:from-amber-500 hover:to-amber-700 text-white font-semibold py-3 rounded-full"
                 >
