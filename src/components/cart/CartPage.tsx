@@ -18,8 +18,31 @@ const CartPage: React.FC = () => {
   };
 
   const handleCheckout = () => {
-    // In a real app, this would redirect to checkout
-    alert('Checkout functionality would be implemented here!');
+    const phoneNumber = "96176104882";
+    
+    const orderDetails = cartItems.map((item) => {
+      let itemStr = `*Item:* ${item.title}\n*Price:* $${item.price} x ${item.quantity} = $${(item.price * item.quantity).toFixed(2)}`;
+      
+      if (item.description) itemStr += `\n*Details:* ${item.description}`;
+      if (item.size) itemStr += `\n*Size:* ${item.size}`;
+      if (item.personalNote) itemStr += `\n*Personal Note:* ${item.personalNote}`;
+      // Only include image link if it's a real URL (not a blob or local asset if possible, but local won't work anyway)
+      // Pollinations URL will start with https
+      if (item.image && item.image.startsWith('http')) {
+        itemStr += `\n*Image Reference:* ${item.image}`;
+      }
+      
+      return itemStr;
+    }).join("\n\n-------------------\n\n");
+
+    const total = getTotalPrice();
+    const tax = total * 0.08;
+    const finalTotal = total + tax;
+
+    const finalMessage = `Hello, I would like to place an order:\n\n${orderDetails}\n\n*Subtotal:* $${total.toFixed(2)}\n*Tax:* $${tax.toFixed(2)}\n*TOTAL:* $${finalTotal.toFixed(2)}`;
+    
+    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(finalMessage)}`;
+    window.open(whatsappUrl, '_blank');
   };
 
   if (isEmpty) {

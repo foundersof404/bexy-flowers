@@ -250,6 +250,7 @@ const Customize: React.FC = () => {
   const [withGlitter, setWithGlitter] = useState(false);
   const [selectedAccessories, setSelectedAccessories] = useState<string[]>([]);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
+  const [generatedImageUrl, setGeneratedImageUrl] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [aiRefinementText, setAiRefinementText] = useState("");
@@ -426,6 +427,7 @@ const Customize: React.FC = () => {
       if (response.ok) {
         const blob = await response.blob();
         setGeneratedImage(URL.createObjectURL(blob));
+        setGeneratedImageUrl(url);
         toast.success("Preview ready!");
       } else {
         throw new Error("Generation failed");
@@ -458,7 +460,7 @@ const Customize: React.FC = () => {
       id: `custom-${Date.now()}`,
       title: "Custom Bouquet",
       price: totalPrice,
-      image: generatedImage || "/src/assets/bouquet-1.jpg",
+      image: generatedImageUrl || generatedImage || "/src/assets/bouquet-1.jpg",
       description: `${selectedPackage?.name} - ${selectedSize?.name} - ${flowerList}`,
       personalNote: note
     });
