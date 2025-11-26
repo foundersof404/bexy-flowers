@@ -429,6 +429,16 @@ All colors MUST be HSL. No rounded corners - sharp and architectural.
       inset 0 1px 0 rgba(255, 255, 255, 0.1);
   }
 
+  /* Hide scrollbar for horizontal scrolling on mobile */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
   ::-webkit-scrollbar-button:hover {
     background: linear-gradient(to bottom, 
       hsl(42 53% 55%), 

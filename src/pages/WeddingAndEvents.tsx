@@ -1,196 +1,20 @@
-import React, { Suspense } from "react";
+import React, { Suspense, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Sparkles, Heart, Flower2, Home, Church, Car, UtensilsCrossed, Wine, Calendar } from "lucide-react";
+import { Calendar, ArrowRight, Sparkles, Flower2, Palette, Heart } from "lucide-react";
 import LazySection from "@/components/LazySection";
 import UltraNavigation from "@/components/UltraNavigation";
 import Footer from "@/components/Footer";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import heroWeddingImage from "@/assets/heroWedding.jpg";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const GOLD_COLOR = "rgb(199, 158, 72)";
 const GOLD_HEX = "#c79e48";
-
-// Custom SVG Icons for floating elements
-const BeerIcon = ({ className, style }: { className?: string; style?: React.CSSProperties }) => (
-  <svg className={className} style={style} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-    {/* Beer mug */}
-    <rect x="35" y="25" width="30" height="50" rx="3" fill="currentColor" opacity="0.9"/>
-    {/* Handle */}
-    <path d="M65 30 Q75 30, 75 40 Q75 50, 65 50" stroke="currentColor" strokeWidth="3" fill="none" opacity="0.7"/>
-    {/* Foam */}
-    <ellipse cx="50" cy="25" rx="15" ry="8" fill="white" opacity="0.8"/>
-    <circle cx="45" cy="22" r="3" fill="white" opacity="0.9"/>
-    <circle cx="50" cy="20" r="3" fill="white" opacity="0.9"/>
-    <circle cx="55" cy="22" r="3" fill="white" opacity="0.9"/>
-    {/* Beer color */}
-    <rect x="37" y="30" width="26" height="42" rx="2" fill="#FFD700" opacity="0.6"/>
-    {/* Bubbles */}
-    <circle cx="45" cy="45" r="2" fill="white" opacity="0.5"/>
-    <circle cx="55" cy="50" r="2" fill="white" opacity="0.5"/>
-    <circle cx="50" cy="60" r="1.5" fill="white" opacity="0.4"/>
-  </svg>
-);
-
-const WeddingCakeIcon = ({ className, style }: { className?: string; style?: React.CSSProperties }) => (
-  <svg className={className} style={style} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-    {/* Bottom tier */}
-    <ellipse cx="50" cy="75" rx="28" ry="8" fill="currentColor" opacity="0.9"/>
-    <rect x="22" y="65" width="56" height="12" rx="4" fill="currentColor" opacity="0.85"/>
-    {/* Middle tier */}
-    <ellipse cx="50" cy="60" rx="22" ry="7" fill="white" opacity="0.8"/>
-    <rect x="28" y="52" width="44" height="10" rx="3" fill="white" opacity="0.75"/>
-    {/* Top tier */}
-    <ellipse cx="50" cy="45" rx="16" ry="6" fill="white" opacity="0.9"/>
-    <rect x="34" y="38" width="32" height="10" rx="2" fill="white" opacity="0.85"/>
-    {/* Decorative icing */}
-    <circle cx="30" cy="68" r="3" fill="white" opacity="0.7"/>
-    <circle cx="50" cy="68" r="3" fill="white" opacity="0.7"/>
-    <circle cx="70" cy="68" r="3" fill="white" opacity="0.7"/>
-    <circle cx="35" cy="58" r="2.5" fill="currentColor" opacity="0.6"/>
-    <circle cx="50" cy="58" r="2.5" fill="currentColor" opacity="0.6"/>
-    <circle cx="65" cy="58" r="2.5" fill="currentColor" opacity="0.6"/>
-    {/* Topper - bride and groom */}
-    <circle cx="45" cy="40" r="4" fill="currentColor" opacity="0.8"/>
-    <circle cx="55" cy="40" r="4" fill="currentColor" opacity="0.8"/>
-    <circle cx="45" cy="37" r="2" fill="white"/>
-    <circle cx="55" cy="37" r="2" fill="white"/>
-    {/* Cake stand base */}
-    <ellipse cx="50" cy="85" rx="30" ry="5" fill="currentColor" opacity="0.6"/>
-    <path d="M20 85 Q50 88, 80 85" stroke="currentColor" strokeWidth="2" opacity="0.5" fill="none"/>
-  </svg>
-);
-
-const BrideIcon = ({ className, style }: { className?: string; style?: React.CSSProperties }) => (
-  <svg className={className} style={style} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-    {/* Veil - more elegant */}
-    <path d="M25 20 Q50 15, 75 20 Q50 65, 25 60 Z" fill="currentColor" opacity="0.25"/>
-    <path d="M30 22 Q50 18, 70 22 Q50 58, 30 55 Z" fill="white" opacity="0.15"/>
-    {/* Wedding dress - elegant and flowing */}
-    <path d="M35 95 Q40 85, 40 70 Q40 55, 45 60 L50 62 L55 60 Q60 55, 60 70 Q60 85, 65 95" fill="currentColor" opacity="0.95"/>
-    <ellipse cx="50" cy="68" rx="12" ry="22" fill="currentColor" opacity="0.9"/>
-    {/* Bodice */}
-    <path d="M38 65 Q50 58, 62 65 L62 75 L38 75 Z" fill="white" opacity="0.2"/>
-    {/* Head */}
-    <circle cx="50" cy="32" r="16" fill="currentColor" opacity="0.9"/>
-    {/* Eyes */}
-    <circle cx="45" cy="30" r="3" fill="white"/>
-    <circle cx="55" cy="30" r="3" fill="white"/>
-    {/* Smile */}
-    <path d="M45 36 Q50 39, 55 36" stroke="white" strokeWidth="1.5" fill="none" opacity="0.6"/>
-    {/* Dress details - train */}
-    <path d="M65 95 Q70 100, 75 98" stroke="currentColor" strokeWidth="2" opacity="0.5" fill="none"/>
-    {/* Bouquet */}
-    <circle cx="35" cy="72" r="7" fill="currentColor" opacity="0.7"/>
-    <circle cx="33" cy="70" r="1.5" fill="white"/>
-    <circle cx="37" cy="70" r="1.5" fill="white"/>
-    <circle cx="35" cy="68" r="1.5" fill="white"/>
-    {/* Crown/tiara */}
-    <path d="M42 20 Q50 15, 58 20" stroke="currentColor" strokeWidth="2" opacity="0.6" fill="none"/>
-    <path d="M45 18 Q50 14, 55 18" stroke="currentColor" strokeWidth="1.5" opacity="0.5" fill="none"/>
-  </svg>
-);
-
-const BouquetIcon = ({ className, style }: { className?: string; style?: React.CSSProperties }) => (
-  <svg className={className} style={style} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-    {/* Stem */}
-    <rect x="47" y="60" width="6" height="30" fill="currentColor" opacity="0.6"/>
-    {/* Leaves */}
-    <ellipse cx="42" cy="70" rx="8" ry="4" fill="currentColor" opacity="0.5" transform="rotate(-30 42 70)"/>
-    <ellipse cx="58" cy="75" rx="8" ry="4" fill="currentColor" opacity="0.5" transform="rotate(30 58 75)"/>
-    {/* Flowers */}
-    <circle cx="40" cy="45" r="8" fill="currentColor" opacity="0.9"/>
-    <circle cx="38" cy="43" r="2" fill="white"/>
-    <circle cx="50" cy="40" r="10" fill="currentColor" opacity="0.9"/>
-    <circle cx="48" cy="38" r="2.5" fill="white"/>
-    <circle cx="60" cy="45" r="8" fill="currentColor" opacity="0.9"/>
-    <circle cx="58" cy="43" r="2" fill="white"/>
-    <circle cx="48" cy="52" r="7" fill="currentColor" opacity="0.9"/>
-    <circle cx="46" cy="50" r="2" fill="white"/>
-    {/* Ribbon */}
-    <rect x="38" y="55" width="24" height="8" rx="2" fill="currentColor" opacity="0.4"/>
-    <path d="M44 59 Q50 57, 56 59" stroke="white" strokeWidth="1" opacity="0.5" fill="none"/>
-  </svg>
-);
-
-const WeddingRingIcon = ({ className, style }: { className?: string; style?: React.CSSProperties }) => (
-  <svg className={className} style={style} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="50" cy="50" r="25" fill="none" stroke="currentColor" strokeWidth="4" opacity="0.8"/>
-    <circle cx="50" cy="50" r="20" fill="none" stroke="currentColor" strokeWidth="3" opacity="0.6"/>
-    <circle cx="50" cy="50" r="15" fill="currentColor" opacity="0.3"/>
-    <circle cx="50" cy="50" r="5" fill="currentColor" opacity="0.9"/>
-  </svg>
-);
-
-const DiamondRingIcon = ({ className, style }: { className?: string; style?: React.CSSProperties }) => (
-  <svg className={className} style={style} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-    {/* Ring band */}
-    <ellipse cx="50" cy="50" rx="28" ry="20" fill="none" stroke="currentColor" strokeWidth="5" opacity="0.8"/>
-    <ellipse cx="50" cy="50" rx="23" ry="16" fill="none" stroke="currentColor" strokeWidth="3" opacity="0.6"/>
-    {/* Diamond setting */}
-    <path d="M50 20 L55 35 L50 30 L45 35 Z" fill="white" opacity="0.95" stroke="currentColor" strokeWidth="1"/>
-    <path d="M50 30 L55 35 L50 40 L45 35 Z" fill="white" opacity="0.85"/>
-    {/* Diamond facets */}
-    <path d="M50 20 L52 25 L50 30 Z" fill="white" opacity="0.9"/>
-    <path d="M50 20 L48 25 L50 30 Z" fill="white" opacity="0.9"/>
-    <path d="M50 30 L52 35 L50 40 Z" fill="white" opacity="0.7"/>
-    <path d="M50 30 L48 35 L50 40 Z" fill="white" opacity="0.7"/>
-    {/* Sparkle effect */}
-    <circle cx="50" cy="25" r="1.5" fill="white" opacity="0.8"/>
-    <circle cx="52" cy="28" r="1" fill="white" opacity="0.6"/>
-    <circle cx="48" cy="28" r="1" fill="white" opacity="0.6"/>
-    {/* Side diamonds */}
-    <circle cx="30" cy="50" r="3" fill="white" opacity="0.7"/>
-    <circle cx="70" cy="50" r="3" fill="white" opacity="0.7"/>
-  </svg>
-);
-
-// Floating decorative element component
-const FloatingIcon = ({ 
-  Icon, 
-  position, 
-  delay = 0, 
-  duration = 6,
-  size = 40 
-}: { 
-  Icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }> | React.FC<any>;
-  position: { top?: string; bottom?: string; left?: string; right?: string };
-  delay?: number;
-  duration?: number;
-  size?: number;
-}) => {
-  const isMobile = useIsMobile();
-  const [offset] = React.useState(() => Math.random() * 1000);
-  // Make icons smaller on mobile
-  const adjustedSize = isMobile ? Math.max(size * 0.6, 24) : size;
-  
-  return (
-    <motion.div
-      className="absolute pointer-events-none z-0"
-      style={{
-        ...position,
-        width: `${adjustedSize}px`,
-        height: `${adjustedSize}px`,
-        color: GOLD_COLOR,
-        opacity: isMobile ? 0.15 : 0.25,
-        filter: 'drop-shadow(0 2px 4px rgba(199, 158, 72, 0.2))',
-      }}
-      animate={{
-        y: [0, -30, 0],
-        x: [0, Math.sin((Date.now() + offset) / 1000) * 20, 0],
-        rotate: [0, 360],
-        scale: [1, 1.1, 1],
-      }}
-      transition={{
-        duration,
-        repeat: Infinity,
-        delay,
-        ease: "easeInOut",
-      }}
-    >
-      <Icon className="w-full h-full" style={{ color: GOLD_COLOR }} />
-    </motion.div>
-  );
-};
 
 // Wedding images - properly encoded paths
 const weddingImages = [
@@ -207,96 +31,556 @@ const weddingImages = [
 
 const WeddingHero = () => {
   const isMobile = useIsMobile();
+  const heroRef = useRef<HTMLElement>(null);
+  const imageRef = useRef<HTMLDivElement>(null);
+  const textRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      // Hero image parallax and fade in
+      gsap.fromTo(
+        imageRef.current,
+        { scale: 1.2, opacity: 0 },
+        {
+          scale: 1,
+          opacity: 1,
+          duration: 1.5,
+          ease: "power3.out",
+        }
+      );
+
+      // Text animation
+      gsap.fromTo(
+        textRef.current?.querySelector("h1"),
+        { y: 100, opacity: 0 },
+        {
+          y: 0,
+          opacity: 1,
+          duration: 1.2,
+          delay: 0.3,
+          ease: "power4.out",
+        }
+      );
+
+      gsap.fromTo(
+        textRef.current?.querySelector("p"),
+        { y: 50, opacity: 0 },
+        {
+          y: 0,
+          opacity: 1,
+          duration: 1,
+          delay: 0.6,
+          ease: "power3.out",
+        }
+      );
+
+      // Button animation
+      gsap.fromTo(
+        buttonRef.current,
+        { y: 30, opacity: 0, scale: 0.9 },
+        {
+          y: 0,
+          opacity: 1,
+          scale: 1,
+          duration: 0.8,
+          delay: 0.9,
+          ease: "back.out(1.7)",
+        }
+      );
+
+      // Parallax effect on scroll - disabled on mobile for performance
+      if (!isMobile) {
+        ScrollTrigger.create({
+          trigger: heroRef.current,
+          start: "top top",
+          end: "bottom top",
+          scrub: true,
+          onUpdate: (self) => {
+            if (imageRef.current) {
+              gsap.to(imageRef.current, {
+                y: self.progress * 100,
+                scale: 1 + self.progress * 0.1,
+                ease: "none",
+              });
+            }
+          },
+        });
+      }
+    }, heroRef);
+
+    return () => ctx.revert();
+  }, []);
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-white pt-20">
-      {/* Background decorative elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-gradient-to-br from-[rgba(199,158,72,0.05)] to-transparent rounded-full blur-3xl" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-gradient-to-tl from-[rgba(199,158,72,0.05)] to-transparent rounded-full blur-3xl" />
+    <section ref={heroRef} className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-b from-[#fafafa] to-white" style={{ marginTop: '-12.3rem', paddingTop: '50' }}>
+      {/* Hero Image */}
+      <div
+        ref={imageRef}
+        className="absolute inset-0 w-full h-full"
+        style={{ top: '12rem', height: 'calc(100% - 12rem)' }}
+      >
+        <img
+          src={heroWeddingImage}
+          alt="Elegant Wedding Couple"
+          className="w-full h-full object-cover"
+        />
+        {/* Elegant overlay gradient */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/60" />
       </div>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="mb-6"
-        >
+      {/* Content */}
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 md:py-16 text-center" style={{ marginTop: '12rem', transform: 'scale(0.85)' }}>
+        <div ref={textRef} className="space-y-3 sm:space-y-4 md:space-y-6">
           <motion.div
-            className="inline-flex items-center gap-2 mb-6"
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.2, duration: 0.6 }}
-          >
-            <Sparkles className="w-6 h-6" style={{ color: GOLD_COLOR }} />
-            <span className="text-sm font-semibold tracking-[0.2em] uppercase" style={{ color: GOLD_COLOR }}>
-              Wedding Packages
-            </span>
-            <Sparkles className="w-6 h-6" style={{ color: GOLD_COLOR }} />
-          </motion.div>
-
-          <motion.h1
-            className={`${isMobile ? 'text-4xl md:text-5xl' : 'text-6xl md:text-7xl lg:text-8xl'} font-serif font-bold mb-6 leading-tight`}
-            style={{ color: '#1a1a1a' }}
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.8 }}
-          >
-            Your Dream
-            <br />
-            <span className="relative inline-block">
-              <span style={{ color: GOLD_COLOR }}>Wedding</span>
-              <motion.div
-                className="absolute -bottom-2 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[rgba(199,158,72,0.6)] to-transparent"
-                initial={{ scaleX: 0 }}
-                animate={{ scaleX: 1 }}
-                transition={{ delay: 0.8, duration: 0.8 }}
-              />
-            </span>
-            <br />
-            Awaits
-          </motion.h1>
-
-          <motion.p
-            className={`${isMobile ? 'text-base md:text-lg' : 'text-xl md:text-2xl'} text-gray-600 max-w-3xl mx-auto mb-8 font-light leading-relaxed`}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.5, duration: 0.8 }}
+            transition={{ delay: 0.2, duration: 0.8 }}
+            className="inline-flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4"
+          >
+            <Sparkles className={`${isMobile ? 'w-3 h-3' : 'w-4 h-4'}`} style={{ color: GOLD_COLOR }} />
+            <span className={`${isMobile ? 'text-[10px]' : 'text-xs'} font-semibold tracking-[0.2em] sm:tracking-[0.3em] uppercase text-white/90`}>
+              Wedding & Events
+            </span>
+            <Sparkles className={`${isMobile ? 'w-3 h-3' : 'w-4 h-4'}`} style={{ color: GOLD_COLOR }} />
+          </motion.div>
+
+          <h1
+            className={`${isMobile ? 'text-2xl sm:text-3xl md:text-4xl lg:text-5xl' : 'text-4xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl'} font-serif font-bold mb-3 sm:mb-4 md:mb-6 leading-[1.1] text-white px-2`}
+            style={{ textShadow: '0 4px 20px rgba(0,0,0,0.3)' }}
+          >
+            Beautiful Floral Arrangements
+            <br className="hidden sm:block" />
+            <span className="relative inline-block mt-1 sm:mt-2">
+              <span style={{ color: GOLD_COLOR }}>For Your Special Day</span>
+              <motion.div
+                className="absolute -bottom-2 sm:-bottom-3 left-0 right-0 h-0.5 sm:h-1"
+                style={{
+                  background: `linear-gradient(to right, transparent, ${GOLD_COLOR}, transparent)`,
+                }}
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: 1 }}
+                transition={{ delay: 1.2, duration: 0.8 }}
+              />
+            </span>
+          </h1>
+
+          <p
+            className={`${isMobile ? 'text-sm sm:text-base' : 'text-base md:text-lg lg:text-xl'} text-white/95 max-w-3xl mx-auto font-light leading-relaxed px-4`}
+            style={{ textShadow: '0 2px 10px rgba(0,0,0,0.2)' }}
           >
             Crafting timeless elegance through bespoke floral artistry
-            <br className="hidden md:block" />
-            for your most precious day
-          </motion.p>
-        </motion.div>
+            <br className="hidden sm:block" />
+            for your most precious moments
+          </p>
+
+          <div ref={buttonRef} className="pt-2 sm:pt-3">
+            <Button
+              size="lg"
+              className={`${isMobile ? 'text-xs sm:text-sm px-5 sm:px-6 py-4 sm:py-5' : 'text-base px-10 py-6'} font-semibold rounded-full shadow-2xl hover:shadow-3xl transition-all duration-300 relative overflow-hidden group w-full sm:w-auto`}
+              style={{
+                background: `linear-gradient(135deg, ${GOLD_COLOR} 0%, rgba(199, 158, 72, 0.9) 100%)`,
+                color: 'white',
+              }}
+              onClick={() => {
+                const contactEl = document.getElementById('contact-section');
+                if (contactEl) {
+                  contactEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+              }}
+            >
+              <motion.span
+                className="relative z-10 flex items-center justify-center gap-2 sm:gap-3"
+                whileHover={isMobile ? {} : { scale: 1.05 }}
+              >
+                Get in touch
+                <ArrowRight className={`${isMobile ? 'w-3 h-3' : 'w-4 h-4'} group-hover:translate-x-1 transition-transform`} />
+              </motion.span>
+              {!isMobile && (
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                  initial={{ x: '-100%' }}
+                  whileHover={{ x: '100%' }}
+                  transition={{ duration: 0.6 }}
+                />
+              )}
+            </Button>
+          </div>
+        </div>
       </div>
 
-      {/* Floating decorative elements */}
-      <FloatingIcon Icon={BrideIcon} position={{ top: "10%", left: "8%" }} delay={0} duration={6} size={60} />
-      <FloatingIcon Icon={WeddingCakeIcon} position={{ top: "20%", right: "10%" }} delay={1} duration={7} size={50} />
-      <FloatingIcon Icon={WeddingCakeIcon} position={{ top: "28%", left: "15%" }} delay={0.6} duration={6.5} size={48} />
-      <FloatingIcon Icon={WeddingCakeIcon} position={{ bottom: "20%", right: "12%" }} delay={1.3} duration={7.2} size={52} />
-      <FloatingIcon Icon={BouquetIcon} position={{ top: "35%", left: "5%" }} delay={2} duration={5.5} size={45} />
-      <FloatingIcon Icon={BeerIcon} position={{ bottom: "25%", left: "12%" }} delay={1.5} duration={6.5} size={55} />
-      <FloatingIcon Icon={Flower2} position={{ bottom: "15%", right: "8%" }} delay={0.5} duration={5} size={40} />
-      <FloatingIcon Icon={Heart} position={{ top: "50%", left: "3%" }} delay={2.5} duration={6} size={35} />
-      <FloatingIcon Icon={DiamondRingIcon} position={{ top: "60%", right: "5%" }} delay={3} duration={7.5} size={40} />
-      <FloatingIcon Icon={WeddingRingIcon} position={{ top: "55%", left: "8%" }} delay={2.8} duration={6.8} size={36} />
-      <FloatingIcon Icon={BouquetIcon} position={{ bottom: "30%", right: "15%" }} delay={1.8} duration={5.8} size={50} />
-      <FloatingIcon Icon={Sparkles} position={{ top: "15%", left: "50%" }} delay={0.8} duration={4.5} size={30} />
-      <FloatingIcon Icon={WeddingRingIcon} position={{ bottom: "40%", left: "20%" }} delay={2.2} duration={6.2} size={35} />
-      <FloatingIcon Icon={BrideIcon} position={{ top: "70%", right: "20%" }} delay={1.2} duration={7.2} size={48} />
-      <FloatingIcon Icon={WeddingCakeIcon} position={{ bottom: "10%", left: "45%" }} delay={2.8} duration={5.5} size={52} />
-      <FloatingIcon Icon={BeerIcon} position={{ top: "45%", right: "25%" }} delay={1.8} duration={6.8} size={42} />
-      <FloatingIcon Icon={Sparkles} position={{ bottom: "50%", left: "30%" }} delay={0.3} duration={5.2} size={28} />
-      <FloatingIcon Icon={DiamondRingIcon} position={{ bottom: "35%", right: "25%" }} delay={1.7} duration={6.5} size={38} />
+      {/* Subtle decorative elements - elegant, not distracting */}
+      <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 z-10">
+        <motion.div
+          animate={{ y: [0, 10, 0] }}
+          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          className="w-6 h-10 border-2 border-white/30 rounded-full flex items-start justify-center p-2"
+        >
+          <motion.div
+            animate={{ y: [0, 12, 0] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            className="w-1 h-3 bg-white/50 rounded-full"
+          />
+        </motion.div>
+      </div>
+    </section>
+  );
+};
+
+const ServiceSection = ({ 
+  title, 
+  description, 
+  image, 
+  index,
+  features 
+}: { 
+  title: string; 
+  description: string; 
+  image: string;
+  index: number;
+  features?: string[];
+}) => {
+  const isMobile = useIsMobile();
+  const sectionRef = useRef<HTMLElement>(null);
+  const imageRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      const isEven = index % 2 === 0;
+      const animationDistance = isMobile ? 30 : (isEven ? -100 : 100);
+
+      // Image animation - reduced on mobile
+      gsap.fromTo(
+        imageRef.current,
+        {
+          x: isMobile ? 0 : animationDistance,
+          opacity: 0,
+          scale: isMobile ? 0.95 : 0.9,
+        },
+        {
+          x: 0,
+          opacity: 1,
+          scale: 1,
+          duration: isMobile ? 0.8 : 1.2,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: "top 85%",
+            end: "top 20%",
+            toggleActions: "play none none reverse",
+          },
+        }
+      );
+
+      // Content animation - reduced on mobile
+      gsap.fromTo(
+        contentRef.current,
+        {
+          x: isMobile ? 0 : (isEven ? 100 : -100),
+          opacity: 0,
+          y: isMobile ? 20 : 0,
+        },
+        {
+          x: 0,
+          y: 0,
+          opacity: 1,
+          duration: isMobile ? 0.8 : 1.2,
+          delay: isMobile ? 0.1 : 0.2,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: "top 85%",
+            end: "top 20%",
+            toggleActions: "play none none reverse",
+          },
+        }
+      );
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, [index, isMobile]);
+
+  const isEven = index % 2 === 0;
+
+  // Modern mobile card layout
+  if (isMobile) {
+    return (
+      <section
+        ref={sectionRef}
+        className={`relative py-8 overflow-visible ${index % 2 === 0 ? 'bg-white' : 'bg-gradient-to-b from-white to-[#fafafa]'}`}
+      >
+        <div className="max-w-7xl mx-auto px-4">
+          {/* Modern Card Design for Mobile */}
+          <motion.div
+            ref={cardRef}
+            className="relative"
+            initial={{ opacity: 0, y: 50, scale: 0.95 }}
+            whileInView={{ opacity: 1, y: 0, scale: 1 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+          >
+            {/* Card with modern shadow and rounded corners */}
+            <div className="relative bg-white rounded-3xl shadow-2xl overflow-hidden border border-gray-100">
+              {/* Image with overlay gradient */}
+              <div ref={imageRef} className="relative h-[280px] overflow-hidden">
+                <img
+                  src={image}
+                  alt={title}
+                  className="w-full h-full object-cover"
+                />
+                {/* Gradient overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+                {/* Title overlay on image */}
+                <div className="absolute bottom-0 left-0 right-0 p-6">
+                  <h2
+                    className="text-3xl font-serif font-bold text-white mb-2"
+                    style={{ textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}
+                  >
+                    {title}
+                  </h2>
+                  <div
+                    className="w-16 h-1 mb-3"
+                    style={{ background: GOLD_COLOR }}
+                  />
+                </div>
+              </div>
+
+              {/* Content section */}
+              <div ref={contentRef} className="p-6 space-y-4">
+                <p className="text-sm text-gray-700 leading-relaxed">
+                  {description}
+                </p>
+
+                {features && features.length > 0 && (
+                  <div className="space-y-2 pt-2">
+                    {features.map((feature, idx) => (
+                      <div key={idx} className="flex items-center gap-2">
+                        <div
+                          className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                          style={{ backgroundColor: GOLD_COLOR }}
+                        />
+                        <span className="text-xs text-gray-600">{feature}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="w-full rounded-full border-2 px-6 py-5 text-sm font-semibold mt-4"
+                  style={{
+                    borderColor: GOLD_COLOR,
+                    color: GOLD_COLOR,
+                  }}
+                  onClick={() => {
+                    const contactEl = document.getElementById('contact-section');
+                    if (contactEl) {
+                      contactEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                  }}
+                >
+                  Learn More
+                  <ArrowRight className="w-3 h-3 ml-2" />
+                </Button>
+              </div>
+            </div>
+
+            {/* Decorative floating element */}
+            <div
+              className="absolute -top-4 -right-4 w-20 h-20 rounded-full opacity-10 blur-xl"
+              style={{
+                background: `radial-gradient(circle, ${GOLD_COLOR}, transparent)`,
+              }}
+            />
+          </motion.div>
+        </div>
+      </section>
+    );
+  }
+
+  // Desktop layout (unchanged)
+  return (
+    <section
+      ref={sectionRef}
+      className={`relative py-12 sm:py-16 md:py-24 lg:py-32 overflow-hidden ${index % 2 === 0 ? 'bg-white' : 'bg-gradient-to-b from-white to-[#fafafa]'}`}
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className={`grid grid-cols-2 gap-6 sm:gap-8 md:gap-12 lg:gap-16 items-center ${isEven ? '' : 'md:flex-row-reverse'}`}>
+          {/* Image */}
+          <div
+            ref={imageRef}
+            className={`${isEven ? 'order-1' : 'order-2'} relative group`}
+          >
+            <div className="relative overflow-hidden rounded-xl sm:rounded-2xl shadow-xl sm:shadow-2xl">
+              <img
+                src={image}
+                alt={title}
+                className="w-full h-[400px] sm:h-[500px] md:h-[500px] lg:h-[600px] object-cover transition-transform duration-700 group-hover:scale-110"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            </div>
+            {/* Decorative corner accent */}
+            <div
+              className="absolute -top-6 -right-6 w-24 h-24 opacity-20 hidden md:block"
+              style={{
+                background: `linear-gradient(135deg, ${GOLD_COLOR}, transparent)`,
+                borderRadius: '50%',
+              }}
+            />
+          </div>
+
+          {/* Content */}
+          <div
+            ref={contentRef}
+            className={`${isEven ? 'order-2' : 'order-1'} space-y-4 sm:space-y-6`}
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+            >
+              <h2
+                className="text-4xl md:text-5xl lg:text-6xl font-serif font-bold mb-4 sm:mb-6"
+                style={{ color: '#1a1a1a' }}
+              >
+                {title}
+              </h2>
+              <div
+                className="w-16 sm:w-20 h-0.5 sm:h-1 mb-4 sm:mb-6"
+                style={{ background: `linear-gradient(to right, ${GOLD_COLOR}, transparent)` }}
+              />
+            </motion.div>
+
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              className="text-base md:text-lg lg:text-xl text-gray-700 leading-relaxed"
+            >
+              {description}
+            </motion.p>
+
+            {features && features.length > 0 && (
+              <motion.ul
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+                className="space-y-3 mt-8"
+              >
+                {features.map((feature, idx) => (
+                  <li key={idx} className="flex items-start gap-3">
+                    <div
+                      className="w-2 h-2 rounded-full mt-2 flex-shrink-0"
+                      style={{ backgroundColor: GOLD_COLOR }}
+                    />
+                    <span className="text-gray-700">{feature}</span>
+                  </li>
+                ))}
+              </motion.ul>
+            )}
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="pt-2 sm:pt-4"
+            >
+              <Button
+                variant="outline"
+                size="lg"
+                className="group rounded-full border-2 px-8 py-6 font-semibold transition-all duration-300"
+                style={{
+                  borderColor: GOLD_COLOR,
+                  color: GOLD_COLOR,
+                }}
+                onMouseEnter={(e) => {
+                  gsap.to(e.currentTarget, {
+                    backgroundColor: GOLD_COLOR,
+                    color: 'white',
+                    scale: 1.05,
+                    duration: 0.3,
+                  });
+                }}
+                onMouseLeave={(e) => {
+                  gsap.to(e.currentTarget, {
+                    backgroundColor: 'transparent',
+                    color: GOLD_COLOR,
+                    scale: 1,
+                    duration: 0.3,
+                  });
+                }}
+                onClick={() => {
+                  const contactEl = document.getElementById('contact-section');
+                  if (contactEl) {
+                    contactEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }
+                }}
+              >
+                Learn More
+                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </motion.div>
+          </div>
+        </div>
+      </div>
     </section>
   );
 };
 
 const PackageSection = () => {
   const isMobile = useIsMobile();
-  
+  const sectionRef = useRef<HTMLElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        cardRef.current,
+        { y: isMobile ? 30 : 100, opacity: 0 },
+        {
+          y: 0,
+          opacity: 1,
+          duration: isMobile ? 0.8 : 1.2,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: "top 75%",
+            toggleActions: "play none none reverse",
+          },
+        }
+      );
+
+      // Animate feature cards - reduced on mobile
+      gsap.utils.toArray(cardRef.current?.querySelectorAll('.feature-card') || []).forEach((card: any, index: number) => {
+        gsap.fromTo(
+          card,
+          { y: isMobile ? 20 : 50, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: isMobile ? 0.6 : 0.8,
+            delay: isMobile ? index * 0.05 : index * 0.1,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: card,
+              start: "top 85%",
+              toggleActions: "play none none reverse",
+            },
+          }
+        );
+      });
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, [isMobile]);
+
   const packageFeatures = [
     {
       icon: Flower2,
@@ -309,22 +593,22 @@ const PackageSection = () => {
       description: "Elegant bridesmaids' bouquets matching your wedding theme",
     },
     {
-      icon: Home,
+      icon: Heart,
       title: "Bride & Groom's House Decorations",
       description: "Beautiful floral arrangements for both bride and groom's houses",
     },
     {
-      icon: Church,
+      icon: Sparkles,
       title: "Church Decorations",
       description: "Stunning altar and entrance decorations with fresh and artificial flowers",
     },
     {
-      icon: Wine,
+      icon: Sparkles,
       title: "Welcome Drink Decoration",
       description: "Elegant table settings with candles and floral centerpieces",
     },
     {
-      icon: UtensilsCrossed,
+      icon: Sparkles,
       title: "Party Decoration",
       description: "Beautiful dining table centerpieces for your celebration",
     },
@@ -334,167 +618,825 @@ const PackageSection = () => {
       description: "Large centerpieces with high-quality white artificial flowers",
     },
     {
-      icon: Car,
+      icon: Sparkles,
       title: "Car Flower Decoration",
       description: "Three cars decorated with real flowers, including main bridal car",
     },
   ];
 
+  // Modern mobile package section
+  if (isMobile) {
+    return (
+      <section ref={sectionRef} className="relative py-12 bg-gradient-to-b from-[#fafafa] to-white overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4">
+          <motion.div
+            className="text-center mb-8"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+          >
+            <div className="inline-flex items-center gap-2 mb-4">
+              <Sparkles className="w-4 h-4" style={{ color: GOLD_COLOR }} />
+              <span className="text-xs font-semibold tracking-[0.2em] uppercase" style={{ color: GOLD_COLOR }}>
+                Our Standard Package
+              </span>
+              <Sparkles className="w-4 h-4" style={{ color: GOLD_COLOR }} />
+            </div>
+            <h2 className="text-3xl font-serif font-bold mb-3" style={{ color: '#1a1a1a' }}>
+              Complete Wedding Experience
+            </h2>
+            <p className="text-sm text-gray-600 max-w-3xl mx-auto">
+              Everything you need for your perfect day
+            </p>
+          </motion.div>
+
+          {/* Modern Card Design */}
+          <motion.div
+            ref={cardRef}
+            className="relative bg-white rounded-3xl shadow-2xl overflow-hidden border border-[rgba(199,158,72,0.15)]"
+            initial={{ opacity: 0, y: 50, scale: 0.95 }}
+            whileInView={{ opacity: 1, y: 0, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
+            {/* Price Header - Prominent */}
+            <div className="relative bg-gradient-to-br from-[rgba(199,158,72,0.1)] to-transparent p-6 text-center border-b border-[rgba(199,158,72,0.1)]">
+              <div className="mb-3">
+                <span className="text-5xl font-bold font-serif" style={{ color: GOLD_COLOR }}>
+                  $3,200
+                </span>
+              </div>
+              <p className="text-xs text-gray-600">
+                Complete package • Customizable
+              </p>
+            </div>
+
+            <div className="p-6 space-y-6">
+              {/* Features in scrollable horizontal cards */}
+              <div className="overflow-x-auto pb-2 -mx-6 px-6 scrollbar-hide">
+                <div className="flex gap-4" style={{ width: 'max-content' }}>
+                  {packageFeatures.map((feature, index) => {
+                    const Icon = feature.icon;
+                    return (
+                      <div
+                        key={index}
+                        className="feature-card flex-shrink-0 w-[280px] bg-gradient-to-br from-white to-[rgba(199,158,72,0.02)] rounded-2xl p-4 border border-[rgba(199,158,72,0.15)]"
+                      >
+                        <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3" style={{ backgroundColor: `${GOLD_COLOR}15` }}>
+                          <Icon className="w-5 h-5" style={{ color: GOLD_COLOR }} />
+                        </div>
+                        <h3 className="font-serif font-semibold text-sm mb-1" style={{ color: '#1a1a1a' }}>
+                          {feature.title}
+                        </h3>
+                        <p className="text-xs text-gray-600 leading-relaxed">
+                          {feature.description}
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Description */}
+              <div className="pt-4 border-t border-gray-100">
+                <p className="text-xs text-gray-600 leading-relaxed mb-3">
+                  Our Standard Package offers a complete floral and décor experience designed to make your wedding day elegant and unforgettable.
+                </p>
+                <p className="text-xs font-semibold" style={{ color: GOLD_COLOR }}>
+                  ✨ The package can be customized upon request
+                </p>
+              </div>
+
+              {/* CTA Button */}
+              <Button
+                size="lg"
+                className="w-full rounded-full border-0 px-6 py-5 text-sm font-semibold shadow-xl"
+                style={{
+                  background: `linear-gradient(135deg, ${GOLD_COLOR} 0%, rgba(199, 158, 72, 0.9) 100%)`,
+                  color: 'white',
+                }}
+                onClick={() => {
+                  const contactEl = document.getElementById('contact-section');
+                  if (contactEl) {
+                    contactEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }
+                }}
+              >
+                <Calendar className="w-4 h-4 mr-2" />
+                Reserve a Meeting
+              </Button>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+    );
+  }
+
+  // Desktop layout
   return (
-    <section className="relative py-20 bg-gradient-to-b from-white to-[rgba(250,250,250,1)] overflow-hidden">
-      {/* Floating decorative elements */}
-      <FloatingIcon Icon={BouquetIcon} position={{ top: "10%", left: "2%" }} delay={0.3} duration={6.5} size={45} />
-      <FloatingIcon Icon={BeerIcon} position={{ top: "20%", right: "3%" }} delay={1.8} duration={7} size={50} />
-      <FloatingIcon Icon={DiamondRingIcon} position={{ bottom: "15%", left: "4%" }} delay={2.3} duration={5.8} size={40} />
-      <FloatingIcon Icon={WeddingCakeIcon} position={{ bottom: "25%", right: "2%" }} delay={1.2} duration={6.2} size={48} />
-      <FloatingIcon Icon={WeddingCakeIcon} position={{ top: "35%", left: "1%" }} delay={0.6} duration={6.5} size={46} />
-      <FloatingIcon Icon={WeddingCakeIcon} position={{ bottom: "18%", right: "4%" }} delay={1.4} duration={7.1} size={50} />
-      <FloatingIcon Icon={Flower2} position={{ top: "50%", left: "1%" }} delay={0.7} duration={5.5} size={35} />
-      <FloatingIcon Icon={Heart} position={{ bottom: "5%", right: "8%" }} delay={2.5} duration={7.5} size={38} />
-      <FloatingIcon Icon={BrideIcon} position={{ top: "30%", right: "1%" }} delay={1.5} duration={6.8} size={42} />
-      <FloatingIcon Icon={WeddingRingIcon} position={{ bottom: "40%", left: "1%" }} delay={0.9} duration={6} size={32} />
-      
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        {/* Package Card */}
+    <section ref={sectionRef} className="relative py-12 sm:py-16 md:py-24 lg:py-32 bg-gradient-to-b from-[#fafafa] to-white overflow-hidden">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
-          className="relative mb-16"
-          initial={{ opacity: 0, y: 50 }}
+          className="text-center mb-8 sm:mb-12 md:mb-16"
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
         >
-          <div className="relative bg-white rounded-3xl shadow-2xl overflow-hidden border border-[rgba(199,158,72,0.2)]">
-            {/* Gold gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-br from-[rgba(199,158,72,0.05)] via-transparent to-[rgba(199,158,72,0.05)]" />
-            
-            <div className="relative p-8 md:p-12 lg:p-16">
-              {/* Header */}
-              <div className="text-center mb-12">
-                <motion.div
-                  className="inline-flex items-center gap-2 mb-4"
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6 }}
-                >
-                  <Sparkles className="w-5 h-5" style={{ color: GOLD_COLOR }} />
-                  <span className="text-sm font-semibold tracking-[0.2em] uppercase" style={{ color: GOLD_COLOR }}>
-                    Standard Package
-                  </span>
-                  <Sparkles className="w-5 h-5" style={{ color: GOLD_COLOR }} />
-                </motion.div>
+          <div className="inline-flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+            <Sparkles className="w-5 h-5" style={{ color: GOLD_COLOR }} />
+            <span className="text-sm font-semibold tracking-[0.3em] uppercase" style={{ color: GOLD_COLOR }}>
+              Our Standard Package
+            </span>
+            <Sparkles className="w-5 h-5" style={{ color: GOLD_COLOR }} />
+          </div>
+          <h2
+            className="text-4xl md:text-5xl lg:text-6xl font-serif font-bold mb-4 sm:mb-6"
+            style={{ color: '#1a1a1a' }}
+          >
+            Complete Wedding Experience
+          </h2>
+          <p className="text-base md:text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto px-2">
+            Everything you need for your perfect day, beautifully arranged
+          </p>
+        </motion.div>
 
-                <motion.h2
-                  className={`${isMobile ? 'text-3xl md:text-4xl' : 'text-5xl md:text-6xl'} font-serif font-bold mb-6`}
-                  style={{ color: '#1a1a1a' }}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 0.2, duration: 0.8 }}
-                >
-                  Standard Wedding Package
-                </motion.h2>
-
-                <motion.div
-                  className="mb-6"
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 0.4, duration: 0.6 }}
-                >
-                  <span className={`${isMobile ? 'text-4xl md:text-5xl' : 'text-6xl md:text-7xl'} font-bold font-serif`} style={{ color: GOLD_COLOR }}>
-                    $3,200
-                  </span>
-                </motion.div>
-
-                <motion.p
-                  className={`${isMobile ? 'text-base md:text-lg' : 'text-lg md:text-xl'} text-gray-600 max-w-3xl mx-auto leading-relaxed`}
-                  initial={{ opacity: 0 }}
-                  whileInView={{ opacity: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 0.6, duration: 0.8 }}
-                >
-                  Our Standard Package offers a complete floral and décor experience designed to make your wedding day elegant and unforgettable. This package includes full arrangements from Bexy Flowers – from ceremony to reception – ensuring every detail is beautifully styled and cohesive. We take care of everything so you can focus on celebrating your special day.
-                  <br className="mt-4" />
-                  <span className="font-semibold" style={{ color: GOLD_COLOR }}>
-                    The package can be customized upon request
-                  </span>
-                </motion.p>
+        <div ref={cardRef} className="relative bg-white rounded-2xl sm:rounded-3xl shadow-xl sm:shadow-2xl overflow-hidden border border-[rgba(199,158,72,0.15)]">
+          <div className="absolute inset-0 bg-gradient-to-br from-[rgba(199,158,72,0.03)] via-transparent to-[rgba(199,158,72,0.03)]" />
+          
+          <div className="relative p-4 sm:p-6 md:p-8 lg:p-12 xl:p-16">
+            {/* Price Header */}
+            <div className="text-center mb-8 sm:mb-10 md:mb-12">
+              <div className="mb-4 sm:mb-6">
+                <span className={`${isMobile ? 'text-4xl sm:text-5xl md:text-6xl' : 'text-6xl md:text-7xl lg:text-8xl'} font-bold font-serif`} style={{ color: GOLD_COLOR }}>
+                  $3,200
+                </span>
               </div>
+              <p className={`${isMobile ? 'text-sm sm:text-base' : 'text-base md:text-lg lg:text-xl'} text-gray-600 max-w-3xl mx-auto leading-relaxed px-2`}>
+                Our Standard Package offers a complete floral and décor experience designed to make your wedding day elegant and unforgettable. This package includes full arrangements from Bexy Flowers – from ceremony to reception – ensuring every detail is beautifully styled and cohesive.
+                <br className="mt-2 sm:mt-4" />
+                <span className="font-semibold" style={{ color: GOLD_COLOR }}>
+                  The package can be customized upon request
+                </span>
+              </p>
+            </div>
 
-              {/* Features Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-                {packageFeatures.map((feature, index) => {
-                  const Icon = feature.icon;
-                  return (
-                    <motion.div
-                      key={index}
-                      className="relative bg-white rounded-2xl p-6 border border-[rgba(199,158,72,0.15)] hover:border-[rgba(199,158,72,0.4)] transition-all duration-300 hover:shadow-xl group"
-                      initial={{ opacity: 0, y: 30 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: index * 0.1, duration: 0.6 }}
-                      whileHover={{ y: -5, scale: 1.02 }}
-                    >
-                      <div className="absolute inset-0 bg-gradient-to-br from-[rgba(199,158,72,0.03)] to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                      
-                      <div className="relative z-10">
-                        <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300" style={{ backgroundColor: `${GOLD_COLOR}15` }}>
-                          <Icon className="w-6 h-6" style={{ color: GOLD_COLOR }} />
-                        </div>
-                        <h3 className="font-serif font-semibold text-lg mb-2" style={{ color: '#1a1a1a' }}>
-                          {feature.title}
-                        </h3>
-                        <p className="text-sm text-gray-600 leading-relaxed">
-                          {feature.description}
-                        </p>
-                      </div>
-                    </motion.div>
-                  );
-                })}
-              </div>
-
-              {/* CTA Button */}
-              <motion.div
-                className="text-center"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.8, duration: 0.8 }}
-              >
-                <Button
-                  size="lg"
-                  className={`${isMobile ? 'text-base px-8 py-6' : 'text-lg px-12 py-7'} font-semibold rounded-full shadow-2xl hover:shadow-3xl transition-all duration-300 relative overflow-hidden group`}
-                  style={{
-                    background: `linear-gradient(135deg, ${GOLD_COLOR} 0%, rgba(199, 158, 72, 0.9) 100%)`,
-                    color: 'white',
-                  }}
-                  onClick={() => {
-                    // Scroll to contact section or open contact modal
-                    const contactEl = document.getElementById('contact-section');
-                    if (contactEl) {
-                      contactEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    } else {
-                      // Fallback: could open a contact form or redirect
-                      window.location.href = 'mailto:info@bexyflowers.com?subject=Wedding Package Inquiry';
-                    }
-                  }}
-                >
-                  <motion.span
-                    className="relative z-10 flex items-center gap-3"
-                    whileHover={{ scale: 1.05 }}
+            {/* Features Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8 sm:mb-10 md:mb-12">
+              {packageFeatures.map((feature, index) => {
+                const Icon = feature.icon;
+                return (
+                  <div
+                    key={index}
+                    className="feature-card relative bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-[rgba(199,158,72,0.15)] hover:border-[rgba(199,158,72,0.4)] transition-all duration-300 hover:shadow-xl group"
                   >
-                    <Calendar className="w-5 h-5" />
-                    Contact Us Now to Reserve a Meeting
-                  </motion.span>
+                    <div className="absolute inset-0 bg-gradient-to-br from-[rgba(199,158,72,0.03)] to-transparent rounded-xl sm:rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    
+                    <div className="relative z-10">
+                      <div className={`${isMobile ? 'w-10 h-10' : 'w-12 h-12'} rounded-xl flex items-center justify-center mb-3 sm:mb-4 group-hover:scale-110 transition-transform duration-300`} style={{ backgroundColor: `${GOLD_COLOR}15` }}>
+                        <Icon className={`${isMobile ? 'w-5 h-5' : 'w-6 h-6'}`} style={{ color: GOLD_COLOR }} />
+                      </div>
+                      <h3 className={`font-serif font-semibold ${isMobile ? 'text-base' : 'text-lg'} mb-2`} style={{ color: '#1a1a1a' }}>
+                        {feature.title}
+                      </h3>
+                      <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-gray-600 leading-relaxed`}>
+                        {feature.description}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* CTA Button */}
+            <div className="text-center">
+              <Button
+                size="lg"
+                className={`${isMobile ? 'text-sm sm:text-base px-6 sm:px-8 py-5 sm:py-6' : 'text-lg px-12 py-7'} font-semibold rounded-full shadow-2xl hover:shadow-3xl transition-all duration-300 relative overflow-hidden group w-full sm:w-auto`}
+                style={{
+                  background: `linear-gradient(135deg, ${GOLD_COLOR} 0%, rgba(199, 158, 72, 0.9) 100%)`,
+                  color: 'white',
+                }}
+                onClick={() => {
+                  const contactEl = document.getElementById('contact-section');
+                  if (contactEl) {
+                    contactEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }
+                }}
+              >
+                <motion.span
+                  className="relative z-10 flex items-center justify-center gap-2 sm:gap-3"
+                  whileHover={isMobile ? {} : { scale: 1.05 }}
+                >
+                  <Calendar className={`${isMobile ? 'w-4 h-4' : 'w-5 h-5'}`} />
+                  <span className={isMobile ? 'hidden sm:inline' : ''}>Contact Us Now to Reserve a Meeting</span>
+                  <span className={isMobile ? 'sm:hidden' : 'hidden'}>Reserve a Meeting</span>
+                </motion.span>
+                {!isMobile && (
                   <motion.div
                     className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
                     initial={{ x: '-100%' }}
                     whileHover={{ x: '100%' }}
                     transition={{ duration: 0.6 }}
                   />
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+// Shared Image Modal Component - Works for both mobile and desktop
+const ImageModal = ({ 
+  selectedImage, 
+  onClose, 
+  images, 
+  isMobile 
+}: { 
+  selectedImage: number | null; 
+  onClose: () => void; 
+  images: string[];
+  isMobile: boolean;
+}) => {
+  const [mounted, setMounted] = React.useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
+
+  if (selectedImage === null || !mounted) return null;
+
+  const modalContent = (
+    <motion.div
+      className="fixed inset-0 bg-black flex items-center justify-center modal-background"
+      style={{ 
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        width: '100vw',
+        height: '100vh',
+        overflow: 'hidden',
+        zIndex: 999999, // Much higher than navigation (z-100) to overlay everything
+      }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      onClick={(e) => {
+        // Close when clicking outside the image
+        const target = e.target as HTMLElement;
+        // Only close if clicking directly on the background div (not on image container or button)
+        if (target === e.currentTarget) {
+          onClose();
+        }
+      }}
+      onTouchEnd={(e) => {
+        // Close when tapping outside the image on mobile
+        const target = e.target as HTMLElement;
+        // Only close if tapping directly on the background div
+        if (target === e.currentTarget) {
+          e.preventDefault();
+          onClose();
+        }
+      }}
+    >
+      {/* Close button - X icon - Smaller on mobile, larger on desktop */}
+      <button
+        className="absolute text-white font-bold transition-all duration-200 flex items-center justify-center rounded-full shadow-2xl"
+        style={{
+          top: isMobile ? '12px' : '16px',
+          right: isMobile ? '12px' : '16px',
+          touchAction: 'manipulation',
+          WebkitTapHighlightColor: 'transparent',
+          width: isMobile ? '44px' : '70px',
+          height: isMobile ? '44px' : '70px',
+          pointerEvents: 'auto',
+          zIndex: 1000000, // Highest z-index to be above everything
+          backgroundColor: 'rgba(0, 0, 0, 0.85)',
+          border: isMobile ? '2px solid rgba(255, 255, 255, 0.95)' : '3px solid rgba(255, 255, 255, 0.9)',
+          backdropFilter: 'blur(10px)',
+        }}
+        onClick={(e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          onClose();
+        }}
+        onTouchStart={(e) => {
+          e.stopPropagation();
+          // Visual feedback on touch
+          e.currentTarget.style.transform = 'scale(0.9)';
+          e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.95)';
+        }}
+        onTouchEnd={(e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          // Reset visual state
+          e.currentTarget.style.transform = 'scale(1)';
+          e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.85)';
+          onClose();
+        }}
+        onTouchCancel={(e) => {
+          // Reset if touch is cancelled
+          e.currentTarget.style.transform = 'scale(1)';
+          e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.85)';
+        }}
+        onMouseDown={(e) => {
+          if (!isMobile) {
+            e.currentTarget.style.transform = 'scale(0.95)';
+          }
+        }}
+        onMouseUp={(e) => {
+          if (!isMobile) {
+            e.currentTarget.style.transform = 'scale(1)';
+          }
+        }}
+        aria-label="Close image"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className={isMobile ? "w-6 h-6" : "w-11 h-11"}
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={isMobile ? 3 : 4}
+          style={{ 
+            pointerEvents: 'none',
+            color: 'white',
+            filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))',
+          }}
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+
+      {/* Image container - prevents closing when clicking on image */}
+      <div
+        className="relative flex items-center justify-center image-container"
+        style={{
+          position: 'absolute',
+          top: isMobile ? '60px' : '0',
+          left: isMobile ? '12px' : '0',
+          right: isMobile ? '12px' : '0',
+          bottom: isMobile ? '100px' : '0',
+          width: isMobile ? 'calc(100% - 24px)' : '100%',
+          height: isMobile ? 'calc(100% - 160px)' : '100%',
+          padding: isMobile ? '0' : '16px',
+        }}
+        onClick={(e) => {
+          e.stopPropagation();
+        }}
+        onTouchStart={(e) => {
+          e.stopPropagation();
+        }}
+        onTouchEnd={(e) => {
+          e.stopPropagation();
+        }}
+      >
+        <motion.img
+          src={images[selectedImage]}
+          alt={`Wedding decoration ${selectedImage + 1}`}
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ scale: 0.9, opacity: 0 }}
+          transition={{ duration: 0.3 }}
+          style={{
+            maxWidth: isMobile ? '100%' : '90vw',
+            maxHeight: isMobile ? 'calc(100vh - 160px)' : '90vh',
+            width: 'auto',
+            height: 'auto',
+            display: 'block',
+            pointerEvents: 'none',
+            objectFit: 'contain',
+            opacity: 1,
+            visibility: 'visible',
+          }}
+          onLoad={(e) => {
+            // Ensure image is visible
+            const img = e.currentTarget;
+            img.style.opacity = '1';
+            img.style.visibility = 'visible';
+            img.style.display = 'block';
+          }}
+          onError={(e) => {
+            console.error('Image failed to load:', images[selectedImage]);
+          }}
+        />
+      </div>
+
+      {/* Tap indicator text for mobile */}
+      {isMobile && (
+        <motion.div
+          className="absolute bottom-6 left-0 right-0 text-center z-[100000] pointer-events-none"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+        >
+          <p className="text-white/80 text-sm font-medium">Tap outside or X to close</p>
+        </motion.div>
+      )}
+    </motion.div>
+  );
+
+  // Render modal using portal to ensure it's above everything
+  return createPortal(modalContent, document.body);
+};
+
+const ImageGallery = () => {
+  const [selectedImage, setSelectedImage] = React.useState<number | null>(null);
+  const [currentIndex, setCurrentIndex] = React.useState(0);
+  const isMobile = useIsMobile();
+  const sectionRef = useRef<HTMLElement>(null);
+  const galleryRef = useRef<HTMLDivElement>(null);
+  const touchStartX = useRef<number | null>(null);
+  const touchEndX = useRef<number | null>(null);
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      // Animate gallery items - reduced on mobile
+      gsap.utils.toArray(galleryRef.current?.querySelectorAll('.gallery-item') || []).forEach((item: any, index: number) => {
+        gsap.fromTo(
+          item,
+          { scale: isMobile ? 0.95 : 0.8, opacity: 0, y: isMobile ? 20 : 50 },
+          {
+            scale: 1,
+            opacity: 1,
+            y: 0,
+            duration: isMobile ? 0.6 : 0.8,
+            delay: isMobile ? index * 0.05 : index * 0.1,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: item,
+              start: "top 85%",
+              toggleActions: "play none none reverse",
+            },
+          }
+        );
+      });
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, [isMobile]);
+
+  // Prevent body scroll when modal is open and restore scroll position
+  useEffect(() => {
+    if (selectedImage !== null) {
+      // Save current scroll position
+      const scrollY = window.scrollY;
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = '100%';
+      document.body.style.overflow = 'hidden';
+      
+      return () => {
+        // Restore scroll position when modal closes
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.width = '';
+        document.body.style.overflow = '';
+        window.scrollTo(0, scrollY);
+      };
+    }
+  }, [selectedImage]);
+
+  // Swipe handlers for mobile
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    touchEndX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStartX.current || !touchEndX.current) return;
+    const distance = touchStartX.current - touchEndX.current;
+    const isLeftSwipe = distance > 50;
+    const isRightSwipe = distance < -50;
+
+    if (isLeftSwipe && currentIndex < weddingImages.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+    }
+    if (isRightSwipe && currentIndex > 0) {
+      setCurrentIndex(currentIndex - 1);
+    }
+  };
+
+  // Modern mobile gallery with swipe
+  if (isMobile) {
+    return (
+      <>
+        <section ref={sectionRef} className="relative py-12 bg-white overflow-hidden">
+          <div className="max-w-7xl mx-auto px-4">
+            <motion.div
+              className="text-center mb-8"
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+            >
+              <h2 className="text-3xl font-serif font-bold mb-3" style={{ color: '#1a1a1a' }}>
+                Our Wedding Creations
+              </h2>
+              <p className="text-sm text-gray-600 max-w-2xl mx-auto">
+                Swipe to explore our stunning arrangements
+              </p>
+            </motion.div>
+
+            {/* Swipeable Carousel */}
+            <div className="relative">
+              <div
+                className="flex transition-transform duration-500 ease-out"
+                style={{ transform: `translateX(-${currentIndex * 100}%)` }}
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
+              >
+                {weddingImages.map((image, index) => (
+                  <div
+                    key={index}
+                    className="min-w-full px-2"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setSelectedImage(index);
+                    }}
+                    onTouchEnd={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setSelectedImage(index);
+                    }}
+                    style={{ touchAction: 'manipulation' }}
+                  >
+                    <div className="relative rounded-3xl overflow-hidden shadow-2xl aspect-[4/5] cursor-pointer">
+                      <img
+                        src={image}
+                        alt={`Wedding decoration ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+                      <div className="absolute bottom-0 left-0 right-0 p-6">
+                        <p className="text-white text-sm font-semibold">Tap to view full size</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Dots indicator */}
+              <div className="flex justify-center gap-2 mt-6">
+                {weddingImages.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentIndex(index)}
+                    className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                      index === currentIndex
+                        ? 'w-8 bg-[rgb(199,158,72)]'
+                        : 'bg-gray-300'
+                    }`}
+                  />
+                ))}
+              </div>
+
+              {/* Navigation arrows */}
+              {currentIndex > 0 && (
+                <button
+                  onClick={() => setCurrentIndex(currentIndex - 1)}
+                  className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 shadow-lg flex items-center justify-center z-10"
+                >
+                  <ArrowRight className="w-5 h-5 rotate-180" style={{ color: GOLD_COLOR }} />
+                </button>
+              )}
+              {currentIndex < weddingImages.length - 1 && (
+                <button
+                  onClick={() => setCurrentIndex(currentIndex + 1)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 shadow-lg flex items-center justify-center z-10"
+                >
+                  <ArrowRight className="w-5 h-5" style={{ color: GOLD_COLOR }} />
+                </button>
+              )}
+            </div>
+
+            {/* Grid view for quick access */}
+            <div className="mt-8">
+              <p className="text-xs text-gray-500 text-center mb-4">Quick View</p>
+              <div className="grid grid-cols-4 gap-2">
+                {weddingImages.slice(0, 4).map((image, index) => (
+                  <div
+                    key={index}
+                    className={`aspect-square rounded-xl overflow-hidden cursor-pointer border-2 transition-all ${
+                      currentIndex === index ? 'border-[rgb(199,158,72)] scale-105' : 'border-transparent'
+                    }`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setCurrentIndex(index);
+                      setSelectedImage(index);
+                    }}
+                    onTouchEnd={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setCurrentIndex(index);
+                      setSelectedImage(index);
+                    }}
+                  >
+                    <img
+                      src={image}
+                      alt={`Thumbnail ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Image Modal for Mobile */}
+        <ImageModal
+          selectedImage={selectedImage}
+          onClose={() => setSelectedImage(null)}
+          images={weddingImages}
+          isMobile={true}
+        />
+      </>
+    );
+  }
+
+  // Desktop layout
+  return (
+    <>
+      <section ref={sectionRef} className="relative py-12 sm:py-16 md:py-24 lg:py-32 bg-white overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            className="text-center mb-8 sm:mb-12 md:mb-16"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+          >
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-serif font-bold mb-3 sm:mb-4" style={{ color: '#1a1a1a' }}>
+              Our Wedding Creations
+            </h2>
+            <p className="text-base md:text-lg lg:text-xl text-gray-600 max-w-2xl mx-auto px-2">
+              Explore our stunning wedding floral arrangements and decorations
+            </p>
+          </motion.div>
+
+          <div ref={galleryRef} className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4 md:gap-6">
+            {weddingImages.map((image, index) => (
+              <div
+                key={index}
+                className="gallery-item relative group cursor-pointer rounded-xl overflow-hidden aspect-square"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setSelectedImage(index);
+                }}
+              >
+                <img
+                  src={image}
+                  alt={`Wedding decoration ${index + 1}`}
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="absolute bottom-0 left-0 right-0 p-4 transform translate-y-full group-hover:translate-y-0 transition-transform duration-500">
+                  <p className="text-white text-sm font-semibold">View Details</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Image Modal for Desktop */}
+      <ImageModal
+        selectedImage={selectedImage}
+        onClose={() => setSelectedImage(null)}
+        images={weddingImages}
+        isMobile={false}
+      />
+    </>
+  );
+};
+
+const ContactSection = () => {
+  const isMobile = useIsMobile();
+  const sectionRef = useRef<HTMLElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        cardRef.current,
+        { y: isMobile ? 30 : 100, opacity: 0, scale: isMobile ? 0.98 : 0.95 },
+        {
+          y: 0,
+          opacity: 1,
+          scale: 1,
+          duration: isMobile ? 0.8 : 1.2,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: "top 75%",
+            toggleActions: "play none none reverse",
+          },
+        }
+      );
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, [isMobile]);
+
+  return (
+    <section
+      ref={sectionRef}
+      id="contact-section"
+      className="relative py-12 sm:py-16 md:py-24 lg:py-32 bg-gradient-to-b from-white via-[#fafafa] to-white overflow-hidden"
+    >
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <motion.div
+          ref={cardRef}
+          className="bg-white rounded-2xl sm:rounded-3xl shadow-xl sm:shadow-2xl p-6 sm:p-8 md:p-12 border border-[rgba(199,158,72,0.2)] relative overflow-hidden"
+        >
+          {/* Background decorative elements */}
+          <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-[rgba(199,158,72,0.05)] to-transparent rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-gradient-to-tl from-[rgba(199,158,72,0.05)] to-transparent rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
+
+          <div className="relative z-10">
+            <div className="text-center mb-6 sm:mb-8">
+              <motion.div
+                className={`inline-flex items-center justify-center ${isMobile ? 'w-16 h-16' : 'w-20 h-20'} rounded-full mb-4 sm:mb-6 mx-auto`}
+                style={{ backgroundColor: `${GOLD_COLOR}15` }}
+                animate={{ rotate: [0, 360] }}
+                transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+              >
+                <Calendar className={`${isMobile ? 'w-8 h-8' : 'w-10 h-10'}`} style={{ color: GOLD_COLOR }} />
+              </motion.div>
+
+              <h2 className={`${isMobile ? 'text-2xl sm:text-3xl' : 'text-3xl md:text-4xl lg:text-5xl'} font-serif font-bold mb-3 sm:mb-4`} style={{ color: '#1a1a1a' }}>
+                Ready to Begin Your Journey?
+              </h2>
+              <p className={`${isMobile ? 'text-sm sm:text-base' : 'text-base md:text-lg lg:text-xl'} text-gray-600 mb-6 sm:mb-8`}>
+                Let's discuss how we can make your special day unforgettable
+              </p>
+            </div>
+
+            <div className="space-y-3 sm:space-y-4">
+              <motion.div
+                whileHover={isMobile ? {} : { scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <Button
+                  size="lg"
+                  className={`w-full ${isMobile ? 'text-sm sm:text-base px-6 py-5' : 'text-lg px-8 py-7'} font-semibold rounded-full shadow-xl hover:shadow-2xl transition-all duration-300`}
+                  style={{
+                    background: `linear-gradient(135deg, ${GOLD_COLOR} 0%, rgba(199, 158, 72, 0.9) 100%)`,
+                    color: 'white',
+                  }}
+                  onClick={() => {
+                    window.location.href = 'mailto:info@bexyflowers.com?subject=Wedding Package Inquiry';
+                  }}
+                >
+                  <span className="flex items-center justify-center gap-2 sm:gap-3">
+                    <Calendar className={`${isMobile ? 'w-4 h-4' : 'w-5 h-5'}`} />
+                    Schedule a Consultation
+                  </span>
                 </Button>
               </motion.div>
+
+              <motion.div
+                whileHover={isMobile ? {} : { scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className={`w-full ${isMobile ? 'text-sm sm:text-base px-6 py-5' : 'text-lg px-8 py-7'} font-semibold rounded-full border-2 transition-all duration-300`}
+                  style={{
+                    borderColor: GOLD_COLOR,
+                    color: GOLD_COLOR,
+                  }}
+                  onClick={() => {
+                    window.open('https://wa.me/1234567890?text=Hi, I\'m interested in your Wedding Package', '_blank');
+                  }}
+                >
+                  <span className="flex items-center justify-center gap-2 sm:gap-3">
+                    💬 Contact via WhatsApp
+                  </span>
+                </Button>
+              </motion.div>
+            </div>
+
+            <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-gray-200 text-center">
+              <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-gray-500`}>
+                We respond to all inquiries within 24 hours
+              </p>
             </div>
           </div>
         </motion.div>
@@ -503,202 +1445,39 @@ const PackageSection = () => {
   );
 };
 
-const ImageGallery = () => {
-  const [selectedImage, setSelectedImage] = React.useState<number | null>(null);
-  const isMobile = useIsMobile();
-
-  return (
-    <section className="relative py-20 bg-white overflow-hidden">
-      {/* Floating decorative elements */}
-      <FloatingIcon Icon={BouquetIcon} position={{ top: "5%", left: "3%" }} delay={0.5} duration={6.2} size={42} />
-      <FloatingIcon Icon={WeddingCakeIcon} position={{ top: "10%", right: "4%" }} delay={1.5} duration={7.3} size={46} />
-      <FloatingIcon Icon={WeddingCakeIcon} position={{ top: "18%", left: "4%" }} delay={0.7} duration={6.4} size={44} />
-      <FloatingIcon Icon={WeddingCakeIcon} position={{ bottom: "12%", right: "5%" }} delay={1.8} duration={7.1} size={48} />
-      <FloatingIcon Icon={BeerIcon} position={{ bottom: "10%", left: "2%" }} delay={2.1} duration={5.9} size={44} />
-      <FloatingIcon Icon={DiamondRingIcon} position={{ bottom: "15%", right: "3%" }} delay={0.8} duration={6.5} size={38} />
-      <FloatingIcon Icon={BrideIcon} position={{ top: "40%", left: "1%" }} delay={1.8} duration={7} size={40} />
-      <FloatingIcon Icon={Sparkles} position={{ bottom: "5%", right: "6%" }} delay={2.4} duration={5.5} size={30} />
-      <FloatingIcon Icon={Heart} position={{ top: "60%", right: "2%" }} delay={1.2} duration={6.8} size={36} />
-      <FloatingIcon Icon={WeddingRingIcon} position={{ bottom: "30%", left: "1%" }} delay={0.6} duration={6.3} size={34} />
-      
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <motion.div
-          className="text-center mb-12"
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-        >
-          <h2 className={`${isMobile ? 'text-3xl md:text-4xl' : 'text-5xl md:text-6xl'} font-serif font-bold mb-4`} style={{ color: '#1a1a1a' }}>
-            Our Wedding Creations
-          </h2>
-          <p className={`${isMobile ? 'text-base' : 'text-lg'} text-gray-600 max-w-2xl mx-auto`}>
-            Explore our stunning wedding floral arrangements and decorations
-          </p>
-        </motion.div>
-
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-          {weddingImages.map((image, index) => (
-            <motion.div
-              key={index}
-              className="relative group cursor-pointer rounded-xl overflow-hidden aspect-square"
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.1, duration: 0.6 }}
-              whileHover={{ scale: 1.05, zIndex: 10 }}
-              onClick={() => setSelectedImage(index)}
-            >
-              <img
-                src={image}
-                alt={`Wedding decoration ${index + 1}`}
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                loading="lazy"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              <div className="absolute bottom-0 left-0 right-0 p-4 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                <p className="text-white text-sm font-semibold">View Details</p>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-
-      {/* Full screen image modal */}
-      {selectedImage !== null && (
-        <motion.div
-          className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          onClick={() => setSelectedImage(null)}
-        >
-          <motion.img
-            src={weddingImages[selectedImage]}
-            alt={`Wedding decoration ${selectedImage + 1}`}
-            className="max-w-full max-h-full object-contain rounded-lg"
-            initial={{ scale: 0.8 }}
-            animate={{ scale: 1 }}
-            exit={{ scale: 0.8 }}
-            onClick={(e) => e.stopPropagation()}
-          />
-          <button
-            className="absolute top-4 right-4 text-white text-2xl font-bold hover:scale-110 transition-transform"
-            onClick={() => setSelectedImage(null)}
-          >
-            ✕
-          </button>
-        </motion.div>
-      )}
-    </section>
-  );
-};
-
-const ContactSection = () => {
-  const isMobile = useIsMobile();
-
-  return (
-    <section
-      id="contact-section"
-      className="relative py-20 bg-gradient-to-b from-[rgba(250,250,250,1)] to-white overflow-hidden"
-    >
-      {/* Floating decorative elements */}
-      <FloatingIcon Icon={BouquetIcon} position={{ top: "8%", left: "5%" }} delay={0.4} duration={6.4} size={48} />
-      <FloatingIcon Icon={WeddingCakeIcon} position={{ top: "15%", right: "6%" }} delay={1.6} duration={7.2} size={50} />
-      <FloatingIcon Icon={WeddingCakeIcon} position={{ top: "22%", left: "6%" }} delay={0.8} duration={6.6} size={46} />
-      <FloatingIcon Icon={WeddingCakeIcon} position={{ bottom: "15%", right: "7%" }} delay={1.5} duration={7.3} size={50} />
-      <FloatingIcon Icon={BeerIcon} position={{ bottom: "12%", left: "4%" }} delay={2.2} duration={6.1} size={46} />
-      <FloatingIcon Icon={DiamondRingIcon} position={{ bottom: "18%", right: "5%" }} delay={0.9} duration={6.6} size={42} />
-      <FloatingIcon Icon={BrideIcon} position={{ top: "35%", left: "2%" }} delay={1.9} duration={7.1} size={44} />
-      <FloatingIcon Icon={Heart} position={{ bottom: "8%", right: "4%" }} delay={1.3} duration={6.9} size={40} />
-      <FloatingIcon Icon={WeddingRingIcon} position={{ bottom: "25%", left: "2%" }} delay={0.7} duration={6.2} size={36} />
-      <FloatingIcon Icon={Sparkles} position={{ top: "25%", right: "2%" }} delay={2.5} duration={5.7} size={32} />
-      
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <motion.div
-          className="bg-white rounded-3xl shadow-2xl p-8 md:p-12 border border-[rgba(199,158,72,0.2)]"
-          initial={{ opacity: 0, y: 50 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-        >
-          <div className="text-center mb-8">
-            <motion.div
-              className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-6 mx-auto"
-              style={{ backgroundColor: `${GOLD_COLOR}15` }}
-              animate={{ rotate: [0, 360] }}
-              transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-            >
-              <Calendar className="w-8 h-8" style={{ color: GOLD_COLOR }} />
-            </motion.div>
-
-            <h2 className={`${isMobile ? 'text-3xl md:text-4xl' : 'text-4xl md:text-5xl'} font-serif font-bold mb-4`} style={{ color: '#1a1a1a' }}>
-              Ready to Begin Your Journey?
-            </h2>
-            <p className={`${isMobile ? 'text-base' : 'text-lg'} text-gray-600 mb-8`}>
-              Let's discuss how we can make your special day unforgettable
-            </p>
-          </div>
-
-          <div className="space-y-4">
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <Button
-                size="lg"
-                className="w-full text-lg px-8 py-7 font-semibold rounded-full shadow-xl hover:shadow-2xl transition-all duration-300"
-                style={{
-                  background: `linear-gradient(135deg, ${GOLD_COLOR} 0%, rgba(199, 158, 72, 0.9) 100%)`,
-                  color: 'white',
-                }}
-                onClick={() => {
-                  window.location.href = 'mailto:info@bexyflowers.com?subject=Wedding Package Inquiry';
-                }}
-              >
-                <span className="flex items-center justify-center gap-3">
-                  <Calendar className="w-5 h-5" />
-                  Schedule a Consultation
-                </span>
-              </Button>
-            </motion.div>
-
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <Button
-                size="lg"
-                variant="outline"
-                className="w-full text-lg px-8 py-7 font-semibold rounded-full border-2 transition-all duration-300"
-                style={{
-                  borderColor: GOLD_COLOR,
-                  color: GOLD_COLOR,
-                }}
-                onClick={() => {
-                  // WhatsApp link - replace with actual number
-                  window.open('https://wa.me/1234567890?text=Hi, I\'m interested in your Wedding Package', '_blank');
-                }}
-              >
-                <span className="flex items-center justify-center gap-3">
-                  💬 Contact via WhatsApp
-                </span>
-              </Button>
-            </motion.div>
-          </div>
-
-          <div className="mt-8 pt-8 border-t border-gray-200 text-center">
-            <p className="text-sm text-gray-500">
-              We respond to all inquiries within 24 hours
-            </p>
-          </div>
-        </motion.div>
-      </div>
-    </section>
-  );
-};
-
 const WeddingAndEvents = () => {
+  useEffect(() => {
+    // Add class to body to identify wedding page
+    document.body.classList.add('wedding-page');
+    
+    // Make navigation transparent with white text for wedding page
+    const nav = document.querySelector('.ultra-navigation') as HTMLElement;
+    if (nav) {
+      // Set transparent background immediately
+      nav.style.backgroundColor = 'rgba(0, 0, 0, 0.1)';
+      nav.style.backdropFilter = 'blur(10px)';
+      nav.style.transition = 'background-color 0.3s ease';
+
+      // Update on scroll - keep transparent but slightly more opaque when scrolled
+      const handleScroll = () => {
+        const scrolled = window.scrollY > 50;
+        nav.style.backgroundColor = scrolled ? 'rgba(0, 0, 0, 0.3)' : 'rgba(0, 0, 0, 0.1)';
+      };
+
+      window.addEventListener('scroll', handleScroll, { passive: true });
+      handleScroll(); // Initial call
+      
+      return () => {
+        window.removeEventListener('scroll', handleScroll);
+        document.body.classList.remove('wedding-page');
+        // Reset navigation when leaving page
+        nav.style.backgroundColor = '';
+        nav.style.backdropFilter = '';
+        nav.style.transition = '';
+      };
+    }
+  }, []);
+
   return (
     <div className="min-h-screen overflow-x-hidden relative bg-white">
       <UltraNavigation />
@@ -706,6 +1485,54 @@ const WeddingAndEvents = () => {
         <LazySection rootMargin="400px 0px">
           <Suspense fallback={null}>
             <WeddingHero />
+          </Suspense>
+        </LazySection>
+        <LazySection rootMargin="400px 0px">
+          <Suspense fallback={null}>
+            <ServiceSection
+              title="Wedding Flowers"
+              description="Create your dream wedding with our exquisite floral designs. From bridal bouquets to ceremony decorations, we provide elegant and timeless arrangements that capture the essence of your special day. Every petal is carefully selected and arranged to perfection."
+              image={weddingImages[2] || weddingImages[0]}
+              index={0}
+              features={[
+                "Custom bridal bouquets",
+                "Ceremony arch decorations",
+                "Aisle arrangements",
+                "Altar floral displays"
+              ]}
+            />
+          </Suspense>
+        </LazySection>
+        <LazySection rootMargin="400px 0px">
+          <Suspense fallback={null}>
+            <ServiceSection
+              title="Event Flowers"
+              description="Enhance your events with stunning floral arrangements. Whether it's a corporate gathering or a private party, we tailor our designs to suit the occasion. Our expert florists create memorable centerpieces and decorations that leave a lasting impression."
+              image={weddingImages[1] || weddingImages[0]}
+              index={1}
+              features={[
+                "Corporate event arrangements",
+                "Private party decorations",
+                "Custom centerpieces",
+                "Venue transformation"
+              ]}
+            />
+          </Suspense>
+        </LazySection>
+        <LazySection rootMargin="400px 0px">
+          <Suspense fallback={null}>
+            <ServiceSection
+              title="Design Your Bouquet"
+              description="Choose from a variety of flowers and colors to create a personalized bouquet for your special day. Our experts will help you craft the perfect arrangement that reflects your unique style and vision. Every detail is tailored to your preferences."
+              image={weddingImages[3] || weddingImages[0]}
+              index={2}
+              features={[
+                "Personalized consultations",
+                "Wide selection of flowers",
+                "Custom color schemes",
+                "Expert design guidance"
+              ]}
+            />
           </Suspense>
         </LazySection>
         <LazySection rootMargin="400px 0px">
