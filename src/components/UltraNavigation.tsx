@@ -243,7 +243,9 @@ const UltraNavigation = () => {
             style={{
               backgroundColor: 'transparent', // Make header transparent
               transition: 'none', // Remove transition to prevent black flash
-              pointerEvents: 'auto' // Ensure navigation is clickable
+              pointerEvents: 'auto', // Ensure navigation is clickable
+              position: 'fixed', // Explicitly set fixed for mobile
+              width: '100%',
               // Removed will-change as it causes performance issues with scroll
             }}
           >

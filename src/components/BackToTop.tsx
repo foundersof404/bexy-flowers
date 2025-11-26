@@ -39,8 +39,10 @@ const BackToTop = () => {
   return (
     <motion.button
       onClick={scrollToTop}
-      className="fixed bottom-6 right-6 z-50 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95"
+      className="fixed z-50 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95"
       style={{
+        bottom: isMobile ? '80px' : '24px', // Higher on mobile to avoid footer/content overlap
+        right: isMobile ? '16px' : '24px',
         width: isMobile ? '50px' : '60px',
         height: isMobile ? '50px' : '60px',
         background: `linear-gradient(135deg, ${GOLD_COLOR} 0%, rgba(199, 158, 72, 0.9) 100%)`,
