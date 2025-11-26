@@ -27,9 +27,20 @@ const CartPage: React.FC = () => {
     });
   };
 
-  const handleWhatsAppCheckout = () => {
+  const handleWhatsAppCheckout = (e?: React.MouseEvent<HTMLButtonElement>) => {
+    // CRITICAL: Prevent all default behavior and stop propagation
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
+    console.log('=== CHECKOUT BUTTON CLICKED ===');
+    console.log('Event:', e);
+    console.log('Cart Items Count:', cartItems.length);
+    
     if (cartItems.length === 0) {
       console.log('Cart is empty, cannot checkout');
+      alert('Your cart is empty. Please add items before checkout.');
       return;
     }
     
@@ -71,20 +82,24 @@ const CartPage: React.FC = () => {
     // Save cart state before opening WhatsApp (defensive)
     try {
       localStorage.setItem('bexy-flowers-cart-backup', JSON.stringify(cartItems));
+      console.log('Cart backed up to localStorage');
     } catch (e) {
       console.warn('Could not backup cart:', e);
     }
     
-    // Try window.open first
-    const newWindow = window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
-    
-    if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
-      console.log('Popup blocked, showing user message');
-      // Don't navigate away - show a message instead
-      alert('Please allow popups for this site to open WhatsApp, or copy this link:\n\n' + whatsappUrl);
-    } else {
-      console.log('WhatsApp opened successfully');
-    }
+    // Use setTimeout to ensure all event handlers have finished
+    setTimeout(() => {
+      // Try window.open first
+      const newWindow = window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+      
+      if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+        console.log('Popup blocked, showing user message');
+        // Don't navigate away - show a message instead
+        alert('Please allow popups for this site to open WhatsApp, or copy this link:\n\n' + whatsappUrl);
+      } else {
+        console.log('WhatsApp opened successfully');
+      }
+    }, 100);
   };
 
   if (isEmpty) {
@@ -245,7 +260,7 @@ const CartPage: React.FC = () => {
             transition={{ duration: 0.6, delay: 0.3 }}
             className="lg:col-span-1"
           >
-            <Card className="p-6 bg-white/60 backdrop-blur-sm border border-white/30 sticky top-8">
+            <Card className="p-6 bg-white/60 backdrop-blur-sm border border-white/30 sticky top-8" style={{ position: 'relative', zIndex: 10 }}>
               <h3 className="font-luxury text-2xl font-bold text-slate-800 mb-6">
                 Order Summary
               </h3>
@@ -274,11 +289,17 @@ const CartPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="space-y-3">
+              <div className="space-y-3" style={{ position: 'relative', zIndex: 10 }}>
                 <Button
                   type="button"
                   onClick={handleWhatsAppCheckout}
                   className="w-full bg-gradient-to-r from-amber-400 to-amber-600 hover:from-amber-500 hover:to-amber-700 text-white font-semibold py-6 rounded-full"
+                  style={{ 
+                    position: 'relative', 
+                    zIndex: 1000,
+                    pointerEvents: 'auto',
+                    cursor: 'pointer'
+                  }}
                 >
                   Proceed to Checkout
                 </Button>
