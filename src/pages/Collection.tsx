@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useLocation } from "react-router-dom";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import UltraNavigation from "@/components/UltraNavigation";
@@ -25,11 +26,21 @@ const Collection = () => {
   const [selectedBouquet, setSelectedBouquet] = useState<Bouquet | null>(null);
   const [filteredBouquets, setFilteredBouquets] = useState<Bouquet[]>(generatedBouquets);
   const containerRef = useRef<HTMLDivElement>(null);
+  const location = useLocation();
 
   useEffect(() => {
     // Ensure page loads at the very top on navigation
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
   }, []);
+
+  // Check for category query parameter
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const categoryParam = params.get("category");
+    if (categoryParam) {
+      setSelectedCategory(categoryParam);
+    }
+  }, [location.search]);
 
   useEffect(() => {
     if (selectedCategory === "all") {

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useNavigate } from 'react-router-dom';
 import { Heart, Gift, Cake, Crown, Briefcase, Flower2, Star, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -14,7 +15,8 @@ const categories = [
     image: encodeURI("/assets/wedding % events/wedding/IMG-20251126-WA0021.jpg"),
     gradient: "from-rose-200/20 via-amber-100/30 to-yellow-200/20",
     icon: Crown,
-    color: "from-rose-400/80 to-amber-300/90"
+    color: "from-rose-400/80 to-amber-300/90",
+    filterValue: "wedding-percent-events"
   },
   {
     id: 2,
@@ -23,7 +25,8 @@ const categories = [
     image: encodeURI("/assets/valentine/IMG_4172.jpg"),
     gradient: "from-red-200/20 via-pink-100/30 to-rose-200/20",
     icon: Heart,
-    color: "from-red-400/80 to-pink-300/90"
+    color: "from-red-400/80 to-pink-300/90",
+    filterValue: "valentine"
   },
   {
     id: 3,
@@ -32,7 +35,8 @@ const categories = [
     image: encodeURI("/assets/mother day/IMG_8394.JPG"),
     gradient: "from-pink-200/20 via-rose-100/30 to-lavender-200/20",
     icon: Flower2,
-    color: "from-pink-400/80 to-rose-300/90"
+    color: "from-pink-400/80 to-rose-300/90",
+    filterValue: "mother-day"
   },
   {
     id: 4,
@@ -41,7 +45,8 @@ const categories = [
     image: encodeURI("/assets/birthday/IMG_3730 (1).jpg"),
     gradient: "from-purple-200/20 via-violet-100/30 to-indigo-200/20",
     icon: Cake,
-    color: "from-purple-400/80 to-violet-300/90"
+    color: "from-purple-400/80 to-violet-300/90",
+    filterValue: "birthday"
   },
   {
     id: 5,
@@ -50,7 +55,8 @@ const categories = [
     image: encodeURI("/assets/red roses/red roses the letter J.png"),
     gradient: "from-amber-200/20 via-yellow-100/30 to-gold-200/20",
     icon: Star,
-    color: "from-amber-400/80 to-yellow-300/90"
+    color: "from-amber-400/80 to-yellow-300/90",
+    filterValue: "red-roses"
   },
   {
     id: 6,
@@ -59,7 +65,8 @@ const categories = [
     image: encodeURI("/assets/wedding % events/events/IMG-20251126-WA0022.jpg"),
     gradient: "from-slate-200/20 via-gray-100/30 to-zinc-200/20",
     icon: Briefcase,
-    color: "from-slate-400/80 to-gray-300/90"
+    color: "from-slate-400/80 to-gray-300/90",
+    filterValue: "wedding-percent-events"
   },
   {
     id: 8,
@@ -68,7 +75,8 @@ const categories = [
     image: encodeURI("/assets/hand band/IMG_5392.jpg"),
     gradient: "from-emerald-200/20 via-green-100/30 to-teal-200/20",
     icon: Sparkles,
-    color: "from-emerald-400/80 to-green-300/90"
+    color: "from-emerald-400/80 to-green-300/90",
+    filterValue: "hand-band"
   },
   {
     id: 9,
@@ -77,7 +85,8 @@ const categories = [
     image: encodeURI("/assets/graduation/IMG_0295.jpg"),
     gradient: "from-blue-200/20 via-indigo-100/30 to-purple-200/20",
     icon: Star,
-    color: "from-blue-400/80 to-indigo-300/90"
+    color: "from-blue-400/80 to-indigo-300/90",
+    filterValue: "graduation"
   },
   {
     id: 10,
@@ -86,17 +95,29 @@ const categories = [
     image: encodeURI("/assets/red roses/large red roses flower bouquet with gliter.png"),
     gradient: "from-orange-200/20 via-amber-100/30 to-yellow-200/20",
     icon: Gift,
-    color: "from-orange-400/80 to-amber-300/90"
+    color: "from-orange-400/80 to-amber-300/90",
+    filterValue: "red-roses"
   }
 ];
 
 const UltraCategories = () => {
+  const navigate = useNavigate();
   const sectionRef = useRef<HTMLElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const mobileRow1Ref = useRef<HTMLDivElement>(null);
   const mobileRow2Ref = useRef<HTMLDivElement>(null);
   const [isAutoScroll, setIsAutoScroll] = useState(false);
+
+  const handleExplore = (filterValue: string) => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    navigate(`/collection?category=${filterValue}`);
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    });
+  };
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -373,6 +394,7 @@ const UltraCategories = () => {
               <div
                 key={`${category.id}-${index}`}
                 className="flex-shrink-0 w-80 h-96 group cursor-pointer"
+                onClick={() => handleExplore(category.filterValue)}
                   style={{ 
                     willChange: 'transform',
                     backfaceVisibility: 'hidden',
@@ -433,6 +455,10 @@ const UltraCategories = () => {
                           className="bg-gradient-to-r from-slate-800/90 to-slate-900/90 backdrop-blur-xl border border-slate-600/50 text-slate-100 px-8 py-3 rounded-2xl font-medium text-sm opacity-0 group-hover:opacity-100 transform translate-y-6 group-hover:translate-y-0 transition-all duration-700 ease-out hover:from-slate-700/90 hover:to-slate-800/90 hover:text-white hover:border-slate-500/70 hover:shadow-[0_10px_30px_rgba(0,0,0,0.3)]"
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleExplore(category.filterValue);
+                          }}
                         >
                           EXPLORE COLLECTION
                         </motion.button>
@@ -576,6 +602,7 @@ const UltraCategories = () => {
                 <div
                   key={`row1-${category.id}-${index}`}
                   className="flex-shrink-0 w-[196px] h-56 group cursor-pointer"
+                  onClick={() => handleExplore(category.filterValue)}
                   style={{ 
                     willChange: 'transform',
                     backfaceVisibility: 'hidden',
@@ -650,6 +677,7 @@ const UltraCategories = () => {
                 <div
                   key={`row2-${category.id}-${index}`}
                   className="flex-shrink-0 w-[196px] h-56 group cursor-pointer"
+                  onClick={() => handleExplore(category.filterValue)}
                   style={{ 
                     willChange: 'transform',
                     backfaceVisibility: 'hidden',
