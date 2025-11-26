@@ -389,27 +389,35 @@ const Customize: React.FC = () => {
         })
         .join(" and ");
 
-      // 2. Packaging Description - Crucial for "No stems/greens" in box
+      // 2. Packaging & Setting Description based on Glitter/No-Glitter
       let packagingPrompt = "";
+      let settingPrompt = "";
+      
       if (selectedPackage?.type === "box") {
-        const sizeDesc = selectedSize?.id === 'small' ? "compact small" : selectedSize?.id === 'large' ? "large grand" : "medium";
-        packagingPrompt = `arranged tightly packed inside a ${sizeDesc} ${selectedBoxColor?.name} ${selectedBoxShape?.name}-shaped luxury box. The flowers are arranged in a HIGH, ROUNDED DOME shape, rising significantly above the rim of the box (mounded style). The flower heads are packed very close together with ABSOLUTELY NO STEMS VISIBLE. The box features a clear gold logo on the front that says "Bexy Flowers". Camera angle is a FRONT-SIDE VIEW at eye level (NOT top-down), showing the depth of the box and the height of the flower dome.`;
+        const sizeDesc = selectedSize?.id === 'small' ? "medium-sized" : selectedSize?.id === 'large' ? "large" : "medium-sized";
+        
+        if (!withGlitter) {
+          // Image 1 Style (Classic)
+          packagingPrompt = `in a matte black cylindrical box with a slightly textured, fabric-like velvet finish. The box features a small, golden logo centered near the bottom with a stylized 'B' followed by "Bexy Flowers" in a clean, modern, golden sans-serif font. The roses are fresh, vibrant red, plump and velvety, arranged tightly in a perfect, domed cluster sitting slightly above the rim.`;
+          settingPrompt = `outdoors on a light grey concrete ledge. Background features bright sunlight casting a slight shadow, with lush green foliage framing the arrangement on the left, suggesting a bright, sunny day with natural lighting.`;
+        } else {
+          // Image 2 Style (Glitter)
+          packagingPrompt = `in a matte black cylindrical box featuring a thin, double-ring gold border trim around the top and bottom edges. The box features a centered golden logo with a stylized 'B' followed by "Bexy Flowers" in a golden sans-serif font. The roses are deep burgundy red, heavily dusted with fine reddish-gold glitter giving a shimmering, metallic frosted appearance. They are packed densely forming a slightly mounded surface.`;
+          settingPrompt = `indoors against a completely plain, solid white background. Lighting is soft, artificial studio lighting with no harsh shadows.`;
+        }
       } else {
-        packagingPrompt = `wrapped in ${selectedWrapColor?.name} paper with "Bexy Flowers" printed on it. Elegant wrapping style showing stems at the bottom. View is from a front-side angle.`;
+        // Wrap fallback
+        packagingPrompt = `wrapped in ${selectedWrapColor?.name} paper with "Bexy Flowers" printed on it. Elegant wrapping style showing stems at the bottom.`;
+        settingPrompt = `indoors against a plain white background with soft studio lighting.`;
       }
 
-      // 3. Glitter - "Diamond dust" look
-      const glitterPrompt = withGlitter 
-        ? "The flower petals are covered in heavy fine diamond dust glitter, creating a strong sparkling and shimmering effect identical to red glitter roses." 
-        : "Natural flower texture, no glitter.";
-
-      // 4. Accessories
+      // 3. Accessories
       const accessoriesPrompt = selectedAccessories.length > 0 
         ? `Includes ${selectedAccessories.map(id => accessories.find(a => a.id === id)?.name).join(", ")} placed nicely.` 
         : "";
 
       // Combined Prompt
-      const fullPrompt = `Professional product photography of ${flowerDetails}, ${packagingPrompt} ${glitterPrompt} ${accessoriesPrompt} White background, soft studio lighting, 8k resolution, photorealistic, sharp focus, centered composition. The text on the box MUST be "Bexy Flowers". ${aiRefinementText}`;
+      const fullPrompt = `Professional photography of ${flowerDetails} ${packagingPrompt} ${accessoriesPrompt} ${settingPrompt} High resolution, photorealistic, 8k, sharp focus. ${aiRefinementText}`;
 
       // Use Pollinations AI
       const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(fullPrompt)}?width=1024&height=1024&nologo=true&seed=${Date.now()}&model=flux`;
@@ -438,7 +446,10 @@ const Customize: React.FC = () => {
         const flower = flowers.find(f => f.id === flowerId);
         return Object.entries(colors)
           .filter(([_, count]) => count > 0)
-          .map(([colorId, count]) => `${count}x ${colorObj?.name} ${flower?.name}`)
+          .map(([colorId, count]) => {
+            const colorObj = flower?.colors.find(c => c.id === colorId);
+            return `${count}x ${colorObj?.name} ${flower?.name}`;
+          })
           .join(", ");
       })
       .join(", ");
