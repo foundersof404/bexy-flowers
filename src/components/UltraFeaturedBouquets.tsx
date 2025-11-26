@@ -282,7 +282,7 @@ const UltraFeaturedBouquets = () => {
             style={{ marginTop: '5em' }}
           >
             <div 
-              className="grid grid-cols-3 gap-3 sm:gap-4 md:gap-6 lg:gap-8 max-w-6xl mx-auto px-2 sm:px-4 w-full"
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto px-4 w-full"
             >
           {bouquets.map((bouquet, index) => {
             // Define consistent gold color for all cards
@@ -351,12 +351,10 @@ const UltraFeaturedBouquets = () => {
                  >
                      {/* Image */}
                      <div 
-                       className="imgBox"
+                       className="imgBox h-80 sm:h-[clamp(8rem,20vw,18.75rem)]"
                        style={{
                          position: 'relative',
                          width: '100%',
-                         height: 'clamp(8rem, 20vw, 18.75rem)',
-                         minHeight: '8rem',
                          borderRadius: '1.25rem 1.25rem 0 0',
                          overflow: 'hidden'
                        }}
@@ -443,30 +441,29 @@ const UltraFeaturedBouquets = () => {
 
                      {/* Content section */}
                      <div 
-                       className="content"
+                       className="content p-6"
                        style={{
-                         padding: 'clamp(0.5rem, 1.5vw, 0.938rem) clamp(0.4rem, 1.2vw, 0.625rem)',
                          borderRadius: '0 0 1.25rem 1.25rem'
                        }}
                      >
                     <h3 
                       style={{
                         textTransform: 'capitalize',
-                        fontSize: 'clamp(0.875rem, 2vw, 1.8rem)',
+                        fontSize: 'clamp(1.25rem, 2.5vw, 1.8rem)',
                         color: '#111',
                         fontWeight: '700',
                         lineHeight: '1.2',
-                        marginBottom: '0.25rem'
+                        marginBottom: '0.5rem'
                       }}
                     >
                     {bouquet.name}
                   </h3>
                     <p 
                       style={{
-                        margin: 'clamp(0.25rem, 1vw, 0.625rem) 0 clamp(0.5rem, 1.5vw, 1.25rem)',
+                        marginBottom: '1rem',
                         color: '#565656',
-                        fontSize: 'clamp(0.65rem, 1.5vw, 0.875rem)',
-                        lineHeight: '1.3',
+                        fontSize: 'clamp(0.95rem, 1.5vw, 1rem)',
+                        lineHeight: '1.5',
                         display: '-webkit-box',
                         WebkitLineClamp: 2,
                         WebkitBoxOrient: 'vertical',
@@ -496,10 +493,11 @@ const UltraFeaturedBouquets = () => {
                              background: '#f0f0f0',
                              color: tag.color,
                              fontWeight: '700',
-                             fontSize: 'clamp(0.5rem, 1.2vw, 0.8rem)',
-                             padding: 'clamp(0.2rem, 0.8vw, 0.375rem) clamp(0.3rem, 1vw, 0.625rem)',
-                             borderRadius: '0.188rem',
-                             whiteSpace: 'nowrap'
+                             fontSize: '0.75rem',
+                             padding: '0.375rem 0.75rem',
+                             borderRadius: '0.25rem',
+                             whiteSpace: 'nowrap',
+                             letterSpacing: '0.05em'
                            }}
                          >
                            {tag.text}
