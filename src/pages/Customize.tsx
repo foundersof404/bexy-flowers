@@ -398,11 +398,11 @@ const Customize: React.FC = () => {
         
         if (!withGlitter) {
           // Image 1 Style (Classic)
-          packagingPrompt = `in a matte black cylindrical box with a slightly textured, fabric-like velvet finish. The box features a small, golden logo centered near the bottom with a stylized 'B' followed by "Bexy Flowers" in a clean, modern, golden sans-serif font. The roses are fresh, vibrant red, plump and velvety, arranged tightly in a perfect, domed cluster sitting slightly above the rim.`;
-          settingPrompt = `outdoors on a light grey concrete ledge. Background features bright sunlight casting a slight shadow, with lush green foliage framing the arrangement on the left, suggesting a bright, sunny day with natural lighting.`;
+          packagingPrompt = `in a matte black cylindrical box with a soft velvet finish. The box has the text "Bexy Flowers" written in gold letters on the front. The roses form a perfect, tight hemisphere rising above the box edge. Only the rose blooms are visible, packed so tightly that no green stems or leaves can be seen between them.`;
+          settingPrompt = `The box sits on a light grey stone ledge outdoors. Sunlight hits the red roses creating vibrant highlights. Background is blurred green garden foliage.`;
         } else {
           // Image 2 Style (Glitter)
-          packagingPrompt = `in a matte black cylindrical box featuring a thin, double-ring gold border trim around the top and bottom edges. The box features a centered golden logo with a stylized 'B' followed by "Bexy Flowers" in a golden sans-serif font. The roses are deep burgundy red, heavily dusted with fine reddish-gold glitter giving a shimmering, metallic frosted appearance. They are packed densely forming a slightly mounded surface.`;
+          packagingPrompt = `in a matte black cylindrical box with a thin double gold ring at the top and bottom. The box has the text "Bexy Flowers" written in gold letters on the front. The roses are deep burgundy red, heavily coated in fine reddish-gold glitter. The roses are packed extremely tight, forming a flat-topped or slightly curved surface.`;
           settingPrompt = `indoors against a completely plain, solid white background. Lighting is soft, artificial studio lighting with no harsh shadows.`;
         }
       } else {
