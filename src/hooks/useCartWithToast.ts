@@ -15,6 +15,7 @@ export const useCartWithToast = () => {
       description: `${product.title} has been added to your cart.`,
       duration: 3000,
       position: 'top-right',
+      closeButton: true,
     });
   };
 
@@ -27,6 +28,7 @@ export const useCartWithToast = () => {
         description: `${item.title} has been removed from your cart.`,
         duration: 3000,
         position: 'top-right',
+        closeButton: true,
       });
     }
   };

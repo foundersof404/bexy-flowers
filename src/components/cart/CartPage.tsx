@@ -16,8 +16,15 @@ const CartPage: React.FC = () => {
   const isEmpty = cartItems.length === 0;
   const totalPrice = getTotalPrice();
 
-  const handleContinueShopping = () => {
-    navigate('/');
+  const handleContinueShopping = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    // Use requestAnimationFrame to ensure state is preserved
+    requestAnimationFrame(() => {
+      navigate('/');
+    });
   };
 
   const handleWhatsAppCheckout = () => {
@@ -61,12 +68,20 @@ const CartPage: React.FC = () => {
     console.log('WhatsApp URL:', whatsappUrl);
     console.log('Opening WhatsApp...');
     
+    // Save cart state before opening WhatsApp (defensive)
+    try {
+      localStorage.setItem('bexy-flowers-cart-backup', JSON.stringify(cartItems));
+    } catch (e) {
+      console.warn('Could not backup cart:', e);
+    }
+    
     // Try window.open first
     const newWindow = window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
     
     if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
-      console.log('Popup blocked, using location.href');
-      window.location.href = whatsappUrl;
+      console.log('Popup blocked, showing user message');
+      // Don't navigate away - show a message instead
+      alert('Please allow popups for this site to open WhatsApp, or copy this link:\n\n' + whatsappUrl);
     } else {
       console.log('WhatsApp opened successfully');
     }
@@ -97,6 +112,7 @@ const CartPage: React.FC = () => {
             </p>
             
             <Button
+              type="button"
               onClick={handleContinueShopping}
               className="bg-gradient-to-r from-amber-400 to-amber-600 hover:from-amber-500 hover:to-amber-700 text-white font-semibold px-8 py-3 rounded-full"
             >
@@ -133,6 +149,7 @@ const CartPage: React.FC = () => {
           </div>
           
           <Button
+            type="button"
             onClick={handleContinueShopping}
             variant="outline"
             className="border-slate-300 text-slate-700 hover:bg-slate-50"

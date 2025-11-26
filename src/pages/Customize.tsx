@@ -335,7 +335,7 @@ const Customize: React.FC = () => {
 
   const adjustFlowerColor = (flowerId: string, colorId: string, delta: number) => {
     if (delta > 0 && totalFlowers >= maxFlowers) {
-      toast.error(`Maximum ${maxFlowers} flowers`, { icon: "🌸" });
+      toast.error(`Maximum ${maxFlowers} flowers`, { icon: "🌸", closeButton: true });
       return;
     }
     
@@ -428,14 +428,14 @@ const Customize: React.FC = () => {
         const blob = await response.blob();
         setGeneratedImage(URL.createObjectURL(blob));
         setGeneratedImageUrl(url);
-        toast.success("Preview ready!");
+        toast.success("Preview ready!", { closeButton: true });
       } else {
         throw new Error("Generation failed");
       }
 
     } catch (error) {
       console.error("Error generating image:", error);
-      toast.error("Generation failed, please try again.");
+      toast.error("Generation failed, please try again.", { closeButton: true });
     } finally {
       setIsGenerating(false);
     }
@@ -466,7 +466,7 @@ const Customize: React.FC = () => {
     });
     setCelebrating(true);
     setTimeout(() => setCelebrating(false), 2000);
-    toast.success("Added to cart!");
+    toast.success("Added to cart!", { closeButton: true });
   };
 
   return (
