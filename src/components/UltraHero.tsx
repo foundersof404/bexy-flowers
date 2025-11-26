@@ -153,39 +153,50 @@ const UltraHero = () => {
       }`}
       style={{ 
         minHeight: '100vh',
-        padding: isMobile ? '5rem 1.4rem' : '6rem 2rem',
-        backgroundImage: isMobile ? "url('/assets/flower1.jpg')" : undefined,
-        backgroundSize: isMobile ? 'cover' : undefined,
-        backgroundPosition: isMobile ? 'center' : undefined,
-        backgroundAttachment: isMobile ? 'fixed' : undefined
+        padding: isMobile ? '5rem 1.4rem' : '6rem 2rem'
       }}
     >
       {/* Background Image with 3D Parallax */}
       <div 
         className={`absolute inset-0 z-0 ${isMobile ? '' : '-top-4'}`}
       >
-        {!isMobile && (
-          <motion.img
-            src={heroBackground}
-            alt="Luxury floral background"
-            className="w-full h-full object-cover transform-3d shadow-gold opacity-20"
-            initial={{ scale: shouldReduceMotion ? 1 : 1.2, rotateX: shouldReduceMotion ? 0 : -5 }}
-            whileInView={{ scale: 1, rotateX: 0 }}
-            viewport={{ once: true, amount: 0.2 }}
-            transition={{ 
-              duration: shouldReduceMotion ? 0 : 20, 
-              ease: "linear", 
-              repeat: shouldReduceMotion ? 0 : Infinity, 
-              repeatType: "reverse" 
-            }}
-            loading="eager"
-            decoding="async"
-            style={{ willChange: shouldReduceMotion ? "auto" : "transform" }}
-          />
-        )}
-        {!isMobile && (
-          <div className="absolute inset-0 -top-4 bg-gradient-to-b from-background/90 via-background/70 to-background/90" />
-        )}
+        <motion.img
+          src={heroBackground}
+          alt="Luxury floral background"
+          className={`w-full h-full object-cover ${isMobile ? 'opacity-80 scale-105' : 'transform-3d shadow-gold opacity-20'}`}
+          initial={
+            isMobile
+              ? { scale: 1.05, opacity: 0 }
+              : { scale: shouldReduceMotion ? 1 : 1.2, rotateX: shouldReduceMotion ? 0 : -5 }
+          }
+          animate={
+            isMobile
+              ? { opacity: 1, scale: 1 }
+              : { scale: 1, rotateX: 0 }
+          }
+          whileInView={!isMobile ? { scale: 1, rotateX: 0 } : undefined}
+          viewport={!isMobile ? { once: true, amount: 0.2 } : undefined}
+          transition={{
+            duration: shouldReduceMotion ? 0 : 20,
+            ease: "linear",
+            repeat: !isMobile && !shouldReduceMotion ? Infinity : 0,
+            repeatType: "reverse"
+          }}
+          loading="eager"
+          decoding="async"
+          style={{ willChange: shouldReduceMotion && !isMobile ? "auto" : "transform, opacity" }}
+        />
+        <div 
+          className={`absolute inset-0 ${isMobile ? '' : '-top-4'} ${isMobile ? '' : 'bg-gradient-to-b from-background/90 via-background/70 to-background/90'}`}
+          style={
+            isMobile
+              ? {
+                  background: 'linear-gradient(180deg, rgba(8,8,8,0.15) 0%, rgba(255,255,255,0.1) 45%, rgba(255,255,255,0.85) 100%)',
+                  pointerEvents: 'none'
+                }
+              : undefined
+          }
+        />
       </div>
 
 
@@ -198,7 +209,7 @@ const UltraHero = () => {
           <div 
             className="absolute inset-0 z-10"
             style={{
-              background: 'linear-gradient(180deg, rgba(255,255,255,0.85) 15%, rgba(255,255,250,0.92) 100%)',
+              background: 'linear-gradient(180deg, rgba(255,255,255,0.4) 5%, rgba(255,255,250,0.75) 55%, rgba(255,255,255,0.9) 100%)',
               pointerEvents: 'none'
             }}
           />
@@ -215,6 +226,16 @@ const UltraHero = () => {
           />
         </>
       )}
+
+      {/* Soft edge at bottom */}
+      <div
+        className="absolute inset-x-0 bottom-0 h-24 pointer-events-none"
+        style={{
+          zIndex: 10,
+          background: 'linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.65) 55%, rgba(255,255,255,0.95) 100%)',
+          backdropFilter: 'blur(8px)'
+        }}
+      />
 
       {/* Modern Hero Content */}
       <div className={`relative z-20 max-w-7xl mx-auto w-full ${
@@ -508,28 +529,27 @@ const UltraHero = () => {
                </motion.div>
                
                {/* Mobile CTA Button - After subtitle */}
-               {isMobile && (
-                 <motion.a
-                   href="/collection"
-                   className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-[#0f0f0f] text-white rounded-sm font-semibold tracking-[0.06em] shadow-[0_8px_20px_rgba(11,11,11,0.18)] transition-all duration-180 border-2 border-white/[0.02] mx-auto mb-6 w-[60%] max-w-[250px]"
-                   initial={{ opacity: 0, y: 20 }}
-                   animate={{ opacity: 1, y: 0 }}
-                   transition={{ duration: 0.6, delay: 1.2 }}
-                   onMouseEnter={(e) => {
-                     e.currentTarget.style.transform = 'translateY(-4px) scale(1.02)';
-                     e.currentTarget.style.boxShadow = '0 18px 36px rgba(11,11,11,0.22), 0 0 18px rgba(185,136,57,0.12)';
-                   }}
-                   onMouseLeave={(e) => {
-                     e.currentTarget.style.transform = 'translateY(0) scale(1)';
-                     e.currentTarget.style.boxShadow = '0 8px 20px rgba(11,11,11,0.18)';
-                   }}
-                 >
-                   SHOP NOW
-                   <span className="inline-block w-[18px] h-[18px] rounded-full bg-gradient-to-r from-[rgba(185,136,57,0.95)] to-[rgba(185,136,57,0.85)] text-white text-[0.8rem] leading-[18px] text-center">
-                     →
-                   </span>
-                 </motion.a>
-               )}
+              {isMobile && (
+                <motion.a
+                  href="/collection"
+                  className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[rgba(23,23,23,0.95)] via-[rgba(38,38,38,0.85)] to-[rgba(23,23,23,0.95)] text-white rounded-full font-semibold tracking-[0.08em] shadow-[0_10px_22px_rgba(12,12,12,0.25)] transition-all duration-200 border border-white/10 mx-auto mb-4 w-[55%] max-w-[220px]"
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.55, delay: 1.1 }}
+                  style={{ letterSpacing: '0.12em' }}
+                  whileHover={{
+                    scale: 1.03,
+                    boxShadow: '0 18px 36px rgba(12,12,12,0.28)',
+                    background: 'linear-gradient(90deg, rgba(185,136,57,0.95), rgba(141,104,39,0.92))'
+                  }}
+                  whileTap={{ scale: 0.97 }}
+                >
+                  SHOP NOW
+                  <span className="inline-flex w-5 h-5 rounded-full items-center justify-center text-[0.85rem] bg-gradient-to-r from-[rgba(185,136,57,0.95)] to-[rgba(199,158,72,0.95)] text-white shadow-[0_2px_6px_rgba(185,136,57,0.35)]">
+                    →
+                  </span>
+                </motion.a>
+              )}
                
                {/* Description with typewriter effect - Hidden on mobile */}
                {!isMobile && (
@@ -972,7 +992,7 @@ const UltraHero = () => {
       {/* Advanced Scroll Indicator - Desktop */}
       {!isMobile && (
         <motion.div
-          className="absolute bottom-8 left-[47%] transform -translate-x-1/2 z-30"
+          className="absolute bottom-8 left-[47%] transform -translate-x-1/2 z-40"
           initial={{ opacity: 0, y: shouldReduceMotion ? 0 : -30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.2 }}
@@ -988,13 +1008,13 @@ const UltraHero = () => {
             <span className="font-body text-xs sm:text-sm mb-4 tracking-wide opacity-80 group-hover:opacity-100 transition-opacity">
               DISCOVER LUXURY
             </span>
-            <div className="relative">
-              <ChevronDown className="w-6 h-6 sm:w-8 sm:h-8 text-primary animate-pulse-gold" />
+            <div className="relative w-12 h-12 flex items-center justify-center rounded-full border border-primary/30 bg-white/60 shadow-lg shadow-primary/10 backdrop-blur-sm">
+              <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-primary" strokeWidth={1.5} />
               {!shouldReduceMotion && (
                 <motion.div
-                  className="absolute inset-0 border-2 border-primary rounded-full"
-                  animate={{ scale: [1, 1.5], opacity: [1, 0] }}
-                  transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }}
+                  className="absolute inset-0 rounded-full border border-primary/40"
+                  animate={{ scale: [1, 1.25], opacity: [0.8, 0] }}
+                  transition={{ duration: 1.8, repeat: Infinity, ease: "easeOut" }}
                 />
               )}
             </div>
@@ -1038,14 +1058,14 @@ const UltraHero = () => {
       {/* Mobile Scroll Hint */}
       {isMobile && (
         <motion.div
-          className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20 flex flex-col items-center gap-3 text-black text-[0.98rem] cursor-pointer"
+          className="absolute bottom-0 left-1/2 transform -translate-x-1/2 z-20 flex flex-col items-center gap-4 text-black text-[0.98rem] cursor-pointer"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5, delay: 1.4 }}
           onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}
         >
-          <span className="whitespace-nowrap">Scroll to discover our premium collections ↓</span>
-          <div className="relative w-[30px] h-[48px] rounded-[18px] border-2 border-black">
+          <span className="whitespace-nowrap pt-1">Scroll to discover our premium collections ↓</span>
+          <div className="relative w-[30px] h-[48px] rounded-[18px] border-2 border-black mt-1">
             <motion.div
               className="absolute left-1/2 top-3 w-1.5 h-1.5 bg-black rounded-full"
               style={{ transform: 'translateX(-50%)' }}
