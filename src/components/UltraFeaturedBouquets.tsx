@@ -8,57 +8,50 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import SignatureQuickView from './SignatureQuickView';
 
-import bouquet1 from '@/assets/bouquet-1.jpg';
-import bouquet2 from '@/assets/bouquet-2.jpg';
-import bouquet3 from '@/assets/bouquet-3.jpg';
-import bouquet4 from '@/assets/bouquet-4.jpg';
-import bouquet5 from '@/assets/bouquet-5.jpg';
-import bouquet6 from '@/assets/bouquet-6.jpg';
-
 gsap.registerPlugin(ScrollTrigger);
 
 const bouquets = [
   {
     id: 1,
-    name: "Royal Gold Elegance",
+    name: "Royal Red Elegance",
     price: "$299",
-    image: bouquet1,
-    description: "Luxurious gold roses with premium white accents"
+    image: encodeURI("/assets/red roses/large red roses flower bouquet with gliter.png"),
+    description: "Luxurious red roses with glittering accents"
   },
   {
     id: 2,
-    name: "Platinum Serenity",
+    name: "Wedding Serenity",
     price: "$349",
-    image: bouquet2,
-    description: "Pure white arrangement with silver details"
+    image: encodeURI("/assets/wedding % events/wedding/IMG_1784.jpg"),
+    description: "Pure elegant arrangement for special moments"
   },
   {
     id: 3,
-    name: "Architectural Bloom",
+    name: "Golden Heart",
     price: "$425",
-    image: bouquet3,
-    description: "Modern geometric design with premium flowers"
+    image: encodeURI("/assets/red roses/red roses in a golden heart shaped box.jpg"),
+    description: "Premium roses in a stunning golden heart box"
   },
   {
     id: 4,
-    name: "Diamond Cascade",
+    name: "Event Grandeur",
     price: "$289",
-    image: bouquet4,
-    description: "Cascading white roses with crystal accents"
+    image: encodeURI("/assets/wedding % events/events/IMG-20251126-WA0024.jpg"),
+    description: "Spectacular floral design for grand events"
   },
   {
     id: 5,
-    name: "Golden Dynasty",
+    name: "Heart's Desire",
     price: "$399",
-    image: bouquet5,
-    description: "Imperial golden arrangement with regal presence"
+    image: encodeURI("/assets/heart shape/IMG-20251001-WA0018.jpg"),
+    description: "Romantic heart-shaped arrangement"
   },
   {
     id: 6,
-    name: "Minimalist Luxury",
+    name: "Glittering Passion",
     price: "$329",
-    image: bouquet6,
-    description: "Clean lines with maximum impact design"
+    image: encodeURI("/assets/red roses/red roses bouquet with red glitter.jpg"),
+    description: "Radiant red roses with a touch of sparkle"
   }
 ];
 
