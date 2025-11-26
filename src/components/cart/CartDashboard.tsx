@@ -17,22 +17,125 @@ const CartDashboard: React.FC<CartDashboardProps> = ({ isOpen, onClose }) => {
   const totalPrice = getTotalPrice();
   const accentColor = '#C79E48';
 
-  const handleCheckout = () => {
-    if (isEmpty || isCheckingOut) return;
-    
-    setIsCheckingOut(true);
-    setTimeout(() => {
+  const handleCheckout = (e?: React.MouseEvent<HTMLButtonElement> | MouseEvent) => {
+    try {
+      console.log('🚀 ========== CART DASHBOARD CHECKOUT HANDLER CALLED ==========');
+      console.log('⏰ Timestamp:', new Date().toISOString());
+      console.log('🎯 Event:', e);
+      console.log('🛒 Cart Items Count:', cartItems.length);
+      console.log('💰 Total Price:', totalPrice);
+      
+      if (isEmpty || isCheckingOut) {
+        console.warn('⚠️ Cart is empty or already checking out');
+        return;
+      }
+      
+      // CRITICAL: Prevent all default behavior and stop propagation
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        if ('stopImmediatePropagation' in e && typeof e.stopImmediatePropagation === 'function') {
+          e.stopImmediatePropagation();
+        }
+        console.log('✅ Event prevented and stopped');
+      }
+      
+      if (cartItems.length === 0) {
+        console.error('❌ Cart is empty, cannot checkout');
+        alert('Your cart is empty. Please add items before checkout.');
+        return;
+      }
+      
+      setIsCheckingOut(true);
+      
+      const phoneNumber = "96176104882";
+      console.log('📱 Phone number:', phoneNumber);
+      
       try {
-        clearCart();
-        setIsCheckingOut(false);
-        onClose();
-        // In a real app, you would redirect to checkout page here
-        // navigate('/checkout');
-      } catch (error) {
-        console.error('Checkout error:', error);
+        const orderDetails = cartItems.map((item, index) => {
+          console.log(`📦 Processing item ${index + 1}:`, item.title);
+          let itemStr = `*Item:* ${item.title}\n*Price:* $${item.price} x ${item.quantity} = $${(item.price * item.quantity).toFixed(2)}`;
+          
+          if (item.description) itemStr += `\n*Details:* ${item.description}`;
+          if (item.size) itemStr += `\n*Size:* ${item.size}`;
+          if (item.personalNote) itemStr += `\n*Personal Note:* ${item.personalNote}`;
+          
+          // Handle image links
+          if (item.image) {
+            if (item.image.includes('pollinations.ai')) {
+              itemStr += `\n*Image Reference:* ${item.image}`;
+            } 
+            else if (item.image.startsWith('http')) {
+              itemStr += `\n*Image Reference:* ${item.image}`;
+            }
+          }
+          
+          return itemStr;
+        }).join("\n\n-------------------\n\n");
+
+        const total = totalPrice;
+        const tax = total * 0.08;
+        const finalTotal = total + tax;
+
+        const finalMessage = `Hello, I would like to place an order:\n\n${orderDetails}\n\n*Subtotal:* $${total.toFixed(2)}\n*Tax:* $${tax.toFixed(2)}\n*TOTAL:* $${finalTotal.toFixed(2)}\n\n*Payment Method:* Whish Money / Cash on Delivery`;
+        
+        const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(finalMessage)}`;
+        
+        console.log('✅ Order details generated');
+        console.log('📝 Message length:', finalMessage.length);
+        console.log('🔗 WhatsApp URL (first 100 chars):', whatsappUrl.substring(0, 100));
+        
+        // Save cart state before opening WhatsApp (defensive)
+        try {
+          localStorage.setItem('bexy-flowers-cart-backup', JSON.stringify(cartItems));
+          console.log('💾 Cart backed up to localStorage');
+        } catch (storageError) {
+          console.error('❌ Could not backup cart:', storageError);
+        }
+        
+        // Use setTimeout to ensure all event handlers have finished
+        console.log('⏳ Setting timeout to open WhatsApp...');
+        setTimeout(() => {
+          try {
+            console.log('🚪 Attempting to open WhatsApp window...');
+            const newWindow = window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+            
+            if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+              console.error('❌ Popup blocked');
+              alert('Please allow popups for this site to open WhatsApp, or copy this link:\n\n' + whatsappUrl);
+              setIsCheckingOut(false);
+            } else {
+              console.log('✅ WhatsApp opened successfully!');
+              console.log('🪟 New window:', newWindow);
+              // Close the cart dashboard after opening WhatsApp
+              setTimeout(() => {
+                setIsCheckingOut(false);
+                onClose();
+              }, 500);
+            }
+          } catch (openError) {
+            console.error('❌ Error opening window:', openError);
+            alert('Error opening WhatsApp. Please try again or copy this link:\n\n' + whatsappUrl);
+            setIsCheckingOut(false);
+          }
+        }, 100);
+        
+      } catch (orderError) {
+        console.error('❌ Error generating order details:', orderError);
+        alert('Error preparing order. Please try again.');
         setIsCheckingOut(false);
       }
-    }, 2000);
+      
+    } catch (error) {
+      console.error('❌ FATAL ERROR in checkout handler:', error);
+      if (error instanceof Error) {
+        console.error('Error stack:', error.stack);
+      } else {
+        console.error('Error details:', String(error));
+      }
+      alert('An unexpected error occurred. Please try again or contact support.');
+      setIsCheckingOut(false);
+    }
   };
   
   const handleClearCart = () => {
@@ -502,16 +605,25 @@ const CartDashboard: React.FC<CartDashboardProps> = ({ isOpen, onClose }) => {
                     </div>
 
                     {/* Action Buttons - Sharp Professional Design */}
-                    <div className="space-y-3">
+                    <div className="space-y-3" style={{ position: 'relative', zIndex: 10 }}>
                       <Button
-                        onClick={handleCheckout}
+                        type="button"
+                        onClick={(e) => {
+                          console.log('🎯🎯🎯 CART DASHBOARD BUTTON CLICKED! 🎯🎯🎯');
+                          handleCheckout(e);
+                        }}
                         disabled={isCheckingOut}
                         className="w-full py-4 font-semibold text-sm uppercase tracking-wider relative overflow-hidden"
                         style={{
                           background: accentColor,
                           color: 'white',
                           clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))',
-                          boxShadow: `0 4px 12px ${accentColor}30`
+                          boxShadow: `0 4px 12px ${accentColor}30`,
+                          position: 'relative',
+                          zIndex: 1000,
+                          pointerEvents: 'auto',
+                          cursor: 'pointer',
+                          touchAction: 'manipulation'
                         }}
                       >
                         {isCheckingOut ? (
@@ -529,7 +641,12 @@ const CartDashboard: React.FC<CartDashboardProps> = ({ isOpen, onClose }) => {
                       </Button>
                       
                       <Button
-                        onClick={handleClearCart}
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleClearCart();
+                        }}
                         variant="outline"
                         disabled={isEmpty}
                         className="w-full py-3 border-red-300 text-red-600 hover:bg-red-50 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
