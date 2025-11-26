@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useCart } from '@/contexts/CartContext';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Trash2, ShoppingBag, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { cn } from "@/lib/utils";
 
 const CartPage: React.FC = () => {
   const { cartItems, removeFromCart, getTotalPrice, clearCart } = useCart();
@@ -17,10 +18,7 @@ const CartPage: React.FC = () => {
     navigate('/');
   };
 
-  const handleCheckout = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-
+  const whatsappUrl = useMemo(() => {
     const phoneNumber = "96176104882";
     
     const orderDetails = cartItems.map((item) => {
@@ -46,17 +44,14 @@ const CartPage: React.FC = () => {
       return itemStr;
     }).join("\n\n-------------------\n\n");
 
-    const total = getTotalPrice();
+    const total = totalPrice; // Use totalPrice from hook
     const tax = total * 0.08;
     const finalTotal = total + tax;
 
     const finalMessage = `Hello, I would like to place an order:\n\n${orderDetails}\n\n*Subtotal:* $${total.toFixed(2)}\n*Tax:* $${tax.toFixed(2)}\n*TOTAL:* $${finalTotal.toFixed(2)}\n\n*Payment Method:* Whish Money / Cash on Delivery`;
     
-    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(finalMessage)}`;
-    
-    // Open in new tab to avoid navigating away and potentially losing state if not persisted well
-    window.open(whatsappUrl, '_blank');
-  };
+    return `https://wa.me/${phoneNumber}?text=${encodeURIComponent(finalMessage)}`;
+  }, [cartItems, totalPrice]);
 
   if (isEmpty) {
     return (
@@ -237,13 +232,17 @@ const CartPage: React.FC = () => {
               </div>
 
               <div className="space-y-3">
-                <Button
-                  type="button"
-                  onClick={handleCheckout}
-                  className="w-full bg-gradient-to-r from-amber-400 to-amber-600 hover:from-amber-500 hover:to-amber-700 text-white font-semibold py-3 rounded-full"
+                <a
+                  href={whatsappUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={cn(
+                    buttonVariants({ variant: "default" }),
+                    "w-full bg-gradient-to-r from-amber-400 to-amber-600 hover:from-amber-500 hover:to-amber-700 text-white font-semibold py-6 rounded-full cursor-pointer"
+                  )}
                 >
                   Proceed to Checkout
-                </Button>
+                </a>
                 
                 <Button
                   onClick={clearCart}
