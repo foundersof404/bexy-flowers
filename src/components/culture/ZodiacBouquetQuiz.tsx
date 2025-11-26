@@ -179,55 +179,55 @@ const ZodiacBouquetQuiz = () => {
           </motion.p>
         </motion.div>
 
-        {/* Luxury Progress Bar */}
+        {/* Connected Progress Steps */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="mb-12"
+          className="mb-12 px-4"
         >
-          <div className="flex justify-between items-center mb-8">
+          <div className="relative flex justify-between items-center max-w-2xl mx-auto">
+            {/* Continuous Background Line */}
+            <div className="absolute top-1/2 left-0 w-full h-0.5 bg-gray-200 -z-10 transform -translate-y-1/2 rounded-full" />
+            
+            {/* Active Progress Line */}
+            <motion.div 
+              className="absolute top-1/2 left-0 h-0.5 bg-[#C79E48] -z-10 transform -translate-y-1/2 rounded-full origin-left"
+              initial={{ scaleX: 0 }}
+              animate={{ scaleX: progress / 100 }}
+              transition={{ duration: 0.8, ease: "easeInOut" }}
+              style={{ width: '100%', transformOrigin: 'left' }} 
+            />
+
             {steps.map((step, index) => (
-              <div key={index} className="flex flex-col items-center relative">
+              <div key={index} className="relative group cursor-default flex flex-col items-center">
                 <motion.div
-                  className={`w-14 h-14 rounded-full flex items-center justify-center text-lg font-bold transition-all duration-500 relative ${
+                  className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-500 relative z-10 ${
                     index <= currentStep
-                      ? 'bg-[#C79E48] text-white shadow-lg shadow-[#C79E48]/40'
-                      : 'bg-white border-2 border-[#C79E48] text-[#C79E48]'
+                      ? 'bg-[#C79E48] text-white shadow-md shadow-[#C79E48]/30 scale-110'
+                      : 'bg-white border-2 border-gray-200 text-gray-300'
                   }`}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                  whileHover={{ scale: 1.15 }}
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
-                  transition={{ delay: index * 0.1, type: "spring", stiffness: 200 }}
+                  transition={{ delay: index * 0.1 }}
                 >
                   {index + 1}
                   {index <= currentStep && (
                     <motion.div
-                      className="absolute inset-0 rounded-full bg-[#C79E48] opacity-30"
-                      animate={{ scale: [1, 1.1, 1] }}
+                      className="absolute inset-0 rounded-full bg-[#C79E48] opacity-20"
+                      animate={{ scale: [1, 1.3, 1] }}
                       transition={{ duration: 2, repeat: Infinity }}
                     />
                   )}
                 </motion.div>
-                <span className={`text-sm mt-3 text-center font-medium tracking-wide ${
-                  index <= currentStep ? 'text-[#C79E48]' : 'text-gray-500'
+                <span className={`absolute -bottom-8 text-xs font-bold tracking-wider whitespace-nowrap transition-colors duration-300 uppercase ${
+                  index <= currentStep ? 'text-[#C79E48]' : 'text-gray-300'
                 }`}>
                   {step.title}
                 </span>
-                {index < steps.length - 1 && (
-                  <div className="absolute top-7 left-14 w-full h-0.5 bg-[#E8D4A8] -z-10" />
-                )}
               </div>
             ))}
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-            <motion.div
-              className="bg-gradient-to-r from-[#C79E48] to-[#C79E48] h-2 rounded-full shadow-md"
-              initial={{ width: 0 }}
-              animate={{ width: `${progress}%` }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
-            />
           </div>
         </motion.div>
 
