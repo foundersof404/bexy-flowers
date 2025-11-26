@@ -136,9 +136,10 @@ const CartPage: React.FC = () => {
       try {
         const orderDetails = cartItems.map((item, index) => {
           console.log(`📦 Processing item ${index + 1}:`, item.title);
+          const cardNumber = index + 1;
           
           // Start with image URL at the top for visibility
-          let itemStr = `*━━━━━━━━━━━━━━━━━━━━━━━━━━━━*\n*Item ${index + 1}:* ${item.title}`;
+          let itemStr = `*━━━━━━━━━━━━━━━━━━━━━━━━━━━━*\n*Card ${cardNumber} - Item ${cardNumber}:* ${item.title}`;
           
           // Add image URL prominently at the top
           if (item.image) {
@@ -174,7 +175,8 @@ const CartPage: React.FC = () => {
         // Create ULTRA-SHORT message for URL (NO image URLs - they're too long!)
         // WhatsApp has ~2000 char limit for encoded URLs, so we keep it minimal
         const shortOrderDetails = cartItems.map((item, index) => {
-          let shortStr = `*${index + 1}.* ${item.title}`;
+          const cardNumber = index + 1;
+          let shortStr = `*Card ${cardNumber}:* ${item.title}`;
           shortStr += ` - $${item.price} x ${item.quantity} = $${(item.price * item.quantity).toFixed(2)}`;
           if (item.size) shortStr += ` (${item.size})`;
           return shortStr;
