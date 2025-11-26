@@ -19,6 +19,8 @@ const CartPage: React.FC = () => {
   };
 
   const whatsappUrl = useMemo(() => {
+    if (cartItems.length === 0) return '#';
+    
     const phoneNumber = "96176104882";
     
     const orderDetails = cartItems.map((item) => {
@@ -52,6 +54,22 @@ const CartPage: React.FC = () => {
     
     return `https://wa.me/${phoneNumber}?text=${encodeURIComponent(finalMessage)}`;
   }, [cartItems, totalPrice]);
+
+  const handleWhatsAppCheckout = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    console.log('Opening WhatsApp with URL:', whatsappUrl);
+    
+    // Open WhatsApp in a new window
+    const newWindow = window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+    
+    if (!newWindow) {
+      // Popup blocked, try direct navigation
+      console.log('Popup blocked, trying direct navigation');
+      window.location.href = whatsappUrl;
+    }
+  };
 
   if (isEmpty) {
     return (
@@ -234,11 +252,10 @@ const CartPage: React.FC = () => {
               <div className="space-y-3">
                 <a
                   href={whatsappUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  onClick={handleWhatsAppCheckout}
                   className={cn(
                     buttonVariants({ variant: "default" }),
-                    "w-full bg-gradient-to-r from-amber-400 to-amber-600 hover:from-amber-500 hover:to-amber-700 text-white font-semibold py-6 rounded-full cursor-pointer"
+                    "w-full bg-gradient-to-r from-amber-400 to-amber-600 hover:from-amber-500 hover:to-amber-700 text-white font-semibold py-6 rounded-full cursor-pointer block text-center"
                   )}
                 >
                   Proceed to Checkout
