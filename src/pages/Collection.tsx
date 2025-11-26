@@ -39,6 +39,18 @@ const Collection = () => {
     const categoryParam = params.get("category");
     if (categoryParam) {
       setSelectedCategory(categoryParam);
+      
+      // Scroll to the main collection grid, bypassing the hero section
+      setTimeout(() => {
+        const gridElement = document.getElementById('main-collection-grid');
+        if (gridElement) {
+          // Offset for fixed header/navigation if needed
+          const yOffset = -80; 
+          const y = gridElement.getBoundingClientRect().top + window.pageYOffset + yOffset;
+          
+          window.scrollTo({top: y, behavior: 'smooth'});
+        }
+      }, 800); // Delay to allow page transition/animation to complete
     }
   }, [location.search]);
 
@@ -117,7 +129,7 @@ const Collection = () => {
         />
         
         {/* Main Bouquet Grid - No Gaps */}
-        <section className="py-20 px-4 sm:px-6 lg:px-8 w-full">
+        <section id="main-collection-grid" className="py-20 px-4 sm:px-6 lg:px-8 w-full">
           <div className="max-w-7xl mx-auto w-full">
             <AnimatePresence mode="wait">
               <BouquetGrid 
