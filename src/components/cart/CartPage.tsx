@@ -168,23 +168,41 @@ const CartPage: React.FC = () => {
         const tax = total * 0.08;
         const finalTotal = total + tax;
 
-        const finalMessage = `🌸 *BEXY FLOWERS - ORDER REQUEST* 🌸\n\nHello! I would like to place an order:\n\n${orderDetails}\n\n*━━━━━━━━━━━━━━━━━━━━━━━━━━━━*\n*ORDER SUMMARY:*\n*Subtotal:* $${total.toFixed(2)}\n*Tax (8%):* $${tax.toFixed(2)}\n*━━━━━━━━━━━━━━━━━━━━━━━━━━━━*\n*TOTAL:* $${finalTotal.toFixed(2)}\n\n*Payment Method:* Whish Money / Cash on Delivery\n\nThank you! 💐`;
+        // Create FULL detailed message (for clipboard)
+        const fullMessage = `🌸 *BEXY FLOWERS - ORDER REQUEST* 🌸\n\nHello! I would like to place an order:\n\n${orderDetails}\n\n*━━━━━━━━━━━━━━━━━━━━━━━━━━━━*\n*ORDER SUMMARY:*\n*Subtotal:* $${total.toFixed(2)}\n*Tax (8%):* $${tax.toFixed(2)}\n*━━━━━━━━━━━━━━━━━━━━━━━━━━━━*\n*TOTAL:* $${finalTotal.toFixed(2)}\n\n*Payment Method:* Whish Money / Cash on Delivery\n\nThank you! 💐`;
         
-        // Check message length (WhatsApp has practical limits)
-        const encodedMessage = encodeURIComponent(finalMessage);
-        const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
+        // Create SHORT message for URL (WhatsApp has ~2000 char limit for encoded URLs)
+        const shortOrderDetails = cartItems.map((item, index) => {
+          let shortStr = `*Item ${index + 1}:* ${item.title}`;
+          if (item.image && (item.image.includes('pollinations.ai') || item.image.startsWith('http'))) {
+            shortStr += `\n📸 ${item.image}`;
+          }
+          shortStr += `\n$${item.price} x ${item.quantity} = $${(item.price * item.quantity).toFixed(2)}`;
+          if (item.size) shortStr += ` | Size: ${item.size}`;
+          return shortStr;
+        }).join('\n\n');
+        
+        const shortMessage = `🌸 *BEXY FLOWERS ORDER* 🌸\n\nHello! Order request:\n\n${shortOrderDetails}\n\n*Total:* $${finalTotal.toFixed(2)}\n*Payment:* Whish Money / Cash on Delivery\n\n*Full details copied to clipboard - please paste below*`;
+        
+        // Try short message first
+        let encodedMessage = encodeURIComponent(shortMessage);
+        let whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
         
         console.log('✅ Order details generated');
-        console.log('📝 Message length:', finalMessage.length);
-        console.log('📝 Encoded message length:', encodedMessage.length);
+        console.log('📝 Full message length:', fullMessage.length);
+        console.log('📝 Short message length:', shortMessage.length);
+        console.log('📝 Encoded short message length:', encodedMessage.length);
         console.log('🔗 WhatsApp URL length:', whatsappUrl.length);
-        console.log('📄 Full message:', finalMessage);
-        console.log('🔗 Full WhatsApp URL:', whatsappUrl);
+        console.log('📄 Full message:', fullMessage);
+        console.log('📄 Short message:', shortMessage);
         
-        // Warn if URL is very long (WhatsApp Web has practical limits)
-        if (whatsappUrl.length > 4000) {
-          console.warn('⚠️ WhatsApp URL is very long, may not work properly');
-          // Optionally truncate or split message
+        // If even short message is too long, use minimal version
+        if (whatsappUrl.length > 2000) {
+          console.warn('⚠️ Short message still too long, using minimal version');
+          const minimalMessage = `🌸 *BEXY FLOWERS ORDER* 🌸\n\nHello! I have ${cartItems.length} item(s) in my cart.\n*Total:* $${finalTotal.toFixed(2)}\n\n*Full order details have been copied to your clipboard - please paste them here.*`;
+          encodedMessage = encodeURIComponent(minimalMessage);
+          whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
+          console.log('📄 Minimal message:', minimalMessage);
         }
         
         // Save cart state before opening WhatsApp (defensive)
@@ -195,59 +213,56 @@ const CartPage: React.FC = () => {
           console.error('❌ Could not backup cart:', storageError);
         }
         
-        // Use setTimeout to ensure all event handlers have finished
-        console.log('⏳ Setting timeout to open WhatsApp...');
-        setTimeout(() => {
-          try {
-            console.log('🚪 Attempting to open WhatsApp window...');
-            
-            // Try to open WhatsApp
-            const newWindow = window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
-            
-            if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
-              console.error('❌ Popup blocked');
-              
-              // Try to copy message to clipboard as fallback
-              try {
-                navigator.clipboard.writeText(finalMessage).then(() => {
-                  alert('Popup was blocked. The order message has been copied to your clipboard!\n\nPlease open WhatsApp manually and paste the message.\n\nPhone: +' + phoneNumber);
-                }).catch(() => {
-                  alert('Popup was blocked. Please allow popups for this site, or manually open WhatsApp and send this message:\n\n' + finalMessage + '\n\nPhone: +' + phoneNumber);
-                });
-              } catch (clipboardError) {
-                alert('Popup was blocked. Please allow popups for this site, or manually open WhatsApp and send this message:\n\n' + finalMessage + '\n\nPhone: +' + phoneNumber);
-              }
-            } else {
-              console.log('✅ WhatsApp opened successfully!');
-              console.log('🪟 New window:', newWindow);
-              
-              // Verify the message was pre-filled by checking if window loaded
-              setTimeout(() => {
-                try {
-                  // Check if window is still open and accessible
-                  if (newWindow && !newWindow.closed) {
-                    console.log('✅ WhatsApp window is open and accessible');
-                  }
-                } catch (e) {
-                  console.warn('⚠️ Cannot verify WhatsApp window (cross-origin restriction)');
-                }
-              }, 1000);
-            }
-          } catch (openError) {
-            console.error('❌ Error opening window:', openError);
-            
-            // Fallback: copy to clipboard
+        // ALWAYS copy full message to clipboard FIRST, then open WhatsApp
+        navigator.clipboard.writeText(fullMessage).then(() => {
+          console.log('✅ Full message copied to clipboard');
+          
+          // Use setTimeout to ensure all event handlers have finished
+          console.log('⏳ Setting timeout to open WhatsApp...');
+          setTimeout(() => {
             try {
-              navigator.clipboard.writeText(finalMessage).then(() => {
-                alert('Error opening WhatsApp. The order message has been copied to your clipboard!\n\nPlease open WhatsApp manually and paste the message.\n\nPhone: +' + phoneNumber);
-              }).catch(() => {
-                alert('Error opening WhatsApp. Please manually open WhatsApp and send this message:\n\n' + finalMessage + '\n\nPhone: +' + phoneNumber);
-              });
-            } catch (clipboardError) {
-              alert('Error opening WhatsApp. Please manually open WhatsApp and send this message:\n\n' + finalMessage + '\n\nPhone: +' + phoneNumber);
+              console.log('🚪 Attempting to open WhatsApp window...');
+              
+              // Show brief alert about clipboard
+              setTimeout(() => {
+                alert('✅ Full order details have been copied to your clipboard!\n\nWhatsApp will open now. If the message doesn\'t appear, just paste (Ctrl+V) the full details from your clipboard.');
+              }, 50);
+              
+              // Try to open WhatsApp
+              const newWindow = window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+              
+              if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+                console.error('❌ Popup blocked');
+                alert('Popup was blocked, but the full order message has been copied to your clipboard!\n\nPlease open WhatsApp manually and paste the message (Ctrl+V).\n\nPhone: +' + phoneNumber);
+              } else {
+                console.log('✅ WhatsApp opened successfully!');
+                console.log('🪟 New window:', newWindow);
+              }
+            } catch (openError) {
+              console.error('❌ Error opening window:', openError);
+              alert('Error opening WhatsApp, but the full order message has been copied to your clipboard!\n\nPlease open WhatsApp manually and paste the message (Ctrl+V).\n\nPhone: +' + phoneNumber);
             }
-          }
-        }, 100);
+          }, 100);
+        }).catch((clipboardError) => {
+          console.warn('⚠️ Could not copy to clipboard:', clipboardError);
+          // Still try to open WhatsApp even if clipboard failed
+          console.log('⏳ Opening WhatsApp without clipboard backup...');
+          setTimeout(() => {
+            try {
+              const newWindow = window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+              
+              if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+                console.error('❌ Popup blocked');
+                alert('Popup was blocked. Please allow popups for this site, or manually open WhatsApp and send this message:\n\n' + fullMessage + '\n\nPhone: +' + phoneNumber);
+              } else {
+                console.log('✅ WhatsApp opened successfully!');
+              }
+            } catch (openError) {
+              console.error('❌ Error opening window:', openError);
+              alert('Error opening WhatsApp. Please manually open WhatsApp and send this message:\n\n' + fullMessage + '\n\nPhone: +' + phoneNumber);
+            }
+          }, 100);
+        });
         
       } catch (orderError) {
         console.error('❌ Error generating order details:', orderError);
