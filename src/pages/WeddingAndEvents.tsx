@@ -1,4 +1,4 @@
-import React, { Suspense, useEffect, useRef } from "react";
+import React, { Suspense, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -27,6 +27,23 @@ const weddingImages = [
   encodeURI("/assets/wedding % events/IMG_1672.JPG"),
   encodeURI("/assets/wedding % events/IMG_1649.jpg"),
   encodeURI("/assets/wedding % events/IMG_2802.JPG"),
+];
+
+// Event flowers images - automatically rotating
+const eventFlowersImages = [
+  encodeURI("/assets/wedding % events/events/IMG-20251126-WA0018.jpg"),
+  encodeURI("/assets/wedding % events/events/IMG-20251126-WA0020.jpg"),
+  encodeURI("/assets/wedding % events/events/IMG-20251126-WA0022.jpg"),
+  encodeURI("/assets/wedding % events/events/IMG-20251126-WA0023.jpg"),
+  encodeURI("/assets/wedding % events/events/IMG-20251126-WA0024.jpg"),
+  encodeURI("/assets/wedding % events/events/WhatsApp Image 2025-11-26 at 03.14.12_6dbd359d.jpg"),
+];
+
+// Wedding flowers images - automatically rotating
+const weddingFlowersImages = [
+  encodeURI("/assets/wedding % events/wedding/IMG_1784.jpg"),
+  encodeURI("/assets/wedding % events/wedding/IMG-20251126-WA0019.jpg"),
+  encodeURI("/assets/wedding % events/wedding/IMG-20251126-WA0021.jpg"),
 ];
 
 const WeddingHero = () => {
@@ -231,12 +248,14 @@ const ServiceSection = ({
   title, 
   description, 
   image, 
+  images, // New prop for multiple images (carousel)
   index,
   features 
 }: { 
   title: string; 
   description: string; 
-  image: string;
+  image?: string; // Optional now
+  images?: string[]; // Array of images for slideshow
   index: number;
   features?: string[];
 }) => {
@@ -245,6 +264,39 @@ const ServiceSection = ({
   const imageRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
+  
+  // Use images array if provided, otherwise fall back to single image
+  const imageArray = images || (image ? [image] : []);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  
+  // Debug: Log image array to console
+  useEffect(() => {
+    if (imageArray.length === 0) {
+      console.warn(`ServiceSection "${title}": No images provided`);
+    }
+  }, [imageArray, title]);
+  
+  // Auto-rotate images every 4 seconds if multiple images provided
+  // Seamless loop - no blank/blink between transitions
+  // Preload all images to ensure smooth transitions
+  useEffect(() => {
+    if (imageArray.length <= 1) return;
+    
+    // Preload all images for smooth transitions (no blank moments)
+    imageArray.forEach((imgSrc) => {
+      const img = new Image();
+      img.src = imgSrc;
+    });
+    
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prev) => {
+        const next = (prev + 1) % imageArray.length;
+        return next;
+      });
+    }, 4000); // 4 seconds between transitions
+    
+    return () => clearInterval(interval);
+  }, [imageArray]);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -325,13 +377,47 @@ const ServiceSection = ({
             <div className="relative bg-white rounded-3xl shadow-2xl overflow-hidden border border-gray-100">
               {/* Image with overlay gradient */}
               <div ref={imageRef} className="relative h-[280px] overflow-hidden">
-                <img
-                  src={image}
-                  alt={title}
-                  className="w-full h-full object-cover"
-                />
+                {imageArray.length > 0 ? (
+                  imageArray.map((img, idx) => (
+                    <motion.img
+                      key={idx}
+                      src={img}
+                      alt={title}
+                      className="absolute inset-0 w-full h-full object-cover"
+                      initial={{ opacity: idx === 0 ? 1 : 0 }}
+                      animate={{ 
+                        opacity: idx === currentImageIndex ? 1 : 0,
+                        scale: idx === currentImageIndex ? 1 : 1.05
+                      }}
+                      transition={{ 
+                        duration: 1.2, 
+                        ease: [0.4, 0, 0.2, 1], // Smooth easing for seamless transition
+                        opacity: { duration: 1.2 } // Longer fade for smoother loop
+                      }}
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        willChange: 'opacity', // Optimize for smooth transitions
+                      }}
+                      onLoad={() => {
+                        // Ensure image is loaded before showing
+                        if (idx === currentImageIndex) {
+                          // Image is ready
+                        }
+                      }}
+                    />
+                  ))
+                ) : (
+                  <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                    <span className="text-gray-400 text-sm">No image available</span>
+                  </div>
+                )}
                 {/* Gradient overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent z-10" />
                 {/* Title overlay on image */}
                 <div className="absolute bottom-0 left-0 right-0 p-6">
                   <h2
@@ -414,13 +500,50 @@ const ServiceSection = ({
             ref={imageRef}
             className={`${isEven ? 'order-1' : 'order-2'} relative group`}
           >
-            <div className="relative overflow-hidden rounded-xl sm:rounded-2xl shadow-xl sm:shadow-2xl">
-              <img
-                src={image}
-                alt={title}
-                className="w-full h-[400px] sm:h-[500px] md:h-[500px] lg:h-[600px] object-cover transition-transform duration-700 group-hover:scale-110"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="relative overflow-hidden rounded-xl sm:rounded-2xl shadow-xl sm:shadow-2xl" style={{ height: '500px', minHeight: '500px' }}>
+              {imageArray.length > 0 ? (
+                imageArray.map((img, idx) => (
+                  <motion.img
+                    key={idx}
+                    src={img}
+                    alt={title}
+                    className="absolute inset-0 w-full h-full object-cover"
+                    initial={{ opacity: idx === 0 ? 1 : 0 }}
+                    animate={{ 
+                      opacity: idx === currentImageIndex ? 1 : 0,
+                      scale: idx === currentImageIndex ? 1 : 1.05
+                    }}
+                    transition={{ 
+                      duration: 1.5, 
+                      ease: [0.25, 0.1, 0.25, 1], // Smooth cubic bezier for seamless crossfade
+                      opacity: { 
+                        duration: 1.5,
+                        ease: [0.25, 0.1, 0.25, 1] // Overlapping fade for seamless loop
+                      }
+                    }}
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                      willChange: 'opacity', // Optimize for smooth transitions
+                    }}
+                    onLoad={() => {
+                      // Ensure image is loaded before showing
+                      if (idx === currentImageIndex) {
+                        // Image is ready
+                      }
+                    }}
+                  />
+                ))
+              ) : (
+                <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                  <span className="text-gray-400">No image available</span>
+                </div>
+              )}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10" />
             </div>
             {/* Decorative corner accent */}
             <div
@@ -1492,7 +1615,7 @@ const WeddingAndEvents = () => {
             <ServiceSection
               title="Wedding Flowers"
               description="Create your dream wedding with our exquisite floral designs. From bridal bouquets to ceremony decorations, we provide elegant and timeless arrangements that capture the essence of your special day. Every petal is carefully selected and arranged to perfection."
-              image={weddingImages[2] || weddingImages[0]}
+              images={weddingFlowersImages}
               index={0}
               features={[
                 "Custom bridal bouquets",
@@ -1508,7 +1631,7 @@ const WeddingAndEvents = () => {
             <ServiceSection
               title="Event Flowers"
               description="Enhance your events with stunning floral arrangements. Whether it's a corporate gathering or a private party, we tailor our designs to suit the occasion. Our expert florists create memorable centerpieces and decorations that leave a lasting impression."
-              image={weddingImages[1] || weddingImages[0]}
+              images={eventFlowersImages}
               index={1}
               features={[
                 "Corporate event arrangements",
