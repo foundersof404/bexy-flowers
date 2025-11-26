@@ -18,12 +18,11 @@ const GOLD_HEX = "#c79e48";
 
 // Wedding images - properly encoded paths
 const weddingImages = [
-  // Keep first 5 original images
+  // Keep first 4 original images
   encodeURI("/assets/wedding % events/IMG_5461.jpg"),
   encodeURI("/assets/wedding % events/IMG_4875.jpg"),
   encodeURI("/assets/wedding % events/IMG_2670.jpg"),
   encodeURI("/assets/wedding % events/IMG_1791.jpg"),
-  encodeURI("/assets/wedding % events/IMG_1784.jpg"),
   // Add all event images (replaces image 6)
   encodeURI("/assets/wedding % events/events/IMG-20251126-WA0018.jpg"),
   encodeURI("/assets/wedding % events/events/IMG-20251126-WA0020.jpg"),
@@ -1317,10 +1316,6 @@ const ImageGallery = () => {
                 alt={`Wedding decoration ${index + 1}`}
                         className="w-full h-full object-cover"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-                      <div className="absolute bottom-0 left-0 right-0 p-6">
-                        <p className="text-white text-sm font-semibold">Tap to view full size</p>
-              </div>
                     </div>
                   </div>
           ))}
