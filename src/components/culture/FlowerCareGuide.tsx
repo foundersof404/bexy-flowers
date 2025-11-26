@@ -70,7 +70,7 @@ const FlowerCareGuide = () => {
   const [activeStep, setActiveStep] = useState<number>(1);
 
   return (
-    <section className="py-10 px-4 bg-gradient-to-b from-background to-muted/10 relative overflow-hidden">
+    <section className="py-10 px-4 bg-white relative overflow-hidden">
       {/* Glassmorphism Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-10 left-10 w-32 h-32 bg-gradient-to-br from-white/20 to-transparent rounded-full blur-xl animate-pulse" />
