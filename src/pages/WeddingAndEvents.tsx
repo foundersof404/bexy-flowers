@@ -1657,7 +1657,7 @@ const WeddingAndEvents = () => {
             <ServiceSection
               title="Design Your Bouquet"
               description="Choose from a variety of flowers and colors to create a personalized bouquet for your special day. Our experts will help you craft the perfect arrangement that reflects your unique style and vision. Every detail is tailored to your preferences."
-              image={weddingImages[3] || weddingImages[0]}
+              images={weddingFlowersImages}
               index={2}
               features={[
                 "Personalized consultations",
