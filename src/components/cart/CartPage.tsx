@@ -136,37 +136,56 @@ const CartPage: React.FC = () => {
       try {
         const orderDetails = cartItems.map((item, index) => {
           console.log(`📦 Processing item ${index + 1}:`, item.title);
-          let itemStr = `*Item:* ${item.title}\n*Price:* $${item.price} x ${item.quantity} = $${(item.price * item.quantity).toFixed(2)}`;
+          
+          // Start with image URL at the top for visibility
+          let itemStr = `*━━━━━━━━━━━━━━━━━━━━━━━━━━━━*\n*Item ${index + 1}:* ${item.title}`;
+          
+          // Add image URL prominently at the top
+          if (item.image) {
+            if (item.image.includes('pollinations.ai') || item.image.startsWith('http')) {
+              itemStr += `\n\n📸 *FLOWER IMAGE:*\n${item.image}`;
+            } else {
+              // For local images, try to construct full URL
+              const imageUrl = item.image.startsWith('/') 
+                ? `${window.location.origin}${item.image}`
+                : item.image;
+              itemStr += `\n\n📸 *FLOWER IMAGE:*\n${imageUrl}`;
+            }
+          }
+          
+          itemStr += `\n\n*Price:* $${item.price} x ${item.quantity} = $${(item.price * item.quantity).toFixed(2)}`;
           
           if (item.description) itemStr += `\n*Details:* ${item.description}`;
           if (item.size) itemStr += `\n*Size:* ${item.size}`;
           if (item.personalNote) itemStr += `\n*Personal Note:* ${item.personalNote}`;
           
-          // Handle image links
-          if (item.image) {
-            if (item.image.includes('pollinations.ai')) {
-                 itemStr += `\n*Image Reference:* ${item.image}`;
-            } 
-            else if (item.image.startsWith('http')) {
-                 itemStr += `\n*Image Reference:* ${item.image}`;
-            }
-          }
+          itemStr += `\n*━━━━━━━━━━━━━━━━━━━━━━━━━━━━*`;
           
           return itemStr;
-        }).join("\n\n-------------------\n\n");
+        }).join("\n\n");
 
         const total = totalPrice;
         const tax = total * 0.08;
         const finalTotal = total + tax;
 
-        const finalMessage = `Hello, I would like to place an order:\n\n${orderDetails}\n\n*Subtotal:* $${total.toFixed(2)}\n*Tax:* $${tax.toFixed(2)}\n*TOTAL:* $${finalTotal.toFixed(2)}\n\n*Payment Method:* Whish Money / Cash on Delivery`;
+        const finalMessage = `🌸 *BEXY FLOWERS - ORDER REQUEST* 🌸\n\nHello! I would like to place an order:\n\n${orderDetails}\n\n*━━━━━━━━━━━━━━━━━━━━━━━━━━━━*\n*ORDER SUMMARY:*\n*Subtotal:* $${total.toFixed(2)}\n*Tax (8%):* $${tax.toFixed(2)}\n*━━━━━━━━━━━━━━━━━━━━━━━━━━━━*\n*TOTAL:* $${finalTotal.toFixed(2)}\n\n*Payment Method:* Whish Money / Cash on Delivery\n\nThank you! 💐`;
         
-        const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(finalMessage)}`;
+        // Check message length (WhatsApp has practical limits)
+        const encodedMessage = encodeURIComponent(finalMessage);
+        const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
         
         console.log('✅ Order details generated');
         console.log('📝 Message length:', finalMessage.length);
+        console.log('📝 Encoded message length:', encodedMessage.length);
         console.log('🔗 WhatsApp URL length:', whatsappUrl.length);
-        console.log('🔗 WhatsApp URL (first 100 chars):', whatsappUrl.substring(0, 100));
+        console.log('📄 Full message:', finalMessage);
+        console.log('🔗 Full WhatsApp URL:', whatsappUrl);
+        
+        // Warn if URL is very long (WhatsApp Web has practical limits)
+        if (whatsappUrl.length > 4000) {
+          console.warn('⚠️ WhatsApp URL is very long, may not work properly');
+          // Optionally truncate or split message
+        }
         
         // Save cart state before opening WhatsApp (defensive)
         try {
@@ -181,18 +200,52 @@ const CartPage: React.FC = () => {
         setTimeout(() => {
           try {
             console.log('🚪 Attempting to open WhatsApp window...');
+            
+            // Try to open WhatsApp
             const newWindow = window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
             
             if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
               console.error('❌ Popup blocked');
-              alert('Please allow popups for this site to open WhatsApp, or copy this link:\n\n' + whatsappUrl);
+              
+              // Try to copy message to clipboard as fallback
+              try {
+                navigator.clipboard.writeText(finalMessage).then(() => {
+                  alert('Popup was blocked. The order message has been copied to your clipboard!\n\nPlease open WhatsApp manually and paste the message.\n\nPhone: +' + phoneNumber);
+                }).catch(() => {
+                  alert('Popup was blocked. Please allow popups for this site, or manually open WhatsApp and send this message:\n\n' + finalMessage + '\n\nPhone: +' + phoneNumber);
+                });
+              } catch (clipboardError) {
+                alert('Popup was blocked. Please allow popups for this site, or manually open WhatsApp and send this message:\n\n' + finalMessage + '\n\nPhone: +' + phoneNumber);
+              }
             } else {
               console.log('✅ WhatsApp opened successfully!');
               console.log('🪟 New window:', newWindow);
+              
+              // Verify the message was pre-filled by checking if window loaded
+              setTimeout(() => {
+                try {
+                  // Check if window is still open and accessible
+                  if (newWindow && !newWindow.closed) {
+                    console.log('✅ WhatsApp window is open and accessible');
+                  }
+                } catch (e) {
+                  console.warn('⚠️ Cannot verify WhatsApp window (cross-origin restriction)');
+                }
+              }, 1000);
             }
           } catch (openError) {
             console.error('❌ Error opening window:', openError);
-            alert('Error opening WhatsApp. Please try again or copy this link:\n\n' + whatsappUrl);
+            
+            // Fallback: copy to clipboard
+            try {
+              navigator.clipboard.writeText(finalMessage).then(() => {
+                alert('Error opening WhatsApp. The order message has been copied to your clipboard!\n\nPlease open WhatsApp manually and paste the message.\n\nPhone: +' + phoneNumber);
+              }).catch(() => {
+                alert('Error opening WhatsApp. Please manually open WhatsApp and send this message:\n\n' + finalMessage + '\n\nPhone: +' + phoneNumber);
+              });
+            } catch (clipboardError) {
+              alert('Error opening WhatsApp. Please manually open WhatsApp and send this message:\n\n' + finalMessage + '\n\nPhone: +' + phoneNumber);
+            }
           }
         }, 100);
         
