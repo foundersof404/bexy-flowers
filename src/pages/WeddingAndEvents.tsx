@@ -18,13 +18,28 @@ const GOLD_HEX = "#c79e48";
 
 // Wedding images - properly encoded paths
 const weddingImages = [
+  // Keep first 5 original images
   encodeURI("/assets/wedding % events/IMG_5461.jpg"),
   encodeURI("/assets/wedding % events/IMG_4875.jpg"),
   encodeURI("/assets/wedding % events/IMG_2670.jpg"),
   encodeURI("/assets/wedding % events/IMG_1791.jpg"),
   encodeURI("/assets/wedding % events/IMG_1784.jpg"),
-  encodeURI("/assets/wedding % events/IMG_1673.JPG"),
+  // Add all event images (replaces image 6)
+  encodeURI("/assets/wedding % events/events/IMG-20251126-WA0018.jpg"),
+  encodeURI("/assets/wedding % events/events/IMG-20251126-WA0020.jpg"),
+  encodeURI("/assets/wedding % events/events/IMG-20251126-WA0022.jpg"),
+  encodeURI("/assets/wedding % events/events/IMG-20251126-WA0023.jpg"),
+  encodeURI("/assets/wedding % events/events/IMG-20251126-WA0024.jpg"),
+  encodeURI("/assets/wedding % events/events/WhatsApp Image 2025-11-26 at 03.14.12_6dbd359d.jpg"),
+  // Keep one original (image 7)
   encodeURI("/assets/wedding % events/IMG_1672.JPG"),
+  // Add all wedding images (replaces image 8)
+  encodeURI("/assets/wedding % events/wedding/IMG_1784.jpg"),
+  encodeURI("/assets/wedding % events/wedding/IMG_1791.jpg"),
+  encodeURI("/assets/wedding % events/wedding/IMG-20251126-WA0019.jpg"),
+  encodeURI("/assets/wedding % events/wedding/IMG-20251126-WA0021.jpg"),
+  // Keep remaining original images
+  encodeURI("/assets/wedding % events/IMG_1673.JPG"),
   encodeURI("/assets/wedding % events/IMG_1649.jpg"),
   encodeURI("/assets/wedding % events/IMG_2802.JPG"),
 ];
