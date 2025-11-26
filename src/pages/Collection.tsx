@@ -1,8 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocation } from "react-router-dom";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import UltraNavigation from "@/components/UltraNavigation";
 import { CollectionHero } from "@/components/collection/CollectionHero";
 import { CategoryNavigation } from "@/components/collection/CategoryNavigation";
@@ -18,8 +16,6 @@ import {
   generatedBouquets,
   generatedCategories
 } from "@/data/generatedBouquets";
-
-gsap.registerPlugin(ScrollTrigger);
 
 const Collection = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -65,23 +61,9 @@ const Collection = () => {
   }, [selectedCategory]);
 
   useEffect(() => {
-    // Ensure at top on page mount
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
     document.documentElement.scrollTop = 0;
     document.body.scrollTop = 0;
-
-    // Simplified curtain reveal animation - shorter duration for better performance
-    const tl = gsap.timeline();
-    
-    tl.set(".curtain-left", { x: 0 })
-      .set(".curtain-right", { x: 0 })
-      .to(".curtain-left", { x: "-100%", duration: 1, ease: "power2.inOut" })
-      .to(".curtain-right", { x: "100%", duration: 1, ease: "power2.inOut" }, "-=1")
-      .from(".collection-content", { opacity: 0, duration: 0.5, ease: "power2.out" }, "-=0.3");
-
-    return () => {
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
-    };
   }, []);
 
   // Memoize featured bouquets calculation
@@ -109,10 +91,6 @@ const Collection = () => {
     <div ref={containerRef} className="relative min-h-screen bg-background overflow-hidden">
       {/* Ultra Navigation */}
       <UltraNavigation />
-      
-      {/* Curtain Animation - Lower z-index and pointer-events-none to not block navigation */}
-      <div className="curtain-left fixed top-0 left-0 w-1/2 h-full bg-primary z-40 pointer-events-none"></div>
-      <div className="curtain-right fixed top-0 right-0 w-1/2 h-full bg-primary z-40 pointer-events-none"></div>
       
       {/* Floating 3D Background */}
       <FloatingBackground />

@@ -408,7 +408,7 @@ const ServiceSection = ({
                         ease: [0.4, 0, 0.2, 1], // Smooth easing for seamless transition
                         opacity: { duration: 1.2 } // Longer fade for smoother loop
                       }}
-                      style={{
+      style={{
                         position: 'absolute',
                         top: 0,
                         left: 0,
@@ -473,7 +473,7 @@ const ServiceSection = ({
                   className="w-full rounded-full border-2 px-6 py-5 text-sm font-semibold mt-4"
                   style={{
                     borderColor: GOLD_COLOR,
-                    color: GOLD_COLOR,
+        color: GOLD_COLOR,
                   }}
                   onClick={() => {
                     const contactEl = document.getElementById('contact-section');
@@ -523,11 +523,11 @@ const ServiceSection = ({
                     alt={title}
                     className="absolute inset-0 w-full h-full object-cover"
                     initial={{ opacity: idx === 0 ? 1 : 0 }}
-                    animate={{ 
+      animate={{
                       opacity: idx === currentImageIndex ? 1 : 0,
                       scale: idx === currentImageIndex ? 1 : 1.05
-                    }}
-                    transition={{ 
+      }}
+      transition={{
                       duration: 1.5, 
                       ease: [0.25, 0.1, 0.25, 1], // Smooth cubic bezier for seamless crossfade
                       opacity: { 
@@ -590,7 +590,7 @@ const ServiceSection = ({
                 className="w-16 sm:w-20 h-0.5 sm:h-1 mb-4 sm:mb-6"
                 style={{ background: `linear-gradient(to right, ${GOLD_COLOR}, transparent)` }}
               />
-            </motion.div>
+    </motion.div>
 
           <motion.p
               initial={{ opacity: 0, y: 20 }}
@@ -707,15 +707,15 @@ const ConsultationModal = ({ isOpen, onClose, onConfirm }: {
   if (!isOpen) return null;
 
   return createPortal(
-    <motion.div
+        <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       className="fixed inset-0 z-[99999] flex items-center justify-center p-4"
       style={{ backgroundColor: 'rgba(0, 0, 0, 0.7)' }}
       onClick={onClose}
-    >
-      <motion.div
+        >
+          <motion.div
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
@@ -787,7 +787,7 @@ const ConsultationModal = ({ isOpen, onClose, onConfirm }: {
                 </button>
               ))}
             </div>
-          </div>
+      </div>
 
           {/* Selected Date & Time Display */}
           {selectedDate && selectedTime && (
@@ -1507,8 +1507,8 @@ const ImageGallery = () => {
                 src={image}
                 alt={`Wedding decoration ${index + 1}`}
                         className="w-full h-full object-cover"
-                      />
-                    </div>
+              />
+              </div>
                   </div>
           ))}
         </div>

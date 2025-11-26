@@ -6,6 +6,7 @@ import { Heart, Award, Users, Star, Crown, Sparkles, Flower2, Leaf } from "lucid
 import signatureGlitterFlower from '@/assets/about-image.jpg'; // Updated to about page image
 import pinkFlower from '@/assets/flowers/pink.png';
 import redFlower from '@/assets/flowers/red.png';
+import aboutHeroBg from '@/assets/bouquet-2.jpg';
 
 const About = () => {
   // SUGGESTION: Refined and consolidated stats for clarity and credibility.
@@ -253,15 +254,28 @@ const About = () => {
   return (
     <motion.section 
       ref={sectionRef} 
-      className="relative py-16 md:py-28 px-4 overflow-hidden" 
-      style={{ background: 'linear-gradient(180deg, #ffffff 0%, #fff6f9 50%, #fdecef 100%)' }}
+      className="relative py-16 md:py-28 px-4 overflow-hidden bg-white" 
       variants={pageTransitionVariants}
       initial="hidden"
       animate="visible"
     >
+      <motion.div
+        className="absolute inset-0 -z-10"
+        initial={{ scale: 1.05, opacity: 0 }}
+        animate={{ scale: 1, opacity: 0.35 }}
+        transition={{ duration: 1.4, ease: [0.22, 1, 0.36, 1] }}
+      >
+        <img
+          src={aboutHeroBg}
+          alt="About hero background"
+          className="w-full h-full object-cover"
+          loading="eager"
+        />
+      </motion.div>
+      <div className="absolute inset-0 -z-0 bg-gradient-to-b from-white/95 via-white/90 to-white/96" />
       
 
-      <div className="max-w-6xl mx-auto relative z-10">
+      <div className="max-w-7xl mx-auto relative z-10">
         {/* Header */}
         <motion.div
           className="text-center mb-12 md:mb-20"
@@ -277,27 +291,44 @@ const About = () => {
             }
           }}
         >
-          {/* SUGGESTION: Improved SEO-friendly H1 and more engaging copy */}
+          {/* Luxury Typography with Gold Accent */}
           <motion.h1 
-            className="font-luxury text-4xl md:text-6xl font-bold text-slate-800 mb-4" 
-            variants={headingReveal}
+            className="font-luxury text-6xl md:text-8xl font-bold mb-6 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 bg-clip-text text-transparent relative"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            viewport={{ once: true }}
+            style={{
+              filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))',
+              letterSpacing: '0.05em'
+            }}
           >
             The Art of Floral Couture
+            {/* Animated Gold Underline */}
+            <motion.div 
+              className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 h-1 bg-gradient-to-r from-amber-400 to-yellow-500 rounded-full"
+              initial={{ width: 0 }}
+              whileInView={{ width: '200px' }}
+              transition={{ duration: 1.2, delay: 0.8, ease: "easeOut" }}
+              viewport={{ once: true }}
+            />
           </motion.h1>
+
+          {/* Enhanced Decorative Elements */}
+          <div className="relative mb-8">
+            <div className="w-40 h-0.5 bg-gradient-to-r from-transparent via-amber-500/60 to-transparent mx-auto" />
+            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-amber-500 rotate-45 shadow-lg shadow-amber-500/50" />
+          </div>
+
           <motion.p 
-            className="text-sm md:text-lg text-slate-500 max-w-3xl mx-auto leading-relaxed px-4" 
-            style={{ fontFamily: 'Inter, ui-sans-serif, system-ui', lineHeight: 1.8 }}
-            variants={paragraphReveal}
+            className="font-body text-lg md:text-xl text-slate-600 max-w-4xl mx-auto leading-relaxed font-light px-4" 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+            viewport={{ once: true }}
           >
             Welcome to Bexy Flowers, where generations of artistry meet modern luxury. Discover Lebanon's first and only glitter flower atelier.
           </motion.p>
-          <motion.div
-            className="mx-auto mt-6 mb-2 h-px w-16 md:w-24 bg-amber-300/70"
-            initial={{ scaleX: 0 }}
-            whileInView={{ scaleX: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-          />
         </motion.div>
 
         {/* Main Content (Image-first layout for visual impact) */}
@@ -305,7 +336,7 @@ const About = () => {
           {/* Enhanced Signature Image with Powerful 3D Reveal Effect */}
           <motion.div
             ref={imageRef}
-            className="rounded-3xl lg:rounded-full overflow-hidden shadow-xl order-1 lg:order-2 mx-auto lg:mx-0 w-full max-w-sm lg:w-[500px] aspect-square"
+            className="rounded-3xl lg:rounded-full overflow-hidden shadow-xl order-1 lg:order-2 mx-auto lg:mx-0 w-full max-w-sm lg:max-w-none lg:w-[550px] aspect-square"
             style={{ 
              
               boxShadow: '0 10px 30px rgb(198, 156, 72), 0 0 24px rgba(198, 157, 72, 0.2)'
@@ -353,13 +384,13 @@ const About = () => {
             {/* SUGGESTION: More personal and compelling story */}
             <div className="space-y-4 md:space-y-6 text-slate-700 text-base md:text-lg leading-relaxed px-2 md:px-0" style={{ fontFamily: 'Inter, ui-sans-serif, system-ui', lineHeight: 1.8 }}>
               <motion.p variants={paragraphReveal}>
-                Born in 2024 from a family legacy of over 25 years in floral design, Bexy Flowers introduced a dream to Lebanon: the country's first glitter flower boutique. We blend time-honored techniques with a spark of modern magic.
+                Born in 2024 from a <span className="font-medium" style={{ color: 'rgb(201, 161, 78)' }}>family legacy</span> of over <span className="font-medium" style={{ color: 'rgb(201, 161, 78)' }}>25 years</span> in floral design, Bexy Flowers introduced a dream to Lebanon: the country's first <span className="font-medium" style={{ color: 'rgb(201, 161, 78)' }}>glitter flower boutique</span>. We blend time-honored techniques with a spark of <span className="font-medium" style={{ color: 'rgb(201, 161, 78)' }}>modern magic</span>.
               </motion.p>
               <motion.p variants={paragraphReveal}>
-                Our artisans hand-select each bloom, from velvety David Austin roses sourced from English gardens to exotic orchids from the tropics, ensuring every arrangement is a masterpiece of freshness and rarity.
+                Our <span className="font-medium" style={{ color: 'rgb(201, 161, 78)' }}>artisans</span> hand-select each bloom, from velvety <span className="font-medium" style={{ color: 'rgb(201, 161, 78)' }}>David Austin roses</span> sourced from English gardens to <span className="font-medium" style={{ color: 'rgb(201, 161, 78)' }}>exotic orchids</span> from the tropics, ensuring every arrangement is a <span className="font-medium" style={{ color: 'rgb(201, 161, 78)' }}>masterpiece</span> of freshness and rarity.
               </motion.p>
               <motion.p variants={paragraphReveal}>
-                We believe flowers are more than gifts; they are stories, emotions, and memories captured in nature's beauty.
+                We believe flowers are more than gifts; they are <span className="font-medium" style={{ color: 'rgb(201, 161, 78)' }}>stories</span>, <span className="font-medium" style={{ color: 'rgb(201, 161, 78)' }}>emotions</span>, and <span className="font-medium" style={{ color: 'rgb(201, 161, 78)' }}>memories</span> captured in nature's beauty.
               </motion.p>
             </div>
 
@@ -392,7 +423,7 @@ const About = () => {
         </div>
 
         {/* Enhanced Statistics with Powerful 3D Card Effects */}
-        <div className="mt-16 p-8 rounded-2xl bg-rose-50/70">
+        <div className="mt-16 p-8 rounded-2xl bg-slate-50/70">
         <motion.div
           className="grid grid-cols-2 md:grid-cols-4 gap-6"
           initial="hidden"
@@ -581,11 +612,11 @@ const About = () => {
           viewport={{ once: true }}
         >
           {/* Background with Gradient */}
-          <div className="absolute inset-0 bg-gradient-to-br from-amber-50 via-pink-50 to-rose-50 rounded-3xl"></div>
+          <div className="absolute inset-0 bg-gradient-to-br from-amber-50 via-amber-50 to-amber-50 rounded-3xl"></div>
           
           {/* Decorative Elements */}
           <div className="absolute top-0 right-0 w-64 h-64 bg-amber-200/20 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-0 left-0 w-48 h-48 bg-pink-200/20 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-0 left-0 w-48 h-48 bg-amber-200/20 rounded-full blur-3xl"></div>
           
           <div className="relative z-10 text-center p-12 md:p-16 rounded-3xl border-2 border-amber-100/60 backdrop-blur-sm">
             <motion.h2 

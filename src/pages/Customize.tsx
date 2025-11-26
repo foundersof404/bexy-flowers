@@ -6,6 +6,8 @@ import Footer from "@/components/Footer";
 import BackToTop from "@/components/BackToTop";
 import { useCart } from "@/contexts/CartContext";
 import { toast } from "sonner";
+import heroBouquetMain from "@/assets/bouquet-4.jpg";
+import heroBouquetAccent from "@/assets/bouquet-5.jpg";
 
 const GOLD = "rgb(199, 158, 72)";
 
@@ -227,13 +229,30 @@ const CustomizeSection = React.forwardRef<HTMLDivElement, { title: string; child
     ref={ref}
     initial={{ opacity: 0, y: 50 }}
     animate={isActive ? { opacity: 1, y: 0, height: 'auto' } : { opacity: 0.5, y: 0, height: 'auto' }}
-    className={`bg-white/90 backdrop-blur-sm rounded-3xl p-8 border shadow-xl mb-8 transition-all duration-500 ${isActive ? 'border-[#C79E48]' : 'border-gray-100 grayscale-[0.5] pointer-events-none'}`}
+    className={`relative group bg-white/90 backdrop-blur-sm rounded-3xl p-[1px] mb-8 transition-all duration-500 ${isActive ? 'shadow-[0_35px_120px_rgba(0,0,0,0.08)]' : 'shadow-none'} ${isActive ? 'pointer-events-auto' : 'pointer-events-none'}`}
+    style={{
+      border: '1px solid rgba(199, 158, 72, 0.15)',
+      overflow: 'hidden'
+    }}
   >
-    <h2 className="text-3xl font-luxury font-bold mb-6 text-[#C79E48] border-b border-[#C79E48]/10 pb-4 flex items-center gap-3">
-      {title}
-      {!isActive && <Check className="w-6 h-6 text-green-500 ml-auto" />}
-    </h2>
-    {children}
+    <div className={`relative rounded-3xl p-8 border ${isActive ? 'border-white/40 bg-white' : 'border-transparent bg-white/70'} transition-all`}>
+      <motion.div
+        className="absolute inset-0 opacity-0 group-hover:opacity-100 pointer-events-none"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: isActive ? [0.2, 0.4, 0.2] : 0 }}
+        transition={{ duration: 6, repeat: Infinity }}
+        style={{
+          background: 'linear-gradient(135deg, rgba(199,158,72,0.08), rgba(255,255,255,0))'
+        }}
+      />
+      <div className={`relative z-10 ${isActive ? '' : 'opacity-70'}`}>
+        <h2 className="text-3xl font-luxury font-bold mb-6 text-[#C79E48] border-b border-[#C79E48]/10 pb-4 flex items-center gap-3">
+          {title}
+          {!isActive && <Check className="w-6 h-6 text-green-500 ml-auto" />}
+        </h2>
+        {children}
+      </div>
+    </div>
   </motion.div>
 ));
 
@@ -332,6 +351,24 @@ const Customize: React.FC = () => {
                      (selectedSize?.id === "custom" ? 0 : selectedSize?.price || 0) + 
                      flowerCost + 
                      accessoriesCost;
+
+  const extrasDetail = selectedAccessories.length > 0
+    ? `${selectedAccessories.length} accessory${selectedAccessories.length > 1 ? 'ies' : ''}`
+    : withGlitter
+      ? "Glitter on"
+      : "Add sparkle";
+
+  const steps = [
+    { id: 'presentation', label: 'Presentation', detail: selectedPackage ? selectedPackage.name : 'Choose style', complete: !!selectedPackage },
+    { id: 'details', label: selectedPackage?.type === 'box' ? 'Box Details' : 'Wrap Details', detail: selectedPackage?.type === 'box' ? (selectedBoxColor ? selectedBoxColor.name : 'Shape & color') : (selectedWrapColor ? selectedWrapColor.name : 'Wrap color'), complete: selectedPackage?.type === 'box' ? !!selectedBoxColor : !!selectedWrapColor },
+    { id: 'size', label: 'Size', detail: selectedSize ? selectedSize.name : 'Pick size', complete: !!selectedSize },
+    { id: 'flowers', label: 'Flowers', detail: totalFlowers ? `${totalFlowers} stems` : 'Select stems', complete: totalFlowers > 0 },
+    { id: 'extras', label: 'Final Touch', detail: extrasDetail, complete: selectedAccessories.length > 0 || withGlitter },
+    { id: 'preview', label: 'Preview', detail: generatedImage ? 'Ready' : 'Generate look', complete: !!generatedImage }
+  ];
+
+  const completedSteps = steps.filter(step => step.complete).length;
+  const progressPercent = Math.round((completedSteps / steps.length) * 100);
 
   const adjustFlowerColor = (flowerId: string, colorId: string, delta: number) => {
     if (delta > 0 && totalFlowers >= maxFlowers) {
@@ -472,6 +509,27 @@ const Customize: React.FC = () => {
   return (
     <div className="min-h-screen bg-white relative overflow-x-hidden">
       <UltraNavigation />
+
+      {/* Ambient Gold Ribbons */}
+      <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
+        {[...Array(3)].map((_, idx) => (
+          <motion.div
+            key={`ribbon-${idx}`}
+            initial={{ opacity: 0.2, rotate: 0, y: 0 }}
+            animate={{ 
+              opacity: [0.1, 0.3, 0.15], 
+              rotate: idx % 2 === 0 ? [0, 5, -5, 0] : [0, -6, 6, 0],
+              y: [-30, 20, -40]
+            }}
+            transition={{ duration: 18 + idx * 4, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute w-[55vw] h-[55vw] bg-gradient-to-br from-[#c9a14e1f] via-[#f9efe3] to-transparent blur-3xl"
+            style={{
+              top: idx === 0 ? '-10%' : idx === 1 ? '30%' : '60%',
+              left: idx === 0 ? '-15%' : idx === 1 ? '40%' : '65%'
+            }}
+          />
+        ))}
+      </div>
       
       {/* Floating Background */}
       <div className="fixed inset-0 pointer-events-none z-0 opacity-30">
@@ -481,17 +539,121 @@ const Customize: React.FC = () => {
       </div>
 
       {/* Header */}
-      <div className="relative pt-32 pb-12 px-6 text-center bg-gradient-to-b from-white to-[#fffbf5]">
-        <motion.h1 
+      <div className="relative pt-32 pb-20 px-6 overflow-hidden">
+        <motion.div
+          className="absolute inset-0"
+          initial={{ scale: 1.08, opacity: 0 }}
+          animate={{ scale: 1, opacity: 0.65 }}
+          transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <img
+            src={heroBouquetMain}
+            alt="Customization hero background"
+            className="w-full h-full object-cover"
+            loading="eager"
+          />
+        </motion.div>
+        <div className="absolute inset-0 bg-gradient-to-b from-white/95 via-white/85 to-white/95" />
+
+        <motion.div
+          className="relative z-10 text-center"
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+        >
+          {/* Luxury Typography with Gold Accent */}
+          <motion.h1 
+            className="font-luxury text-6xl md:text-8xl font-bold mb-6 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 bg-clip-text text-transparent relative"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            style={{
+              filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))',
+              letterSpacing: '0.05em'
+            }}
+          >
+            Design Your Masterpiece
+            {/* Animated Gold Underline */}
+            <motion.div 
+              className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 h-1 bg-gradient-to-r from-[#C79E48] to-[#D4A85A] rounded-full"
+              initial={{ width: 0 }}
+              animate={{ width: '200px' }}
+              transition={{ duration: 1.2, delay: 0.8, ease: "easeOut" }}
+            />
+          </motion.h1>
+
+          {/* Enhanced Decorative Elements */}
+          <div className="relative mb-6">
+            <div className="w-40 h-0.5 bg-gradient-to-r from-transparent via-[#C79E48]/60 to-transparent mx-auto" />
+            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-[#C79E48] rotate-45 shadow-lg shadow-[#C79E48]/50" />
+          </div>
+
+          <motion.p 
+            className="font-body text-lg md:text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed font-light"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+          >
+            Customize every detail of your perfect bouquet, from the box and wrap to the last glittering petal.
+          </motion.p>
+        </motion.div>
+      </div>
+
+      {/* Animated Step Timeline */}
+      <div className="relative z-10 -mt-8 pb-16 px-6">
+        <motion.div 
+          className="max-w-6xl mx-auto bg-white/80 backdrop-blur-md border border-[#C79E48]/15 rounded-3xl p-6 md:p-8 shadow-[0_25px_80px_rgba(0,0,0,0.08)]"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-5xl md:text-7xl font-luxury font-bold mb-4 text-[#C79E48]"
+          transition={{ duration: 0.8 }}
         >
-          Design Your Masterpiece
-        </motion.h1>
-        <p className="text-xl text-gray-500 max-w-2xl mx-auto font-light">
-          Customize every detail of your perfect bouquet, from the packaging to the petals.
-        </p>
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+            <div>
+              <p className="text-sm uppercase tracking-[0.3em] text-slate-400">Creative journey</p>
+              <p className="text-2xl font-luxury font-semibold text-slate-800">You're {progressPercent}% ready</p>
+            </div>
+            <div className="text-right">
+              <p className="text-sm text-slate-500">Completed steps</p>
+              <p className="text-lg font-semibold text-[#C79E48]">{completedSteps} / {steps.length}</p>
+            </div>
+          </div>
+
+          <div className="relative mb-8">
+            <div className="h-2 bg-slate-100 rounded-full" />
+            <motion.div 
+              className="absolute top-0 left-0 h-2 bg-gradient-to-r from-[#C79E48] via-[#d7b46d] to-[#f5d7a0] rounded-full"
+              initial={{ width: 0 }}
+              animate={{ width: `${progressPercent}%` }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+              style={{ boxShadow: '0 4px 14px rgba(199, 158, 72, 0.35)' }}
+            />
+            <div className="absolute inset-0 flex justify-between">
+              {steps.map((step) => (
+                <div key={step.id} className="relative flex-1 flex justify-center">
+                  <motion.span 
+                    className={`w-4 h-4 rounded-full border-2 ${step.complete ? 'bg-[#C79E48] border-[#C79E48]' : 'bg-white border-slate-200'} transition-colors`}
+                    animate={step.complete ? { scale: [1, 1.15, 1], boxShadow: ['0 0 0 rgba(199,158,72,0)', '0 0 12px rgba(199,158,72,0.45)', '0 0 0 rgba(199,158,72,0)'] } : {}}
+                    transition={{ duration: 1.6, repeat: step.complete ? Infinity : 0 }}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid md:grid-cols-6 gap-4">
+            {steps.map((step, idx) => (
+              <motion.div 
+                key={step.id}
+                className={`rounded-2xl border p-4 text-center transition-all ${step.complete ? 'border-[#C79E48]/70 bg-[#fff8eb]' : 'border-slate-100 bg-white/70'}`}
+                whileHover={{ y: -4 }}
+              >
+                <div className="text-sm uppercase tracking-wide text-slate-400 mb-1">Step {idx + 1}</div>
+                <div className={`font-semibold ${step.complete ? 'text-[#C79E48]' : 'text-slate-600'}`}>{step.label}</div>
+                <div className="text-xs text-slate-500 mt-2">{step.detail}</div>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
       </div>
 
       <div className="max-w-[1600px] mx-auto px-6 pb-20 relative z-10">

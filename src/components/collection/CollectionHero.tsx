@@ -16,101 +16,34 @@ const CollectionHeroComponent = () => {
   );
 
   useEffect(() => {
-    // Skip heavy animations on mobile or reduced motion
-    if (isMobile || prefersReducedMotion || shouldReduceMotion) {
-      gsap.set([".hero-title .char", ".hero-subtitle", ".hero-description", ".subtitle-underline"], { 
-        opacity: 1, 
-        y: 0, 
-        rotateX: 0,
-        filter: "blur(0px)",
-        scale: 1,
-        clipPath: "inset(0 0% 0 0%)"
-      });
+    if (isMobile || prefersReducedMotion || shouldReduceMotion || !particlesRef.current) {
       return;
     }
-    // Prepare states for staged reveal
-    gsap.set([".hero-subtitle"], { opacity: 0, y: 20, filter: "blur(6px)" });
-    gsap.set([".hero-description"], {
-      opacity: 0,
-      y: 24,
-      scale: 0.98,
-      clipPath: "inset(0 50% 0 50%)"
+
+    const particles = particlesRef.current.children;
+    gsap.set(particles, {
+      x: () => gsap.utils.random(-200, 200),
+      y: () => gsap.utils.random(-200, 200),
+      scale: () => gsap.utils.random(0.5, 1.5),
+      opacity: () => gsap.utils.random(0.3, 0.8)
     });
-    gsap.set('.subtitle-underline', { scaleX: 0, transformOrigin: '0% 50%' });
 
-    // Title first, then subtitle, then powerful description reveal
-    const tl = gsap.timeline({ delay: 0.2 });
-    tl.from(".hero-title .char", {
-      y: 100,
-      opacity: 0,
-      rotationX: -90,
-      duration: 0.8,
-      ease: "back.out(1.7)",
-      stagger: 0.05
-    })
-    .to(".hero-subtitle", {
-      opacity: 1,
-      y: 0,
-      filter: "blur(0px)",
-      duration: 0.4,
-      ease: "power3.out"
-    }, "+=0.05")
-    .from(".subtitle-word", {
-      y: 28,
-      opacity: 0,
-      skewY: 6,
-      duration: 0.6,
-      ease: "power3.out",
-      stagger: 0.06
-    }, "<")
-    .fromTo(".hero-subtitle", { letterSpacing: "0.08em" }, { letterSpacing: "0em", duration: 0.8, ease: "power2.out" }, "<")
-    .to('.subtitle-underline', { scaleX: 1, duration: 0.6, ease: 'power3.out' }, "<0.1")
-    .to(".hero-description", {
-      opacity: 1,
-      y: 0,
-      scale: 1,
-      clipPath: "inset(0 0% 0 0%)",
-      duration: 0.8,
-      ease: "power3.out"
-    }, "+=0.1");
-
-    // Floating particles animation - Further optimized
-    if (!isMobile && !shouldReduceMotion && particlesRef.current) {
-      const particles = particlesRef.current.children;
-      gsap.set(particles, {
-        x: () => gsap.utils.random(-200, 200),
-        y: () => gsap.utils.random(-200, 200),
-        scale: () => gsap.utils.random(0.5, 1.5),
-        opacity: () => gsap.utils.random(0.3, 0.8)
-      });
-
-      gsap.to(particles, {
-        y: "-=100",
-        rotation: 180, // Reduced rotation
-        duration: () => gsap.utils.random(15, 25), // Slower animation
-        ease: "none",
-        repeat: -1,
-        stagger: { each: 1, repeat: -1 }, // Increased stagger for less simultaneous animations
-        force3D: true
-      });
-    }
+    gsap.to(particles, {
+      y: "-=100",
+      rotation: 180,
+      duration: () => gsap.utils.random(15, 25),
+      ease: "none",
+      repeat: -1,
+      stagger: { each: 1, repeat: -1 },
+      force3D: true
+    });
   }, [isMobile, prefersReducedMotion, shouldReduceMotion]);
 
-  const splitText = (text: string) => {
-    return text.split("").map((char, i) => (
-      <span key={i} className="char inline-block" style={{ transformOrigin: "50% 100%" }}>
-        {char === " " ? "\u00A0" : char}
-      </span>
-    ));
-  };
-
-  const splitWords = (text: string) => {
-    return text.split(" ").map((word, i) => (
-      <span key={i} className="subtitle-word inline-block mr-2">
-        {word}
-      </span>
-    ));
-  };
+  const heroHighlights = [
+    { value: "150+", label: "Signature Arrangements" },
+    { value: "24/7", label: "Concierge Support" },
+    { value: "20+", label: "Curated Themes" }
+  ];
 
   return (
     <section 
@@ -125,6 +58,27 @@ const CollectionHeroComponent = () => {
         minHeight: isMobile ? '70vh' : '85vh'
       }}
     >
+      {/* Ambient Gold Ribbons */}
+      <div className="absolute inset-0 pointer-events-none z-10 overflow-hidden">
+        {[...Array(3)].map((_, idx) => (
+          <motion.div
+            key={`ribbon-${idx}`}
+            initial={{ opacity: 0.2, rotate: 0, y: 0 }}
+            animate={{ 
+              opacity: [0.15, 0.35, 0.2], 
+              rotate: idx % 2 === 0 ? [0, 4, -4, 0] : [0, -5, 5, 0],
+              y: [-20, 30, -40]
+            }}
+            transition={{ duration: 24 + idx * 4, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute w-[50vw] h-[50vw] bg-gradient-to-br from-[#c9a14e1f] via-[#fff6e6] to-transparent blur-3xl"
+            style={{
+              top: idx === 0 ? '-5%' : idx === 1 ? '25%' : '55%',
+              left: idx === 0 ? '-10%' : idx === 1 ? '45%' : '65%'
+            }}
+          />
+        ))}
+      </div>
+
       {/* Background Image with Parallax Effect - Reduced on mobile */}
       <motion.div
         className="absolute inset-0 z-0"
@@ -149,7 +103,7 @@ const CollectionHeroComponent = () => {
       </motion.div>
 
       {/* Gradient Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/50 to-background/70 z-10" />
+      <div className="absolute inset-0 bg-gradient-to-b from-white/85 via-white/70 to-white/85 z-10" />
 
       {/* Floating Particles Background - Further reduced for performance */}
       {!isMobile && !shouldReduceMotion && (
@@ -176,46 +130,90 @@ const CollectionHeroComponent = () => {
       )}
 
       {/* Hero Content - Moved upward */}
-      <div className="relative z-20 text-center max-w-4xl mx-auto px-4 xs:px-5 sm:px-6 lg:px-8 -mt-12 sm:-mt-16 md:-mt-20">
+      <div
+        className="relative z-20 text-center max-w-6xl mx-auto px-4 xs:px-5 sm:px-6 lg:px-8"
+        style={{ marginTop: "-10px" }}
+      >
         <motion.div
-          className="hero-title mb-6 sm:mb-8"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: shouldReduceMotion || isMobile ? 0 : 0.1 }}
-          style={{ willChange: shouldReduceMotion || isMobile ? "auto" : "opacity" }}
+          className="space-y-6 sm:space-y-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
         >
-          <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-luxury text-foreground leading-tight px-2 sm:px-0">
-            {splitText("Our Complete")}
-            <br />
-            <span className="text-primary">
-              {splitText("Collection")}
-            </span>
-          </h1>
-        </motion.div>
+          <motion.p 
+            className="uppercase tracking-[0.4em] text-xs sm:text-sm text-slate-500"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15, duration: 0.6 }}
+          >
+            Bexy Signature Atelier
+          </motion.p>
 
-        <motion.p 
-          className="hero-subtitle relative inline-block text-base xs:text-lg sm:text-xl lg:text-2xl text-foreground/80 mb-4 sm:mb-6 font-body px-2 sm:px-0"
-          initial={false}
-          animate={false}
-        >
-          {splitWords("Handcrafted luxury bouquets for every precious moment")}
-          <span className="subtitle-underline absolute left-0 -bottom-2 h-[2px] w-full bg-gradient-to-r from-primary via-primary/70 to-transparent" />
-        </motion.p>
+          <motion.h1 
+            className="font-luxury text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold mb-6 text-slate-900 relative"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.8 }}
+            style={{
+              filter: 'drop-shadow(0 6px 18px rgba(0,0,0,0.15))',
+              letterSpacing: '0.04em'
+            }}
+          >
+            Our Complete Collection
+            <motion.div 
+              className="absolute -bottom-3 left-1/2 transform -translate-x-1/2 h-[6px] w-48 rounded-full bg-gradient-to-r from-[#C79E48] via-[#dcbf7b] to-[#f9e7bb]"
+              initial={{ width: 0 }}
+              animate={{ width: 192 }}
+              transition={{ delay: 0.6, duration: 1.1, ease: "easeOut" }}
+            />
+          </motion.h1>
 
-        <motion.div
-          className="hero-description relative max-w-3xl mx-auto"
-          initial={false}
-          animate={false}
-        >
-          <div className="bg-background/70 backdrop-blur-md border border-primary/20 rounded-xl shadow-gold px-4 xs:px-5 sm:px-6 py-4 sm:py-5">
-            <p className="text-sm xs:text-base sm:text-lg leading-relaxed text-foreground/90 font-body">
-            Discover our curated collection of artisanal bouquets, each carefully designed 
-            to celebrate life's most beautiful moments with elegance and sophistication.
-            </p>
+          <div className="relative">
+            <div className="w-40 h-0.5 bg-gradient-to-r from-transparent via-[#C79E48]/60 to-transparent mx-auto" />
+            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-[#C79E48] rotate-45 shadow-lg shadow-[#C79E48]/40" />
           </div>
+
+          <motion.p 
+            className="text-base sm:text-lg md:text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed font-body"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.45, duration: 0.7 }}
+          >
+            Discover Lebanon&apos;s most luxurious floral portfolio — curated themes, couture arrangements, and limited editions designed to celebrate every exquisite moment.
+          </motion.p>
         </motion.div>
 
-        
+        <motion.div 
+          className="mt-10 grid sm:grid-cols-3 gap-4 sm:gap-6 max-w-5xl mx-auto"
+          initial="hidden"
+          animate="show"
+          variants={{
+            hidden: {},
+            show: {
+              transition: { staggerChildren: 0.15, delayChildren: 0.6 }
+            }
+          }}
+        >
+          {heroHighlights.map((item) => (
+            <motion.div
+              key={item.label}
+              className="relative rounded-3xl border border-[#e8d8b5] bg-white/90 backdrop-blur-lg px-6 py-5 text-left shadow-[0_18px_45px_rgba(0,0,0,0.08)]"
+              variants={{
+                hidden: { opacity: 0, y: 30 },
+                show: { opacity: 1, y: 0 }
+              }}
+            >
+              <div className="text-3xl font-luxury text-slate-900 mb-2">{item.value}</div>
+              <div className="text-sm uppercase tracking-[0.35em] text-slate-500">{item.label}</div>
+              <motion.div 
+                className="absolute inset-0 rounded-3xl pointer-events-none"
+                animate={{ opacity: [0.1, 0.3, 0.1] }}
+                transition={{ duration: 6, repeat: Infinity }}
+                style={{ border: '1px solid rgba(199,158,72,0.25)' }}
+              />
+            </motion.div>
+          ))}
+        </motion.div>
       </div>
     </section>
   );
