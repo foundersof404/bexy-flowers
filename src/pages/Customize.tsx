@@ -393,9 +393,9 @@ const Customize: React.FC = () => {
       let packagingPrompt = "";
       if (selectedPackage?.type === "box") {
         const sizeDesc = selectedSize?.id === 'small' ? "compact small" : selectedSize?.id === 'large' ? "large grand" : "medium";
-        packagingPrompt = `arranged tightly packed inside a ${sizeDesc} ${selectedBoxColor?.name} ${selectedBoxShape?.name}-shaped luxury box. The flowers must be packed very close together showing ONLY the flower heads. ABSOLUTELY NO STEMS VISIBLE, NO GREEN LEAVES VISIBLE. The box features a "Bexy Flowers" logo in gold. View is from slightly above at a 45 degree angle looking down at the flower heads.`;
+        packagingPrompt = `arranged tightly packed inside a ${sizeDesc} ${selectedBoxColor?.name} ${selectedBoxShape?.name}-shaped luxury box. The flowers are arranged in a HIGH, ROUNDED DOME shape, rising significantly above the rim of the box (mounded style). The flower heads are packed very close together with ABSOLUTELY NO STEMS VISIBLE. The box features a clear gold logo on the front that says "Bexy Flowers". Camera angle is a FRONT-SIDE VIEW at eye level (NOT top-down), showing the depth of the box and the height of the flower dome.`;
       } else {
-        packagingPrompt = `wrapped in ${selectedWrapColor?.name} paper with "Bexy Flowers" printed on it. Elegant wrapping style showing stems at the bottom. View is from slightly above at a 45 degree angle.`;
+        packagingPrompt = `wrapped in ${selectedWrapColor?.name} paper with "Bexy Flowers" printed on it. Elegant wrapping style showing stems at the bottom. View is from a front-side angle.`;
       }
 
       // 3. Glitter - "Diamond dust" look
@@ -409,7 +409,7 @@ const Customize: React.FC = () => {
         : "";
 
       // Combined Prompt
-      const fullPrompt = `Professional product photography of ${flowerDetails}, ${packagingPrompt} ${glitterPrompt} ${accessoriesPrompt} White background, soft studio lighting from top-left, 8k resolution, photorealistic, sharp focus, centered composition filling 70% of frame. ${aiRefinementText}`;
+      const fullPrompt = `Professional product photography of ${flowerDetails}, ${packagingPrompt} ${glitterPrompt} ${accessoriesPrompt} White background, soft studio lighting, 8k resolution, photorealistic, sharp focus, centered composition. The text on the box MUST be "Bexy Flowers". ${aiRefinementText}`;
 
       // Use Pollinations AI
       const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(fullPrompt)}?width=1024&height=1024&nologo=true&seed=${Date.now()}&model=flux`;
