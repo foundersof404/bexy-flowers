@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useCart } from '@/contexts/CartContext';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Trash2, ShoppingBag, ArrowLeft } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import UltraNavigation from '@/components/UltraNavigation';
 import Footer from '@/components/Footer';
 import BackToTop from '@/components/BackToTop';
@@ -12,9 +12,38 @@ import BackToTop from '@/components/BackToTop';
 const CartPage: React.FC = () => {
   const { cartItems, removeFromCart, getTotalPrice, clearCart } = useCart();
   const navigate = useNavigate();
+  const location = useLocation();
+  const checkoutButtonRef = useRef<HTMLButtonElement>(null);
+  const componentMountedRef = useRef(false);
 
   const isEmpty = cartItems.length === 0;
   const totalPrice = getTotalPrice();
+
+  // Track component lifecycle
+  useEffect(() => {
+    console.log('🟢 CartPage MOUNTED');
+    console.log('📍 Location:', location.pathname);
+    console.log('🛒 Cart Items:', cartItems.length);
+    componentMountedRef.current = true;
+
+    // Check if button exists
+    if (checkoutButtonRef.current) {
+      console.log('✅ Checkout button found in DOM');
+      console.log('Button element:', checkoutButtonRef.current);
+    } else {
+      console.warn('⚠️ Checkout button NOT found in DOM yet');
+    }
+
+    return () => {
+      console.log('🔴 CartPage UNMOUNTING');
+      componentMountedRef.current = false;
+    };
+  }, []);
+
+  // Track cart changes
+  useEffect(() => {
+    console.log('🛒 Cart updated:', cartItems.length, 'items');
+  }, [cartItems]);
 
   const handleContinueShopping = (e?: React.MouseEvent) => {
     if (e) {
@@ -27,80 +56,159 @@ const CartPage: React.FC = () => {
     });
   };
 
-  const handleWhatsAppCheckout = (e?: React.MouseEvent<HTMLButtonElement>) => {
-    // CRITICAL: Prevent all default behavior and stop propagation
-    if (e) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-    
-    console.log('=== CHECKOUT BUTTON CLICKED ===');
-    console.log('Event:', e);
-    console.log('Cart Items Count:', cartItems.length);
-    
-    if (cartItems.length === 0) {
-      console.log('Cart is empty, cannot checkout');
-      alert('Your cart is empty. Please add items before checkout.');
-      return;
-    }
-    
-    const phoneNumber = "96176104882";
-    
-    const orderDetails = cartItems.map((item) => {
-      let itemStr = `*Item:* ${item.title}\n*Price:* $${item.price} x ${item.quantity} = $${(item.price * item.quantity).toFixed(2)}`;
-      
-      if (item.description) itemStr += `\n*Details:* ${item.description}`;
-      if (item.size) itemStr += `\n*Size:* ${item.size}`;
-      if (item.personalNote) itemStr += `\n*Personal Note:* ${item.personalNote}`;
-      
-      // Handle image links
-      if (item.image) {
-        if (item.image.includes('pollinations.ai')) {
-             itemStr += `\n*Image Reference:* ${item.image}`;
-        } 
-        else if (item.image.startsWith('http')) {
-             itemStr += `\n*Image Reference:* ${item.image}`;
-        }
-      }
-      
-      return itemStr;
-    }).join("\n\n-------------------\n\n");
-
-    const total = totalPrice;
-    const tax = total * 0.08;
-    const finalTotal = total + tax;
-
-    const finalMessage = `Hello, I would like to place an order:\n\n${orderDetails}\n\n*Subtotal:* $${total.toFixed(2)}\n*Tax:* $${tax.toFixed(2)}\n*TOTAL:* $${finalTotal.toFixed(2)}\n\n*Payment Method:* Whish Money / Cash on Delivery`;
-    
-    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(finalMessage)}`;
-    
-    console.log('=== CHECKOUT DEBUG ===');
-    console.log('Cart Items:', cartItems.length);
-    console.log('WhatsApp URL:', whatsappUrl);
-    console.log('Opening WhatsApp...');
-    
-    // Save cart state before opening WhatsApp (defensive)
+  const handleWhatsAppCheckout = useCallback((e?: React.MouseEvent<HTMLButtonElement> | MouseEvent) => {
     try {
-      localStorage.setItem('bexy-flowers-cart-backup', JSON.stringify(cartItems));
-      console.log('Cart backed up to localStorage');
-    } catch (e) {
-      console.warn('Could not backup cart:', e);
-    }
-    
-    // Use setTimeout to ensure all event handlers have finished
-    setTimeout(() => {
-      // Try window.open first
-      const newWindow = window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+      console.log('🚀 ========== CHECKOUT HANDLER CALLED ==========');
+      console.log('⏰ Timestamp:', new Date().toISOString());
+      console.log('📍 Component mounted:', componentMountedRef.current);
+      console.log('🎯 Event:', e);
+      console.log('🛒 Cart Items Count:', cartItems.length);
+      console.log('💰 Total Price:', totalPrice);
       
-      if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
-        console.log('Popup blocked, showing user message');
-        // Don't navigate away - show a message instead
-        alert('Please allow popups for this site to open WhatsApp, or copy this link:\n\n' + whatsappUrl);
+      // CRITICAL: Prevent all default behavior and stop propagation
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        if ('stopImmediatePropagation' in e && typeof e.stopImmediatePropagation === 'function') {
+          e.stopImmediatePropagation();
+        }
+        console.log('✅ Event prevented and stopped');
       } else {
-        console.log('WhatsApp opened successfully');
+        console.warn('⚠️ No event object provided');
       }
-    }, 100);
-  };
+      
+      // Check if component is still mounted
+      if (!componentMountedRef.current) {
+        console.error('❌ Component unmounted, aborting checkout');
+        return;
+      }
+      
+      if (cartItems.length === 0) {
+        console.error('❌ Cart is empty, cannot checkout');
+        alert('Your cart is empty. Please add items before checkout.');
+        return;
+      }
+      
+      const phoneNumber = "96176104882";
+      console.log('📱 Phone number:', phoneNumber);
+      
+      try {
+        const orderDetails = cartItems.map((item, index) => {
+          console.log(`📦 Processing item ${index + 1}:`, item.title);
+          let itemStr = `*Item:* ${item.title}\n*Price:* $${item.price} x ${item.quantity} = $${(item.price * item.quantity).toFixed(2)}`;
+          
+          if (item.description) itemStr += `\n*Details:* ${item.description}`;
+          if (item.size) itemStr += `\n*Size:* ${item.size}`;
+          if (item.personalNote) itemStr += `\n*Personal Note:* ${item.personalNote}`;
+          
+          // Handle image links
+          if (item.image) {
+            if (item.image.includes('pollinations.ai')) {
+                 itemStr += `\n*Image Reference:* ${item.image}`;
+            } 
+            else if (item.image.startsWith('http')) {
+                 itemStr += `\n*Image Reference:* ${item.image}`;
+            }
+          }
+          
+          return itemStr;
+        }).join("\n\n-------------------\n\n");
+
+        const total = totalPrice;
+        const tax = total * 0.08;
+        const finalTotal = total + tax;
+
+        const finalMessage = `Hello, I would like to place an order:\n\n${orderDetails}\n\n*Subtotal:* $${total.toFixed(2)}\n*Tax:* $${tax.toFixed(2)}\n*TOTAL:* $${finalTotal.toFixed(2)}\n\n*Payment Method:* Whish Money / Cash on Delivery`;
+        
+        const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(finalMessage)}`;
+        
+        console.log('✅ Order details generated');
+        console.log('📝 Message length:', finalMessage.length);
+        console.log('🔗 WhatsApp URL length:', whatsappUrl.length);
+        console.log('🔗 WhatsApp URL (first 100 chars):', whatsappUrl.substring(0, 100));
+        
+        // Save cart state before opening WhatsApp (defensive)
+        try {
+          localStorage.setItem('bexy-flowers-cart-backup', JSON.stringify(cartItems));
+          console.log('💾 Cart backed up to localStorage');
+        } catch (storageError) {
+          console.error('❌ Could not backup cart:', storageError);
+        }
+        
+        // Use setTimeout to ensure all event handlers have finished
+        console.log('⏳ Setting timeout to open WhatsApp...');
+        setTimeout(() => {
+          try {
+            console.log('🚪 Attempting to open WhatsApp window...');
+            const newWindow = window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+            
+            if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+              console.error('❌ Popup blocked');
+              alert('Please allow popups for this site to open WhatsApp, or copy this link:\n\n' + whatsappUrl);
+            } else {
+              console.log('✅ WhatsApp opened successfully!');
+              console.log('🪟 New window:', newWindow);
+            }
+          } catch (openError) {
+            console.error('❌ Error opening window:', openError);
+            alert('Error opening WhatsApp. Please try again or copy this link:\n\n' + whatsappUrl);
+          }
+        }, 100);
+        
+      } catch (orderError) {
+        console.error('❌ Error generating order details:', orderError);
+        alert('Error preparing order. Please try again.');
+      }
+      
+    } catch (error) {
+      console.error('❌ FATAL ERROR in checkout handler:', error);
+      console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+      alert('An unexpected error occurred. Please try again or contact support.');
+    }
+  }, [cartItems, totalPrice]);
+
+  // Track button render and check for form wrappers - AFTER handler is defined
+  useEffect(() => {
+    if (!isEmpty && checkoutButtonRef.current) {
+      console.log('✅ Checkout button rendered');
+      const button = checkoutButtonRef.current;
+      console.log('Button styles:', window.getComputedStyle(button));
+      console.log('Button z-index:', window.getComputedStyle(button).zIndex);
+      console.log('Button pointer-events:', window.getComputedStyle(button).pointerEvents);
+      
+      // Check if button is inside a form
+      const form = button.closest('form');
+      if (form) {
+        console.error('❌ WARNING: Button is inside a FORM element!', form);
+        console.error('Form action:', form.action);
+        console.error('Form method:', form.method);
+      } else {
+        console.log('✅ Button is NOT inside a form');
+      }
+      
+      // Check for overlaying elements
+      const rect = button.getBoundingClientRect();
+      const elementAtPoint = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
+      if (elementAtPoint !== button && !button.contains(elementAtPoint)) {
+        console.warn('⚠️ WARNING: Element at button center is not the button itself:', elementAtPoint);
+      }
+      
+      // Add direct event listener as backup
+      const handleDirectClick = (e: MouseEvent) => {
+        console.log('🎯 DIRECT CLICK LISTENER FIRED (capture phase)');
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        handleWhatsAppCheckout(e as any);
+      };
+      
+      button.addEventListener('click', handleDirectClick, true); // Use capture phase
+      
+      return () => {
+        button.removeEventListener('click', handleDirectClick, true);
+      };
+    }
+  }, [isEmpty, cartItems.length, handleWhatsAppCheckout]);
 
   if (isEmpty) {
     return (
@@ -291,14 +399,26 @@ const CartPage: React.FC = () => {
 
               <div className="space-y-3" style={{ position: 'relative', zIndex: 10 }}>
                 <Button
+                  ref={checkoutButtonRef}
                   type="button"
-                  onClick={handleWhatsAppCheckout}
+                  onClick={(e) => {
+                    console.log('🎯 React onClick handler fired');
+                    handleWhatsAppCheckout(e);
+                  }}
+                  onMouseDown={(e) => {
+                    console.log('🖱️ onMouseDown fired');
+                    e.preventDefault();
+                  }}
+                  onMouseUp={(e) => {
+                    console.log('🖱️ onMouseUp fired');
+                  }}
                   className="w-full bg-gradient-to-r from-amber-400 to-amber-600 hover:from-amber-500 hover:to-amber-700 text-white font-semibold py-6 rounded-full"
                   style={{ 
                     position: 'relative', 
                     zIndex: 1000,
                     pointerEvents: 'auto',
-                    cursor: 'pointer'
+                    cursor: 'pointer',
+                    touchAction: 'manipulation'
                   }}
                 >
                   Proceed to Checkout
