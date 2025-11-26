@@ -433,7 +433,7 @@ const BirthDetailsStep = ({
 );
 
 const ZodiacProfileStep = ({ sign }: { sign: ZodiacSign }) => (
-  <div className="space-y-10">
+  <div className="space-y-6">
     <motion.div 
       className="text-center"
       initial={{ opacity: 0, y: 20 }}
@@ -444,10 +444,10 @@ const ZodiacProfileStep = ({ sign }: { sign: ZodiacSign }) => (
         initial={{ scale: 0, rotate: -180 }}
         animate={{ scale: 1, rotate: 0 }}
         transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.2 }}
-        className="relative mx-auto mb-8"
+        className="relative mx-auto mb-4"
       >
-        <div className="w-40 h-40 bg-white border-4 border-[#C79E48] rounded-full flex items-center justify-center shadow-2xl shadow-[#C79E48]/30 relative">
-          <span className="text-8xl drop-shadow-lg">{sign.symbol}</span>
+        <div className="w-28 h-28 bg-white border-4 border-[#C79E48] rounded-full flex items-center justify-center shadow-2xl shadow-[#C79E48]/30 relative">
+          <span className="text-6xl drop-shadow-lg">{sign.symbol}</span>
           <motion.div
             className="absolute inset-0 border-4 border-[#C79E48] rounded-full"
             animate={{ scale: [1, 1.05, 1], opacity: [0.3, 0.1, 0.3] }}
@@ -457,7 +457,7 @@ const ZodiacProfileStep = ({ sign }: { sign: ZodiacSign }) => (
       </motion.div>
       
       <motion.h3 
-        className="text-5xl font-bold text-gray-900 mb-6 tracking-wide"
+        className="text-4xl font-bold text-gray-900 mb-2 tracking-wide"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.4 }}
@@ -471,13 +471,13 @@ const ZodiacProfileStep = ({ sign }: { sign: ZodiacSign }) => (
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.6, delay: 0.5 }}
       >
-        <Badge variant="secondary" className="mb-6 bg-[#F5F1E8] border-2 border-[#C79E48] text-[#8B6F3A] text-xl px-6 py-3 rounded-full font-semibold">
+        <Badge variant="secondary" className="mb-3 bg-[#F5F1E8] border border-[#C79E48] text-[#8B6F3A] text-sm px-4 py-1 rounded-full font-semibold">
           {sign.element} • {sign.modality}
         </Badge>
       </motion.div>
       
       <motion.p 
-        className="text-gray-600 text-xl font-light"
+        className="text-gray-600 text-sm font-light"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.6 }}
@@ -487,25 +487,25 @@ const ZodiacProfileStep = ({ sign }: { sign: ZodiacSign }) => (
     </motion.div>
     
     <motion.div 
-      className="grid md:grid-cols-2 gap-8"
+      className="grid md:grid-cols-2 gap-4"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, delay: 0.7 }}
     >
-      <div className="bg-white rounded-2xl p-8 border-2 border-[#E8D4A8] shadow-lg">
-        <h4 className="font-bold text-gray-900 text-2xl mb-6 tracking-wide" style={{ fontFamily: 'Playfair Display, serif' }}>
+      <div className="bg-white rounded-2xl p-5 border border-[#E8D4A8] shadow-md">
+        <h4 className="font-bold text-gray-900 text-lg mb-3 tracking-wide" style={{ fontFamily: 'Playfair Display, serif' }}>
           Your Personality
         </h4>
-        <p className="text-gray-800 leading-relaxed text-lg">
+        <p className="text-gray-800 leading-relaxed text-sm">
           {sign.personality}
         </p>
       </div>
       
-      <div className="bg-white rounded-2xl p-8 border-2 border-[#E8D4A8] shadow-lg">
-        <h4 className="font-bold text-gray-900 text-2xl mb-6 tracking-wide" style={{ fontFamily: 'Playfair Display, serif' }}>
+      <div className="bg-white rounded-2xl p-5 border border-[#E8D4A8] shadow-md">
+        <h4 className="font-bold text-gray-900 text-lg mb-3 tracking-wide" style={{ fontFamily: 'Playfair Display, serif' }}>
           Your Traits
         </h4>
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-wrap gap-2">
           {sign.traits.map((trait, index) => (
             <motion.div
               key={index}
@@ -514,7 +514,7 @@ const ZodiacProfileStep = ({ sign }: { sign: ZodiacSign }) => (
               transition={{ duration: 0.3, delay: 0.8 + index * 0.1 }}
               whileHover={{ scale: 1.05 }}
             >
-              <span className="inline-block border-2 border-[#C79E48] text-[#8B6F3A] bg-[#F5F1E8] rounded-full px-4 py-2 text-sm font-medium hover:bg-[#C79E48] hover:text-white transition-all duration-300 cursor-pointer">
+              <span className="inline-block border border-[#C79E48] text-[#8B6F3A] bg-[#F5F1E8] rounded-full px-3 py-1 text-xs font-medium hover:bg-[#C79E48] hover:text-white transition-all duration-300 cursor-pointer">
                 {trait}
               </span>
             </motion.div>
@@ -524,15 +524,15 @@ const ZodiacProfileStep = ({ sign }: { sign: ZodiacSign }) => (
     </motion.div>
     
     <motion.div 
-      className="bg-white rounded-2xl p-8 border-2 border-[#E8D4A8] shadow-lg"
+      className="bg-white rounded-2xl p-5 border border-[#E8D4A8] shadow-md flex flex-col items-center"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, delay: 0.9 }}
     >
-      <h4 className="font-bold text-gray-900 text-2xl mb-6 tracking-wide text-center" style={{ fontFamily: 'Playfair Display, serif' }}>
+      <h4 className="font-bold text-gray-900 text-lg mb-4 tracking-wide text-center" style={{ fontFamily: 'Playfair Display, serif' }}>
         Your Colors
       </h4>
-      <div className="flex justify-center gap-6">
+      <div className="flex justify-center gap-4">
         {sign.colors.map((color, index) => (
           <motion.div
             key={index}
@@ -543,7 +543,7 @@ const ZodiacProfileStep = ({ sign }: { sign: ZodiacSign }) => (
             whileHover={{ scale: 1.2 }}
           >
             <div
-              className="w-16 h-16 rounded-full border-4 border-[#C79E48] shadow-lg"
+              className="w-10 h-10 rounded-full border-2 border-[#C79E48] shadow-md"
               style={{ backgroundColor: color }}
               title={`${sign.name} ${color}`}
             />
