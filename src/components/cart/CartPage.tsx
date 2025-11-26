@@ -26,11 +26,42 @@ const CartPage: React.FC = () => {
     console.log('🛒 Cart Items:', cartItems.length);
     componentMountedRef.current = true;
 
-    // Check if button exists (will be null on first render)
+    // GLOBAL CLICK LISTENER - to catch ALL clicks
+    const globalClickHandler = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (target && (target.textContent?.includes('Proceed to Checkout') || target.closest('button')?.textContent?.includes('Proceed to Checkout'))) {
+        console.log('🌍 GLOBAL CLICK DETECTED on checkout button!');
+        console.log('Target:', target);
+        console.log('Event:', e);
+      }
+    };
+    
+    document.addEventListener('click', globalClickHandler, true);
+
+    // Check if button exists and add test listener
+    let testHandlerCleanup: (() => void) | null = null;
+    
     const checkButton = () => {
       if (checkoutButtonRef.current) {
         console.log('✅ Checkout button found in DOM');
         console.log('Button element:', checkoutButtonRef.current);
+        console.log('Button parent:', checkoutButtonRef.current.parentElement);
+        console.log('Button form:', checkoutButtonRef.current.form);
+        
+        // Add a test click listener directly to the DOM element
+        const testHandler = (e: Event) => {
+          console.log('🧪 DIRECT DOM CLICK LISTENER FIRED!');
+          e.preventDefault();
+          e.stopPropagation();
+          e.stopImmediatePropagation();
+          alert('DIRECT DOM LISTENER WORKS! Button is clickable!');
+        };
+        checkoutButtonRef.current.addEventListener('click', testHandler, true);
+        
+        // Store cleanup
+        testHandlerCleanup = () => {
+          checkoutButtonRef.current?.removeEventListener('click', testHandler, true);
+        };
       } else {
         console.warn('⚠️ Checkout button NOT found in DOM yet');
       }
@@ -42,6 +73,8 @@ const CartPage: React.FC = () => {
 
     return () => {
       clearTimeout(timeoutId);
+      document.removeEventListener('click', globalClickHandler, true);
+      if (testHandlerCleanup) testHandlerCleanup();
       console.log('🔴 CartPage UNMOUNTING');
       componentMountedRef.current = false;
     };
@@ -294,6 +327,21 @@ const CartPage: React.FC = () => {
           </Button>
         </motion.div>
 
+        {/* TEST BUTTON - to verify buttons work on this page */}
+        <div className="mb-4 p-4 bg-yellow-100 border-2 border-yellow-500 rounded">
+          <p className="text-sm font-bold mb-2">DEBUG: Test if buttons work on this page</p>
+          <button
+            type="button"
+            onClick={() => {
+              console.log('✅ TEST BUTTON CLICKED - Buttons work on this page!');
+              alert('TEST BUTTON WORKS!');
+            }}
+            className="px-4 py-2 bg-blue-500 text-white rounded"
+          >
+            TEST BUTTON (Click Me)
+          </button>
+        </div>
+
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Cart Items */}
           <div className="lg:col-span-2 space-y-4">
@@ -414,7 +462,10 @@ const CartPage: React.FC = () => {
                   ref={checkoutButtonRef}
                   type="button"
                   onClick={(e) => {
-                    console.log('🎯 React onClick handler fired');
+                    console.log('🎯🎯🎯 REACT onClick HANDLER FIRED! 🎯🎯🎯');
+                    alert('REACT onClick WORKS!');
+                    e.preventDefault();
+                    e.stopPropagation();
                     handleWhatsAppCheckout(e);
                   }}
                   onMouseDown={(e) => {
@@ -424,13 +475,22 @@ const CartPage: React.FC = () => {
                   onMouseUp={(e) => {
                     console.log('🖱️ onMouseUp fired');
                   }}
+                  onTouchStart={(e) => {
+                    console.log('👆 onTouchStart fired');
+                    e.preventDefault();
+                  }}
+                  onTouchEnd={(e) => {
+                    console.log('👆 onTouchEnd fired');
+                    e.preventDefault();
+                  }}
                   className="w-full bg-gradient-to-r from-amber-400 to-amber-600 hover:from-amber-500 hover:to-amber-700 text-white font-semibold py-6 rounded-full"
                   style={{ 
                     position: 'relative', 
                     zIndex: 1000,
                     pointerEvents: 'auto',
                     cursor: 'pointer',
-                    touchAction: 'manipulation'
+                    touchAction: 'manipulation',
+                    WebkitTapHighlightColor: 'transparent'
                   }}
                 >
                   Proceed to Checkout
