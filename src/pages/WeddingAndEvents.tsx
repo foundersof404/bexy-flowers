@@ -358,14 +358,14 @@ const ServiceSection = ({
 
   // Modern mobile card layout
   if (isMobile) {
-    return (
+  return (
       <section
         ref={sectionRef}
         className={`relative py-8 overflow-visible ${index % 2 === 0 ? 'bg-white' : 'bg-gradient-to-b from-white to-[#fafafa]'}`}
       >
         <div className="max-w-7xl mx-auto px-4">
           {/* Modern Card Design for Mobile */}
-          <motion.div
+    <motion.div
             ref={cardRef}
             className="relative"
             initial={{ opacity: 0, y: 50, scale: 0.95 }}
@@ -385,11 +385,11 @@ const ServiceSection = ({
                       alt={title}
                       className="absolute inset-0 w-full h-full object-cover"
                       initial={{ opacity: idx === 0 ? 1 : 0 }}
-                      animate={{ 
+      animate={{
                         opacity: idx === currentImageIndex ? 1 : 0,
                         scale: idx === currentImageIndex ? 1 : 1.05
-                      }}
-                      transition={{ 
+      }}
+      transition={{
                         duration: 1.2, 
                         ease: [0.4, 0, 0.2, 1], // Smooth easing for seamless transition
                         opacity: { duration: 1.2 } // Longer fade for smoother loop
@@ -553,14 +553,14 @@ const ServiceSection = ({
                 borderRadius: '50%',
               }}
             />
-          </div>
+      </div>
 
           {/* Content */}
           <div
             ref={contentRef}
             className={`${isEven ? 'order-2' : 'order-1'} space-y-4 sm:space-y-6`}
-          >
-            <motion.div
+        >
+          <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -568,7 +568,7 @@ const ServiceSection = ({
             >
               <h2
                 className="text-4xl md:text-5xl lg:text-6xl font-serif font-bold mb-4 sm:mb-6"
-                style={{ color: '#1a1a1a' }}
+            style={{ color: '#1a1a1a' }}
               >
                 {title}
               </h2>
@@ -578,7 +578,7 @@ const ServiceSection = ({
               />
             </motion.div>
 
-            <motion.p
+          <motion.p
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -586,7 +586,7 @@ const ServiceSection = ({
               className="text-base md:text-lg lg:text-xl text-gray-700 leading-relaxed"
             >
               {description}
-            </motion.p>
+          </motion.p>
 
             {features && features.length > 0 && (
               <motion.ul
@@ -649,8 +649,8 @@ const ServiceSection = ({
                 Learn More
                 <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
-            </motion.div>
-          </div>
+        </motion.div>
+      </div>
         </div>
       </div>
     </section>
@@ -703,7 +703,7 @@ const PackageSection = () => {
 
     return () => ctx.revert();
   }, [isMobile]);
-
+  
   const packageFeatures = [
     {
       icon: Flower2,
@@ -749,16 +749,16 @@ const PackageSection = () => {
 
   // Modern mobile package section
   if (isMobile) {
-    return (
+  return (
       <section ref={sectionRef} className="relative py-12 bg-gradient-to-b from-[#fafafa] to-white overflow-hidden">
         <div className="max-w-7xl mx-auto px-4">
-          <motion.div
+        <motion.div
             className="text-center mb-8"
             initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-          >
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+        >
             <div className="inline-flex items-center gap-2 mb-4">
               <Sparkles className="w-4 h-4" style={{ color: GOLD_COLOR }} />
               <span className="text-xs font-semibold tracking-[0.2em] uppercase" style={{ color: GOLD_COLOR }}>
@@ -775,20 +775,20 @@ const PackageSection = () => {
           </motion.div>
 
           {/* Modern Card Design */}
-          <motion.div
+                <motion.div
             ref={cardRef}
             className="relative bg-white rounded-3xl shadow-2xl overflow-hidden border border-[rgba(199,158,72,0.15)]"
             initial={{ opacity: 0, y: 50, scale: 0.95 }}
             whileInView={{ opacity: 1, y: 0, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-          >
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.6 }}
+                >
             {/* Price Header - Prominent */}
             <div className="relative bg-gradient-to-br from-[rgba(199,158,72,0.1)] to-transparent p-6 text-center border-b border-[rgba(199,158,72,0.1)]">
               <div className="mb-3">
                 <span className="text-5xl font-bold font-serif" style={{ color: GOLD_COLOR }}>
                   $3,200
-                </span>
+                  </span>
               </div>
               <p className="text-xs text-gray-600">
                 Complete package • Customizable
@@ -860,18 +860,18 @@ const PackageSection = () => {
   return (
     <section ref={sectionRef} className="relative py-12 sm:py-16 md:py-24 lg:py-32 bg-gradient-to-b from-[#fafafa] to-white overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.div
+                <motion.div
           className="text-center mb-8 sm:mb-12 md:mb-16"
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
+                  viewport={{ once: true }}
           transition={{ duration: 0.8 }}
         >
           <div className="inline-flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
             <Sparkles className="w-5 h-5" style={{ color: GOLD_COLOR }} />
             <span className="text-sm font-semibold tracking-[0.3em] uppercase" style={{ color: GOLD_COLOR }}>
               Our Standard Package
-            </span>
+                  </span>
             <Sparkles className="w-5 h-5" style={{ color: GOLD_COLOR }} />
           </div>
           <h2
@@ -883,7 +883,7 @@ const PackageSection = () => {
           <p className="text-base md:text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto px-2">
             Everything you need for your perfect day, beautifully arranged
           </p>
-        </motion.div>
+                </motion.div>
 
         <div ref={cardRef} className="relative bg-white rounded-2xl sm:rounded-3xl shadow-xl sm:shadow-2xl overflow-hidden border border-[rgba(199,158,72,0.15)]">
           <div className="absolute inset-0 bg-gradient-to-br from-[rgba(199,158,72,0.03)] via-transparent to-[rgba(199,158,72,0.03)]" />
@@ -899,63 +899,63 @@ const PackageSection = () => {
               <p className={`${isMobile ? 'text-sm sm:text-base' : 'text-base md:text-lg lg:text-xl'} text-gray-600 max-w-3xl mx-auto leading-relaxed px-2`}>
                 Our Standard Package offers a complete floral and décor experience designed to make your wedding day elegant and unforgettable. This package includes full arrangements from Bexy Flowers – from ceremony to reception – ensuring every detail is beautifully styled and cohesive.
                 <br className="mt-2 sm:mt-4" />
-                <span className="font-semibold" style={{ color: GOLD_COLOR }}>
-                  The package can be customized upon request
-                </span>
+                  <span className="font-semibold" style={{ color: GOLD_COLOR }}>
+                    The package can be customized upon request
+                  </span>
               </p>
-            </div>
+              </div>
 
-            {/* Features Grid */}
+              {/* Features Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8 sm:mb-10 md:mb-12">
-              {packageFeatures.map((feature, index) => {
-                const Icon = feature.icon;
-                return (
+                {packageFeatures.map((feature, index) => {
+                  const Icon = feature.icon;
+                  return (
                   <div
-                    key={index}
+                      key={index}
                     className="feature-card relative bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-[rgba(199,158,72,0.15)] hover:border-[rgba(199,158,72,0.4)] transition-all duration-300 hover:shadow-xl group"
                   >
                     <div className="absolute inset-0 bg-gradient-to-br from-[rgba(199,158,72,0.03)] to-transparent rounded-xl sm:rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    
-                    <div className="relative z-10">
+                      
+                      <div className="relative z-10">
                       <div className={`${isMobile ? 'w-10 h-10' : 'w-12 h-12'} rounded-xl flex items-center justify-center mb-3 sm:mb-4 group-hover:scale-110 transition-transform duration-300`} style={{ backgroundColor: `${GOLD_COLOR}15` }}>
                         <Icon className={`${isMobile ? 'w-5 h-5' : 'w-6 h-6'}`} style={{ color: GOLD_COLOR }} />
-                      </div>
+                        </div>
                       <h3 className={`font-serif font-semibold ${isMobile ? 'text-base' : 'text-lg'} mb-2`} style={{ color: '#1a1a1a' }}>
-                        {feature.title}
-                      </h3>
+                          {feature.title}
+                        </h3>
                       <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-gray-600 leading-relaxed`}>
-                        {feature.description}
-                      </p>
-                    </div>
+                          {feature.description}
+                        </p>
+                      </div>
                   </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
 
-            {/* CTA Button */}
+              {/* CTA Button */}
             <div className="text-center">
-              <Button
-                size="lg"
+                <Button
+                  size="lg"
                 className={`${isMobile ? 'text-sm sm:text-base px-6 sm:px-8 py-5 sm:py-6' : 'text-lg px-12 py-7'} font-semibold rounded-full shadow-2xl hover:shadow-3xl transition-all duration-300 relative overflow-hidden group w-full sm:w-auto`}
-                style={{
-                  background: `linear-gradient(135deg, ${GOLD_COLOR} 0%, rgba(199, 158, 72, 0.9) 100%)`,
-                  color: 'white',
-                }}
-                onClick={() => {
-                  const contactEl = document.getElementById('contact-section');
-                  if (contactEl) {
-                    contactEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                  }
-                }}
-              >
-                <motion.span
+                  style={{
+                    background: `linear-gradient(135deg, ${GOLD_COLOR} 0%, rgba(199, 158, 72, 0.9) 100%)`,
+                    color: 'white',
+                  }}
+                  onClick={() => {
+                    const contactEl = document.getElementById('contact-section');
+                    if (contactEl) {
+                      contactEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                  }}
+                >
+                  <motion.span
                   className="relative z-10 flex items-center justify-center gap-2 sm:gap-3"
                   whileHover={isMobile ? {} : { scale: 1.05 }}
-                >
+                  >
                   <Calendar className={`${isMobile ? 'w-4 h-4' : 'w-5 h-5'}`} />
                   <span className={isMobile ? 'hidden sm:inline' : ''}>Contact Us Now to Reserve a Meeting</span>
                   <span className={isMobile ? 'sm:hidden' : 'hidden'}>Reserve a Meeting</span>
-                </motion.span>
+                  </motion.span>
                 {!isMobile && (
                   <motion.div
                     className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
@@ -964,7 +964,7 @@ const PackageSection = () => {
                     transition={{ duration: 0.6 }}
                   />
                 )}
-              </Button>
+                </Button>
             </div>
           </div>
         </div>
@@ -1256,20 +1256,20 @@ const ImageGallery = () => {
       <>
         <section ref={sectionRef} className="relative py-12 bg-white overflow-hidden">
           <div className="max-w-7xl mx-auto px-4">
-            <motion.div
+        <motion.div
               className="text-center mb-8"
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8 }}
-            >
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+        >
               <h2 className="text-3xl font-serif font-bold mb-3" style={{ color: '#1a1a1a' }}>
-                Our Wedding Creations
-              </h2>
+            Our Wedding Creations
+          </h2>
               <p className="text-sm text-gray-600 max-w-2xl mx-auto">
                 Swipe to explore our stunning arrangements
-              </p>
-            </motion.div>
+          </p>
+        </motion.div>
 
             {/* Swipeable Carousel */}
             <div className="relative">
@@ -1280,9 +1280,9 @@ const ImageGallery = () => {
                 onTouchMove={handleTouchMove}
                 onTouchEnd={handleTouchEnd}
               >
-                {weddingImages.map((image, index) => (
+          {weddingImages.map((image, index) => (
                   <div
-                    key={index}
+              key={index}
                     className="min-w-full px-2"
                     onClick={(e) => {
                       e.preventDefault();
@@ -1297,19 +1297,19 @@ const ImageGallery = () => {
                     style={{ touchAction: 'manipulation' }}
                   >
                     <div className="relative rounded-3xl overflow-hidden shadow-2xl aspect-[4/5] cursor-pointer">
-                      <img
-                        src={image}
-                        alt={`Wedding decoration ${index + 1}`}
+              <img
+                src={image}
+                alt={`Wedding decoration ${index + 1}`}
                         className="w-full h-full object-cover"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
                       <div className="absolute bottom-0 left-0 right-0 p-6">
                         <p className="text-white text-sm font-semibold">Tap to view full size</p>
-                      </div>
+              </div>
                     </div>
                   </div>
-                ))}
-              </div>
+          ))}
+        </div>
 
               {/* Dots indicator */}
               <div className="flex justify-center gap-2 mt-6">
@@ -1324,7 +1324,7 @@ const ImageGallery = () => {
                     }`}
                   />
                 ))}
-              </div>
+      </div>
 
               {/* Navigation arrows */}
               {currentIndex > 0 && (
@@ -1336,12 +1336,12 @@ const ImageGallery = () => {
                 </button>
               )}
               {currentIndex < weddingImages.length - 1 && (
-                <button
+          <button
                   onClick={() => setCurrentIndex(currentIndex + 1)}
                   className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 shadow-lg flex items-center justify-center z-10"
-                >
+          >
                   <ArrowRight className="w-5 h-5" style={{ color: GOLD_COLOR }} />
-                </button>
+          </button>
               )}
             </div>
 
@@ -1378,7 +1378,7 @@ const ImageGallery = () => {
               </div>
             </div>
           </div>
-        </section>
+    </section>
 
         {/* Image Modal for Mobile */}
         <ImageModal
@@ -1493,73 +1493,73 @@ const ContactSection = () => {
 
           <div className="relative z-10">
             <div className="text-center mb-6 sm:mb-8">
-              <motion.div
+            <motion.div
                 className={`inline-flex items-center justify-center ${isMobile ? 'w-16 h-16' : 'w-20 h-20'} rounded-full mb-4 sm:mb-6 mx-auto`}
-                style={{ backgroundColor: `${GOLD_COLOR}15` }}
-                animate={{ rotate: [0, 360] }}
-                transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-              >
+              style={{ backgroundColor: `${GOLD_COLOR}15` }}
+              animate={{ rotate: [0, 360] }}
+              transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+            >
                 <Calendar className={`${isMobile ? 'w-8 h-8' : 'w-10 h-10'}`} style={{ color: GOLD_COLOR }} />
-              </motion.div>
+            </motion.div>
 
               <h2 className={`${isMobile ? 'text-2xl sm:text-3xl' : 'text-3xl md:text-4xl lg:text-5xl'} font-serif font-bold mb-3 sm:mb-4`} style={{ color: '#1a1a1a' }}>
-                Ready to Begin Your Journey?
-              </h2>
+              Ready to Begin Your Journey?
+            </h2>
               <p className={`${isMobile ? 'text-sm sm:text-base' : 'text-base md:text-lg lg:text-xl'} text-gray-600 mb-6 sm:mb-8`}>
-                Let's discuss how we can make your special day unforgettable
-              </p>
-            </div>
+              Let's discuss how we can make your special day unforgettable
+            </p>
+          </div>
 
             <div className="space-y-3 sm:space-y-4">
-              <motion.div
+            <motion.div
                 whileHover={isMobile ? {} : { scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <Button
-                  size="lg"
+              whileTap={{ scale: 0.98 }}
+            >
+              <Button
+                size="lg"
                   className={`w-full ${isMobile ? 'text-sm sm:text-base px-6 py-5' : 'text-lg px-8 py-7'} font-semibold rounded-full shadow-xl hover:shadow-2xl transition-all duration-300`}
-                  style={{
-                    background: `linear-gradient(135deg, ${GOLD_COLOR} 0%, rgba(199, 158, 72, 0.9) 100%)`,
-                    color: 'white',
-                  }}
-                  onClick={() => {
-                    window.location.href = 'mailto:info@bexyflowers.com?subject=Wedding Package Inquiry';
-                  }}
-                >
+                style={{
+                  background: `linear-gradient(135deg, ${GOLD_COLOR} 0%, rgba(199, 158, 72, 0.9) 100%)`,
+                  color: 'white',
+                }}
+                onClick={() => {
+                  window.location.href = 'mailto:info@bexyflowers.com?subject=Wedding Package Inquiry';
+                }}
+              >
                   <span className="flex items-center justify-center gap-2 sm:gap-3">
                     <Calendar className={`${isMobile ? 'w-4 h-4' : 'w-5 h-5'}`} />
-                    Schedule a Consultation
-                  </span>
-                </Button>
-              </motion.div>
+                  Schedule a Consultation
+                </span>
+              </Button>
+            </motion.div>
 
-              <motion.div
+            <motion.div
                 whileHover={isMobile ? {} : { scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <Button
-                  size="lg"
-                  variant="outline"
+              whileTap={{ scale: 0.98 }}
+            >
+              <Button
+                size="lg"
+                variant="outline"
                   className={`w-full ${isMobile ? 'text-sm sm:text-base px-6 py-5' : 'text-lg px-8 py-7'} font-semibold rounded-full border-2 transition-all duration-300`}
-                  style={{
-                    borderColor: GOLD_COLOR,
-                    color: GOLD_COLOR,
-                  }}
-                  onClick={() => {
-                    window.open('https://wa.me/1234567890?text=Hi, I\'m interested in your Wedding Package', '_blank');
-                  }}
-                >
+                style={{
+                  borderColor: GOLD_COLOR,
+                  color: GOLD_COLOR,
+                }}
+                onClick={() => {
+                  window.open('https://wa.me/1234567890?text=Hi, I\'m interested in your Wedding Package', '_blank');
+                }}
+              >
                   <span className="flex items-center justify-center gap-2 sm:gap-3">
-                    💬 Contact via WhatsApp
-                  </span>
-                </Button>
-              </motion.div>
-            </div>
+                  💬 Contact via WhatsApp
+                </span>
+              </Button>
+            </motion.div>
+          </div>
 
             <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-gray-200 text-center">
               <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-gray-500`}>
-                We respond to all inquiries within 24 hours
-              </p>
+              We respond to all inquiries within 24 hours
+            </p>
             </div>
           </div>
         </motion.div>
