@@ -26,18 +26,26 @@ const CartPage: React.FC = () => {
     console.log('🛒 Cart Items:', cartItems.length);
     componentMountedRef.current = true;
 
-    // Check if button exists
-    if (checkoutButtonRef.current) {
-      console.log('✅ Checkout button found in DOM');
-      console.log('Button element:', checkoutButtonRef.current);
-    } else {
-      console.warn('⚠️ Checkout button NOT found in DOM yet');
-    }
+    // Check if button exists (will be null on first render)
+    const checkButton = () => {
+      if (checkoutButtonRef.current) {
+        console.log('✅ Checkout button found in DOM');
+        console.log('Button element:', checkoutButtonRef.current);
+      } else {
+        console.warn('⚠️ Checkout button NOT found in DOM yet');
+      }
+    };
+    
+    // Check immediately and after a short delay
+    checkButton();
+    const timeoutId = setTimeout(checkButton, 100);
 
     return () => {
+      clearTimeout(timeoutId);
       console.log('🔴 CartPage UNMOUNTING');
       componentMountedRef.current = false;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Track cart changes
@@ -162,7 +170,11 @@ const CartPage: React.FC = () => {
       
     } catch (error) {
       console.error('❌ FATAL ERROR in checkout handler:', error);
-      console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+      if (error instanceof Error) {
+        console.error('Error stack:', error.stack);
+      } else {
+        console.error('Error details:', String(error));
+      }
       alert('An unexpected error occurred. Please try again or contact support.');
     }
   }, [cartItems, totalPrice]);
