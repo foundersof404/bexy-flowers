@@ -96,108 +96,67 @@ const ProfessionalCustomSection = React.memo(() => {
       <div className="relative z-10 max-w-7xl mx-auto">
         {/* Premium Header */}
         <motion.div
-          className="text-center mb-20"
-          initial={{ opacity: 0, y: 40 }}
+          className="text-center mb-20 relative"
+          initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.5, margin: "0px 0px -100px 0px" }}
-          transition={{ duration: 0.8, ease: [0.23, 1, 0.32, 1] }}
+          transition={{ duration: 1, ease: [0.23, 1, 0.32, 1] }}
         >
-          {/* Professional Badge */}
-          <motion.div
-            className="inline-flex items-center gap-2 px-4 py-2 mb-8 rounded-full"
-            style={{
-              background: 'linear-gradient(90deg, rgba(194, 154, 67, 0.1) 0%, rgba(184, 138, 68, 0.15) 100%)',
-              border: '1px solid rgba(194, 154, 67, 0.2)'
-            }}
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
+          {/* Modern Floating Badge */}
+          <motion.div 
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-slate-800/10 to-slate-700/10 backdrop-blur-xl border border-slate-600/20 mb-8"
+            initial={{ scale: 0.8, opacity: 0 }}
+            whileInView={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
             viewport={{ once: true, amount: 0.5, margin: "0px 0px -100px 0px" }}
-            transition={{ duration: 0.6, delay: 0.2 }}
           >
-            <Layers className="w-4 h-4 text-[#B88A44]" />
-            <span 
-              className="text-xs font-bold tracking-[0.25em] uppercase"
-              style={{
-                color: '#1a1a1a',
-                letterSpacing: '0.25em'
-              }}
-            >
-              PROFESSIONAL CUSTOMIZATION
-            </span>
+            <div className="w-2 h-2 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 animate-pulse" />
+            <span className="text-sm font-medium text-slate-700 tracking-wider uppercase">Professional Customization</span>
           </motion.div>
 
-          {/* Main Title - Sharp & Bold */}
+          {/* Main Title - Luxury Typography with Gold Accent */}
           <motion.h2
-            className="font-bold mb-6 leading-tight"
-            style={{
-              fontSize: 'clamp(2.5rem, 7vw, 5rem)',
-              color: '#0a0a0a',
-              letterSpacing: '-0.02em',
-              fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
-              textShadow: '0 2px 4px rgba(0, 0, 0, 0.05)'
-            }}
+            className="font-luxury text-6xl md:text-8xl font-bold mb-6 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 bg-clip-text text-transparent relative"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.5, margin: "0px 0px -100px 0px" }}
-            transition={{ duration: 0.8, delay: 0.3, ease: [0.23, 1, 0.32, 1] }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            style={{
+              filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))',
+              letterSpacing: '0.05em'
+            }}
           >
             DESIGN YOUR
             <br />
-            <span 
-              className="relative inline-block"
-              style={{
-                backgroundImage: 'linear-gradient(90deg, #B7893C 0%, #D4A85A 50%, #CFA340 100%)',
-                backgroundClip: 'text',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                color: 'transparent'
-              }}
-            >
-              PERFECT BOUQUET
-              {/* Underline Accent */}
-              <motion.div
-                className="absolute -bottom-2 left-0 h-1 rounded-full"
-                style={{
-                  background: 'linear-gradient(90deg, #B7893C 0%, #D4A85A 100%)'
-                }}
-                initial={{ width: 0 }}
-                whileInView={{ width: '100%' }}
-                viewport={{ once: true, amount: 0.5, margin: "0px 0px -100px 0px" }}
-                transition={{ duration: 1, delay: 0.8, ease: "easeOut" }}
-              />
-            </span>
+            PERFECT BOUQUET
+            {/* Animated Gold Underline */}
+            <motion.div
+              className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 h-1 bg-gradient-to-r from-[#C79E48] to-[#D4A85A] rounded-full"
+              initial={{ width: 0 }}
+              whileInView={{ width: '200px' }}
+              viewport={{ once: true, amount: 0.5, margin: "0px 0px -100px 0px" }}
+              transition={{ duration: 1.2, delay: 0.8, ease: "easeOut" }}
+            />
           </motion.h2>
 
-          {/* Subtitle - Professional */}
+          {/* Enhanced Decorative Elements */}
+          <div className="relative mb-8">
+            <div className="w-40 h-0.5 bg-gradient-to-r from-transparent via-[#C79E48]/60 to-transparent mx-auto" />
+            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-[#C79E48] rotate-45 shadow-lg shadow-[#C79E48]/50" />
+          </div>
+
+          {/* Subtitle - Enhanced Description */}
           <motion.p
-            className="text-lg max-w-3xl mx-auto leading-relaxed"
-            style={{
-              color: '#525252',
-              fontFamily: 'Inter, sans-serif',
-              letterSpacing: '0.01em'
-            }}
+            className="font-body text-lg md:text-xl text-slate-600 max-w-4xl mx-auto leading-relaxed font-light"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.5, margin: "0px 0px -100px 0px" }}
-            transition={{ duration: 0.8, delay: 0.5 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
           >
             Create a bespoke floral masterpiece with unlimited creative freedom.
             <br className="hidden sm:block" />
             Choose from our curated premium selection and design something uniquely yours.
           </motion.p>
-
-          {/* Decorative Line */}
-          <motion.div 
-            className="flex items-center justify-center gap-3 mt-8 mb-16"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true, amount: 0.5, margin: "0px 0px -100px 0px" }}
-            transition={{ duration: 0.8, delay: 0.6 }}
-          >
-            <div className="h-[1px] w-16 bg-gradient-to-r from-transparent to-[#C79E48]" />
-            <div className="w-2 h-2 rounded-full bg-[#C79E48]" />
-            <div className="h-[1px] w-16 bg-gradient-to-l from-transparent to-[#C79E48]" />
-          </motion.div>
         </motion.div>
 
         {/* Feature Cards - Premium Grid */}
