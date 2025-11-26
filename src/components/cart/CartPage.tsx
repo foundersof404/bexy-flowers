@@ -5,6 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Trash2, ShoppingBag, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import UltraNavigation from '@/components/UltraNavigation';
+import Footer from '@/components/Footer';
+import BackToTop from '@/components/BackToTop';
 
 const CartPage: React.FC = () => {
   const { cartItems, removeFromCart, getTotalPrice, clearCart } = useCart();
@@ -71,40 +74,47 @@ const CartPage: React.FC = () => {
 
   if (isEmpty) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-background to-muted/10 flex items-center justify-center px-4">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.6 }}
-          className="text-center max-w-md mx-auto"
-        >
-          <div className="mb-8">
-            <ShoppingBag className="w-24 h-24 text-slate-300 mx-auto mb-4" />
-          </div>
-          
-          <h2 className="font-luxury text-3xl font-bold text-slate-800 mb-4">
-            Your cart is empty
-          </h2>
-          
-          <p className="text-slate-600 mb-8 font-body">
-            Looks like you haven't added any beautiful arrangements to your cart yet. 
-            Start shopping to find the perfect flowers for your special moments.
-          </p>
-          
-          <Button
-            onClick={handleContinueShopping}
-            className="bg-gradient-to-r from-amber-400 to-amber-600 hover:from-amber-500 hover:to-amber-700 text-white font-semibold px-8 py-3 rounded-full"
+      <>
+        <UltraNavigation />
+        <div className="min-h-screen bg-gradient-to-b from-background to-muted/10 flex items-center justify-center px-4 pt-20">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.6 }}
+            className="text-center max-w-md mx-auto"
           >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Continue Shopping
-          </Button>
-        </motion.div>
-      </div>
+            <div className="mb-8">
+              <ShoppingBag className="w-24 h-24 text-slate-300 mx-auto mb-4" />
+            </div>
+            
+            <h2 className="font-luxury text-3xl font-bold text-slate-800 mb-4">
+              Your cart is empty
+            </h2>
+            
+            <p className="text-slate-600 mb-8 font-body">
+              Looks like you haven't added any beautiful arrangements to your cart yet. 
+              Start shopping to find the perfect flowers for your special moments.
+            </p>
+            
+            <Button
+              onClick={handleContinueShopping}
+              className="bg-gradient-to-r from-amber-400 to-amber-600 hover:from-amber-500 hover:to-amber-700 text-white font-semibold px-8 py-3 rounded-full"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Continue Shopping
+            </Button>
+          </motion.div>
+        </div>
+        <Footer />
+        <BackToTop />
+      </>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/10 py-8 px-4 sm:px-6 lg:px-8">
+    <>
+      <UltraNavigation />
+      <div className="min-h-screen bg-gradient-to-b from-background to-muted/10 py-8 px-4 sm:px-6 lg:px-8 pt-32">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <motion.div
@@ -273,7 +283,9 @@ const CartPage: React.FC = () => {
           </motion.div>
         </div>
       </div>
-    </div>
+      <Footer />
+      <BackToTop />
+    </>
   );
 };
 
