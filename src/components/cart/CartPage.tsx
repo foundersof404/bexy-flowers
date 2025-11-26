@@ -1,11 +1,10 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { useCart } from '@/contexts/CartContext';
-import { Button, buttonVariants } from '@/components/ui/button';
+import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Trash2, ShoppingBag, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { cn } from "@/lib/utils";
 
 const CartPage: React.FC = () => {
   const { cartItems, removeFromCart, getTotalPrice, clearCart } = useCart();
@@ -18,8 +17,11 @@ const CartPage: React.FC = () => {
     navigate('/');
   };
 
-  const whatsappUrl = useMemo(() => {
-    if (cartItems.length === 0) return '#';
+  const handleWhatsAppCheckout = () => {
+    if (cartItems.length === 0) {
+      console.log('Cart is empty, cannot checkout');
+      return;
+    }
     
     const phoneNumber = "96176104882";
     
@@ -32,12 +34,9 @@ const CartPage: React.FC = () => {
       
       // Handle image links
       if (item.image) {
-        // If it's a Pollinations URL, it's already a public link
         if (item.image.includes('pollinations.ai')) {
-             // Use the URL as is, it's likely long but WhatsApp usually handles it if encoded properly
              itemStr += `\n*Image Reference:* ${item.image}`;
         } 
-        // If it's a local asset path (starts with /), we can't link it externally
         else if (item.image.startsWith('http')) {
              itemStr += `\n*Image Reference:* ${item.image}`;
         }
@@ -46,28 +45,27 @@ const CartPage: React.FC = () => {
       return itemStr;
     }).join("\n\n-------------------\n\n");
 
-    const total = totalPrice; // Use totalPrice from hook
+    const total = totalPrice;
     const tax = total * 0.08;
     const finalTotal = total + tax;
 
     const finalMessage = `Hello, I would like to place an order:\n\n${orderDetails}\n\n*Subtotal:* $${total.toFixed(2)}\n*Tax:* $${tax.toFixed(2)}\n*TOTAL:* $${finalTotal.toFixed(2)}\n\n*Payment Method:* Whish Money / Cash on Delivery`;
     
-    return `https://wa.me/${phoneNumber}?text=${encodeURIComponent(finalMessage)}`;
-  }, [cartItems, totalPrice]);
-
-  const handleWhatsAppCheckout = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
+    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(finalMessage)}`;
     
-    console.log('Opening WhatsApp with URL:', whatsappUrl);
+    console.log('=== CHECKOUT DEBUG ===');
+    console.log('Cart Items:', cartItems.length);
+    console.log('WhatsApp URL:', whatsappUrl);
+    console.log('Opening WhatsApp...');
     
-    // Open WhatsApp in a new window
+    // Try window.open first
     const newWindow = window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
     
-    if (!newWindow) {
-      // Popup blocked, try direct navigation
-      console.log('Popup blocked, trying direct navigation');
+    if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+      console.log('Popup blocked, using location.href');
       window.location.href = whatsappUrl;
+    } else {
+      console.log('WhatsApp opened successfully');
     }
   };
 
@@ -250,18 +248,16 @@ const CartPage: React.FC = () => {
               </div>
 
               <div className="space-y-3">
-                <a
-                  href={whatsappUrl}
+                <Button
+                  type="button"
                   onClick={handleWhatsAppCheckout}
-                  className={cn(
-                    buttonVariants({ variant: "default" }),
-                    "w-full bg-gradient-to-r from-amber-400 to-amber-600 hover:from-amber-500 hover:to-amber-700 text-white font-semibold py-6 rounded-full cursor-pointer block text-center"
-                  )}
+                  className="w-full bg-gradient-to-r from-amber-400 to-amber-600 hover:from-amber-500 hover:to-amber-700 text-white font-semibold py-6 rounded-full"
                 >
                   Proceed to Checkout
-                </a>
+                </Button>
                 
                 <Button
+                  type="button"
                   onClick={clearCart}
                   variant="outline"
                   className="w-full border-red-300 text-red-600 hover:bg-red-50"
