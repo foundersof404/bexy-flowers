@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -8,9 +8,10 @@ import { CategoryNavigation } from "@/components/collection/CategoryNavigation";
 import { BouquetGrid } from "@/components/collection/BouquetGrid";
 import { FeaturedCarousel } from "@/components/collection/FeaturedCarousel";
 import { ProductModal } from "@/components/collection/ProductModal";
-import { CollectionFooter } from "@/components/collection/CollectionFooter";
+import Footer from "@/components/Footer";
 import { FloatingBackground } from "@/components/collection/FloatingBackground";
 import BackToTop from "@/components/BackToTop";
+import LazySection from "@/components/LazySection";
 import type { Bouquet } from "@/types/bouquet";
 import {
   generatedBouquets,
@@ -140,7 +141,11 @@ const Collection = () => {
         />
         
         {/* Footer */}
-        <CollectionFooter />
+        <LazySection rootMargin="600px 0px">
+          <Suspense fallback={null}>
+            <Footer />
+          </Suspense>
+        </LazySection>
       </div>
       
       {/* Product Modal */}

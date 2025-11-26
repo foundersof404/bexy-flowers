@@ -15,7 +15,9 @@ import {
   Heart,
   Star,
   Calendar,
-  Settings
+  Settings,
+  Instagram,
+  MessageCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/contexts/CartContext';
@@ -165,6 +167,34 @@ const UltraNavigation = () => {
       }
     }
   };
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (isMenuOpen && menuRef.current && navRef.current) {
+        const target = event.target as Node;
+        // Check if click is outside both menu and navigation
+        if (
+          !menuRef.current.contains(target) &&
+          !navRef.current.contains(target)
+        ) {
+          setIsMenuOpen(false);
+        }
+      }
+    };
+
+    if (isMenuOpen) {
+      // Add event listener with a small delay to avoid immediate closing
+      const timeoutId = setTimeout(() => {
+        document.addEventListener('mousedown', handleClickOutside);
+      }, 100);
+
+      return () => {
+        clearTimeout(timeoutId);
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
+    }
+  }, [isMenuOpen]);
 
   const handleNavigation = (path: string) => {
     // Force scroll reset around navigation to ensure new page starts at top
@@ -571,15 +601,25 @@ const UltraNavigation = () => {
         {/* Mobile Menu */}
         <AnimatePresence>
           {isMenuOpen && (
-            <motion.div
-              ref={menuRef}
-              className="lg:hidden absolute top-full left-0 right-0 bg-background/98 backdrop-blur-xl border-t border-primary/20 shadow-luxury"
-              style={{ backgroundColor: 'rgba(229, 228, 226, 0.98)' }}
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
-            >
+            <>
+              {/* Backdrop - Click outside to close */}
+              <motion.div
+                className="lg:hidden fixed inset-0 bg-black/20 backdrop-blur-sm z-[99]"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                onClick={() => setIsMenuOpen(false)}
+              />
+              <motion.div
+                ref={menuRef}
+                className="lg:hidden absolute top-full left-0 right-0 bg-background/98 backdrop-blur-xl border-t border-primary/20 shadow-luxury z-[100]"
+                style={{ backgroundColor: 'rgba(229, 228, 226, 0.98)' }}
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
+              >
               <div className="px-4 sm:px-6 py-6 sm:py-8 space-y-3 sm:space-y-4">
                 {navigationItems.map((item, index) => {
                   const isActive = location.pathname === item.path;
@@ -733,8 +773,68 @@ const UltraNavigation = () => {
                     </div>
                   </Button>
                 </motion.div>
+
+                {/* Social Media Icons - Mobile Menu */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ 
+                    delay: (navigationItems.length + 1) * 0.1, 
+                    duration: 0.6 
+                  }}
+                  className="pt-4 border-t border-primary/20 mt-4"
+                >
+                  <div className="flex items-center justify-center gap-3">
+                    {/* WhatsApp */}
+                    <motion.a
+                      href="https://api.whatsapp.com/send/?phone=96176104882&text&type=phone_number&app_absent=0&wame_ctl=1"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center text-primary hover:bg-primary hover:text-background transition-colors"
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.95 }}
+                      aria-label="WhatsApp"
+                    >
+                      <MessageCircle className="w-4 h-4" />
+                    </motion.a>
+
+                    {/* Instagram */}
+                    <motion.a
+                      href="https://www.instagram.com/bexyflowers?igsh=cTcybzM0dzVkc25v"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center text-primary hover:bg-primary hover:text-background transition-colors"
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.95 }}
+                      aria-label="Instagram"
+                    >
+                      <Instagram className="w-4 h-4" />
+                    </motion.a>
+
+                    {/* TikTok */}
+                    <motion.a
+                      href="https://www.tiktok.com/@bexyflower?_r=1&_t=ZS-91i2FtAJdVF"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center text-primary hover:bg-primary hover:text-background transition-colors"
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.95 }}
+                      aria-label="TikTok"
+                    >
+                      <svg
+                        className="w-4 h-4"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
+                      </svg>
+                    </motion.a>
+                  </div>
+                </motion.div>
               </div>
             </motion.div>
+            </>
           )}
          </AnimatePresence>
        </nav>
