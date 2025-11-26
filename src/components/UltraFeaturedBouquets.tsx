@@ -15,14 +15,14 @@ const bouquets = [
     id: 1,
     name: "Royal Red Elegance",
     price: "$299",
-    image: encodeURI("/assets/red roses/large red roses flower bouquet with gliter.png"),
+    image: encodeURI("/assets/red roses/medium red roses flower in a black box.png"),
     description: "Luxurious red roses with glittering accents"
   },
   {
     id: 2,
     name: "Wedding Serenity",
     price: "$349",
-    image: encodeURI("/assets/wedding % events/wedding/IMG_1784.jpg"),
+    image: encodeURI("/assets/wedding % events/IMG_1673.JPG"),
     description: "Pure elegant arrangement for special moments"
   },
   {
