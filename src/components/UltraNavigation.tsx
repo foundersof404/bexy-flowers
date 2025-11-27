@@ -142,14 +142,14 @@ const UltraNavigation = () => {
             if (nav) {
               // Keep it transparent but add subtle border/shadow on scroll
               nav.style.backgroundColor = scrolled 
-                ? "rgba(255, 255, 255, 0.1)" // Slightly more visible on scroll
+                ? "rgba(255, 255, 255, 0.85)" // Much more visible on scroll (obvious)
                 : "rgba(255, 255, 255, 0.02)";
-              nav.style.backdropFilter = scrolled ? "blur(16px)" : "blur(12px)";
+              nav.style.backdropFilter = scrolled ? "blur(20px)" : "blur(12px)";
               nav.style.boxShadow = scrolled 
-                ? "0 8px 32px rgba(0, 0, 0, 0.1)"
+                ? "0 8px 32px rgba(0, 0, 0, 0.15)"
                 : "0 4px 30px rgba(0, 0, 0, 0.05)";
               nav.style.borderBottom = scrolled 
-                ? "1px solid rgba(255, 255, 255, 0.1)"
+                ? "1px solid rgba(255, 255, 255, 0.2)"
                 : "1px solid rgba(255, 255, 255, 0.05)";
             }
             
@@ -264,7 +264,7 @@ const UltraNavigation = () => {
                   <img
                     src={logoImage}
                     alt="Bexy Flowers Logo"
-                    className="w-full h-full object-contain relative z-10"
+                    className="w-full h-full object-contain relative z-10 drop-shadow-lg filter brightness-110"
                   />
                 </div>
                 

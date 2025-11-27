@@ -164,7 +164,7 @@ const UltraHero = () => {
         <motion.img
           src={heroBackground}
           alt="Luxury floral background"
-          className={`w-full h-full object-cover ${isMobile ? 'opacity-70 scale-105 translate-y-14' : 'transform-3d shadow-gold opacity-10'}`}
+          className={`w-full h-full object-cover ${isMobile ? 'opacity-70 scale-105 translate-y-24' : 'transform-3d shadow-gold opacity-10'}`}
           initial={
             isMobile
               ? { scale: 1.05, opacity: 0 }
