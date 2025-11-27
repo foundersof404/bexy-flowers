@@ -39,7 +39,7 @@ const Favorites = memo(() => {
       {/* Optimized Floating Background Elements - Reduced for performance */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
         <div 
-          className="absolute top-20 left-10 w-72 h-72 bg-gradient-to-br from-[#dc267f]/4 to-transparent rounded-full blur-2xl opacity-60" 
+          className="absolute top-20 left-10 w-72 h-72 bg-gradient-to-br from-[#C79E48]/4 to-transparent rounded-full blur-2xl opacity-60" 
           style={{ 
             animation: 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
             willChange: 'opacity'
@@ -85,9 +85,9 @@ const Favorites = memo(() => {
                 YOUR CURATED COLLECTION
               </p>
               <div className="flex items-center justify-center gap-3">
-                <div className="h-[2px] w-12 bg-gradient-to-r from-transparent to-[#dc267f]" />
-                <div className="h-1 w-1 rounded-full bg-[#dc267f]" />
-                <div className="h-[2px] w-12 bg-gradient-to-l from-transparent to-[#dc267f]" />
+                <div className="h-[2px] w-12 bg-gradient-to-r from-transparent to-[#C79E48]" />
+                <div className="h-1 w-1 rounded-full bg-[#C79E48]" />
+                <div className="h-[2px] w-12 bg-gradient-to-l from-transparent to-[#C79E48]" />
               </div>
             </motion.div>
 
@@ -109,9 +109,9 @@ const Favorites = memo(() => {
                 MY FAVORITES
               </h1>
               <div className="flex items-center justify-center gap-3">
-                <div className="h-[2px] w-12 bg-gradient-to-r from-transparent to-[#dc267f]" />
-                <div className="h-1 w-1 rounded-full bg-[#dc267f]" />
-                <div className="h-[2px] w-12 bg-gradient-to-l from-transparent to-[#dc267f]" />
+                <div className="h-[2px] w-12 bg-gradient-to-r from-transparent to-[#C79E48]" />
+                <div className="h-1 w-1 rounded-full bg-[#C79E48]" />
+                <div className="h-[2px] w-12 bg-gradient-to-l from-transparent to-[#C79E48]" />
               </div>
             </motion.div>
             
@@ -205,8 +205,8 @@ const Favorites = memo(() => {
                 onClick={() => navigate('/collection')}
                 className="px-8 py-4 hover:opacity-70 transition-opacity"
                 style={{
-                  background: 'linear-gradient(90deg, #dc267f 0%, #e91e63 100%)',
-                  boxShadow: '0 4px 12px rgba(220, 38, 127, 0.3)'
+                  background: 'linear-gradient(90deg, #C79E48 0%, #D4A85A 100%)',
+                  boxShadow: '0 4px 12px rgba(199, 158, 72, 0.3)'
                 }}
               >
                 <span 
@@ -251,7 +251,7 @@ const Favorites = memo(() => {
                         style={{
                           background: 'linear-gradient(180deg, #ffffff 0%, #fefcfb 100%)',
                           boxShadow: isHovered 
-                            ? '0 24px 48px rgba(220, 38, 127, 0.2), 0 0 0 2px rgba(220, 38, 127, 0.4)'
+                            ? '0 24px 48px rgba(199, 158, 72, 0.2), 0 0 0 2px rgba(199, 158, 72, 0.4)'
                             : '0 8px 32px rgba(0, 0, 0, 0.08)',
                           willChange: 'transform, box-shadow'
                         }}
@@ -284,8 +284,8 @@ const Favorites = memo(() => {
                           className="absolute inset-0 rounded-2xl pointer-events-none z-10"
                           style={{
                             boxShadow: isHovered 
-                              ? 'inset 0 0 0 2px rgba(220, 38, 127, 0.5)'
-                              : 'inset 0 0 0 0px rgba(220, 38, 127, 0)',
+                              ? 'inset 0 0 0 2px rgba(199, 158, 72, 0.5)'
+                              : 'inset 0 0 0 0px rgba(199, 158, 72, 0)',
                           }}
                           transition={{ duration: 0.4 }}
                         />
@@ -293,7 +293,7 @@ const Favorites = memo(() => {
                         {/* Sharp Corner Accent */}
                         {isHovered && (
                           <motion.div
-                            className="absolute top-0 right-0 w-0 h-0 border-t-[24px] border-t-[#dc267f] border-l-[24px] border-l-transparent z-20"
+                            className="absolute top-0 right-0 w-0 h-0 border-t-[24px] border-t-[#C79E48] border-l-[24px] border-l-transparent z-20"
                             initial={{ opacity: 0, scale: 0 }}
                             animate={{ opacity: 1, scale: 1 }}
                             transition={{ duration: 0.3 }}
@@ -323,10 +323,10 @@ const Favorites = memo(() => {
                             transition={{ duration: 0.4 }}
                           />
                           
-                          {/* Pink Glow Overlay on Hover */}
+                          {/* Gold Glow Overlay on Hover */}
                           {isHovered && (
                             <motion.div
-                              className="absolute inset-0 bg-gradient-to-br from-[#dc267f]/10 via-transparent to-transparent"
+                              className="absolute inset-0 bg-gradient-to-br from-[#C79E48]/10 via-transparent to-transparent"
                               initial={{ opacity: 0 }}
                               animate={{ opacity: 1 }}
                               transition={{ duration: 0.4 }}
@@ -338,14 +338,14 @@ const Favorites = memo(() => {
                             <motion.button
                               className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center relative overflow-visible"
                               style={{
-                                background: isFav ? 'rgba(220, 38, 127, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+                                background: isFav ? 'rgba(199, 158, 72, 0.95)' : 'rgba(255, 255, 255, 0.95)',
                                 boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
                                 willChange: 'transform, box-shadow'
                               }}
                               whileHover={{ 
                                 scale: 1.15,
                                 y: -2,
-                                boxShadow: '0 6px 20px rgba(220, 38, 127, 0.4)'
+                                boxShadow: '0 6px 20px rgba(199, 158, 72, 0.4)'
                               }}
                               whileTap={{ scale: 0.9 }}
                               onClick={(e) => {
@@ -365,7 +365,7 @@ const Favorites = memo(() => {
                             <span 
                               className="absolute top-4 left-4 px-3 py-1 rounded-full text-[10px] font-semibold tracking-wide text-white shadow-lg flex items-center gap-1"
                               style={{
-                                background: 'linear-gradient(90deg, #dc267f 0%, #e91e63 100%)'
+                                background: 'linear-gradient(90deg, #C79E48 0%, #D4A85A 100%)'
                               }}
                             >
                               <Sparkles className="w-3 h-3" />
@@ -387,9 +387,9 @@ const Favorites = memo(() => {
                             {favorite.title || favorite.name}
                           </h3>
                           
-                          {/* Sharp Pink Underline - Simplified */}
+                          {/* Sharp Gold Underline - Simplified */}
                           <div 
-                            className="h-[2px] sm:h-[3px] bg-gradient-to-r from-[#dc267f] via-[#e91e63] to-[#f06292] mb-3 sm:mb-5 rounded-full transition-all duration-300"
+                            className="h-[2px] sm:h-[3px] bg-gradient-to-r from-[#C79E48] via-[#D4A85A] to-[#E5C17A] mb-3 sm:mb-5 rounded-full transition-all duration-300"
                             style={{ width: isHovered ? '60px' : '32px' }}
                           />
 
@@ -406,7 +406,7 @@ const Favorites = memo(() => {
                           <div className="flex items-end justify-between pt-2 border-t border-slate-200/60">
                             <div className="flex-1 min-w-0">
                               <div className="flex items-baseline gap-1 flex-wrap">
-                                <span className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-bold bg-gradient-to-r from-[#dc267f] via-[#e91e63] to-[#f06292] bg-clip-text text-transparent leading-none">
+                                <span className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-bold bg-gradient-to-r from-[#C79E48] via-[#D4A85A] to-[#E5C17A] bg-clip-text text-transparent leading-none">
                                   ${favorite.price}
                                 </span>
                                 <span 
@@ -429,14 +429,14 @@ const Favorites = memo(() => {
                             </div>
 
                             <motion.button
-                              className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 rounded-xl lg:rounded-2xl flex items-center justify-center relative overflow-hidden group/btn border-2 border-[#dc267f]/20 flex-shrink-0 ml-2"
+                              className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 rounded-xl lg:rounded-2xl flex items-center justify-center relative overflow-hidden group/btn border-2 border-[#C79E48]/20 flex-shrink-0 ml-2"
                               style={{
                                 background: isHovered 
-                                  ? 'linear-gradient(135deg, #dc267f 0%, #e91e63 50%, #f06292 100%)'
-                                  : 'linear-gradient(135deg, #dc267f 0%, #e91e63 100%)',
+                                  ? 'linear-gradient(135deg, #C79E48 0%, #D4A85A 50%, #E5C17A 100%)'
+                                  : 'linear-gradient(135deg, #C79E48 0%, #D4A85A 100%)',
                                 boxShadow: isHovered
-                                  ? '0 8px 24px rgba(220, 38, 127, 0.5)'
-                                  : '0 6px 20px rgba(220, 38, 127, 0.35)',
+                                  ? '0 8px 24px rgba(199, 158, 72, 0.5)'
+                                  : '0 6px 20px rgba(199, 158, 72, 0.35)',
                                 willChange: 'transform, box-shadow'
                               }}
                               whileHover={{
@@ -486,7 +486,7 @@ const Favorites = memo(() => {
                                 key={i}
                                 className="absolute w-1 h-1 rounded-full"
                                 style={{
-                                  background: 'rgba(220, 38, 127, 0.5)',
+                                  background: 'rgba(199, 158, 72, 0.5)',
                                   left: `${25 + i * 25}%`,
                                   top: `${35 + i * 10}%`,
                                   willChange: 'transform, opacity'

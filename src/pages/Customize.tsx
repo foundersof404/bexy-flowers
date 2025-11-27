@@ -565,7 +565,7 @@ const Customize: React.FC = () => {
       </div>
 
       {/* Header */}
-      <div className="relative pt-32 pb-20 px-6 overflow-hidden">
+      <div className={`relative ${isMobile ? 'pt-24' : 'pt-32'} pb-20 px-6 overflow-hidden`}>
         <motion.div
           className="absolute inset-0"
           initial={{ scale: 1.08, opacity: 0 }}
