@@ -123,35 +123,41 @@ const UltraNavigation = () => {
       // Initial logo animation - Removed as per request, keeping it static
       gsap.set(logo, { scale: 1, rotation: 0 });
 
-       // Set initial platinum background immediately - no transitions
-       gsap.set(nav, {
-         backgroundColor: "rgba(229, 228, 226, 0.95)", // Always start with platinum
-         backdropFilter: "blur(20px)",
-         boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
-         immediateRender: true // Force immediate render
-       });
+      // Set initial transparent background with blur
+      gsap.set(nav, {
+        backgroundColor: "rgba(255, 255, 255, 0.02)", // Transparent
+        backdropFilter: "blur(12px)", // Strong blur
+        boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
+        immediateRender: true
+      });
 
-       // Simplified scroll effect using native scroll listener for better performance
-       let ticking = false;
-       const handleScroll = () => {
-         if (!ticking) {
-           window.requestAnimationFrame(() => {
-             const scrolled = window.scrollY > 50;
-             setIsScrolled(scrolled);
-             
-             if (nav) {
-               const opacity = scrolled ? 0.98 : 0.95;
-               nav.style.backgroundColor = `rgba(229, 228, 226, ${opacity})`;
-               nav.style.boxShadow = scrolled 
-                 ? "0 8px 32px rgba(0,0,0,0.15)"
-                 : "0 8px 32px rgba(0,0,0,0.1)";
-             }
-             
-             ticking = false;
-           });
-           ticking = true;
-         }
-       };
+      // Simplified scroll effect - Maintain transparency but increase blur/border
+      let ticking = false;
+      const handleScroll = () => {
+        if (!ticking) {
+          window.requestAnimationFrame(() => {
+            const scrolled = window.scrollY > 50;
+            setIsScrolled(scrolled);
+            
+            if (nav) {
+              // Keep it transparent but add subtle border/shadow on scroll
+              nav.style.backgroundColor = scrolled 
+                ? "rgba(255, 255, 255, 0.1)" // Slightly more visible on scroll
+                : "rgba(255, 255, 255, 0.02)";
+              nav.style.backdropFilter = scrolled ? "blur(16px)" : "blur(12px)";
+              nav.style.boxShadow = scrolled 
+                ? "0 8px 32px rgba(0, 0, 0, 0.1)"
+                : "0 4px 30px rgba(0, 0, 0, 0.05)";
+              nav.style.borderBottom = scrolled 
+                ? "1px solid rgba(255, 255, 255, 0.1)"
+                : "1px solid rgba(255, 255, 255, 0.05)";
+            }
+            
+            ticking = false;
+          });
+          ticking = true;
+        }
+      };
        
        window.addEventListener('scroll', handleScroll, { passive: true });
        

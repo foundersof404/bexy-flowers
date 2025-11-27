@@ -158,12 +158,13 @@ const UltraHero = () => {
     >
       {/* Background Image with 3D Parallax */}
       <div 
+      
         className={`absolute inset-0 z-0 ${isMobile ? '' : '-top-4'}`}
       >
         <motion.img
           src={heroBackground}
           alt="Luxury floral background"
-          className={`w-full h-full object-cover ${isMobile ? 'opacity-70 scale-105' : 'transform-3d shadow-gold opacity-10'}`}
+          className={`w-full h-full object-cover ${isMobile ? 'opacity-70 scale-105 translate-y-14' : 'transform-3d shadow-gold opacity-10'}`}
           initial={
             isMobile
               ? { scale: 1.05, opacity: 0 }
