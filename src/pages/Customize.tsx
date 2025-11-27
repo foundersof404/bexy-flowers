@@ -6,6 +6,7 @@ import Footer from "@/components/Footer";
 import BackToTop from "@/components/BackToTop";
 import { useCart } from "@/contexts/CartContext";
 import { toast } from "sonner";
+import { useIsMobile } from "@/hooks/use-mobile";
 import heroBouquetMain from "@/assets/bouquet-4.jpg";
 import heroBouquetAccent from "@/assets/bouquet-5.jpg";
 
@@ -257,6 +258,7 @@ const CustomizeSection = React.forwardRef<HTMLDivElement, { title: string; child
 ));
 
 const Customize: React.FC = () => {
+  const isMobile = useIsMobile();
   const [selectedPackage, setSelectedPackage] = useState<Package | null>(null);
   const [selectedBoxShape, setSelectedBoxShape] = useState<BoxShape | null>(null);
   const [selectedBoxColor, setSelectedBoxColor] = useState<BoxColor | null>(null);
@@ -274,6 +276,7 @@ const Customize: React.FC = () => {
   const [showPreview, setShowPreview] = useState(false);
   const [aiRefinementText, setAiRefinementText] = useState("");
   const [showRefinement, setShowRefinement] = useState(false);
+  const [flowerInputValues, setFlowerInputValues] = useState<Record<string, Record<string, string>>>({});
   const { addToCart } = useCart();
 
   // Refs for scrolling
@@ -370,6 +373,18 @@ const Customize: React.FC = () => {
   const completedSteps = steps.filter(step => step.complete).length;
   const progressPercent = Math.round((completedSteps / steps.length) * 100);
 
+  // Sync input values with actual counts
+  useEffect(() => {
+    const synced: Record<string, Record<string, string>> = {};
+    Object.entries(colorQuantities).forEach(([flowerId, colors]) => {
+      synced[flowerId] = {};
+      Object.entries(colors).forEach(([colorId, count]) => {
+        synced[flowerId][colorId] = count.toString();
+      });
+    });
+    setFlowerInputValues(synced);
+  }, [colorQuantities]);
+
   const adjustFlowerColor = (flowerId: string, colorId: string, delta: number) => {
     if (delta > 0 && totalFlowers >= maxFlowers) {
       toast.error(`Maximum ${maxFlowers} flowers`, { icon: "🌸", closeButton: true });
@@ -390,13 +405,24 @@ const Customize: React.FC = () => {
         return { ...prev, [flowerId]: rest };
       }
       
-      return {
+      const updated = {
         ...prev,
         [flowerId]: {
           ...flowerColors,
           [colorId]: newVal
         }
       };
+      
+      // Sync input value
+      setFlowerInputValues(prevInput => ({
+        ...prevInput,
+        [flowerId]: {
+          ...(prevInput[flowerId] || {}),
+          [colorId]: newVal.toString()
+        }
+      }));
+      
+      return updated;
     });
   };
 
@@ -640,7 +666,8 @@ const Customize: React.FC = () => {
             </div>
           </div>
 
-          <div className="grid md:grid-cols-6 gap-4">
+          {/* Step Names Grid - Hidden on Mobile */}
+          <div className={`grid md:grid-cols-6 gap-4 ${isMobile ? 'hidden' : ''}`}>
             {steps.map((step, idx) => (
               <motion.div 
                 key={step.id}
@@ -840,34 +867,126 @@ const Customize: React.FC = () => {
                         </div>
                       </div>
                       
-                      <div className="space-y-2 pl-4 border-l-2 border-gray-100">
+                      <div className="space-y-3 pl-4 border-l-2 border-[#C79E48]/20">
                         {flower.colors.map((color) => {
                           const count = flowerColorMap[color.id] || 0;
-                          return (
-                            <div key={color.id} className="flex justify-between items-center">
-                              <span className="text-sm text-gray-600">{color.name}</span>
-                              <div className="flex items-center gap-3">
-                                <button 
-                                  onClick={() => adjustFlowerColor(flower.id, color.id, -1)}
-                                  className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200"
-                                  disabled={count === 0}
-                                >
-                                  <Minus className="w-4 h-4" />
-                                </button>
-                                <span className="font-bold w-6 text-center">{count}</span>
-                                <button 
-                                  onClick={() => {
-                                    adjustFlowerColor(flower.id, color.id, 1);
-                                    // Auto scroll to extras if max reached? Maybe annoying.
-                                    if (totalFlowers + 1 === maxFlowers) {
-                                      scrollToSection(extrasRef);
+                          const inputKey = `${flower.id}-${color.id}`;
+                          const inputValue = flowerInputValues[flower.id]?.[color.id] ?? count.toString();
+                          const quickQuantities = [5, 10, 15, 20];
+                          
+                          const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+                            const value = e.target.value;
+                            setFlowerInputValues(prev => ({
+                              ...prev,
+                              [flower.id]: {
+                                ...(prev[flower.id] || {}),
+                                [color.id]: value
+                              }
+                            }));
+                            
+                            if (value === '' || value === '0') {
+                              if (count > 0) {
+                                adjustFlowerColor(flower.id, color.id, -count);
+                              }
+                              return;
+                            }
+                            const numValue = parseInt(value);
+                            if (!isNaN(numValue) && numValue >= 0) {
+                              const diff = numValue - count;
+                              if (diff !== 0) {
+                                if (totalFlowers + diff <= maxFlowers) {
+                                  adjustFlowerColor(flower.id, color.id, diff);
+                                } else {
+                                  toast.error(`Maximum ${maxFlowers} flowers`, { icon: "🌸", closeButton: true });
+                                  setFlowerInputValues(prev => ({
+                                    ...prev,
+                                    [flower.id]: {
+                                      ...(prev[flower.id] || {}),
+                                      [color.id]: count.toString()
                                     }
-                                  }}
-                                  className="w-8 h-8 rounded-full bg-[#C79E48] text-white flex items-center justify-center hover:bg-[#b08d45]"
-                                  disabled={totalFlowers >= maxFlowers}
-                                >
-                                  <Plus className="w-4 h-4" />
-                                </button>
+                                  }));
+                                }
+                              }
+                            }
+                          };
+
+                          const handleQuickQuantity = (qty: number) => {
+                            const diff = qty - count;
+                            if (totalFlowers + diff <= maxFlowers) {
+                              adjustFlowerColor(flower.id, color.id, diff);
+                            } else {
+                              toast.error(`Maximum ${maxFlowers} flowers`, { icon: "🌸", closeButton: true });
+                            }
+                          };
+
+                          return (
+                            <div key={color.id} className="space-y-2">
+                              <div className="flex justify-between items-center">
+                                <span className="text-sm font-luxury font-medium text-gray-700 uppercase tracking-wide">{color.name}</span>
+                                <div className="flex items-center gap-2">
+                                  <motion.button 
+                                    onClick={() => adjustFlowerColor(flower.id, color.id, -1)}
+                                    className="w-9 h-9 rounded-full border-2 border-[#C79E48]/30 bg-white flex items-center justify-center hover:bg-[#C79E48]/10 transition-all shadow-sm"
+                                    disabled={count === 0}
+                                    whileHover={count > 0 ? { scale: 1.1, borderColor: '#C79E48' } : {}}
+                                    whileTap={count > 0 ? { scale: 0.95 } : {}}
+                                  >
+                                    <Minus className="w-4 h-4 text-[#C79E48]" strokeWidth={2.5} />
+                                  </motion.button>
+                                  <input
+                                    type="number"
+                                    min="0"
+                                    max={maxFlowers}
+                                    value={inputValue}
+                                    onChange={handleInputChange}
+                                    onBlur={() => {
+                                      if (inputValue === '' || parseInt(inputValue) < 0 || isNaN(parseInt(inputValue))) {
+                                        setFlowerInputValues(prev => ({
+                                          ...prev,
+                                          [flower.id]: {
+                                            ...(prev[flower.id] || {}),
+                                            [color.id]: count.toString()
+                                          }
+                                        }));
+                                      }
+                                    }}
+                                    className="w-16 h-9 text-center font-luxury font-semibold text-[#C79E48] border-2 border-[#C79E48]/20 rounded-lg focus:border-[#C79E48] focus:ring-2 focus:ring-[#C79E48]/20 outline-none transition-all"
+                                    style={{ 
+                                      backgroundColor: count > 0 ? 'rgba(199, 158, 72, 0.05)' : 'white'
+                                    }}
+                                  />
+                                  <motion.button 
+                                    onClick={() => {
+                                      adjustFlowerColor(flower.id, color.id, 1);
+                                      if (totalFlowers + 1 === maxFlowers) {
+                                        scrollToSection(extrasRef);
+                                      }
+                                    }}
+                                    className="w-9 h-9 rounded-full bg-gradient-to-br from-[#C79E48] to-[#b08d45] text-white flex items-center justify-center hover:shadow-lg transition-all shadow-md"
+                                    disabled={totalFlowers >= maxFlowers}
+                                    whileHover={totalFlowers < maxFlowers ? { scale: 1.1, boxShadow: '0 4px 12px rgba(199, 158, 72, 0.4)' } : {}}
+                                    whileTap={totalFlowers < maxFlowers ? { scale: 0.95 } : {}}
+                                  >
+                                    <Plus className="w-4 h-4" strokeWidth={2.5} />
+                                  </motion.button>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2 flex-wrap">
+                                {quickQuantities.map((qty) => (
+                                  <motion.button
+                                    key={qty}
+                                    onClick={() => handleQuickQuantity(qty)}
+                                    className={`px-3 py-1.5 rounded-lg border-2 text-xs font-luxury font-medium transition-all ${
+                                      count === qty
+                                        ? 'bg-[#C79E48] text-white border-[#C79E48] shadow-md'
+                                        : 'bg-white text-[#C79E48] border-[#C79E48]/30 hover:border-[#C79E48] hover:bg-[#C79E48]/5'
+                                    }`}
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                  >
+                                    {qty}
+                                  </motion.button>
+                                ))}
                               </div>
                             </div>
                           );
