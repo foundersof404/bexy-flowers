@@ -303,7 +303,7 @@ const About = () => {
               letterSpacing: '0.05em'
             }}
           >
-            The Art of Floral Couture
+            THE ART OF FLORAL COUTURE
             {/* Animated Gold Underline */}
             <motion.div 
               className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 h-1 bg-gradient-to-r from-amber-400 to-yellow-500 rounded-full"

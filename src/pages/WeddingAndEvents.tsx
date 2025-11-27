@@ -581,10 +581,13 @@ const ServiceSection = ({
               transition={{ duration: 0.6 }}
             >
               <h2
-                className="text-4xl md:text-5xl lg:text-6xl font-serif font-bold mb-4 sm:mb-6"
-            style={{ color: '#1a1a1a' }}
+                className="font-luxury text-6xl md:text-8xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 bg-clip-text text-transparent relative uppercase"
+                style={{
+                  filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))',
+                  letterSpacing: '0.05em'
+                }}
               >
-                {title}
+                {title.toUpperCase()}
               </h2>
               <div
                 className="w-16 sm:w-20 h-0.5 sm:h-1 mb-4 sm:mb-6"
@@ -1075,10 +1078,13 @@ const PackageSection = () => {
             <Sparkles className="w-5 h-5" style={{ color: GOLD_COLOR }} />
           </div>
           <h2
-            className="text-4xl md:text-5xl lg:text-6xl font-serif font-bold mb-4 sm:mb-6"
-            style={{ color: '#1a1a1a' }}
+            className="font-luxury text-6xl md:text-8xl font-bold mb-6 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 bg-clip-text text-transparent relative"
+            style={{
+              filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))',
+              letterSpacing: '0.05em'
+            }}
           >
-            Complete Wedding Experience
+            COMPLETE WEDDING EXPERIENCE
           </h2>
           <p className="text-base md:text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto px-2">
             Everything you need for your perfect day, beautifully arranged
@@ -1605,8 +1611,14 @@ const ImageGallery = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
           >
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-serif font-bold mb-3 sm:mb-4" style={{ color: '#1a1a1a' }}>
-              Our Wedding Creations
+            <h2 
+              className="font-luxury text-6xl md:text-8xl font-bold mb-3 sm:mb-4 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 bg-clip-text text-transparent relative uppercase"
+              style={{
+                filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))',
+                letterSpacing: '0.05em'
+              }}
+            >
+              OUR WEDDING CREATIONS
             </h2>
             <p className="text-base md:text-lg lg:text-xl text-gray-600 max-w-2xl mx-auto px-2">
               Explore our stunning wedding floral arrangements and decorations
@@ -1721,8 +1733,14 @@ const ContactSection = () => {
                 <Calendar className={`${isMobile ? 'w-8 h-8' : 'w-10 h-10'}`} style={{ color: GOLD_COLOR }} />
             </motion.div>
 
-              <h2 className={`${isMobile ? 'text-2xl sm:text-3xl' : 'text-3xl md:text-4xl lg:text-5xl'} font-serif font-bold mb-3 sm:mb-4`} style={{ color: '#1a1a1a' }}>
-              Ready to Begin Your Journey?
+              <h2 
+                className={`${isMobile ? 'text-4xl sm:text-5xl' : 'text-5xl md:text-7xl lg:text-8xl'} font-luxury font-bold mb-3 sm:mb-4 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 bg-clip-text text-transparent relative uppercase`}
+                style={{
+                  filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))',
+                  letterSpacing: '0.05em'
+                }}
+              >
+              READY TO BEGIN YOUR JOURNEY?
             </h2>
               <p className={`${isMobile ? 'text-sm sm:text-base' : 'text-base md:text-lg lg:text-xl'} text-gray-600 mb-6 sm:mb-8`}>
               Let's discuss how we can make your special day unforgettable

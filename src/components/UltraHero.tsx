@@ -209,7 +209,7 @@ const UltraHero = () => {
           <div 
             className="absolute inset-0 z-10"
             style={{
-              background: 'linear-gradient(180deg, rgba(255,255,255,0.4) 5%, rgba(255,255,250,0.75) 55%, rgba(255,255,255,0.9) 100%)',
+              background: 'linear-gradient(180deg, rgba(255,255,255,0.2) 5%, rgba(255,255,250,0.4) 55%, rgba(255,255,255,0.6) 100%)',
               pointerEvents: 'none'
             }}
           />
@@ -277,204 +277,16 @@ const UltraHero = () => {
              >
                {/* Main Title */}
                <motion.h1 
-                 className={`${isMobile ? 'font-serif text-[clamp(1.6rem,7vw,2.6rem)]' : 'font-luxury text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl'} font-black ${isMobile ? 'leading-[1.02] text-[#0f0f0f] tracking-[-0.02em] mb-4 px-2' : 'leading-[1.1] sm:leading-tight mb-3 sm:mb-4 px-2 xs:px-3 sm:px-0'} text-foreground`}
-                 initial={{ opacity: 0 }}
-                 animate={{ opacity: 1 }}
-                 transition={{ duration: shouldReduceMotion || isMobile ? 0 : 0.1, delay: shouldReduceMotion || isMobile ? 0 : 0.4 }}
+                 className={`${isMobile ? 'font-luxury text-[clamp(1.6rem,7vw,2.6rem)]' : 'font-luxury text-3xl md:text-4xl lg:text-5xl'} font-bold mb-6 text-black relative uppercase`}
+                 initial={{ opacity: 0, y: 30 }}
+                 animate={{ opacity: 1, y: 0 }}
+                 transition={{ duration: shouldReduceMotion || isMobile ? 0 : 0.8, delay: shouldReduceMotion || isMobile ? 0 : 0.4 }}
+                 style={{ 
+                   filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))',
+                   letterSpacing: '0.05em'
+                 }}
                >
-                 <motion.span 
-                   className="inline-block relative overflow-hidden"
-                   whileHover={{
-                     scale: 1.02,
-                     transition: { duration: 0.3 }
-                   }}
-                 >
-                   {/* Animated background gradient */}
-                   <motion.div
-                     className="absolute inset-0 bg-gradient-to-r from-primary/10 via-yellow-400/5 to-transparent"
-                     initial={{ x: "-100%", opacity: 0 }}
-                     animate={{ x: "100%", opacity: 1 }}
-                     transition={{ duration: 2, delay: 1.5, ease: "easeInOut" }}
-                   />
-                   
-                  {/* Text with staggered character animation - Simplified on mobile */}
-                  <div className={`relative z-9 flex flex-col ${isMobile ? 'items-center' : 'items-center lg:items-start'}`}>
-                    {[
-                      "Elegant flower",
-                      "for every single",
-                      "occasion"
-                    ].map((line, lineIndex) => (
-                      <span key={lineIndex} className="block">
-                        {line.split("").map((char, charIndex) => (
-                          <motion.span
-                            key={`${lineIndex}-${charIndex}`}
-                            className="inline-block"
-                            initial={{ 
-                              opacity: shouldReduceMotion || isMobile ? 1 : 0, 
-                              y: shouldReduceMotion || isMobile ? 0 : 50, 
-                              rotateX: shouldReduceMotion || isMobile ? 0 : -90,
-                              filter: shouldReduceMotion || isMobile ? "blur(0px)" : "blur(10px)"
-                            }}
-                            animate={{ 
-                              opacity: 1, 
-                              y: 0, 
-                              rotateX: 0,
-                              filter: "blur(0px)"
-                            }}
-                            transition={{ 
-                              duration: shouldReduceMotion || isMobile ? 0 : 0.6,
-                              delay: shouldReduceMotion || isMobile ? 0 : 0.5 + lineIndex * 0.3 + charIndex * 0.05,
-                              ease: [0.25, 0.46, 0.45, 0.94]
-                            }}
-                            whileHover={isMobile ? {} : {
-                              scale: 1.1,
-                              color: "#c6a151",
-                              textShadow: "0 0 20px rgba(198,161,81,0.5)",
-                              transition: { duration: 0.2 }
-                            }}
-                            style={{ willChange: shouldReduceMotion || isMobile ? "auto" : "transform, filter" }}
-                          >
-                            {char === " " ? "\u00A0" : char}
-                          </motion.span>
-                        ))}
-                      </span>
-                    ))}
-                  </div>
-                   
-                   {/* Gold Arc - Mobile Only */}
-                   {isMobile && (
-                     <motion.div
-                       className="block w-[320px] h-[32px] mx-auto my-4"
-                       style={{ transformOrigin: 'center' }}
-                       initial={{ opacity: 0, y: 6, scaleX: 0.95 }}
-                       animate={{ opacity: 1, y: 0, scaleX: 1 }}
-                       transition={{ duration: 0.8, delay: 0.6 }}
-                     >
-                       <svg 
-                         width="100%" 
-                         height="100%" 
-                         viewBox="0 0 320 32" 
-                         fill="none" 
-                         xmlns="http://www.w3.org/2000/svg"
-                         className="mx-auto"
-                         style={{ filter: 'drop-shadow(0 2px 8px rgba(185,136,57,0.3))' }}
-                       >
-                         {/* Main elegant brush stroke arc */}
-                         <path 
-                           d="M20 22 Q80 8, 160 6 T300 22" 
-                           stroke="url(#goldGradient)" 
-                           strokeWidth="3" 
-                           fill="none"
-                           strokeLinecap="round"
-                           strokeLinejoin="round"
-                           opacity="0.95"
-                         />
-                         {/* Subtle secondary stroke for depth */}
-                         <path 
-                           d="M25 24 Q85 10, 160 8 T295 24" 
-                           stroke="#d4a574" 
-                           strokeWidth="1.5" 
-                           fill="none"
-                           strokeLinecap="round"
-                           opacity="0.5"
-                         />
-                         {/* Accent highlights */}
-                         <path 
-                           d="M30 23 Q90 11, 160 9 T290 23" 
-                           stroke="#f0d9b5" 
-                           strokeWidth="0.8" 
-                           fill="none"
-                           strokeLinecap="round"
-                           opacity="0.3"
-                         />
-                         
-                         {/* Decorative Gold Flowers Along Arc */}
-                         {/* Left flower */}
-                         <g transform="translate(60, 12)" opacity="0.8">
-                           <circle cx="0" cy="0" r="1.5" fill="#d4a574"/>
-                           <circle cx="-2" cy="0" r="1.2" fill="#b98839"/>
-                           <circle cx="2" cy="0" r="1.2" fill="#b98839"/>
-                           <circle cx="0" cy="-2" r="1.2" fill="#b98839"/>
-                           <circle cx="0" cy="2" r="1.2" fill="#b98839"/>
-                           <circle cx="-1.4" cy="-1.4" r="0.8" fill="#f0d9b5"/>
-                           <circle cx="1.4" cy="-1.4" r="0.8" fill="#f0d9b5"/>
-                           <circle cx="-1.4" cy="1.4" r="0.8" fill="#f0d9b5"/>
-                           <circle cx="1.4" cy="1.4" r="0.8" fill="#f0d9b5"/>
-                         </g>
-                         
-                         {/* Center flower (larger) */}
-                         <g transform="translate(160, 6)" opacity="0.9">
-                           <circle cx="0" cy="0" r="2" fill="#d4a574"/>
-                           <circle cx="-2.5" cy="0" r="1.5" fill="#b98839"/>
-                           <circle cx="2.5" cy="0" r="1.5" fill="#b98839"/>
-                           <circle cx="0" cy="-2.5" r="1.5" fill="#b98839"/>
-                           <circle cx="0" cy="2.5" r="1.5" fill="#b98839"/>
-                           <circle cx="-1.8" cy="-1.8" r="1" fill="#f0d9b5"/>
-                           <circle cx="1.8" cy="-1.8" r="1" fill="#f0d9b5"/>
-                           <circle cx="-1.8" cy="1.8" r="1" fill="#f0d9b5"/>
-                           <circle cx="1.8" cy="1.8" r="1" fill="#f0d9b5"/>
-                         </g>
-                         
-                         {/* Right flower */}
-                         <g transform="translate(260, 12)" opacity="0.8">
-                           <circle cx="0" cy="0" r="1.5" fill="#d4a574"/>
-                           <circle cx="-2" cy="0" r="1.2" fill="#b98839"/>
-                           <circle cx="2" cy="0" r="1.2" fill="#b98839"/>
-                           <circle cx="0" cy="-2" r="1.2" fill="#b98839"/>
-                           <circle cx="0" cy="2" r="1.2" fill="#b98839"/>
-                           <circle cx="-1.4" cy="-1.4" r="0.8" fill="#f0d9b5"/>
-                           <circle cx="1.4" cy="-1.4" r="0.8" fill="#f0d9b5"/>
-                           <circle cx="-1.4" cy="1.4" r="0.8" fill="#f0d9b5"/>
-                           <circle cx="1.4" cy="1.4" r="0.8" fill="#f0d9b5"/>
-                         </g>
-                         
-                         {/* Small accent flowers */}
-                         <g transform="translate(110, 9)" opacity="0.6">
-                           <circle cx="0" cy="0" r="1" fill="#d4a574"/>
-                           <circle cx="-1.2" cy="0" r="0.7" fill="#b98839"/>
-                           <circle cx="1.2" cy="0" r="0.7" fill="#b98839"/>
-                           <circle cx="0" cy="-1.2" r="0.7" fill="#b98839"/>
-                           <circle cx="0" cy="1.2" r="0.7" fill="#b98839"/>
-                         </g>
-                         
-                         <g transform="translate(210, 9)" opacity="0.6">
-                           <circle cx="0" cy="0" r="1" fill="#d4a574"/>
-                           <circle cx="-1.2" cy="0" r="0.7" fill="#b98839"/>
-                           <circle cx="1.2" cy="0" r="0.7" fill="#b98839"/>
-                           <circle cx="0" cy="-1.2" r="0.7" fill="#b98839"/>
-                           <circle cx="0" cy="1.2" r="0.7" fill="#b98839"/>
-                         </g>
-                         
-                         <defs>
-                           <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                             <stop offset="0%" stopColor="#b98839" stopOpacity="0.6" />
-                             <stop offset="50%" stopColor="#d4a574" stopOpacity="0.95" />
-                             <stop offset="100%" stopColor="#b98839" stopOpacity="0.6" />
-                           </linearGradient>
-                         </defs>
-                       </svg>
-                     </motion.div>
-                   )}
-                   
-                   {/* Animated underline with morphing effect - Desktop Only */}
-                   {!isMobile && (
-                     <motion.div
-                       className="absolute -bottom-2 left-0 h-1 bg-gradient-to-r from-primary via-yellow-400 to-transparent"
-                       initial={{ width: 0, opacity: 0 }}
-                       animate={{ 
-                         width: "100%", 
-                         opacity: 1,
-                         boxShadow: "0 0 20px rgba(198,161,81,0.5)"
-                       }}
-                       transition={{ 
-                         duration: 2, 
-                         delay: 2.2, 
-                         ease: "easeOut"
-                       }}
-                     />
-                   )}
-                   
-                 </motion.span>
+                 ELEGANT FLOWER FOR EVERY SINGLE OCCASION
                </motion.h1>
                
                {/* Subtitle with elegant reveal */}
@@ -488,8 +300,8 @@ const UltraHero = () => {
                 <motion.p 
                   className={`${isMobile ? 'text-[1.05rem] text-gray-600 font-light max-w-[62ch] mx-auto mb-6' : 'text-sm xs:text-base sm:text-lg'} font-light tracking-wide ${isMobile ? '' : 'mb-2 px-2 sm:px-0'} ${
                     isMobile 
-                      ? 'font-sans' 
-                      : 'font-serif text-primary/100'
+                      ? 'font-luxury' 
+                      : 'font-luxury text-primary/100'
                   }`}
                    initial={{ opacity: shouldReduceMotion || isMobile ? 1 : 0.5, x: shouldReduceMotion || isMobile ? 0 : -50 }}
                    animate={{ opacity: 1, x: 0 }}
@@ -500,19 +312,17 @@ const UltraHero = () => {
                     <span>Embrace your natural form with confidence.</span>
                   ) : (
                     <motion.span
-                      className="inline-block drop-shadow-[0_2px_6px_rgba(0,0,0,0.7)] drop-shadow-md"
+                      className="inline-block drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)] drop-shadow-xl font-luxury"
                       style={{ 
                         color: "rgb(198, 161, 81)", 
-                        WebkitTextStroke: "1px #000", 
-                        paintOrder: "stroke fill", 
-                        textShadow: "0 1px 0 #000, 0 -1px 0 #000, 1px 0 0 #000, -1px 0 0 #000" 
+                        textShadow: "0 2px 4px #000" 
                       }}
                       whileHover={{
                         scale: 1.03,
                         transition: { duration: 0.3 }
                       }}
                     >
-                      𝙲𝚛𝚊𝚏𝚝𝚒𝚗𝚐 𝚝𝚒𝚖𝚎𝚕𝚎𝚜𝚜 𝚋𝚎𝚊𝚞𝚝𝚢 𝚝𝚑𝚛𝚘𝚞𝚐𝚑 𝚏𝚕𝚘𝚛𝚊𝚕 𝚊𝚛𝚝𝚒𝚜𝚝𝚛𝚢
+                      Crafting timeless beauty through floral artistry
                     </motion.span>
                   )}
                    
@@ -845,10 +655,10 @@ const UltraHero = () => {
               <div className="relative w-full h-80 md:h-96 lg:h-[500px] perspective-1000" style={{ transformStyle: "preserve-3d", willChange: "transform" }}>
                 {/* Subtle glow effect */}
                 <motion.div 
-                  className="absolute inset-0 bg-gradient-radial from-primary/20 via-primary/10 to-transparent rounded-full blur-3xl scale-110"
+                  className="absolute inset-0 bg-gradient-radial from-primary/10 via-primary/5 to-transparent rounded-full blur-3xl scale-110"
                   animate={{
                     scale: [1.1, 1.2, 1.1],
-                    opacity: [0.2, 0.3, 0.2]
+                    opacity: [0.1, 0.2, 0.1]
                   }}
                   transition={{
                     duration: 6,
@@ -863,11 +673,11 @@ const UltraHero = () => {
                   alt="Beautiful Flower"
                   className="relative w-full h-full object-contain z-10 ml-4 md:ml-6 lg:ml-8"
                   initial={{ 
-                    filter: shouldReduceMotion ? "drop-shadow(0 20px 40px rgba(198,161,81,0.3))" : "blur(8px) brightness(0.9) drop-shadow(0 0 15px rgba(228, 181, 92, 0.4)) drop-shadow(0 0 25px rgba(228, 181, 92, 0.2))",
+                    filter: shouldReduceMotion ? "drop-shadow(0 20px 40px rgba(0,0,0,0.5))" : "blur(8px) brightness(0.9) drop-shadow(0 0 15px rgba(0,0,0,0.6)) drop-shadow(0 0 25px rgba(0,0,0,0.4))",
                     scale: shouldReduceMotion ? 1 : 0.95
                   }}
                   animate={{ 
-                    filter: "drop-shadow(0 20px 40px rgba(198,161,81,0.3))",
+                    filter: "drop-shadow(0 20px 40px rgba(0,0,0,0.5))",
                     scale: 1
                   }}
                   transition={{ 
@@ -878,7 +688,7 @@ const UltraHero = () => {
                   loading="eager"
                   decoding="async"
                   style={{
-                    filter: "drop-shadow(0 20px 40px rgba(198,161,81,0.3))",
+                    filter: "drop-shadow(0 20px 40px rgba(0,0,0,0.5))",
                     transformStyle: "preserve-3d",
                     willChange: shouldReduceMotion ? "auto" : "transform, filter"
                   }}

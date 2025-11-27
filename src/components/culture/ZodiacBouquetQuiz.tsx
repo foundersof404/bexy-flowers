@@ -124,7 +124,7 @@ const ZodiacBouquetQuiz = () => {
           className="text-center mb-16 relative"
         >
           {/* Modern Floating Badge */}
-          <motion.div 
+          <motion.div
             className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-slate-800/10 to-slate-700/10 backdrop-blur-xl border border-slate-600/20 mb-8"
             initial={{ scale: 0.8, opacity: 0 }}
             whileInView={{ scale: 1, opacity: 1 }}

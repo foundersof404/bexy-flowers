@@ -153,17 +153,17 @@ const Footer = () => {
               >
                 <Instagram className="w-5 h-5" />
               </motion.a>
-              <motion.a
+                <motion.a
                 href="https://www.tiktok.com/@bexyflower?_r=1&_t=ZS-91i2FtAJdVF"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center text-primary hover:bg-primary hover:text-background transition-colors"
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.95 }}
+                  className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center text-primary hover:bg-primary hover:text-background transition-colors"
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
                 aria-label="TikTok"
-              >
+                >
                 <TikTokIcon className="w-5 h-5" />
-              </motion.a>
+                </motion.a>
             </div>
           </motion.div>
         </div>

@@ -107,7 +107,7 @@ const UltraCategories = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const mobileRow1Ref = useRef<HTMLDivElement>(null);
   const mobileRow2Ref = useRef<HTMLDivElement>(null);
-  const [isAutoScroll, setIsAutoScroll] = useState(false);
+  // Removed isAutoScroll state to force auto scroll always
 
   const handleExplore = (filterValue: string) => {
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
@@ -214,44 +214,39 @@ const UltraCategories = () => {
     let tween2: gsap.core.Tween | null = null;
 
     // Row 1: Scrolls left (normal direction) - infinite seamless loop
-    if (isAutoScroll) {
-      tween1 = gsap.to(row1, {
-        x: -singleSetWidth1,
-        duration: 15,
-        ease: "none",
-        force3D: true,
-        repeat: -1,
-        repeatDelay: 0,
-        modifiers: {
-          x: (x) => {
-            const val = parseFloat(x);
-            return `${val % singleSetWidth1}px`;
-          }
+    // Force auto scroll always
+    tween1 = gsap.to(row1, {
+      x: -singleSetWidth1,
+      duration: 15,
+      ease: "none",
+      force3D: true,
+      repeat: -1,
+      repeatDelay: 0,
+      modifiers: {
+        x: (x) => {
+          const val = parseFloat(x);
+          return `${val % singleSetWidth1}px`;
         }
-      });
+      }
+    });
 
-      // Row 2: Scrolls right (opposite direction) - infinite seamless loop
-      // Start from negative position for right scroll
-      gsap.set(row2, { x: -singleSetWidth2 });
-      tween2 = gsap.to(row2, {
-        x: 0,
-        duration: 25,
-        ease: "none",
-        force3D: true,
-        repeat: -1,
-        repeatDelay: 0,
-        modifiers: {
-          x: (x) => {
-            const val = parseFloat(x);
-            return `${val % singleSetWidth2}px`;
-          }
+    // Row 2: Scrolls right (opposite direction) - infinite seamless loop
+    // Start from negative position for right scroll
+    gsap.set(row2, { x: -singleSetWidth2 });
+    tween2 = gsap.to(row2, {
+      x: 0,
+      duration: 25,
+      ease: "none",
+      force3D: true,
+      repeat: -1,
+      repeatDelay: 0,
+      modifiers: {
+        x: (x) => {
+          const val = parseFloat(x);
+          return `${val % singleSetWidth2}px`;
         }
-      });
-    } else {
-      // Pause animations
-      if (tween1) tween1.pause();
-      if (tween2) tween2.pause();
-    }
+      }
+    });
 
     return () => {
       if (tween1) tween1.kill();
@@ -259,7 +254,7 @@ const UltraCategories = () => {
       gsap.killTweensOf(row1);
       gsap.killTweensOf(row2);
     };
-  }, [isAutoScroll]);
+  }, []); // Empty dependency array to run once and keep running
 
   const scrollLeft = () => {
     const container = containerRef.current;
@@ -490,101 +485,7 @@ const UltraCategories = () => {
 
         {/* Mobile: Two Rows with Opposite Scroll Directions */}
         <div className="w-full overflow-hidden lg:hidden space-y-4">
-          {/* Enhanced Toggle Switch for Auto/Manual Scroll */}
-          <div className="flex flex-col items-center mb-8 space-y-4">
-            {/* Toggle Switch */}
-            <motion.button
-              onClick={() => setIsAutoScroll(!isAutoScroll)}
-              className={`relative inline-flex items-center gap-4 px-8 py-4 rounded-2xl backdrop-blur-xl border-2 transition-all duration-500 shadow-lg ${
-                isAutoScroll 
-                  ? 'bg-gradient-to-r from-amber-500/25 to-yellow-500/25 border-amber-400/60 shadow-amber-500/20' 
-                  : 'bg-gradient-to-r from-slate-800/15 to-slate-700/15 border-slate-600/40 shadow-slate-500/10'
-              }`}
-              whileHover={{ 
-                scale: 1.05, 
-                boxShadow: isAutoScroll 
-                  ? "0 20px 40px rgba(245, 158, 11, 0.3)" 
-                  : "0 20px 40px rgba(71, 85, 105, 0.2)"
-              }}
-              whileTap={{ scale: 0.95 }}
-            >
-              {/* Enhanced Toggle Switch */}
-              <motion.div
-                className={`w-14 h-7 rounded-full relative transition-all duration-300 shadow-inner ${
-                  isAutoScroll 
-                    ? 'bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500' 
-                    : 'bg-gradient-to-r from-slate-300 to-slate-400'
-                }`}
-              >
-                {/* Toggle Knob */}
-                <motion.div
-                  className="absolute top-0.5 left-0.5 w-6 h-6 bg-white rounded-full shadow-lg border border-gray-200"
-                  animate={{ x: isAutoScroll ? 28 : 0 }}
-                  transition={{ 
-                    type: "spring", 
-                    stiffness: 600, 
-                    damping: 30,
-                    mass: 0.8
-                  }}
-                />
-                {/* Glow effect */}
-                <motion.div
-                  className={`absolute inset-0 rounded-full blur-sm ${
-                    isAutoScroll ? 'bg-amber-400/50' : 'bg-slate-300/30'
-                  }`}
-                  animate={{ opacity: isAutoScroll ? 1 : 0 }}
-                  transition={{ duration: 0.3 }}
-                />
-              </motion.div>
-              
-              {/* Status Text */}
-              <div className="flex flex-col items-start">
-                <span className={`text-base font-semibold tracking-wide ${
-                  isAutoScroll ? 'text-amber-700' : 'text-slate-700'
-                }`}>
-                  {isAutoScroll ? 'AUTO SCROLL' : 'MANUAL CONTROL'}
-                </span>
-                <span className={`text-xs font-medium ${
-                  isAutoScroll ? 'text-amber-600/80' : 'text-slate-600/80'
-                }`}>
-                  {isAutoScroll ? 'Cards flow automatically' : 'Pause to swipe manually'}
-                </span>
-              </div>
-
-              {/* Icon indicator */}
-              <motion.div
-                className={`p-2 rounded-lg transition-all duration-300 ${
-                  isAutoScroll ? 'bg-amber-500/20' : 'bg-slate-500/20'
-                }`}
-                animate={{ rotate: isAutoScroll ? 0 : 180 }}
-                transition={{ duration: 0.5 }}
-              >
-                {isAutoScroll ? (
-                  <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                  >
-                    <Sparkles className={`w-5 h-5 ${isAutoScroll ? 'text-amber-600' : 'text-slate-600'}`} />
-                  </motion.div>
-                ) : (
-                  <ChevronLeft className={`w-5 h-5 ${isAutoScroll ? 'text-amber-600' : 'text-slate-600'}`} />
-                )}
-              </motion.div>
-            </motion.button>
-
-            {/* Helpful Note */}
-            <motion.div 
-              className="text-center max-w-md"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-            >
-              <p className="text-sm text-slate-500 leading-relaxed">
-                💡 <strong>Tip:</strong> Switch to manual mode to pause the auto-scrolling and swipe through the collections at your own pace.
-              </p>
-            </motion.div>
-          </div>
-
+          
           {/* Row 1: Scrolls Left */}
           <div className="w-full overflow-hidden">
               <div 

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ShoppingCart, Heart, Eye, Crown } from 'lucide-react';
+import { ShoppingCart, Heart, Eye, Crown, ArrowUpRight } from 'lucide-react';
 import { useCartWithToast } from '@/hooks/useCartWithToast';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -432,9 +432,7 @@ const UltraFeaturedBouquets = () => {
                       setIsModalOpen(true);
                     }}
                   >
-                           <span style={{ color: '#fff', fontSize: '1.5rem' }}>
-                             ↗
-                           </span>
+                          <ArrowUpRight color="#fff" size={22} strokeWidth={1.8} />
                          </motion.div>
                   </div>
                 </div>

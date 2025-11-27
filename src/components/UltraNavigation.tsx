@@ -120,19 +120,8 @@ const UltraNavigation = () => {
     const logo = logoRef.current;
 
     if (nav && logo) {
-      // Initial logo animation - Simplified on mobile
-      if (isMobile || prefersReducedMotion || shouldReduceMotion) {
-        gsap.set(logo, { scale: 1, rotation: 0 });
-      } else {
-        gsap.set(logo, { scale: 0, rotation: -180 });
-        gsap.to(logo, {
-          duration: 2,
-          scale: 1,
-          rotation: 0,
-          ease: "elastic.out(1, 0.3)",
-          force3D: true
-        });
-      }
+      // Initial logo animation - Removed as per request, keeping it static
+      gsap.set(logo, { scale: 1, rotation: 0 });
 
        // Set initial platinum background immediately - no transitions
        gsap.set(nav, {
@@ -262,55 +251,23 @@ const UltraNavigation = () => {
                 className="relative p-1 sm:p-2 hover:bg-primary/5 transition-all duration-500 group flex items-center rounded-lg"
                 onClick={() => navigate('/')}
               >
-                {/* Logo Container - Elegant Glow Only */}
+                {/* Logo Container - Clean Luxury */}
                 <div 
                   className="w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 relative"
                 >
                   <img
                     src={logoImage}
-                    alt="𝓑𝓮𝔁𝔂 𝓯𝓵𝓸𝔀𝓮𝓻 Logo"
-                    className="w-full h-full object-contain transition-all duration-700 relative z-10"
-                    style={{
-                      filter: 'drop-shadow(0 0 8px rgba(196,166,105,0.3))'
-                    }}
-                  />
-                  
-                  {/* Elegant Glow Effect on Hover */}
-                  <motion.div
-                    className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700"
-                    style={{
-                      background: 'radial-gradient(circle, rgba(196,166,105,0.4) 0%, rgba(196,166,105,0.2) 40%, transparent 70%)',
-                      filter: 'blur(12px)',
-                      zIndex: 0
-                    }}
-                    animate={{
-                      scale: [1, 1.2, 1],
-                      opacity: [0, 0.6, 0]
-                    }}
-                    transition={{
-                      duration: 2,
-                      repeat: Infinity,
-                      ease: "easeInOut"
-                    }}
-                  />
-                  
-                  {/* Secondary Glow Layer */}
-                  <motion.div
-                    className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                    style={{
-                      background: 'radial-gradient(circle, rgba(196,166,105,0.3) 0%, transparent 60%)',
-                      filter: 'blur(8px)',
-                      zIndex: 0
-                    }}
+                    alt="Bexy Flowers Logo"
+                    className="w-full h-full object-contain relative z-10"
                   />
                 </div>
                 
-                {/* Brand Name - Visible on mobile and all screens - Elegant Glow Only */}
-                <div className="ml-1 sm:ml-2">
+                {/* Brand Name - Clean Luxury Text */}
+                <div className="ml-0 sm:ml-0.5">
                   <h1 
-                    className="font-luxury text-sm sm:text-lg md:text-xl lg:text-2xl font-bold text-foreground drop-shadow-[0_0_8px_rgba(196,166,105,0.6)] [text-shadow:_0_0_12px_rgba(196,166,105,0.8)] transition-all duration-700 group-hover:[text-shadow:_0_0_20px_rgba(196,166,105,1),_0_0_30px_rgba(196,166,105,0.8),_0_0_40px_rgba(196,166,105,0.6)]"
+                    className="font-luxury text-sm sm:text-lg md:text-xl lg:text-2xl font-bold text-foreground"
                   >
-                    𝓑𝓮𝔁𝔂 𝓯𝓵𝓸𝔀𝓮𝓻
+                    Bexy Flowers
                   </h1>
                 </div>
               </Button>
@@ -395,7 +352,7 @@ const UltraNavigation = () => {
                 );
               })}
             </div>
-
+              
             {/* Cart - Absolute Right */}
             <div className="flex items-center ml-auto gap-2">
               {/* Favorites Icon - Desktop (next to cart) */}
@@ -636,15 +593,15 @@ const UltraNavigation = () => {
                 transition={{ duration: 0.3 }}
                 onClick={() => setIsMenuOpen(false)}
               />
-              <motion.div
-                ref={menuRef}
+            <motion.div
+              ref={menuRef}
                 className="lg:hidden absolute top-full left-0 right-0 bg-background/98 backdrop-blur-xl border-t border-primary/20 shadow-luxury z-[100]"
-                style={{ backgroundColor: 'rgba(229, 228, 226, 0.98)' }}
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
-              >
+              style={{ backgroundColor: 'rgba(229, 228, 226, 0.98)' }}
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
+            >
               <div className="px-4 sm:px-6 py-6 sm:py-8 space-y-3 sm:space-y-4">
                 {navigationItems.map((item, index) => {
                   const isActive = location.pathname === item.path;

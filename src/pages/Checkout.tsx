@@ -78,8 +78,14 @@ const Checkout = () => {
         >
           {/* Page Title */}
           <div className="text-center space-y-4">
-            <h1 className="font-luxury text-4xl font-bold text-slate-800">
-              Complete Your Order
+            <h1 
+              className="font-luxury text-5xl md:text-7xl font-bold bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 bg-clip-text text-transparent relative uppercase"
+              style={{
+                filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))',
+                letterSpacing: '0.05em'
+              }}
+            >
+              COMPLETE YOUR ORDER
             </h1>
             <p className="text-slate-600 text-lg">
               Review your selections and proceed to checkout

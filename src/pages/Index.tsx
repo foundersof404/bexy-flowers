@@ -201,7 +201,7 @@ const ProfessionalCustomSection = React.memo(() => {
                 }}
                 >
                   <motion.div
-                    className="relative h-full p-8 rounded-3xl overflow-hidden border border-[#C6A15B]/20 bg-white shadow-[0_10px_35px_rgba(0,0,0,0.05)] transition-all duration-300"
+                    className="relative h-full p-4 rounded-3xl overflow-hidden border border-[#C6A15B]/20 bg-white shadow-[0_10px_35px_rgba(0,0,0,0.05)] transition-all duration-300"
                     style={{
                       background: 'linear-gradient(180deg, #ffffff 0%, #fafaf9 100%)',
                       border: '1px solid rgba(0, 0, 0, 0.06)',
@@ -222,7 +222,7 @@ const ProfessionalCustomSection = React.memo(() => {
                     />
 
                     <motion.div
-                      className="relative w-[72px] h-[72px] mb-6 rounded-2xl flex items-center justify-center shadow-[0_3px_12px_rgba(198,161,91,0.25)]"
+                      className="relative w-[48px] h-[48px] mb-3 rounded-2xl flex items-center justify-center shadow-[0_3px_12px_rgba(198,161,91,0.25)]"
                       style={{ 
                         background: gradient135, 
                         boxShadow: '0 8px 24px rgba(194, 154, 67, 0.3)',
@@ -233,7 +233,7 @@ const ProfessionalCustomSection = React.memo(() => {
                     >
                       {/* Icon - Ensure it stays visible with proper z-index */}
                       <Icon 
-                        className="w-9 h-9 text-white drop-shadow-[0_4px_16px_rgba(0,0,0,0.25)] relative z-10" 
+                        className="w-5 h-5 text-white drop-shadow-[0_4px_16px_rgba(0,0,0,0.25)] relative z-10" 
                         strokeWidth={1.6} 
                         style={{ pointerEvents: 'none' }}
                       />
@@ -246,14 +246,14 @@ const ProfessionalCustomSection = React.memo(() => {
                     </motion.div>
 
                     <h3
-                      className="text-xs font-bold tracking-[0.25em] uppercase mb-2"
-                      style={{ color: '#B88A44', letterSpacing: '0.25em' }}
+                      className="text-[0.65rem] font-bold tracking-[0.2em] uppercase mb-1"
+                      style={{ color: '#B88A44', letterSpacing: '0.2em' }}
                     >
                       {feature.title}
                     </h3>
 
                     <motion.h4
-                      className="text-2xl font-bold mb-4 transition-all duration-300"
+                      className="text-lg font-bold mb-2 transition-all duration-300"
                       style={{ color: '#0a0a0a', letterSpacing: '-0.01em', fontFamily: 'Inter, sans-serif' }}
                       whileHover={{ color: '#B88A44' }}
                     >
