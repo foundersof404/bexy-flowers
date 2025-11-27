@@ -164,7 +164,8 @@ const UltraHero = () => {
         <motion.img
           src={heroBackground}
           alt="Luxury floral background"
-          className={`w-full h-full object-cover ${isMobile ? 'opacity-70 scale-105 translate-y-40' : 'transform-3d shadow-gold opacity-10'}`}
+          className={`w-full h-full object-cover ${isMobile ? 'opacity-70 scale-105' : 'transform-3d shadow-gold opacity-10'}`}
+          style={isMobile ? { y: 60 } : { willChange: shouldReduceMotion && !isMobile ? "auto" : "transform, opacity" }} 
           initial={
             isMobile
               ? { scale: 1.05, opacity: 0 }
@@ -185,7 +186,6 @@ const UltraHero = () => {
           }}
           loading="eager"
           decoding="async"
-          style={{ willChange: shouldReduceMotion && !isMobile ? "auto" : "transform, opacity" }}
         />
         <div 
           className={`absolute inset-0 ${isMobile ? '' : '-top-4'} ${isMobile ? '' : 'bg-gradient-to-b from-background/90 via-background/70 to-background/90'}`}

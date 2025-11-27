@@ -140,13 +140,14 @@ const UltraNavigation = () => {
             setIsScrolled(scrolled);
             
             if (nav) {
-              // Keep it transparent but add subtle border/shadow on scroll
+              // Keep it transparent but add strong blur on scroll
               nav.style.backgroundColor = scrolled 
-                ? "rgba(255, 255, 255, 0.85)" // Much more visible on scroll (obvious)
+                ? "rgba(255, 255, 255, 0.15)" // Semi-transparent to show blur
                 : "rgba(255, 255, 255, 0.02)";
-              nav.style.backdropFilter = scrolled ? "blur(20px)" : "blur(12px)";
+              nav.style.backdropFilter = "blur(25px)"; // Consistent strong blur
+              nav.style.webkitBackdropFilter = "blur(25px)"; // Safari support
               nav.style.boxShadow = scrolled 
-                ? "0 8px 32px rgba(0, 0, 0, 0.15)"
+                ? "0 8px 32px rgba(0, 0, 0, 0.1)"
                 : "0 4px 30px rgba(0, 0, 0, 0.05)";
               nav.style.borderBottom = scrolled 
                 ? "1px solid rgba(255, 255, 255, 0.2)"
