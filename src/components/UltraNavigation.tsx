@@ -51,6 +51,37 @@ const TikTokIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
+// Luxury Menu Icon Component
+const LuxuryMenuIcon = ({ className }: { className?: string }) => (
+  <svg 
+    className={className} 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="1" 
+    strokeLinecap="square" 
+    strokeLinejoin="miter"
+  >
+    <path d="M4 8H20" />
+    <path d="M4 16H20" />
+  </svg>
+);
+
+// Luxury Close Icon Component
+const LuxuryCloseIcon = ({ className }: { className?: string }) => (
+  <svg 
+    className={className} 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="1" 
+    strokeLinecap="square" 
+    strokeLinejoin="miter"
+  >
+    <path d="M6 18L18 6M6 6l12 12" />
+  </svg>
+);
+
 interface NavigationItem {
   name: string;
   path: string;
@@ -562,7 +593,7 @@ const UltraNavigation = () => {
                           color: "rgb(196,166,105)"
                         } : {}}
                       >
-                        <X className="w-5 h-5 sm:w-6 sm:h-6 text-foreground transition-all duration-300" />
+                        <LuxuryCloseIcon className="w-6 h-6 sm:w-7 sm:h-7 text-foreground transition-all duration-300" />
                       </motion.div>
                     ) : (
                       <motion.div
@@ -577,7 +608,7 @@ const UltraNavigation = () => {
                           color: "rgb(196,166,105)"
                         } : {}}
                       >
-                        <Menu className="w-5 h-5 sm:w-6 sm:h-6 text-foreground transition-all duration-300" />
+                        <LuxuryMenuIcon className="w-6 h-6 sm:w-7 sm:h-7 text-foreground transition-all duration-300" />
                       </motion.div>
                     )}
                   </AnimatePresence>
@@ -676,14 +707,14 @@ const UltraNavigation = () => {
                           
                           <div className="flex-1 min-w-0">
                             <div 
-                              className="font-luxury font-semibold relative text-base sm:text-lg"
+                              className="font-luxury font-medium relative text-lg sm:text-xl uppercase tracking-[0.15em]"
                               style={{
                                 color: isActive ? GOLD_COLOR : 'inherit',
                               }}
                             >
                               {item.name}
                             </div>
-                            <div className="font-body text-xs sm:text-sm text-muted-foreground mt-1">
+                            <div className="font-luxury italic text-xs sm:text-sm text-muted-foreground mt-1 tracking-wide">
                               {item.description}
                             </div>
                           </div>
