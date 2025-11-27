@@ -163,7 +163,7 @@ const UltraHero = () => {
         <motion.img
           src={heroBackground}
           alt="Luxury floral background"
-          className={`w-full h-full object-cover ${isMobile ? 'opacity-80 scale-105' : 'transform-3d shadow-gold opacity-20'}`}
+          className={`w-full h-full object-cover ${isMobile ? 'opacity-70 scale-105' : 'transform-3d shadow-gold opacity-10'}`}
           initial={
             isMobile
               ? { scale: 1.05, opacity: 0 }
@@ -245,19 +245,7 @@ const UltraHero = () => {
           
           {/* Content Container */}
           <div className={`${isMobile ? 'w-full text-center space-y-4 -mt-[14.5rem] mx-auto max-w-[100vw] overflow-x-hidden' : 'space-y-4 sm:space-y-6 lg:space-y-8 text-center lg:text-left'}`}>
-            {/* Brand Badge - Mobile */}
-            {isMobile && (
-              <motion.div
-                className="mb-4"
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-              >
-                <div className="font-sans text-[#b98839] text-xs font-light">
-                  Luxury Floral Boutique
-                </div>
-              </motion.div>
-            )}
+            {/* Brand Badge - Mobile - Removed */}
              <motion.div
                ref={titleRef}
                className="overflow-hidden"
@@ -272,6 +260,19 @@ const UltraHero = () => {
                }}
                style={{ willChange: shouldReduceMotion || isMobile ? "auto" : "transform, opacity" }}
              >
+               <motion.h1 
+                 className={`${isMobile ? 'font-luxury text-[clamp(1.6rem,7vw,2.6rem)]' : 'font-luxury text-3xl md:text-4xl lg:text-5xl'} font-bold mb-6 text-black relative uppercase`}
+                 initial={{ opacity: 0, y: 30 }}
+                 animate={{ opacity: 1, y: 0 }}
+                 transition={{ duration: shouldReduceMotion || isMobile ? 0 : 0.8, delay: shouldReduceMotion || isMobile ? 0 : 0.4 }}
+                 style={{ 
+                   filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))',
+                   letterSpacing: '0.05em'
+                 }}
+               >
+                 ELEGANT FLOWER FOR EVERY SINGLE OCCASION
+               </motion.h1>
+
                    {/* Gold Arc - Mobile Only */}
                    {isMobile && (
                      <motion.div
@@ -299,7 +300,7 @@ const UltraHero = () => {
                            strokeLinecap="round"
                            strokeLinejoin="round"
                            opacity="0.95"
-                         />
+                           />
                          {/* Subtle secondary stroke for depth */}
                          <path 
                            d="M25 24 Q85 10, 160 8 T295 24" 
@@ -309,7 +310,7 @@ const UltraHero = () => {
                            strokeLinecap="round"
                            strokeLinejoin="round"
                            opacity="0.5"
-                         />
+                           />
                          {/* Accent highlights */}
                          <path 
                            d="M30 23 Q90 11, 160 9 T290 23" 
@@ -319,7 +320,7 @@ const UltraHero = () => {
                            strokeLinecap="round"
                            strokeLinejoin="round"
                            opacity="0.3"
-                         />
+                           />
                          
                          {/* Decorative Gold Flowers Along Arc */}
                          {/* Left flower */}
@@ -370,6 +371,7 @@ const UltraHero = () => {
                            <circle cx="0" cy="1.2" r="0.7" fill="#b98839"/>
                          </g>
                          
+                         {/* Small accent flowers - Right */}
                          <g transform="translate(210, 9)" opacity="0.6">
                            <circle cx="0" cy="0" r="1" fill="#d4a574"/>
                            <circle cx="-1.2" cy="0" r="0.7" fill="#b98839"/>
@@ -388,18 +390,6 @@ const UltraHero = () => {
                        </svg>
                      </motion.div>
                    )}
-               <motion.h1 
-                 className={`${isMobile ? 'font-luxury text-[clamp(1.6rem,7vw,2.6rem)]' : 'font-luxury text-3xl md:text-4xl lg:text-5xl'} font-bold mb-6 text-black relative uppercase`}
-                 initial={{ opacity: 0, y: 30 }}
-                 animate={{ opacity: 1, y: 0 }}
-                 transition={{ duration: shouldReduceMotion || isMobile ? 0 : 0.8, delay: shouldReduceMotion || isMobile ? 0 : 0.4 }}
-                 style={{ 
-                   filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))',
-                   letterSpacing: '0.05em'
-                 }}
-               >
-                 ELEGANT FLOWER FOR EVERY SINGLE OCCASION
-               </motion.h1>
                
                {/* Subtitle with elegant reveal */}
                <motion.div
@@ -426,7 +416,7 @@ const UltraHero = () => {
                     <motion.span
                       className="inline-block drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)] drop-shadow-xl font-luxury"
                       style={{ 
-                        color: "rgb(198, 161, 81)", 
+                        color: "rgb(199, 158, 72)", 
                         textShadow: "0 2px 4px #000" 
                       }}
                       whileHover={{
@@ -945,64 +935,47 @@ const UltraHero = () => {
       )}
 
       {/* Mobile Bouquet Images - Positioned on Left and Right */}
-      {isMobile && (
-        <>
-          {/* Left Bouquet - Positioned lower-left */}
-          <motion.div
-            className="absolute left-5 bottom-[25%] z-30"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 1 }}
-          >
-            <img
-              src="/assets/HEROFLOWER.png"
-              alt="White bouquet"
-              className="w-[90px] h-[130px] object-cover rounded-xl shadow-[0_10px_30px_rgba(12,12,12,0.08)]"
-            />
-          </motion.div>
-
-          {/* Right Bouquet - Positioned lower-right, slightly higher */}
-          <motion.div
-            className="absolute right-5 bottom-[17%] z-30"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 1.2 }}
-          >
-            <img
-              src="/assets/HEROFLOWER.png"
-              alt="White bouquet"
-              className="w-[120px] h-[150px] object-cover rounded-xl shadow-[0_10px_30px_rgba(12,12,12,0.08)]"
-            />
-          </motion.div>
-        </>
-      )}
+      {/* Removed Mobile Bouquet Images as per request */}
 
       {/* Mobile Scroll Hint */}
       {isMobile && (
-        <motion.div
-          className="absolute bottom-0 left-1/2 transform -translate-x-1/2 z-20 flex flex-col items-center gap-4 text-black text-[0.98rem] cursor-pointer"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 1.4 }}
-          onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}
-        >
-          <span className="whitespace-nowrap pt-1">Scroll to discover our premium collections ↓</span>
-          <div className="relative w-[30px] h-[48px] rounded-[18px] border-2 border-black mt-1">
-            <motion.div
-              className="absolute left-1/2 top-3 w-1.5 h-1.5 bg-black rounded-full"
-              style={{ transform: 'translateX(-50%)' }}
-              animate={{ 
-                y: [0, 14, 0],
-                opacity: [1, 0, 1]
-              }}
-              transition={{ 
-                duration: 1.6, 
-                repeat: Infinity, 
-                ease: "easeInOut" 
-              }}
-            />
-          </div>
-        </motion.div>
+        <>
+          {/* Decorative separator */}
+          <motion.div
+            className="absolute bottom-[110px] left-1/2 transform -translate-x-1/2 z-20 flex flex-col items-center"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 0.6, height: 40 }}
+            transition={{ duration: 0.8, delay: 1.3 }}
+          >
+            <div className="w-[1px] h-full bg-gradient-to-b from-transparent via-[#b98839] to-transparent" />
+            <div className="w-1.5 h-1.5 rounded-full bg-[#b98839] mt-1" />
+          </motion.div>
+
+          <motion.div
+            className="absolute bottom-0 left-1/2 transform -translate-x-1/2 z-20 flex flex-col items-center gap-4 text-black text-[0.98rem] cursor-pointer"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 1.4 }}
+            onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}
+          >
+            <span className="whitespace-nowrap pt-1">Scroll to discover our premium collections ↓</span>
+            <div className="relative w-[30px] h-[48px] rounded-[18px] border-2 border-black mt-1">
+              <motion.div
+                className="absolute left-1/2 top-3 w-1.5 h-1.5 bg-black rounded-full"
+                style={{ transform: 'translateX(-50%)' }}
+                animate={{ 
+                  y: [0, 14, 0],
+                  opacity: [1, 0, 1]
+                }}
+                transition={{ 
+                  duration: 1.6, 
+                  repeat: Infinity, 
+                  ease: "easeInOut" 
+                }}
+              />
+            </div>
+          </motion.div>
+        </>
       )}
     </section>
   );
