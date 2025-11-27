@@ -164,7 +164,7 @@ const UltraHero = () => {
         <motion.img
           src={heroBackground}
           alt="Luxury floral background"
-          className={`w-full h-full object-cover ${isMobile ? 'opacity-70 scale-105 translate-y-24' : 'transform-3d shadow-gold opacity-10'}`}
+          className={`w-full h-full object-cover ${isMobile ? 'opacity-70 scale-105 translate-y-40' : 'transform-3d shadow-gold opacity-10'}`}
           initial={
             isMobile
               ? { scale: 1.05, opacity: 0 }
@@ -245,7 +245,7 @@ const UltraHero = () => {
         <div className={`${isMobile ? 'w-full max-w-[860px]' : 'grid lg:grid-cols-2'} ${isMobile ? '' : 'gap-6 sm:gap-8 lg:gap-10 xl:gap-12'} items-center ${isMobile ? 'h-full py-0' : 'min-h-[70vh] sm:min-h-[75vh] lg:min-h-[80vh]'}`}>
           
           {/* Content Container */}
-          <div className={`${isMobile ? 'w-full text-center space-y-4 -mt-12 mx-auto max-w-[100vw] overflow-x-hidden' : 'space-y-4 sm:space-y-6 lg:space-y-8 text-center lg:text-left'}`}>
+          <div className={`${isMobile ? 'w-full text-center space-y-4 mt-2 mx-auto max-w-[100vw] overflow-x-hidden' : 'space-y-4 sm:space-y-6 lg:space-y-8 text-center lg:text-left'}`}>
             {/* Brand Badge - Mobile - Removed */}
              <motion.div
                ref={titleRef}
