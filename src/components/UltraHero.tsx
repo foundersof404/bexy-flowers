@@ -261,7 +261,7 @@ const UltraHero = () => {
                style={{ willChange: shouldReduceMotion || isMobile ? "auto" : "transform, opacity" }}
              >
                <motion.h1 
-                 className={`${isMobile ? 'font-luxury text-[clamp(1.6rem,7vw,2.6rem)]' : 'font-luxury text-3xl md:text-4xl lg:text-5xl'} font-bold mb-6 text-black relative uppercase`}
+                 className={`${isMobile ? 'font-luxury text-[clamp(1.6rem,7vw,2.6rem)]' : 'font-luxury text-3xl md:text-4xl lg:text-5xl'} font-bold mb-2 text-black relative uppercase`}
                  initial={{ opacity: 0, y: 30 }}
                  animate={{ opacity: 1, y: 0 }}
                  transition={{ duration: shouldReduceMotion || isMobile ? 0 : 0.8, delay: shouldReduceMotion || isMobile ? 0 : 0.4 }}
@@ -276,7 +276,7 @@ const UltraHero = () => {
                    {/* Gold Arc - Mobile Only */}
                    {isMobile && (
                      <motion.div
-                       className="block w-[320px] h-[32px] mx-auto my-4 max-w-full"
+                       className="block w-[320px] h-[32px] mx-auto mt-1 mb-8 max-w-full"
                        style={{ transformOrigin: 'center' }}
                        initial={{ opacity: 0, y: 6, scaleX: 0.95 }}
                        animate={{ opacity: 1, y: 0, scaleX: 1 }}
@@ -391,9 +391,32 @@ const UltraHero = () => {
                      </motion.div>
                    )}
                
+               {/* Mobile CTA Button - Before subtitle */}
+              {isMobile && (
+                <motion.a
+                  href="/collection"
+                  className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[rgba(23,23,23,0.95)] via-[rgba(38,38,38,0.85)] to-[rgba(23,23,23,0.95)] text-white rounded-full font-semibold tracking-[0.08em] shadow-[0_10px_22px_rgba(12,12,12,0.25)] transition-all duration-200 border border-white/10 mx-auto mb-6 w-[55%] max-w-[220px]"
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.55, delay: 1.1 }}
+                  style={{ letterSpacing: '0.12em' }}
+                  whileHover={{
+                    scale: 1.03,
+                    boxShadow: '0 18px 36px rgba(12,12,12,0.28)',
+                    background: 'linear-gradient(90deg, rgba(185,136,57,0.95), rgba(141,104,39,0.92))'
+                  }}
+                  whileTap={{ scale: 0.97 }}
+                >
+                  SHOP NOW
+                  <span className="inline-flex w-5 h-5 rounded-full items-center justify-center text-[0.85rem] bg-gradient-to-r from-[rgba(185,136,57,0.95)] to-[rgba(199,158,72,0.95)] text-white shadow-[0_2px_6px_rgba(185,136,57,0.35)]">
+                    →
+                  </span>
+                </motion.a>
+              )}
+               
                {/* Subtitle with elegant reveal */}
                <motion.div
-                 className={`relative overflow-hidden ${isMobile ? '-mt-8' : ''}`}
+                 className={`relative overflow-hidden ${isMobile ? '' : ''}`}
                  initial={{ opacity: 0, y: shouldReduceMotion || isMobile ? 0 : 30 }}
                  animate={{ opacity: 1, y: 0 }}
                  transition={{ duration: shouldReduceMotion || isMobile ? 0 : 1, delay: shouldReduceMotion || isMobile ? 0 : 0.8 }}
@@ -440,28 +463,7 @@ const UltraHero = () => {
                  </motion.p>
                </motion.div>
                
-               {/* Mobile CTA Button - After subtitle */}
-              {isMobile && (
-                <motion.a
-                  href="/collection"
-                  className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[rgba(23,23,23,0.95)] via-[rgba(38,38,38,0.85)] to-[rgba(23,23,23,0.95)] text-white rounded-full font-semibold tracking-[0.08em] shadow-[0_10px_22px_rgba(12,12,12,0.25)] transition-all duration-200 border border-white/10 mx-auto mb-4 w-[55%] max-w-[220px]"
-                  initial={{ opacity: 0, y: 16 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.55, delay: 1.1 }}
-                  style={{ letterSpacing: '0.12em' }}
-                  whileHover={{
-                    scale: 1.03,
-                    boxShadow: '0 18px 36px rgba(12,12,12,0.28)',
-                    background: 'linear-gradient(90deg, rgba(185,136,57,0.95), rgba(141,104,39,0.92))'
-                  }}
-                  whileTap={{ scale: 0.97 }}
-                >
-                  SHOP NOW
-                  <span className="inline-flex w-5 h-5 rounded-full items-center justify-center text-[0.85rem] bg-gradient-to-r from-[rgba(185,136,57,0.95)] to-[rgba(199,158,72,0.95)] text-white shadow-[0_2px_6px_rgba(185,136,57,0.35)]">
-                    →
-                  </span>
-                </motion.a>
-              )}
+               {/* Mobile CTA Button - After subtitle - REMOVED from here */}
                
                {/* Description with typewriter effect - Hidden on mobile */}
                {!isMobile && (
