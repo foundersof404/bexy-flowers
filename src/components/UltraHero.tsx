@@ -148,11 +148,11 @@ const UltraHero = () => {
   return (
     <section 
       ref={heroRef}
-      className={`relative min-h-screen flex items-center justify-center overflow-hidden perspective-1000 text-center ${
+      className={`relative min-h-[100dvh] flex items-center justify-center overflow-hidden perspective-1000 text-center ${
         isMobile ? '-mt-20 md:bg-transparent md:pt-16 md:sm:pt-8' : 'pt-16 sm:pt-8 -mt-20'
       }`}
       style={{ 
-        minHeight: '100vh',
+        minHeight: '100dvh',
         padding: isMobile ? '5rem 1.4rem' : '6rem 2rem'
       }}
     >
@@ -244,7 +244,7 @@ const UltraHero = () => {
         <div className={`${isMobile ? 'w-full max-w-[860px]' : 'grid lg:grid-cols-2'} ${isMobile ? '' : 'gap-6 sm:gap-8 lg:gap-10 xl:gap-12'} items-center ${isMobile ? 'h-full py-0' : 'min-h-[70vh] sm:min-h-[75vh] lg:min-h-[80vh]'}`}>
           
           {/* Content Container */}
-          <div className={`${isMobile ? 'w-full text-center space-y-4 -mt-[12rem]' : 'space-y-4 sm:space-y-6 lg:space-y-8 text-center lg:text-left'}`}>
+          <div className={`${isMobile ? 'w-full text-center space-y-4 -mt-[14.5rem] mx-auto max-w-[100vw] overflow-x-hidden' : 'space-y-4 sm:space-y-6 lg:space-y-8 text-center lg:text-left'}`}>
             {/* Brand Badge - Mobile */}
             {isMobile && (
               <motion.div
@@ -253,9 +253,6 @@ const UltraHero = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.2 }}
               >
-                <div className="font-sans text-[#b98839] tracking-[4px] font-semibold text-[0.95rem] mb-1">
-                  BEXY FLOWERS
-                </div>
                 <div className="font-sans text-[#b98839] text-xs font-light">
                   Luxury Floral Boutique
                 </div>
@@ -275,7 +272,122 @@ const UltraHero = () => {
                }}
                style={{ willChange: shouldReduceMotion || isMobile ? "auto" : "transform, opacity" }}
              >
-               {/* Main Title */}
+                   {/* Gold Arc - Mobile Only */}
+                   {isMobile && (
+                     <motion.div
+                       className="block w-[320px] h-[32px] mx-auto my-4 max-w-full"
+                       style={{ transformOrigin: 'center' }}
+                       initial={{ opacity: 0, y: 6, scaleX: 0.95 }}
+                       animate={{ opacity: 1, y: 0, scaleX: 1 }}
+                       transition={{ duration: 0.8, delay: 0.6 }}
+                     >
+                       <svg 
+                         width="100%" 
+                         height="100%" 
+                         viewBox="0 0 320 32" 
+                         fill="none" 
+                         xmlns="http://www.w3.org/2000/svg"
+                         className="mx-auto"
+                         style={{ filter: 'drop-shadow(0 2px 8px rgba(185,136,57,0.3))' }}
+                       >
+                         {/* Main elegant brush stroke arc */}
+                         <path 
+                           d="M20 22 Q80 8, 160 6 T300 22" 
+                           stroke="url(#goldGradient)" 
+                           strokeWidth="3" 
+                           fill="none"
+                           strokeLinecap="round"
+                           strokeLinejoin="round"
+                           opacity="0.95"
+                         />
+                         {/* Subtle secondary stroke for depth */}
+                         <path 
+                           d="M25 24 Q85 10, 160 8 T295 24" 
+                           stroke="#d4a574" 
+                           strokeWidth="1.5" 
+                           fill="none"
+                           strokeLinecap="round"
+                           strokeLinejoin="round"
+                           opacity="0.5"
+                         />
+                         {/* Accent highlights */}
+                         <path 
+                           d="M30 23 Q90 11, 160 9 T290 23" 
+                           stroke="#f0d9b5" 
+                           strokeWidth="0.8" 
+                           fill="none"
+                           strokeLinecap="round"
+                           strokeLinejoin="round"
+                           opacity="0.3"
+                         />
+                         
+                         {/* Decorative Gold Flowers Along Arc */}
+                         {/* Left flower */}
+                         <g transform="translate(60, 12)" opacity="0.8">
+                           <circle cx="0" cy="0" r="1.5" fill="#d4a574"/>
+                           <circle cx="-2" cy="0" r="1.2" fill="#b98839"/>
+                           <circle cx="2" cy="0" r="1.2" fill="#b98839"/>
+                           <circle cx="0" cy="-2" r="1.2" fill="#b98839"/>
+                           <circle cx="0" cy="2" r="1.2" fill="#b98839"/>
+                           <circle cx="-1.4" cy="-1.4" r="0.8" fill="#f0d9b5"/>
+                           <circle cx="1.4" cy="-1.4" r="0.8" fill="#f0d9b5"/>
+                           <circle cx="-1.4" cy="1.4" r="0.8" fill="#f0d9b5"/>
+                           <circle cx="1.4" cy="1.4" r="0.8" fill="#f0d9b5"/>
+                         </g>
+                         
+                         {/* Center flower (larger) */}
+                         <g transform="translate(160, 6)" opacity="0.9">
+                           <circle cx="0" cy="0" r="2" fill="#d4a574"/>
+                           <circle cx="-2.5" cy="0" r="1.5" fill="#b98839"/>
+                           <circle cx="2.5" cy="0" r="1.5" fill="#b98839"/>
+                           <circle cx="0" cy="-2.5" r="1.5" fill="#b98839"/>
+                           <circle cx="0" cy="2.5" r="1.5" fill="#b98839"/>
+                           <circle cx="-1.8" cy="-1.8" r="1" fill="#f0d9b5"/>
+                           <circle cx="1.8" cy="-1.8" r="1" fill="#f0d9b5"/>
+                           <circle cx="-1.8" cy="1.8" r="1" fill="#f0d9b5"/>
+                           <circle cx="1.8" cy="1.8" r="1" fill="#f0d9b5"/>
+                         </g>
+                         
+                         {/* Right flower */}
+                         <g transform="translate(260, 12)" opacity="0.8">
+                           <circle cx="0" cy="0" r="1.5" fill="#d4a574"/>
+                           <circle cx="-2" cy="0" r="1.2" fill="#b98839"/>
+                           <circle cx="2" cy="0" r="1.2" fill="#b98839"/>
+                           <circle cx="0" cy="-2" r="1.2" fill="#b98839"/>
+                           <circle cx="0" cy="2" r="1.2" fill="#b98839"/>
+                           <circle cx="-1.4" cy="-1.4" r="0.8" fill="#f0d9b5"/>
+                           <circle cx="1.4" cy="-1.4" r="0.8" fill="#f0d9b5"/>
+                           <circle cx="-1.4" cy="1.4" r="0.8" fill="#f0d9b5"/>
+                           <circle cx="1.4" cy="1.4" r="0.8" fill="#f0d9b5"/>
+                         </g>
+                         
+                         {/* Small accent flowers */}
+                         <g transform="translate(110, 9)" opacity="0.6">
+                           <circle cx="0" cy="0" r="1" fill="#d4a574"/>
+                           <circle cx="-1.2" cy="0" r="0.7" fill="#b98839"/>
+                           <circle cx="1.2" cy="0" r="0.7" fill="#b98839"/>
+                           <circle cx="0" cy="-1.2" r="0.7" fill="#b98839"/>
+                           <circle cx="0" cy="1.2" r="0.7" fill="#b98839"/>
+                         </g>
+                         
+                         <g transform="translate(210, 9)" opacity="0.6">
+                           <circle cx="0" cy="0" r="1" fill="#d4a574"/>
+                           <circle cx="-1.2" cy="0" r="0.7" fill="#b98839"/>
+                           <circle cx="1.2" cy="0" r="0.7" fill="#b98839"/>
+                           <circle cx="0" cy="-1.2" r="0.7" fill="#b98839"/>
+                           <circle cx="0" cy="1.2" r="0.7" fill="#b98839"/>
+                         </g>
+                         
+                         <defs>
+                           <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                             <stop offset="0%" stopColor="#b98839" stopOpacity="0.6" />
+                             <stop offset="50%" stopColor="#d4a574" stopOpacity="0.95" />
+                             <stop offset="100%" stopColor="#b98839" stopOpacity="0.6" />
+                           </linearGradient>
+                         </defs>
+                       </svg>
+                     </motion.div>
+                   )}
                <motion.h1 
                  className={`${isMobile ? 'font-luxury text-[clamp(1.6rem,7vw,2.6rem)]' : 'font-luxury text-3xl md:text-4xl lg:text-5xl'} font-bold mb-6 text-black relative uppercase`}
                  initial={{ opacity: 0, y: 30 }}
