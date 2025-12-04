@@ -106,7 +106,7 @@ const BouquetCard = memo(({
           <img
             src={bouquet.image}
             alt={bouquet.name}
-            className="w-full h-80 object-cover transition-transform duration-500 ease-out"
+            className="w-full h-52 sm:h-64 lg:h-80 object-cover transition-transform duration-500 ease-out"
             loading="lazy"
             decoding="async"
             draggable={false}
@@ -204,9 +204,9 @@ const BouquetCard = memo(({
         </div>
 
         {/* Info Section */}
-        <div className="p-6 relative z-10">
+        <div className="p-4 sm:p-6 relative z-10">
           {/* Title */}
-          <h2 className="font-serif font-bold text-gray-900 text-2xl">
+          <h2 className="font-serif font-bold text-gray-900 text-lg sm:text-xl">
             {bouquet.name}
           </h2>
           
@@ -222,12 +222,12 @@ const BouquetCard = memo(({
           </div>
 
           {/* Description */}
-          <p className="text-gray-600 leading-relaxed text-[15px] line-clamp-2">
+          <p className="text-gray-600 leading-relaxed text-xs sm:text-[15px] line-clamp-2">
             {bouquet.description}
           </p>
 
           {/* Tags */}
-          <div className="flex gap-2 mt-4">
+          <div className="flex gap-1.5 sm:gap-2 mt-3 sm:mt-4 flex-wrap">
             {tags.map((tag, tagIndex) => (
               <span
                 key={tagIndex}
@@ -246,10 +246,10 @@ const BouquetCard = memo(({
           <div className="w-full border-t border-gray-200/70 my-5"></div>
 
           {/* Price and Add to Cart */}
-          <div className="flex items-end justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 sm:gap-4">
             <div>
               <span 
-                className="text-3xl font-bold"
+                className="text-2xl sm:text-3xl font-bold"
                 style={{
                   backgroundImage: 'linear-gradient(90deg, #B7893C 0%, #E7D4A8 100%)',
                   backgroundClip: 'text',
@@ -264,7 +264,7 @@ const BouquetCard = memo(({
             </div>
 
             <button
-              className="w-44 h-12 rounded-xl font-semibold text-white flex items-center justify-center gap-2 relative overflow-hidden transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+              className="w-full sm:w-44 h-11 sm:h-12 rounded-xl font-semibold text-white flex items-center justify-center gap-2 relative overflow-hidden transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] text-sm sm:text-base"
               style={{
                 background: 'linear-gradient(90deg, #B88A44 0%, #F6E3B5 100%)',
                 boxShadow: isHovered ? '0 6px 20px rgba(194, 154, 67, 0.4)' : '0 4px 12px rgba(184, 138, 68, 0.3)'
