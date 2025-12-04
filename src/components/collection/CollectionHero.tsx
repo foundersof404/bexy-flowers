@@ -39,12 +39,6 @@ const CollectionHeroComponent = () => {
     });
   }, [isMobile, prefersReducedMotion, shouldReduceMotion]);
 
-  const heroHighlights = [
-    { value: "150+", label: "Signature Arrangements" },
-    { value: "24/7", label: "Concierge Support" },
-    { value: "20+", label: "Curated Themes" }
-  ];
-
   return (
     <section 
       ref={heroRef}
@@ -183,37 +177,7 @@ const CollectionHeroComponent = () => {
           </motion.p>
         </motion.div>
 
-        <motion.div 
-          className="mt-10 grid sm:grid-cols-3 gap-4 sm:gap-6 max-w-5xl mx-auto"
-          initial="hidden"
-          animate="show"
-          variants={{
-            hidden: {},
-            show: {
-              transition: { staggerChildren: 0.15, delayChildren: 0.6 }
-            }
-          }}
-        >
-          {heroHighlights.map((item) => (
-            <motion.div
-              key={item.label}
-              className="relative rounded-3xl border border-[#e8d8b5] bg-white/90 backdrop-blur-lg px-6 py-5 text-left shadow-[0_18px_45px_rgba(0,0,0,0.08)]"
-              variants={{
-                hidden: { opacity: 0, y: 30 },
-                show: { opacity: 1, y: 0 }
-              }}
-            >
-              <div className="text-3xl font-luxury text-slate-900 mb-2">{item.value}</div>
-              <div className="text-sm uppercase tracking-[0.35em] text-slate-500">{item.label}</div>
-              <motion.div 
-                className="absolute inset-0 rounded-3xl pointer-events-none"
-                animate={{ opacity: [0.1, 0.3, 0.1] }}
-                transition={{ duration: 6, repeat: Infinity }}
-                style={{ border: '1px solid rgba(199,158,72,0.25)' }}
-              />
-            </motion.div>
-          ))}
-        </motion.div>
+        {/* Stats moved to end of Collection page for better layout & performance */}
       </div>
     </section>
   );

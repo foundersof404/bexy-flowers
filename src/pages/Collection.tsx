@@ -9,6 +9,7 @@ import { FeaturedCarousel } from "@/components/collection/FeaturedCarousel";
 import { ProductModal } from "@/components/collection/ProductModal";
 import Footer from "@/components/Footer";
 import { FloatingBackground } from "@/components/collection/FloatingBackground";
+import { CollectionStats } from "@/components/collection/CollectionStats";
 import BackToTop from "@/components/BackToTop";
 import LazySection from "@/components/LazySection";
 import type { Bouquet } from "@/types/bouquet";
@@ -145,7 +146,10 @@ const Collection = () => {
           bouquets={featuredBouquets}
           onBouquetClick={handleBouquetClick}
         />
-        
+
+        {/* Global stats for the collection (moved from hero) */}
+        <CollectionStats />
+
         {/* Footer */}
         <LazySection rootMargin="600px 0px">
           <Suspense fallback={null}>

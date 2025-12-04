@@ -7,10 +7,12 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import heroBackground from '@/assets/hero-bg.jpg';
 import { useIsMobile } from '@/hooks/use-mobile';
 import logoImage from '/assets/bexy-flowers-logo.png';
+import { useNavigate } from 'react-router-dom';
 
 gsap.registerPlugin(ScrollTrigger);
 
 const UltraHero = () => {
+  const navigate = useNavigate();
   const heroRef = useRef<HTMLElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const subtitleRef = useRef<HTMLParagraphElement>(null);
@@ -393,8 +395,9 @@ const UltraHero = () => {
                
                {/* Mobile CTA Button - Before subtitle */}
               {isMobile && (
-                <motion.a
-                  href="/collection"
+                <motion.button
+                  type="button"
+                  onClick={() => navigate('/collection')}
                   className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[rgba(23,23,23,0.95)] via-[rgba(38,38,38,0.85)] to-[rgba(23,23,23,0.95)] text-white rounded-full font-semibold tracking-[0.08em] shadow-[0_10px_22px_rgba(12,12,12,0.25)] transition-all duration-200 border border-white/10 mx-auto mb-6 w-[55%] max-w-[220px]"
                   initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -411,7 +414,7 @@ const UltraHero = () => {
                   <span className="inline-flex w-5 h-5 rounded-full items-center justify-center text-[0.85rem] bg-gradient-to-r from-[rgba(185,136,57,0.95)] to-[rgba(199,158,72,0.95)] text-white shadow-[0_2px_6px_rgba(185,136,57,0.35)]">
                     →
                   </span>
-                </motion.a>
+                </motion.button>
               )}
                
                {/* Subtitle with elegant reveal */}
