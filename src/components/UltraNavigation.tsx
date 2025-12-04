@@ -1,8 +1,7 @@
-import { useEffect, useRef, useState, useMemo } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { 
   ShoppingCart, 
@@ -21,11 +20,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/contexts/CartContext';
 import { useFavorites } from '@/contexts/FavoritesContext';
-import { useFlyingHeart } from '@/contexts/FlyingHeartContext';
 import CartDashboard from '@/components/cart/CartDashboard';
 import logoImage from '/assets/bexy-flowers-logo.png';
-
-gsap.registerPlugin(ScrollTrigger);
 
 // WhatsApp Icon Component
 const WhatsAppIcon = ({ className }: { className?: string }) => (
@@ -131,79 +127,23 @@ const UltraNavigation = () => {
   const logoRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const { getTotalItems } = useCart();
   const { getTotalFavorites } = useFavorites();
-  const { navHeartPulse } = useFlyingHeart();
   const cartItems = getTotalItems();
   const favoritesCount = getTotalFavorites();
   const isMobile = useIsMobile();
   const shouldReduceMotion = useReducedMotion();
-  
-  const prefersReducedMotion = useMemo(() => 
-    typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches,
-    []
-  );
 
   useEffect(() => {
     const nav = navRef.current;
     const logo = logoRef.current;
 
     if (nav && logo) {
-      // Initial logo animation - Removed as per request, keeping it static
+      // Ensure logo is static and nav uses CSS-driven transparency/blur only.
       gsap.set(logo, { scale: 1, rotation: 0 });
-
-      // Set initial transparent background with blur
-      gsap.set(nav, {
-        backgroundColor: "rgba(255, 255, 255, 0.02)", // Transparent
-        backdropFilter: "blur(12px)", // Strong blur
-        boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
-        immediateRender: true
-      });
-
-      // Simplified scroll effect - Maintain transparency but increase blur/border
-      let ticking = false;
-      const handleScroll = () => {
-        if (!ticking) {
-          window.requestAnimationFrame(() => {
-            const scrolled = window.scrollY > 50;
-            setIsScrolled(scrolled);
-            
-            if (nav) {
-              // Keep it transparent but add strong blur on scroll
-              nav.style.backgroundColor = scrolled 
-                ? "rgba(255, 255, 255, 0.15)" // Semi-transparent to show blur
-                : "rgba(255, 255, 255, 0.02)";
-              nav.style.backdropFilter = "blur(25px)"; // Consistent strong blur
-              nav.style.webkitBackdropFilter = "blur(25px)"; // Safari support
-              nav.style.boxShadow = scrolled 
-                ? "0 8px 32px rgba(0, 0, 0, 0.1)"
-                : "0 4px 30px rgba(0, 0, 0, 0.05)";
-              nav.style.borderBottom = scrolled 
-                ? "1px solid rgba(255, 255, 255, 0.2)"
-                : "1px solid rgba(255, 255, 255, 0.05)";
-            }
-            
-            ticking = false;
-          });
-          ticking = true;
-        }
-      };
-       
-       window.addEventListener('scroll', handleScroll, { passive: true });
-       
-       // Initial call
-       handleScroll();
-
-      // Logo hover effect - Removed movement, only glow effect via CSS
-      
-      return () => {
-        window.removeEventListener('scroll', handleScroll);
-        ScrollTrigger.getAll().forEach(trigger => trigger.kill());
-      };
     }
-  }, [isMobile, prefersReducedMotion, shouldReduceMotion]);
+  }, [isMobile, shouldReduceMotion]);
 
   const handleMenuToggle = () => {
     setIsMenuOpen(!isMenuOpen);
