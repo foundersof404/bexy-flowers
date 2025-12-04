@@ -7,18 +7,26 @@ export default {
   theme: {
     container: {
       center: true,
-      padding: "2rem",
+      /**
+       * Mobile-first container padding – keeps content comfortably inside
+       * the viewport from 320px upwards while preserving desktop spacing.
+       */
+      padding: {
+        DEFAULT: "1rem",
+        sm: "1.25rem",
+        md: "2rem",
+      },
       screens: {
         "2xl": "1400px",
       },
     },
     screens: {
-      'xs': '475px',
-      'sm': '640px',
-      'md': '768px',
-      'lg': '1024px',
-      'xl': '1280px',
-      '2xl': '1536px',
+      xs: "475px",
+      sm: "640px",
+      md: "768px",
+      lg: "1024px",
+      xl: "1280px",
+      "2xl": "1536px",
     },
     extend: {
       fontFamily: {
@@ -217,8 +225,8 @@ export default {
         "accordion-up": "accordion-up 0.2s ease-out",
         "fade-in": "fade-in 0.6s ease-out",
         "slide-up": "slide-up 0.6s ease-out",
-        "float": "float 6s ease-in-out infinite",
-        "glow": "glow 2s ease-in-out infinite alternate",
+        float: "float 6s ease-in-out infinite",
+        glow: "glow 2s ease-in-out infinite alternate",
         "particle-float": "particle-float 8s linear infinite",
         "tilt-3d": "tilt-3d 0.6s cubic-bezier(0.23, 1, 0.32, 1)",
         "scale-in-3d": "scale-in-3d 0.8s cubic-bezier(0.23, 1, 0.32, 1)",
@@ -230,5 +238,13 @@ export default {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [
+    require("tailwindcss-animate"),
+    // Better responsive typography & content defaults
+    require("@tailwindcss/typography"),
+    // Helpful for media that must keep its aspect ratio on all breakpoints
+    require("@tailwindcss/aspect-ratio"),
+    // Useful for safely clamping overflowing copy on small screens
+    require("@tailwindcss/line-clamp"),
+  ],
 } satisfies Config;
