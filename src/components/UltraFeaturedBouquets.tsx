@@ -219,7 +219,7 @@ const UltraFeaturedBouquets = () => {
       
     <section 
       ref={sectionRef}
-        className="py-24 px-4 relative overflow-hidden"
+        className="py-12 sm:py-16 md:py-20 lg:py-24 px-3 sm:px-4 md:px-6 relative overflow-hidden"
       data-section="signature-collection"
       style={{
           background: '#fff',
@@ -228,7 +228,7 @@ const UltraFeaturedBouquets = () => {
       >
       <div className="max-w-7xl mx-auto relative z-10">
         <motion.div
-          className="text-center mb-8 relative"
+          className="text-center mb-6 sm:mb-8 relative"
           initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, ease: [0.23, 1, 0.32, 1] }}
@@ -236,7 +236,7 @@ const UltraFeaturedBouquets = () => {
         >
           {/* Luxury Typography with Gold Accent */}
           <motion.h2 
-            className="font-luxury text-4xl sm:text-6xl md:text-8xl font-bold mb-6 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 bg-clip-text text-transparent relative"
+            className="font-luxury text-2xl sm:text-3xl md:text-5xl lg:text-6xl xl:text-8xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 bg-clip-text text-transparent relative px-2"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
@@ -249,23 +249,26 @@ const UltraFeaturedBouquets = () => {
             SIGNATURE COLLECTION
             {/* Animated Gold Underline */}
             <motion.div 
-              className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 h-1 bg-gradient-to-r from-amber-400 to-yellow-500 rounded-full"
+              className="absolute -bottom-1 sm:-bottom-2 left-1/2 transform -translate-x-1/2 h-0.5 sm:h-1 bg-gradient-to-r from-amber-400 to-yellow-500 rounded-full"
               initial={{ width: 0 }}
-              whileInView={{ width: '200px' }}
+              whileInView={{ width: '120px' }}
               transition={{ duration: 1.2, delay: 0.8, ease: "easeOut" }}
               viewport={{ once: true }}
+              style={{
+                width: 'clamp(100px, 30vw, 200px)'
+              }}
             />
           </motion.h2>
 
           {/* Enhanced Decorative Elements */}
-          <div className="relative mb-8">
-            <div className="w-40 h-0.5 bg-gradient-to-r from-transparent via-amber-500/60 to-transparent mx-auto" />
-            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-amber-500 rotate-45 shadow-lg shadow-amber-500/50" />
+          <div className="relative mb-4 sm:mb-6 md:mb-8">
+            <div className="w-24 sm:w-32 md:w-40 h-0.5 bg-gradient-to-r from-transparent via-amber-500/60 to-transparent mx-auto" />
+            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-2 h-2 sm:w-3 sm:h-3 bg-amber-500 rotate-45 shadow-lg shadow-amber-500/50" />
           </div>
 
           {/* Enhanced Description */}
           <motion.p 
-            className="font-body text-lg md:text-xl text-slate-600 max-w-4xl mx-auto leading-relaxed font-light"
+            className="font-body text-sm sm:text-base md:text-lg lg:text-xl text-slate-600 max-w-4xl mx-auto leading-relaxed font-light px-2"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
@@ -279,10 +282,10 @@ const UltraFeaturedBouquets = () => {
           <div 
             ref={containerRef}
             className="w-full"
-            style={{ marginTop: '2.5em' }}
+            style={{ marginTop: '1.5em' }}
           >
             <div 
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto px-4 w-full"
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8 max-w-6xl mx-auto px-2 sm:px-4 w-full"
             >
           {bouquets.map((bouquet, index) => {
             // Define consistent gold color for all cards
@@ -351,11 +354,11 @@ const UltraFeaturedBouquets = () => {
                  >
                      {/* Image */}
                      <div 
-                       className="imgBox h-80 sm:h-[clamp(8rem,20vw,18.75rem)]"
+                       className="imgBox h-64 sm:h-72 md:h-80 lg:h-[clamp(8rem,20vw,18.75rem)]"
                        style={{
                          position: 'relative',
                          width: '100%',
-                         borderRadius: '1.25rem 1.25rem 0 0',
+                         borderRadius: '1rem 1rem 0 0',
                          overflow: 'hidden'
                        }}
                      >
@@ -439,28 +442,28 @@ const UltraFeaturedBouquets = () => {
 
                      {/* Content section */}
                      <div 
-                       className="content p-6"
+                       className="content p-4 sm:p-5 md:p-6"
                        style={{
-                         borderRadius: '0 0 1.25rem 1.25rem'
+                         borderRadius: '0 0 1rem 1rem'
                        }}
                      >
                     <h3 
                       style={{
                         textTransform: 'capitalize',
-                        fontSize: 'clamp(1.25rem, 2.5vw, 1.8rem)',
+                        fontSize: 'clamp(1rem, 4vw, 1.8rem)',
                         color: '#111',
                         fontWeight: '700',
                         lineHeight: '1.2',
-                        marginBottom: '0.5rem'
+                        marginBottom: '0.375rem'
                       }}
                     >
                     {bouquet.name}
                   </h3>
                     <p 
                       style={{
-                        marginBottom: '1rem',
+                        marginBottom: '0.75rem',
                         color: '#565656',
-                        fontSize: 'clamp(0.95rem, 1.5vw, 1rem)',
+                        fontSize: 'clamp(0.875rem, 2.5vw, 1rem)',
                         lineHeight: '1.5',
                         display: '-webkit-box',
                         WebkitLineClamp: 2,
@@ -491,8 +494,8 @@ const UltraFeaturedBouquets = () => {
                              background: '#f0f0f0',
                              color: tag.color,
                              fontWeight: '700',
-                             fontSize: '0.75rem',
-                             padding: '0.375rem 0.75rem',
+                             fontSize: 'clamp(0.625rem, 2vw, 0.75rem)',
+                             padding: '0.25rem 0.5rem',
                              borderRadius: '0.25rem',
                              whiteSpace: 'nowrap',
                              letterSpacing: '0.05em'
@@ -512,7 +515,7 @@ const UltraFeaturedBouquets = () => {
         </div>
 
         <motion.div
-          className="text-center mt-16"
+          className="text-center mt-8 sm:mt-12 md:mt-16 px-2"
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.4 }}
@@ -520,17 +523,18 @@ const UltraFeaturedBouquets = () => {
         >
           <motion.button
          className="
-         inline-flex items-center justify-center gap-3
-         px-12 py-4
+         inline-flex items-center justify-center gap-2 sm:gap-3
+         px-6 sm:px-8 md:px-12 py-3 sm:py-3.5 md:py-4
          bg-gradient-to-r from-[rgb(160,120,40)] via-[rgb(199,158,72)] to-[rgb(240,210,150)]
          text-white
-         rounded-2xl
-         font-semibold text-sm tracking-wide uppercase
+         rounded-xl sm:rounded-2xl
+         font-semibold text-xs sm:text-sm tracking-wide uppercase
          shadow-md shadow-yellow-600/30
          transition-all duration-300 ease-out
          hover:shadow-lg hover:shadow-yellow-500/40 hover:scale-[1.02]
          active:scale-[0.98]
          group
+         w-full sm:w-auto
        "
        whileHover={{ scale: 1.03 }}
        whileTap={{ scale: 0.97 }}

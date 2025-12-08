@@ -108,7 +108,7 @@ const Collection = () => {
         />
         
         {/* Main Bouquet Grid - No Gaps */}
-        <section id="main-collection-grid" className="py-20 px-4 sm:px-6 lg:px-8 w-full">
+        <section id="main-collection-grid" className="py-12 md:py-16 lg:py-20 px-3 sm:px-4 md:px-6 lg:px-8 w-full">
           <div className="max-w-7xl mx-auto w-full">
             <AnimatePresence mode="wait">
               <BouquetGrid 

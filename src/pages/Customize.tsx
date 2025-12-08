@@ -230,13 +230,13 @@ const CustomizeSection = React.forwardRef<HTMLDivElement, { title: string; child
     ref={ref}
     initial={{ opacity: 0, y: 50 }}
     animate={isActive ? { opacity: 1, y: 0, height: 'auto' } : { opacity: 0.5, y: 0, height: 'auto' }}
-    className={`relative group bg-white/90 backdrop-blur-sm rounded-3xl p-[1px] mb-8 transition-all duration-500 ${isActive ? 'shadow-[0_35px_120px_rgba(0,0,0,0.08)]' : 'shadow-none'} ${isActive ? 'pointer-events-auto' : 'pointer-events-none'}`}
+    className={`relative group bg-white/90 backdrop-blur-sm rounded-2xl sm:rounded-3xl p-[1px] mb-4 sm:mb-6 md:mb-8 transition-all duration-500 ${isActive ? 'shadow-[0_35px_120px_rgba(0,0,0,0.08)]' : 'shadow-none'} ${isActive ? 'pointer-events-auto' : 'pointer-events-none'}`}
     style={{
       border: '1px solid rgba(199, 158, 72, 0.15)',
       overflow: 'hidden'
     }}
   >
-    <div className={`relative rounded-3xl p-8 border ${isActive ? 'border-white/40 bg-white' : 'border-transparent bg-white/70'} transition-all`}>
+    <div className={`relative rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 border ${isActive ? 'border-white/40 bg-white' : 'border-transparent bg-white/70'} transition-all`}>
       <motion.div
         className="absolute inset-0 opacity-0 group-hover:opacity-100 pointer-events-none"
         initial={{ opacity: 0 }}
@@ -247,9 +247,9 @@ const CustomizeSection = React.forwardRef<HTMLDivElement, { title: string; child
         }}
       />
       <div className={`relative z-10 ${isActive ? '' : 'opacity-70'}`}>
-        <h2 className="text-3xl font-luxury font-bold mb-6 text-[#C79E48] border-b border-[#C79E48]/10 pb-4 flex items-center gap-3">
+        <h2 className="text-xl sm:text-2xl md:text-3xl font-luxury font-bold mb-4 sm:mb-6 text-[#C79E48] border-b border-[#C79E48]/10 pb-3 sm:pb-4 flex items-center gap-2 sm:gap-3">
           {title}
-          {!isActive && <Check className="w-6 h-6 text-green-500 ml-auto" />}
+          {!isActive && <Check className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-green-500 ml-auto" />}
         </h2>
         {children}
       </div>
@@ -565,7 +565,7 @@ const Customize: React.FC = () => {
       </div>
 
       {/* Header */}
-      <div className={`relative ${isMobile ? 'pt-24' : 'pt-32'} pb-20 px-6 overflow-hidden`}>
+      <div className={`relative ${isMobile ? 'pt-20 sm:pt-24' : 'pt-28 md:pt-32'} pb-12 sm:pb-16 md:pb-20 px-4 sm:px-6 overflow-hidden`}>
         <motion.div
           className="absolute inset-0"
           initial={{ scale: 1.08, opacity: 0 }}
@@ -582,14 +582,14 @@ const Customize: React.FC = () => {
         <div className="absolute inset-0 bg-gradient-to-b from-white/95 via-white/85 to-white/95" />
 
         <motion.div
-          className="relative z-10 text-center"
+          className="relative z-10 text-center px-2"
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
         >
           {/* Luxury Typography with Gold Accent */}
           <motion.h1 
-            className="font-luxury text-6xl md:text-8xl font-bold mb-6 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 bg-clip-text text-transparent relative"
+            className="font-luxury text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-8xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 bg-clip-text text-transparent relative"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
@@ -601,21 +601,21 @@ const Customize: React.FC = () => {
             Design Your Masterpiece
             {/* Animated Gold Underline */}
             <motion.div 
-              className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 h-1 bg-gradient-to-r from-[#C79E48] to-[#D4A85A] rounded-full"
+              className="absolute -bottom-1 sm:-bottom-2 left-1/2 transform -translate-x-1/2 h-0.5 sm:h-1 bg-gradient-to-r from-[#C79E48] to-[#D4A85A] rounded-full"
               initial={{ width: 0 }}
-              animate={{ width: '200px' }}
+              animate={{ width: 'clamp(120px, 30vw, 200px)' }}
               transition={{ duration: 1.2, delay: 0.8, ease: "easeOut" }}
             />
           </motion.h1>
 
           {/* Enhanced Decorative Elements */}
-          <div className="relative mb-6">
-            <div className="w-40 h-0.5 bg-gradient-to-r from-transparent via-[#C79E48]/60 to-transparent mx-auto" />
-            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-[#C79E48] rotate-45 shadow-lg shadow-[#C79E48]/50" />
+          <div className="relative mb-4 sm:mb-6">
+            <div className="w-24 sm:w-32 md:w-40 h-0.5 bg-gradient-to-r from-transparent via-[#C79E48]/60 to-transparent mx-auto" />
+            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-2 h-2 sm:w-3 sm:h-3 bg-[#C79E48] rotate-45 shadow-lg shadow-[#C79E48]/50" />
           </div>
 
           <motion.p 
-            className="font-body text-lg md:text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed font-light"
+            className="font-body text-sm sm:text-base md:text-lg lg:text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed font-light px-2"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
@@ -626,21 +626,21 @@ const Customize: React.FC = () => {
       </div>
 
       {/* Animated Step Timeline */}
-      <div className="relative z-10 -mt-8 pb-16 px-6">
+      <div className="relative z-10 -mt-6 sm:-mt-8 pb-12 sm:pb-16 px-4 sm:px-6">
         <motion.div 
-          className="max-w-6xl mx-auto bg-white/80 backdrop-blur-md border border-[#C79E48]/15 rounded-3xl p-6 md:p-8 shadow-[0_25px_80px_rgba(0,0,0,0.08)]"
+          className="max-w-6xl mx-auto bg-white/80 backdrop-blur-md border border-[#C79E48]/15 rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 shadow-[0_25px_80px_rgba(0,0,0,0.08)]"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
         >
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
             <div>
-              <p className="text-sm uppercase tracking-[0.3em] text-slate-400">Creative journey</p>
-              <p className="text-2xl font-luxury font-semibold text-slate-800">You're {progressPercent}% ready</p>
+              <p className="text-xs sm:text-sm uppercase tracking-[0.2em] sm:tracking-[0.3em] text-slate-400">Creative journey</p>
+              <p className="text-lg sm:text-xl md:text-2xl font-luxury font-semibold text-slate-800">You're {progressPercent}% ready</p>
             </div>
-            <div className="text-right">
-              <p className="text-sm text-slate-500">Completed steps</p>
-              <p className="text-lg font-semibold text-[#C79E48]">{completedSteps} / {steps.length}</p>
+            <div className="text-left md:text-right">
+              <p className="text-xs sm:text-sm text-slate-500">Completed steps</p>
+              <p className="text-base sm:text-lg font-semibold text-[#C79E48]">{completedSteps} / {steps.length}</p>
             </div>
           </div>
 
@@ -683,31 +683,31 @@ const Customize: React.FC = () => {
         </motion.div>
       </div>
 
-      <div className="max-w-[1600px] mx-auto px-6 pb-20 relative z-10">
-        <div className="grid lg:grid-cols-12 gap-10 items-start">
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 pb-12 sm:pb-16 md:pb-20 relative z-10">
+        <div className="grid lg:grid-cols-12 gap-6 sm:gap-8 md:gap-10 items-start">
           
           {/* Left Column: Customization Steps */}
-          <div className="lg:col-span-7 space-y-8">
+          <div className="lg:col-span-7 space-y-4 sm:space-y-6 md:space-y-8">
             
             {/* Step 1: Package */}
             <CustomizeSection title="1. Choose Presentation" isActive={true} ref={packageRef}>
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                 {packages.map((pkg) => (
                   <button
                     key={pkg.id}
                     onClick={() => handlePackageSelect(pkg)}
-                    className={`p-6 rounded-2xl border-2 transition-all flex flex-col items-center text-center gap-4 hover:scale-[1.02] ${
+                    className={`p-4 sm:p-6 rounded-xl sm:rounded-2xl border-2 transition-all flex flex-col items-center text-center gap-3 sm:gap-4 hover:scale-[1.02] ${
                       selectedPackage?.id === pkg.id 
                         ? 'border-[#C79E48] bg-[#C79E48]/5 shadow-lg' 
                         : 'border-gray-100 hover:border-[#C79E48]/50'
                     }`}
                   >
-                    <div className={`w-16 h-16 rounded-full flex items-center justify-center ${selectedPackage?.id === pkg.id ? 'bg-[#C79E48] text-white' : 'bg-gray-100 text-gray-400'}`}>
-                      <pkg.icon className="w-8 h-8" />
+                    <div className={`w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center ${selectedPackage?.id === pkg.id ? 'bg-[#C79E48] text-white' : 'bg-gray-100 text-gray-400'}`}>
+                      <pkg.icon className="w-6 h-6 sm:w-8 sm:h-8" />
                     </div>
                     <div>
-                      <h3 className="font-bold text-lg">{pkg.name}</h3>
-                      <p className="text-sm text-gray-500">{pkg.description}</p>
+                      <h3 className="font-bold text-base sm:text-lg">{pkg.name}</h3>
+                      <p className="text-xs sm:text-sm text-gray-500">{pkg.description}</p>
                     </div>
                   </button>
                 ))}
@@ -718,54 +718,54 @@ const Customize: React.FC = () => {
             {selectedPackage?.type === "box" && (
               <>
                 <CustomizeSection title="2. Select Box Shape" isActive={!!selectedPackage} ref={shapeRef}>
-                  <div className="grid grid-cols-3 sm:grid-cols-5 gap-4">
+                  <div className="grid grid-cols-3 sm:grid-cols-5 gap-3 sm:gap-4">
                     {boxShapes.map((shape) => (
                       <button
                         key={shape.id}
                         onClick={() => handleShapeSelect(shape)}
-                        className={`p-4 rounded-xl border-2 transition-all flex flex-col items-center gap-2 ${
+                        className={`p-3 sm:p-4 rounded-lg sm:rounded-xl border-2 transition-all flex flex-col items-center gap-1.5 sm:gap-2 ${
                           selectedBoxShape?.id === shape.id ? 'border-[#C79E48] bg-[#C79E48]/5' : 'border-gray-100'
                         }`}
                       >
-                        <div className={`p-2 rounded-full ${selectedBoxShape?.id === shape.id ? 'bg-[#C79E48] text-white' : 'bg-gray-100'}`}>
-                          <shape.icon className="w-6 h-6" />
+                        <div className={`p-1.5 sm:p-2 rounded-full ${selectedBoxShape?.id === shape.id ? 'bg-[#C79E48] text-white' : 'bg-gray-100'}`}>
+                          <shape.icon className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
                         </div>
-                        <span className="text-sm font-medium">{shape.name}</span>
+                        <span className="text-xs sm:text-sm font-medium">{shape.name}</span>
                       </button>
                     ))}
                   </div>
                 </CustomizeSection>
 
                 <CustomizeSection title="3. Select Box Color" isActive={!!selectedBoxShape} ref={boxColorRef}>
-                  <div className="flex flex-wrap gap-4">
+                  <div className="flex flex-wrap gap-3 sm:gap-4">
                     {boxColors.map((color) => (
                       <button
                         key={color.id}
                         onClick={() => handleBoxColorSelect(color)}
-                        className={`w-16 h-16 rounded-full border-4 shadow-sm transition-transform hover:scale-110 ${selectedBoxColor?.id === color.id ? 'border-[#C79E48] ring-2 ring-[#C79E48] ring-offset-2' : 'border-white'}`}
+                        className={`w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full border-3 sm:border-4 shadow-sm transition-transform hover:scale-110 ${selectedBoxColor?.id === color.id ? 'border-[#C79E48] ring-2 ring-[#C79E48] ring-offset-1 sm:ring-offset-2' : 'border-white'}`}
                         style={{ background: color.gradient }}
                         title={color.name}
                       />
                     ))}
                   </div>
-                  {selectedBoxColor && <p className="mt-4 text-[#C79E48] font-bold">{selectedBoxColor.name} Selected</p>}
+                  {selectedBoxColor && <p className="mt-3 sm:mt-4 text-[#C79E48] font-bold text-sm sm:text-base">{selectedBoxColor.name} Selected</p>}
                 </CustomizeSection>
 
                 <CustomizeSection title="4. Choose Size" isActive={!!selectedBoxColor} ref={boxSizeRef}>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     {boxSizes.map((size) => (
                       <button
                         key={size.id}
                         onClick={() => handleSizeSelect(size)}
-                        className={`p-6 rounded-xl border-2 text-left transition-all ${
+                        className={`p-4 sm:p-5 md:p-6 rounded-lg sm:rounded-xl border-2 text-left transition-all ${
                           selectedSize?.id === size.id ? 'border-[#C79E48] bg-[#C79E48]/5' : 'border-gray-100'
                         }`}
                       >
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="font-bold text-lg">{size.name}</span>
-                          <span className="text-[#C79E48] font-bold">{size.id !== 'custom' ? `$${size.price}` : 'Custom'}</span>
+                        <div className="flex justify-between items-center mb-1.5 sm:mb-2">
+                          <span className="font-bold text-base sm:text-lg">{size.name}</span>
+                          <span className="text-[#C79E48] font-bold text-sm sm:text-base">{size.id !== 'custom' ? `$${size.price}` : 'Custom'}</span>
                         </div>
-                        <p className="text-sm text-gray-500">{size.description}</p>
+                        <p className="text-xs sm:text-sm text-gray-500">{size.description}</p>
                         {size.id === 'custom' && selectedSize?.id === 'custom' && (
                           <input
                             type="number"
@@ -773,7 +773,7 @@ const Customize: React.FC = () => {
                             value={customQty}
                             onChange={(e) => setCustomQty(parseInt(e.target.value) || 5)}
                             onClick={(e) => e.stopPropagation()}
-                            className="mt-2 w-full p-2 border rounded-lg"
+                            className="mt-2 w-full p-2 text-sm border rounded-lg"
                             placeholder="Enter quantity"
                           />
                         )}
@@ -787,15 +787,15 @@ const Customize: React.FC = () => {
             {/* Step 2: Wrap Specifics */}
             {selectedPackage?.type === "wrap" && (
               <CustomizeSection title="2. Wrap Details" isActive={!!selectedPackage} ref={wrapRef}>
-                <div className="space-y-8">
+                <div className="space-y-6 sm:space-y-8">
                   <div>
-                    <h3 className="font-bold mb-4 text-gray-700">Select Wrap Color</h3>
-                    <div className="flex flex-wrap gap-4">
+                    <h3 className="font-bold mb-3 sm:mb-4 text-gray-700 text-sm sm:text-base">Select Wrap Color</h3>
+                    <div className="flex flex-wrap gap-3 sm:gap-4">
                       {wrapColors.map((color) => (
                         <button
                           key={color.id}
                           onClick={() => handleWrapColorSelect(color)}
-                          className={`w-14 h-14 rounded-full border-4 shadow-sm transition-transform hover:scale-110 ${selectedWrapColor?.id === color.id ? 'border-[#C79E48] ring-2 ring-[#C79E48] ring-offset-2' : 'border-white'}`}
+                          className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full border-3 sm:border-4 shadow-sm transition-transform hover:scale-110 ${selectedWrapColor?.id === color.id ? 'border-[#C79E48] ring-2 ring-[#C79E48] ring-offset-1 sm:ring-offset-2' : 'border-white'}`}
                           style={{ background: color.gradient }}
                           title={color.name}
                         />
@@ -804,19 +804,19 @@ const Customize: React.FC = () => {
                   </div>
                   
                   <div>
-                    <h3 className="font-bold mb-4 text-gray-700">Select Bouquet Size</h3>
-                    <div className="grid grid-cols-2 gap-4">
+                    <h3 className="font-bold mb-3 sm:mb-4 text-gray-700 text-sm sm:text-base">Select Bouquet Size</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                       {wrapSizes.map((size) => (
                         <button
                           key={size.id}
                           onClick={() => handleSizeSelect(size)}
-                          className={`p-4 rounded-xl border-2 text-left transition-all ${
+                          className={`p-3 sm:p-4 rounded-lg sm:rounded-xl border-2 text-left transition-all ${
                             selectedSize?.id === size.id ? 'border-[#C79E48] bg-[#C79E48]/5' : 'border-gray-100'
                           }`}
                         >
                           <div className="flex justify-between items-center">
-                            <span className="font-bold">{size.name}</span>
-                            <span className="text-[#C79E48]">{size.id !== 'custom' ? `$${size.price}` : ''}</span>
+                            <span className="font-bold text-sm sm:text-base">{size.name}</span>
+                            <span className="text-[#C79E48] text-sm sm:text-base">{size.id !== 'custom' ? `$${size.price}` : ''}</span>
                           </div>
                           <p className="text-xs text-gray-500 mt-1">{size.description}</p>
                           {size.id === 'custom' && selectedSize?.id === 'custom' && (
@@ -826,7 +826,7 @@ const Customize: React.FC = () => {
                             value={customQty}
                             onChange={(e) => setCustomQty(parseInt(e.target.value) || 5)}
                             onClick={(e) => e.stopPropagation()}
-                            className="mt-2 w-full p-2 border rounded-lg"
+                            className="mt-2 w-full p-2 text-sm border rounded-lg"
                             placeholder="Qty"
                           />
                         )}
@@ -840,11 +840,11 @@ const Customize: React.FC = () => {
 
             {/* Step 5: Flowers */}
             <CustomizeSection title="Select Flowers" isActive={!!selectedSize} ref={flowersRef}>
-              <div className="mb-6 p-4 bg-[#fffbf5] border border-[#C79E48]/20 rounded-xl flex justify-between items-center">
-                <span>
+              <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-[#fffbf5] border border-[#C79E48]/20 rounded-lg sm:rounded-xl flex flex-col sm:flex-row justify-between items-center gap-2 sm:gap-0">
+                <span className="text-sm sm:text-base">
                   <span className="font-bold text-[#C79E48]">{totalFlowers}</span> / {maxFlowers} Stems Selected
                 </span>
-                <div className="w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div className="w-full sm:w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
                   <div 
                     className="h-full bg-[#C79E48] transition-all duration-300"
                     style={{ width: `${Math.min(100, (totalFlowers / maxFlowers) * 100)}%` }}
@@ -852,22 +852,22 @@ const Customize: React.FC = () => {
                 </div>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 {flowers.map((flower) => {
                   const flowerColorMap = colorQuantities[flower.id] || {};
                   const totalCount = Object.values(flowerColorMap).reduce((a, b) => a + b, 0);
                   
                   return (
-                    <div key={flower.id} className={`border rounded-xl p-4 transition-all ${totalCount > 0 ? 'border-[#C79E48] bg-[#C79E48]/5' : 'border-gray-100'}`}>
-                      <div className="flex items-center gap-4 mb-4">
-                        <img src={flower.image} alt={flower.name} className="w-16 h-16 rounded-lg object-cover shadow-sm" />
+                    <div key={flower.id} className={`border rounded-lg sm:rounded-xl p-3 sm:p-4 transition-all ${totalCount > 0 ? 'border-[#C79E48] bg-[#C79E48]/5' : 'border-gray-100'}`}>
+                      <div className="flex items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
+                        <img src={flower.image} alt={flower.name} className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-lg object-cover shadow-sm" />
                         <div>
-                          <h4 className="font-bold text-lg">{flower.name}</h4>
-                          <p className="text-[#C79E48] font-medium">${flower.price} / stem</p>
+                          <h4 className="font-bold text-base sm:text-lg">{flower.name}</h4>
+                          <p className="text-[#C79E48] font-medium text-sm sm:text-base">${flower.price} / stem</p>
                         </div>
                       </div>
                       
-                      <div className="space-y-3 pl-4 border-l-2 border-[#C79E48]/20">
+                      <div className="space-y-2 sm:space-y-3 pl-3 sm:pl-4 border-l-2 border-[#C79E48]/20">
                         {flower.colors.map((color) => {
                           const count = flowerColorMap[color.id] || 0;
                           const inputKey = `${flower.id}-${color.id}`;
@@ -920,18 +920,18 @@ const Customize: React.FC = () => {
                           };
 
                           return (
-                            <div key={color.id} className="space-y-2">
-                              <div className="flex justify-between items-center">
-                                <span className="text-sm font-luxury font-medium text-gray-700 uppercase tracking-wide">{color.name}</span>
-                                <div className="flex items-center gap-2">
+                            <div key={color.id} className="space-y-1.5 sm:space-y-2">
+                              <div className="flex justify-between items-center gap-2">
+                                <span className="text-xs sm:text-sm font-luxury font-medium text-gray-700 uppercase tracking-wide">{color.name}</span>
+                                <div className="flex items-center gap-1.5 sm:gap-2">
                                   <motion.button 
                                     onClick={() => adjustFlowerColor(flower.id, color.id, -1)}
-                                    className="w-9 h-9 rounded-full border-2 border-[#C79E48]/30 bg-white flex items-center justify-center hover:bg-[#C79E48]/10 transition-all shadow-sm"
+                                    className="w-8 h-8 sm:w-9 sm:h-9 rounded-full border-2 border-[#C79E48]/30 bg-white flex items-center justify-center hover:bg-[#C79E48]/10 transition-all shadow-sm"
                                     disabled={count === 0}
                                     whileHover={count > 0 ? { scale: 1.1, borderColor: '#C79E48' } : {}}
                                     whileTap={count > 0 ? { scale: 0.95 } : {}}
                                   >
-                                    <Minus className="w-4 h-4 text-[#C79E48]" strokeWidth={2.5} />
+                                    <Minus className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#C79E48]" strokeWidth={2.5} />
                                   </motion.button>
                                   <input
                                     type="number"
@@ -950,7 +950,7 @@ const Customize: React.FC = () => {
                                         }));
                                       }
                                     }}
-                                    className="w-16 h-9 text-center font-luxury font-semibold text-[#C79E48] border-2 border-[#C79E48]/20 rounded-lg focus:border-[#C79E48] focus:ring-2 focus:ring-[#C79E48]/20 outline-none transition-all"
+                                    className="w-14 sm:w-16 h-8 sm:h-9 text-center text-xs sm:text-sm font-luxury font-semibold text-[#C79E48] border-2 border-[#C79E48]/20 rounded-lg focus:border-[#C79E48] focus:ring-2 focus:ring-[#C79E48]/20 outline-none transition-all"
                                     style={{ 
                                       backgroundColor: count > 0 ? 'rgba(199, 158, 72, 0.05)' : 'white'
                                     }}
@@ -962,21 +962,21 @@ const Customize: React.FC = () => {
                                         scrollToSection(extrasRef);
                                       }
                                     }}
-                                    className="w-9 h-9 rounded-full bg-gradient-to-br from-[#C79E48] to-[#b08d45] text-white flex items-center justify-center hover:shadow-lg transition-all shadow-md"
+                                    className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gradient-to-br from-[#C79E48] to-[#b08d45] text-white flex items-center justify-center hover:shadow-lg transition-all shadow-md"
                                     disabled={totalFlowers >= maxFlowers}
                                     whileHover={totalFlowers < maxFlowers ? { scale: 1.1, boxShadow: '0 4px 12px rgba(199, 158, 72, 0.4)' } : {}}
                                     whileTap={totalFlowers < maxFlowers ? { scale: 0.95 } : {}}
                                   >
-                                    <Plus className="w-4 h-4" strokeWidth={2.5} />
+                                    <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" strokeWidth={2.5} />
                                   </motion.button>
                                 </div>
                               </div>
-                              <div className="flex items-center gap-2 flex-wrap">
+                              <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
                                 {quickQuantities.map((qty) => (
                                   <motion.button
                                     key={qty}
                                     onClick={() => handleQuickQuantity(qty)}
-                                    className={`px-3 py-1.5 rounded-lg border-2 text-xs font-luxury font-medium transition-all ${
+                                    className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg border-2 text-[10px] sm:text-xs font-luxury font-medium transition-all ${
                                       count === qty
                                         ? 'bg-[#C79E48] text-white border-[#C79E48] shadow-md'
                                         : 'bg-white text-[#C79E48] border-[#C79E48]/30 hover:border-[#C79E48] hover:bg-[#C79E48]/5'
@@ -1000,49 +1000,49 @@ const Customize: React.FC = () => {
 
             {/* Step 6: Accessories & Extras */}
             <CustomizeSection title="Final Touches" isActive={totalFlowers > 0} ref={extrasRef}>
-              <div className="space-y-6">
+              <div className="space-y-4 sm:space-y-6">
                 <div>
-                  <h3 className="font-bold mb-4 text-gray-700">Add Accessories</h3>
-                  <div className="grid grid-cols-2 gap-4">
+                  <h3 className="font-bold mb-3 sm:mb-4 text-gray-700 text-sm sm:text-base">Add Accessories</h3>
+                  <div className="grid grid-cols-2 gap-3 sm:gap-4">
                     {accessories.map((acc) => (
                       <button
                         key={acc.id}
                         onClick={() => toggleAccessory(acc.id)}
-                        className={`p-4 rounded-xl border-2 flex items-center gap-3 transition-all ${
+                        className={`p-3 sm:p-4 rounded-lg sm:rounded-xl border-2 flex items-center gap-2 sm:gap-3 transition-all ${
                           selectedAccessories.includes(acc.id) ? 'border-[#C79E48] bg-[#C79E48]/5' : 'border-gray-100'
                         }`}
                       >
-                        <acc.icon className={`w-5 h-5 ${selectedAccessories.includes(acc.id) ? 'text-[#C79E48]' : 'text-gray-400'}`} />
+                        <acc.icon className={`w-4 h-4 sm:w-5 sm:h-5 ${selectedAccessories.includes(acc.id) ? 'text-[#C79E48]' : 'text-gray-400'}`} />
                         <div className="text-left">
-                          <p className="font-bold text-sm">{acc.name}</p>
-                          <p className="text-xs text-gray-500">+${acc.price}</p>
+                          <p className="font-bold text-xs sm:text-sm">{acc.name}</p>
+                          <p className="text-[10px] sm:text-xs text-gray-500">+${acc.price}</p>
                         </div>
                       </button>
                     ))}
                   </div>
                 </div>
 
-                <div className="p-4 rounded-xl border border-[#C79E48]/20 bg-[#fffbf5]">
+                <div className="p-3 sm:p-4 rounded-lg sm:rounded-xl border border-[#C79E48]/20 bg-[#fffbf5]">
                   <label className="flex items-center justify-between cursor-pointer">
-                    <div className="flex items-center gap-3">
-                      <Sparkles className="w-5 h-5 text-[#C79E48]" />
-                      <span className="font-bold text-gray-700">Add Glitter on Petals</span>
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-[#C79E48]" />
+                      <span className="font-bold text-gray-700 text-sm sm:text-base">Add Glitter on Petals</span>
                     </div>
                     <div 
                       onClick={() => setWithGlitter(!withGlitter)}
-                      className={`w-12 h-6 rounded-full relative transition-colors ${withGlitter ? 'bg-[#C79E48]' : 'bg-gray-200'}`}
+                      className={`w-10 h-5 sm:w-12 sm:h-6 rounded-full relative transition-colors ${withGlitter ? 'bg-[#C79E48]' : 'bg-gray-200'}`}
                     >
-                      <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-md transition-all ${withGlitter ? 'left-7' : 'left-1'}`} />
+                      <div className={`absolute top-0.5 sm:top-1 w-4 h-4 bg-white rounded-full shadow-md transition-all ${withGlitter ? 'left-5 sm:left-7' : 'left-0.5 sm:left-1'}`} />
                     </div>
                   </label>
                 </div>
 
                 <div>
-                  <label className="block font-bold text-gray-700 mb-2">Personal Note</label>
+                  <label className="block font-bold text-gray-700 mb-2 text-sm sm:text-base">Personal Note</label>
                   <textarea
                     value={note}
                     onChange={(e) => setNote(e.target.value)}
-                    className="w-full p-4 rounded-xl border border-gray-200 focus:border-[#C79E48] focus:ring-1 focus:ring-[#C79E48] outline-none resize-none"
+                    className="w-full p-3 sm:p-4 rounded-lg sm:rounded-xl border border-gray-200 focus:border-[#C79E48] focus:ring-1 focus:ring-[#C79E48] outline-none resize-none text-sm sm:text-base"
                     placeholder="Write a sweet message..."
                     rows={3}
                   />
@@ -1054,30 +1054,30 @@ const Customize: React.FC = () => {
 
           {/* Right Column: Preview & Cart - Sticky */}
           <div className="lg:col-span-5">
-            <div className="lg:sticky lg:top-32 space-y-6">
+            <div className="lg:sticky lg:top-24 space-y-4 sm:space-y-6">
               
               {/* AI Preview Card */}
-              <div className="bg-white rounded-3xl p-6 shadow-2xl border border-[#C79E48]/20">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-2xl font-luxury font-bold text-[#C79E48]">Your Design</h3>
-                  <Wand2 className="w-6 h-6 text-[#C79E48]" />
+              <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-2xl border border-[#C79E48]/20">
+                <div className="flex items-center justify-between mb-4 sm:mb-6">
+                  <h3 className="text-xl sm:text-2xl font-luxury font-bold text-[#C79E48]">Your Design</h3>
+                  <Wand2 className="w-5 h-5 sm:w-6 sm:h-6 text-[#C79E48]" />
                 </div>
 
-                <div className="aspect-square rounded-2xl bg-gray-50 mb-6 overflow-hidden relative group">
+                <div className="aspect-square rounded-xl sm:rounded-2xl bg-gray-50 mb-4 sm:mb-6 overflow-hidden relative group">
                   {generatedImage ? (
                     <>
                       <img src={generatedImage} alt="Preview" className="w-full h-full object-cover" />
                       <button 
                         onClick={() => setGeneratedImage(null)}
-                        className="absolute top-4 right-4 bg-white/90 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute top-2 right-2 sm:top-4 sm:right-4 bg-white/90 p-1.5 sm:p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                       >
-                        <RefreshCw className="w-5 h-5 text-gray-600" />
+                        <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
                       </button>
                     </>
                   ) : (
-                    <div className="w-full h-full flex flex-col items-center justify-center text-center p-8">
-                      <Wand2 className="w-12 h-12 text-gray-300 mb-4" />
-                      <p className="text-gray-500 text-sm">
+                    <div className="w-full h-full flex flex-col items-center justify-center text-center p-4 sm:p-8">
+                      <Wand2 className="w-8 h-8 sm:w-12 sm:h-12 text-gray-300 mb-3 sm:mb-4" />
+                      <p className="text-gray-500 text-xs sm:text-sm">
                         Complete your selection to generate an AI preview of your bouquet.
                       </p>
                     </div>
@@ -1085,8 +1085,8 @@ const Customize: React.FC = () => {
                   
                   {isGenerating && (
                     <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center z-10">
-                      <RefreshCw className="w-10 h-10 text-[#C79E48] animate-spin mb-4" />
-                      <p className="font-bold text-[#C79E48]">Generating Magic...</p>
+                      <RefreshCw className="w-8 h-8 sm:w-10 sm:h-10 text-[#C79E48] animate-spin mb-3 sm:mb-4" />
+                      <p className="font-bold text-[#C79E48] text-sm sm:text-base">Generating Magic...</p>
                     </div>
                   )}
                 </div>
@@ -1094,32 +1094,32 @@ const Customize: React.FC = () => {
                 <button
                   onClick={generateBouquetImage}
                   disabled={isGenerating || totalFlowers === 0}
-                  className="w-full py-4 bg-[#C79E48] text-white font-bold rounded-xl shadow-lg hover:bg-[#b08d45] disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 mb-4"
+                  className="w-full py-3 sm:py-4 bg-[#C79E48] text-white font-bold rounded-lg sm:rounded-xl shadow-lg hover:bg-[#b08d45] disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 mb-4 text-sm sm:text-base"
                 >
-                  <Wand2 className="w-5 h-5" />
+                  <Wand2 className="w-4 h-4 sm:w-5 sm:h-5" />
                   {generatedImage ? "Regenerate Preview" : "Generate Preview"}
                 </button>
 
                 {/* Summary & Total */}
-                <div className="border-t border-gray-100 pt-6 space-y-3">
-                  <div className="flex justify-between text-sm text-gray-600">
+                <div className="border-t border-gray-100 pt-4 sm:pt-6 space-y-2 sm:space-y-3">
+                  <div className="flex justify-between text-xs sm:text-sm text-gray-600">
                     <span>Base Price</span>
                     <span>${selectedPackage?.price || 0}</span>
                   </div>
-                  <div className="flex justify-between text-sm text-gray-600">
+                  <div className="flex justify-between text-xs sm:text-sm text-gray-600">
                     <span>Size Upgrade</span>
                     <span>+${selectedSize?.id !== 'custom' ? selectedSize?.price || 0 : 0}</span>
                   </div>
-                  <div className="flex justify-between text-sm text-gray-600">
+                  <div className="flex justify-between text-xs sm:text-sm text-gray-600">
                     <span>Flowers ({totalFlowers})</span>
                     <span>+${flowerCost}</span>
                   </div>
-                  <div className="flex justify-between text-sm text-gray-600">
+                  <div className="flex justify-between text-xs sm:text-sm text-gray-600">
                     <span>Accessories</span>
                     <span>+${accessoriesCost}</span>
                   </div>
                   
-                  <div className="flex justify-between text-2xl font-bold text-[#C79E48] pt-4 border-t border-dashed border-[#C79E48]/20">
+                  <div className="flex justify-between text-lg sm:text-xl md:text-2xl font-bold text-[#C79E48] pt-3 sm:pt-4 border-t border-dashed border-[#C79E48]/20">
                     <span>Total</span>
                     <span>${totalPrice.toFixed(2)}</span>
                   </div>
@@ -1128,9 +1128,9 @@ const Customize: React.FC = () => {
                 <button
                   onClick={handleAddToCart}
                   disabled={totalFlowers === 0}
-                  className="w-full mt-6 py-4 bg-black text-white font-bold rounded-xl shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="w-full mt-4 sm:mt-6 py-3 sm:py-4 bg-black text-white font-bold rounded-lg sm:rounded-xl shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm sm:text-base"
                 >
-                  <ShoppingCart className="w-5 h-5" />
+                  <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5" />
                   Add to Cart
                 </button>
               </div>
