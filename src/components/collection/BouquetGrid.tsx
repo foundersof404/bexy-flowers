@@ -7,6 +7,7 @@ import { useCartWithToast } from "@/hooks/useCartWithToast";
 import { useFavorites } from "@/contexts/FavoritesContext";
 import { useFlyingHeart } from "@/contexts/FlyingHeartContext";
 import { useNavigate } from "react-router-dom";
+import { OptimizedImage } from "@/components/OptimizedImage";
 import type { Bouquet } from "@/types/bouquet";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -97,14 +98,14 @@ const BouquetCard = memo(({
         }}
       >
         {/* Image Section */}
-        <div className="relative overflow-hidden">
-          <img
+        <div className="relative overflow-hidden h-48 sm:h-64 lg:h-80">
+          <OptimizedImage
             src={bouquet.image}
             alt={bouquet.name}
-            className="w-full h-48 sm:h-64 lg:h-80 object-cover transition-transform duration-500 ease-out"
-            loading="lazy"
-            decoding="async"
-            draggable={false}
+            className="w-full h-full object-cover transition-transform duration-500 ease-out"
+            aspectRatio="4/5"
+            objectFit="cover"
+            priority={index < 4}
             style={{
               transform: isHovered ? 'scale(1.05)' : 'scale(1)',
               filter: isHovered 
@@ -295,23 +296,42 @@ BouquetCard.displayName = 'BouquetCard';
 
 const BouquetGridComponent = ({ bouquets, onBouquetClick }: BouquetGridProps) => {
   const gridRef = useRef<HTMLDivElement>(null);
+  const [imagesLoaded, setImagesLoaded] = useState(0);
+  const totalImages = bouquets.length;
+
+  // Track image loading progress
+  const handleImageLoad = () => {
+    setImagesLoaded(prev => prev + 1);
+  };
 
   // Removed ScrollTrigger cleanup for better scroll performance
 
   return (
-    <div 
-      ref={gridRef}
-      className="grid grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 w-full px-2 sm:px-0"
-    >
-      {bouquets.map((bouquet, index) => (
-        <BouquetCard
-          key={bouquet.id}
-          bouquet={bouquet}
-          index={index}
-          onBouquetClick={onBouquetClick}
-        />
-      ))}
-    </div>
+    <>
+      {/* Loading progress indicator (optional) */}
+      {imagesLoaded < totalImages && imagesLoaded > 0 && (
+        <div className="mb-4 text-center">
+          <div className="inline-flex items-center gap-2 text-sm text-slate-500">
+            <div className="w-4 h-4 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+            Loading images... {imagesLoaded}/{totalImages}
+          </div>
+        </div>
+      )}
+      
+      <div 
+        ref={gridRef}
+        className="grid grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 w-full px-2 sm:px-0"
+      >
+        {bouquets.map((bouquet, index) => (
+          <BouquetCard
+            key={bouquet.id}
+            bouquet={bouquet}
+            index={index}
+            onBouquetClick={onBouquetClick}
+          />
+        ))}
+      </div>
+    </>
   );
 };
 

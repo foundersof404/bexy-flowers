@@ -1,6 +1,7 @@
 import { useEffect, useRef, useMemo, memo } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { gsap } from "gsap";
+import { OptimizedImage } from "@/components/OptimizedImage";
 import heroBackground from "@/assets/hero-bg.jpg";
 import { useIsMobile } from "@/hooks/use-mobile";
 

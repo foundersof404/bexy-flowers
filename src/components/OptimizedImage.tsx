@@ -1,65 +1,196 @@
-import { useEffect, useRef, useState } from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import { useState, useEffect, useRef, ImgHTMLAttributes } from 'react';
+import { motion } from 'framer-motion';
 
-interface OptimizedImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
+interface OptimizedImageProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, 'onLoad' | 'onError'> {
   src: string;
-  lqip?: string;
+  alt: string;
+  className?: string;
   priority?: boolean; // For above-the-fold images
+  aspectRatio?: string; // e.g., "16/9", "4/3", "1/1"
+  objectFit?: 'cover' | 'contain' | 'fill' | 'none' | 'scale-down';
+  blurDataURL?: string; // Optional blur placeholder
+  onLoadComplete?: () => void;
 }
 
-const OptimizedImage = ({ src, lqip, alt = "", className = "", priority = false, ...rest }: OptimizedImageProps) => {
-  const [loaded, setLoaded] = useState(false);
-  const imgRef = useRef<HTMLImageElement | null>(null);
-  const shouldReduceMotion = useReducedMotion();
+/**
+ * OptimizedImage Component
+ * 
+ * Features:
+ * - Progressive loading with blur placeholder
+ * - Lazy loading with intersection observer
+ * - Automatic aspect ratio handling
+ * - Loading state with skeleton
+ * - Error handling with fallback
+ * - Memory efficient
+ */
+export const OptimizedImage = ({
+  src,
+  alt,
+  className = '',
+  priority = false,
+  aspectRatio,
+  objectFit = 'cover',
+  blurDataURL,
+  onLoadComplete,
+  ...props
+}: OptimizedImageProps) => {
+  const [isLoading, setIsLoading] = useState(true);
+  const [isInView, setIsInView] = useState(priority); // Priority images load immediately
+  const [hasError, setHasError] = useState(false);
+  const [imageSrc, setImageSrc] = useState<string | null>(priority ? src : null);
+  const imgRef = useRef<HTMLImageElement>(null);
+  const observerRef = useRef<IntersectionObserver | null>(null);
 
+  // Intersection Observer for lazy loading
   useEffect(() => {
-    const img = new Image();
-    img.src = src;
-    img.onload = () => setLoaded(true);
-    
-    // If image is already cached, set loaded immediately
-    if (img.complete) {
-      setLoaded(true);
-    }
-  }, [src]);
+    if (priority || !imgRef.current) return;
 
-  // Skip animation for reduced motion
-  const shouldAnimate = !shouldReduceMotion && !loaded;
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setIsInView(true);
+            setImageSrc(src);
+            observerRef.current?.disconnect();
+          }
+        });
+      },
+      {
+        rootMargin: '50px', // Start loading 50px before image enters viewport
+        threshold: 0.01,
+      }
+    );
+
+    if (imgRef.current) {
+      observerRef.current.observe(imgRef.current);
+    }
+
+    return () => {
+      observerRef.current?.disconnect();
+    };
+  }, [src, priority]);
+
+  // Preload image
+  useEffect(() => {
+    if (!imageSrc) return;
+
+    const img = new Image();
+    img.src = imageSrc;
+    
+    img.onload = () => {
+      setIsLoading(false);
+      onLoadComplete?.();
+    };
+    
+    img.onerror = () => {
+      setHasError(true);
+      setIsLoading(false);
+    };
+
+    return () => {
+      img.onload = null;
+      img.onerror = null;
+    };
+  }, [imageSrc, onLoadComplete]);
+
+  // Fallback image for errors
+  const fallbackSrc = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="400"%3E%3Crect width="400" height="400" fill="%23f0f0f0"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="18" fill="%23999"%3EImage unavailable%3C/text%3E%3C/svg%3E';
 
   return (
-    <div className={`relative ${className}`.trim()} style={{ willChange: shouldAnimate ? "contents" : "auto" }}>
-      {/* LQIP layer - only on mobile or when provided */}
-      {lqip && !priority && (
+    <div
+      className={`relative overflow-hidden ${className}`}
+      style={{ aspectRatio: aspectRatio || 'auto' }}
+    >
+      {/* Blur placeholder or skeleton */}
+      {isLoading && (
+        <motion.div
+          className="absolute inset-0 bg-gradient-to-br from-slate-100 to-slate-200"
+          initial={{ opacity: 1 }}
+          animate={{ opacity: isLoading ? 1 : 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          {/* Animated shimmer effect */}
+          <motion.div
+            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent"
+            animate={{
+              x: ['-100%', '100%'],
+            }}
+            transition={{
+              duration: 1.5,
+              repeat: Infinity,
+              ease: 'linear',
+            }}
+          />
+        </motion.div>
+      )}
+
+      {/* Blur placeholder if provided */}
+      {blurDataURL && isLoading && (
         <img
-          src={lqip}
+          src={blurDataURL}
           alt=""
-          aria-hidden
-          className="absolute inset-0 w-full h-full object-cover blur-md scale-105"
-          loading="eager"
-          decoding="async"
+          className="absolute inset-0 w-full h-full"
+          style={{
+            objectFit,
+            filter: 'blur(20px)',
+            transform: 'scale(1.1)',
+          }}
+          aria-hidden="true"
         />
       )}
-      {/* Final image with fade-in - optimized for performance */}
-      <motion.img
-        ref={imgRef}
-        src={src}
-        alt={alt}
-        initial={{ opacity: shouldAnimate ? 0 : 1 }}
-        animate={{ opacity: loaded || !shouldAnimate ? 1 : 0 }}
-        transition={shouldAnimate ? { duration: 0.6, ease: "easeOut" } : { duration: 0 }}
-        className="relative z-10 w-full h-full object-cover"
-        loading={priority ? "eager" : "lazy"}
-        decoding="async"
-        style={{ 
-          willChange: shouldAnimate ? "opacity" : "auto",
-          transform: "translateZ(0)" // GPU acceleration
-        }}
-        {...rest}
-      />
+
+      {/* Main image */}
+      {isInView && (
+        <motion.img
+          ref={imgRef}
+          src={hasError ? fallbackSrc : imageSrc || src}
+          alt={alt}
+          className={`w-full h-full ${className}`}
+          style={{
+            objectFit,
+            opacity: isLoading ? 0 : 1,
+            transition: 'opacity 0.3s ease-in-out',
+          }}
+          loading={priority ? 'eager' : 'lazy'}
+          decoding="async"
+          draggable={false}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: isLoading ? 0 : 1 }}
+          transition={{ duration: 0.3 }}
+          {...props}
+        />
+      )}
+
+      {/* Loading indicator for priority images */}
+      {priority && isLoading && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="w-8 h-8 border-3 border-amber-500 border-t-transparent rounded-full animate-spin" />
+        </div>
+      )}
     </div>
   );
 };
 
+/**
+ * Skeleton loader for card grids
+ */
+export const ImageSkeleton = ({ className = '', aspectRatio }: { className?: string; aspectRatio?: string }) => (
+  <div
+    className={`relative overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200 ${className}`}
+    style={{ aspectRatio: aspectRatio || 'auto' }}
+  >
+    <motion.div
+      className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent"
+      animate={{
+        x: ['-100%', '100%'],
+      }}
+      transition={{
+        duration: 1.5,
+        repeat: Infinity,
+        ease: 'linear',
+      }}
+    />
+  </div>
+);
+
 export default OptimizedImage;
-
-

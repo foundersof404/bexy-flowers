@@ -5,6 +5,8 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { EffectCoverflow, Pagination, Navigation, Autoplay } from "swiper/modules";
 import { ChevronLeft, ChevronRight, ShoppingCart, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { OptimizedImage } from "@/components/OptimizedImage";
+import { useImagePreloader } from "@/hooks/useImagePreloader";
 import type { Bouquet } from "@/pages/Collection";
 
 // Import Swiper styles
@@ -108,10 +110,13 @@ export const FeaturedCarousel = ({ bouquets, onBouquetClick }: FeaturedCarouselP
                   <div className="relative h-full bg-card/30 backdrop-blur-sm border border-border/20 overflow-hidden shadow-2xl">
                     {/* Image */}
                     <div className="relative h-2/3 overflow-hidden">
-                      <img
+                      <OptimizedImage
                         src={bouquet.image}
                         alt={bouquet.name}
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        priority={true}
+                        aspectRatio="4/3"
+                        objectFit="cover"
                       />
                       
                       {/* Overlay */}

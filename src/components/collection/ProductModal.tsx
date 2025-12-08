@@ -4,6 +4,7 @@ import { gsap } from "gsap";
 import { X, Heart, ShoppingCart, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { OptimizedImage } from "@/components/OptimizedImage";
 import type { Bouquet } from "@/pages/Collection";
 import { useCartWithToast } from "@/hooks/useCartWithToast";
 import { useFavorites } from "@/contexts/FavoritesContext";
@@ -136,11 +137,13 @@ export const ProductModal = ({ bouquet, onClose }: ProductModalProps) => {
         <div className="grid lg:grid-cols-2 gap-0 h-full">
           {/* Image Section */}
           <div className="relative h-64 lg:h-auto bg-gradient-to-b from-primary/5 to-transparent">
-            <img
-              ref={imageRef}
+            <OptimizedImage
               src={bouquet.image}
               alt={bouquet.name}
               className="w-full h-full object-cover"
+              priority={true}
+              aspectRatio="4/5"
+              objectFit="cover"
             />
             
             {/* Image Overlay */}
