@@ -38,108 +38,9 @@ const UltraHero = () => {
         gsap.set([title, subtitle, button], { y: 0, opacity: 1 });
         return;
       }
-      // Initial animation sequence
-      const tl = gsap.timeline();
       
-      // Set initial states
-      gsap.set([title, subtitle, button], { y: 100, opacity: 0 });
-
-      // Animate in sequence
-      tl
-        .to(title, { 
-          duration: 1.5, 
-          y: 0, 
-          opacity: 1, 
-          ease: "power3.out",
-          onComplete: () => {
-            // Add 3D text effect
-            gsap.to(title, {
-              duration: 0.8,
-              textShadow: "0 1px 0 hsl(51 100% 40%), 0 2px 0 hsl(51 100% 35%), 0 3px 0 hsl(51 100% 30%), 0 4px 8px rgba(0,0,0,0.3)",
-              ease: "power2.out"
-            });
-          }
-        }, "-=0.8")
-        .to(subtitle, { duration: 1, y: 0, opacity: 1, ease: "power2.out" }, "-=0.5")
-        .to(button, { 
-          duration: 1, 
-          y: 0, 
-          opacity: 1, 
-          ease: "power2.out",
-          onComplete: () => {
-            // Add liquid morph animation to button
-            gsap.to(button.querySelector('button'), {
-              duration: 4,
-              borderRadius: "60% 40% 30% 70%/60% 30% 70% 40%",
-              repeat: -1,
-              yoyo: true,
-              ease: "power1.inOut"
-            });
-          }
-        }, "-=0.3");
-
-      // Parallax scroll effect - Disabled on mobile
-      if (!isMobile) {
-        ScrollTrigger.create({
-          trigger: hero,
-          start: "top top",
-          end: "bottom top",
-          scrub: 1,
-          refreshPriority: -1,
-          onUpdate: (self) => {
-            const progress = self.progress;
-            gsap.to(hero, {
-              duration: 0.1,
-              y: progress * -200,
-              scale: 1 + progress * 0.1,
-              ease: "none",
-              force3D: true
-            });
-          }
-        });
-      }
-
-      // Beautiful 3D rotation effect for flower image on scroll - Disabled on mobile
-      if (!isMobile) {
-        const flowerImage = hero.querySelector('img[alt="Beautiful Flower"]');
-        if (flowerImage) {
-          ScrollTrigger.create({
-            trigger: hero,
-            start: "top center",
-            end: "bottom center",
-            scrub: 0.5,
-            refreshPriority: -1,
-            onUpdate: (self) => {
-              const progress = self.progress;
-              const smoothProgress = progress * progress * (3 - 2 * progress); // Smooth easing
-              
-              gsap.to(flowerImage, {
-                duration: 0.1,
-                rotateY: smoothProgress * 720, // Two full rotations
-                rotateX: Math.sin(progress * Math.PI * 2) * 10, // Gentle X rotation
-                rotateZ: Math.sin(progress * Math.PI) * 5, // Subtle Z rotation
-                scale: 1 + Math.sin(progress * Math.PI) * 0.05, // Subtle scale breathing
-                ease: "none",
-                force3D: true
-              });
-            }
-          });
-        }
-      }
-
-      // Floating elements animation
-      const floatingElements = hero.querySelectorAll('.floating-element');
-      floatingElements.forEach((element, index) => {
-        gsap.to(element, {
-          duration: 6 + index * 2,
-          y: "-=100",
-          x: `+=${Math.random() * 100 - 50}`,
-          rotation: 360,
-          repeat: -1,
-          ease: "none",
-          delay: index * 0.5
-        });
-      });
+      // Set initial states (no animations, just instant display for better scroll perf)
+      gsap.set([title, subtitle, button], { y: 0, opacity: 1 });
     }
 
     return () => {
@@ -436,23 +337,22 @@ const UltraHero = () => {
                    transition={{ duration: shouldReduceMotion || isMobile ? 0 : 1.2, delay: shouldReduceMotion || isMobile ? 0 : 1, ease: "easeOut" }}
                    style={{ willChange: shouldReduceMotion || isMobile ? "auto" : "transform, opacity" }}
                 >
-                  {isMobile ? (
-                    <span style={{ color: "rgb(160, 120, 40)" }}>Crafting timeless beauty through floral artistry</span>
-                  ) : (
-                    <motion.span
-                      className="inline-block drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)] drop-shadow-xl font-luxury"
-                      style={{ 
-                        color: "rgb(199, 158, 72)", 
-                        textShadow: "0 2px 4px #000" 
-                      }}
-                      whileHover={{
-                        scale: 1.03,
-                        transition: { duration: 0.3 }
-                      }}
-                    >
-                      Crafting timeless beauty through floral artistry
-                    </motion.span>
-                  )}
+                  <span 
+                    className={`inline-block ${isMobile ? 'text-slate-800 font-medium drop-shadow-sm' : 'text-slate-800 font-medium drop-shadow-md'}`}
+                    style={{ 
+                      fontSize: isMobile ? 'clamp(0.95rem, 3.5vw, 1.15rem)' : undefined,
+                      lineHeight: isMobile ? '1.6' : '1.5',
+                      textShadow: isMobile 
+                        ? '0 1px 2px rgba(255,255,255,0.8), 0 2px 4px rgba(0,0,0,0.15)' 
+                        : '0 1px 3px rgba(255,255,255,0.9), 0 2px 8px rgba(0,0,0,0.2)',
+                      background: isMobile ? undefined : 'linear-gradient(135deg, rgba(255,255,255,0.6), rgba(229,228,226,0.4))',
+                      padding: isMobile ? '0.25rem 0.5rem' : '0.5rem 1rem',
+                      borderRadius: isMobile ? '8px' : '12px',
+                      backdropFilter: isMobile ? undefined : 'blur(8px)'
+                    }}
+                  >
+                    Crafting timeless beauty through floral artistry
+                  </span>
                    
                    {/* Decorative line - hidden on mobile */}
                    {!isMobile && (

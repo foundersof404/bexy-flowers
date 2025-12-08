@@ -543,7 +543,7 @@ const CartDashboard: React.FC<CartDashboardProps> = ({ isOpen, onClose }) => {
                                         e.preventDefault();
                                         try {
                                           const newQuantity = item.quantity - 1;
-                                          if (newQuantity >= 0) {
+                                          if (newQuantity >= 1) {
                                             updateQuantity(item.id, newQuantity, item.size, item.personalNote);
                                           }
                                         } catch (error) {

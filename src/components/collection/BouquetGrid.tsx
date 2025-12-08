@@ -62,13 +62,8 @@ const BouquetCard = memo(({
   
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ 
-        duration: 0.4, 
-        delay: Math.min(index * 0.05, 0.3),
-        ease: "easeOut"
-      }}
+      initial={{ opacity: 1 }}
+      animate={{ opacity: 1 }}
       className="group cursor-pointer"
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
@@ -106,7 +101,7 @@ const BouquetCard = memo(({
           <img
             src={bouquet.image}
             alt={bouquet.name}
-            className="w-full h-52 sm:h-64 lg:h-80 object-cover transition-transform duration-500 ease-out"
+            className="w-full h-48 sm:h-64 lg:h-80 object-cover transition-transform duration-500 ease-out"
             loading="lazy"
             decoding="async"
             draggable={false}
@@ -301,16 +296,12 @@ BouquetCard.displayName = 'BouquetCard';
 const BouquetGridComponent = ({ bouquets, onBouquetClick }: BouquetGridProps) => {
   const gridRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    return () => {
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
-    };
-  }, [bouquets]);
+  // Removed ScrollTrigger cleanup for better scroll performance
 
   return (
     <div 
       ref={gridRef}
-      className="grid grid-cols-2 md:grid-cols-3 gap-4 sm:gap-7 lg:gap-8 w-full"
+      className="grid grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 w-full px-2 sm:px-0"
     >
       {bouquets.map((bouquet, index) => (
         <BouquetCard

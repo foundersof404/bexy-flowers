@@ -9,15 +9,92 @@ const Checkout = () => {
   const { cartItems, getTotalPrice, clearCart } = useCart();
 
   const subtotal = getTotalPrice();
-  const tax = subtotal * 0.08; // 8% tax
-  const shipping = subtotal > 100 ? 0 : 15; // Free shipping over $100
-  const total = subtotal + tax + shipping;
+  const deliveryFee = 4; // $4 delivery fee
+  const total = subtotal + deliveryFee;
 
   const handlePlaceOrder = () => {
-    // In a real application, this would process the payment
-    alert('Order placed successfully! Thank you for your purchase.');
-    clearCart();
-    navigate('/');
+    if (cartItems.length === 0) {
+      alert('Your cart is empty. Please add items before placing an order.');
+      return;
+    }
+
+    const phoneNumber = "96176104882";
+    
+    // Create professional WhatsApp message
+    const orderDetails = cartItems.map((item, index) => {
+      const itemNumber = index + 1;
+      let itemStr = `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n*Item ${itemNumber}:* ${item.title}`;
+      
+      // Add image URL if available
+      if (item.image) {
+        const imageUrl = item.image.startsWith('/') 
+          ? `${window.location.origin}${item.image}`
+          : item.image;
+        itemStr += `\n\n📸 *Image:*\n${imageUrl}`;
+      }
+      
+      itemStr += `\n\n💰 *Price:* $${item.price.toFixed(2)} x ${item.quantity} = $${(item.price * item.quantity).toFixed(2)}`;
+      
+      if (item.size) {
+        itemStr += `\n📏 *Size:* ${item.size}`;
+      }
+      
+      if (item.personalNote) {
+        itemStr += `\n💌 *Personal Note:*\n"${item.personalNote}"`;
+      }
+      
+      itemStr += `\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
+      
+      return itemStr;
+    }).join("\n\n");
+
+    const subtotal = getTotalPrice();
+    const deliveryFee = 4;
+    const finalTotal = subtotal + deliveryFee;
+
+    // Create full detailed message with payment selection prompt
+    const fullMessage = `🌸 *BEXY FLOWERS - NEW ORDER REQUEST* 🌸\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nHello! I would like to place an order with the following details:\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n${orderDetails}\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n💰 *PAYMENT SUMMARY*\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n📦 *Items Subtotal:* $${subtotal.toFixed(2)}\n🚚 *Delivery Fee:* $${deliveryFee.toFixed(2)}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n💵 *TOTAL AMOUNT:* $${finalTotal.toFixed(2)}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n💳 *PREFERRED PAYMENT METHOD:*\n\n_Please let me know which payment option works best:_\n\n✅ Option 1: *Whish Money Transfer*\n✅ Option 2: *Cash on Delivery (COD)*\n✅ Option 3: *Bank Transfer*\n✅ Option 4: *Credit/Debit Card*\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n📍 *DELIVERY INFORMATION*\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n⏱️ *Delivery Time:* 3-5 business days\n🌺 *Quality:* Handcrafted Fresh - Made to Order\n📦 *Delivery Fee:* $4.00 (All Areas)\n🎁 *Gift Wrapping:* Complimentary Premium Packaging\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nThank you for choosing *Bexy Flowers*! 💐\n\nWe're excited to create something beautiful for you. Please confirm your preferred payment method and delivery address, and we'll process your order immediately.\n\n_Looking forward to serving you!_ 🌸✨`;
+
+    // Create shorter message for WhatsApp URL (to avoid URL length limits)
+    const shortOrderDetails = cartItems.map((item, index) => {
+      const itemNumber = index + 1;
+      let shortStr = `*Item ${itemNumber}:* ${item.title} - $${item.price.toFixed(2)} x ${item.quantity} = $${(item.price * item.quantity).toFixed(2)}`;
+      if (item.size) shortStr += ` (${item.size})`;
+      return shortStr;
+    }).join('\n');
+
+    const shortMessage = `🌸 *BEXY FLOWERS - NEW ORDER* 🌸\n\nHello! I'd like to place an order:\n\n${shortOrderDetails}\n\n*Subtotal:* $${subtotal.toFixed(2)}\n*Delivery:* $${deliveryFee.toFixed(2)}\n*TOTAL:* $${finalTotal.toFixed(2)}\n\n*Please confirm my preferred payment method:*\n• Whish Money\n• Cash on Delivery\n• Bank Transfer\n• Card Payment\n\nThank you! 💐`;
+
+    // Copy full message to clipboard
+    navigator.clipboard.writeText(fullMessage).then(() => {
+      // Encode and create WhatsApp URL
+      const encodedMessage = encodeURIComponent(shortMessage);
+      const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
+      
+      // Open WhatsApp
+      const newWindow = window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+      
+      if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+        alert(`Popup was blocked. Please allow popups for this site.\n\nFull order details have been copied to your clipboard.\n\nPhone: +961 76 104 882`);
+      } else {
+        // Show success message
+        setTimeout(() => {
+          alert('Order details have been sent to WhatsApp!\n\nFull order details are also in your clipboard.\n\nYour cart will be cleared after confirmation.');
+        }, 500);
+      }
+    }).catch(() => {
+      // Fallback if clipboard fails
+      const encodedMessage = encodeURIComponent(shortMessage);
+      const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
+      window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+      alert(`Order details are ready to send!\n\nPhone: +961 76 104 882\n\nPlease copy the order details manually if needed.`);
+    });
+    
+    // Clear cart after a delay to allow user to see the message
+    setTimeout(() => {
+      clearCart();
+      navigate('/');
+    }, 2000);
   };
 
   if (cartItems.length === 0) {
@@ -140,14 +217,8 @@ const Checkout = () => {
                 <span className="font-semibold">${subtotal.toFixed(2)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-600">Tax (8%)</span>
-                <span className="font-semibold">${tax.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-600">Shipping</span>
-                <span className="font-semibold">
-                  {shipping === 0 ? 'FREE' : `$${shipping.toFixed(2)}`}
-                </span>
+                <span className="text-slate-600">Delivery Fee</span>
+                <span className="font-semibold">${deliveryFee.toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-lg font-bold pt-3 border-t border-amber-200">
                 <span className="text-slate-800">Total</span>
@@ -181,13 +252,21 @@ const Checkout = () => {
 
           {/* Payment Method */}
           <div className="bg-white/60 backdrop-blur-sm rounded-2xl border border-amber-100/60 p-8">
-            <h2 className="text-2xl font-semibold text-slate-800 mb-6">Payment Method</h2>
+            <h2 className="text-2xl font-semibold text-slate-800 mb-6">Payment Options</h2>
             
-            <div className="flex items-center space-x-3 p-4 bg-white/40 rounded-lg">
-              <CreditCard className="w-6 h-6 text-amber-500" />
-              <div>
-                <p className="font-semibold text-slate-800">Credit/Debit Card</p>
-                <p className="text-slate-600">Secure payment processing</p>
+            <div className="space-y-3">
+              <div className="flex items-center space-x-3 p-4 bg-white/40 rounded-lg">
+                <CreditCard className="w-6 h-6 text-amber-500" />
+                <div>
+                  <p className="font-semibold text-slate-800">Multiple Payment Methods Available</p>
+                  <p className="text-slate-600 text-sm">Select your preferred option in WhatsApp</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3 text-sm text-slate-600">
+                <div className="p-3 bg-amber-50/50 rounded-lg">✓ Whish Money</div>
+                <div className="p-3 bg-amber-50/50 rounded-lg">✓ Cash on Delivery</div>
+                <div className="p-3 bg-amber-50/50 rounded-lg">✓ Bank Transfer</div>
+                <div className="p-3 bg-amber-50/50 rounded-lg">✓ Card Payment</div>
               </div>
             </div>
           </div>

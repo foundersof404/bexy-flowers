@@ -91,41 +91,96 @@ const suggestedFlowers = [
   }
 ];
 
-// Categories data
-const categories = [
+// Real categories from UltraCategories component
+const allCategories = [
   {
-    id: 'premium-roses',
-    title: 'Premium Roses',
-    description: 'The finest roses from around the world',
-    image: bouquet1,
-    count: '24 Arrangements',
-    color: 'from-rose-400 to-pink-500'
+    id: 1,
+    name: "WEDDINGS",
+    description: "Architectural bridal arrangements",
+    image: encodeURI("/assets/wedding % events/wedding/IMG-20251126-WA0021.jpg"),
+    gradient: "from-rose-200/20 via-amber-100/30 to-yellow-200/20",
+    color: "from-rose-400/80 to-amber-300/90",
+    filterValue: "wedding-percent-events"
   },
   {
-    id: 'exotic-flowers',
-    title: 'Exotic Flowers',
-    description: 'Rare and unique flowers from distant lands',
-    image: bouquet6,
-    count: '18 Arrangements',
-    color: 'from-purple-400 to-indigo-500'
+    id: 2,
+    name: "VALENTINE'S",
+    description: "Romantic luxury collections",
+    image: encodeURI("/assets/valentine/IMG_4172.jpg"),
+    gradient: "from-red-200/20 via-pink-100/30 to-rose-200/20",
+    color: "from-red-400/80 to-pink-300/90",
+    filterValue: "valentine"
   },
   {
-    id: 'seasonal',
-    title: 'Seasonal Collections',
-    description: 'Fresh flowers that celebrate each season',
-    image: heroBg,
-    count: '32 Arrangements',
-    color: 'from-green-400 to-emerald-500'
+    id: 3,
+    name: "MOTHER'S DAY",
+    description: "Elegant tribute arrangements",
+    image: encodeURI("/assets/mother day/IMG_8394.JPG"),
+    gradient: "from-pink-200/20 via-rose-100/30 to-lavender-200/20",
+    color: "from-pink-400/80 to-rose-300/90",
+    filterValue: "mother-day"
   },
   {
-    id: 'aromatic',
-    title: 'Aromatic Gardens',
-    description: 'Fragrant blooms that delight the senses',
-    image: aboutImage,
-    count: '15 Arrangements',
-    color: 'from-lavender-400 to-purple-500'
+    id: 4,
+    name: "BIRTHDAYS",
+    description: "Celebration masterpieces",
+    image: encodeURI("/assets/birthday/IMG_3730 (1).jpg"),
+    gradient: "from-purple-200/20 via-violet-100/30 to-indigo-200/20",
+    color: "from-purple-400/80 to-violet-300/90",
+    filterValue: "birthday"
+  },
+  {
+    id: 5,
+    name: "ANNIVERSARIES",
+    description: "Timeless love expressions",
+    image: encodeURI("/assets/red roses/red roses the letter J.png"),
+    gradient: "from-amber-200/20 via-yellow-100/30 to-gold-200/20",
+    color: "from-amber-400/80 to-yellow-300/90",
+    filterValue: "red-roses"
+  },
+  {
+    id: 6,
+    name: "CORPORATE",
+    description: "Professional luxury designs",
+    image: encodeURI("/assets/wedding % events/events/IMG-20251126-WA0022.jpg"),
+    gradient: "from-slate-200/20 via-gray-100/30 to-zinc-200/20",
+    color: "from-slate-400/80 to-gray-300/90",
+    filterValue: "wedding-percent-events"
+  },
+  {
+    id: 8,
+    name: "SEASONAL",
+    description: "Limited edition collections",
+    image: encodeURI("/assets/hand band/IMG_5392.jpg"),
+    gradient: "from-emerald-200/20 via-green-100/30 to-teal-200/20",
+    color: "from-emerald-400/80 to-green-300/90",
+    filterValue: "hand-band"
+  },
+  {
+    id: 9,
+    name: "GRADUATION",
+    description: "Achievement celebrations",
+    image: encodeURI("/assets/graduation/IMG_0295.jpg"),
+    gradient: "from-blue-200/20 via-indigo-100/30 to-purple-200/20",
+    color: "from-blue-400/80 to-indigo-300/90",
+    filterValue: "graduation"
+  },
+  {
+    id: 10,
+    name: "LUXURY GIFTS",
+    description: "Premium gift arrangements",
+    image: encodeURI("/assets/red roses/large red roses flower bouquet with gliter.png"),
+    gradient: "from-orange-200/20 via-amber-100/30 to-yellow-200/20",
+    color: "from-orange-400/80 to-amber-300/90",
+    filterValue: "red-roses"
   }
 ];
+
+// Function to get random 4 categories
+const getRandomCategories = (): typeof allCategories => {
+  const shuffled = [...allCategories].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, 4);
+};
 
 // Animation variants for page transitions
 const pageVariants = {
@@ -437,7 +492,7 @@ const CategoryCard = ({
   category, 
   index 
 }: { 
-  category: typeof categories[0]; 
+  category: typeof allCategories[0]; 
   index: number; 
 }) => {
   const navigate = useNavigate();
@@ -453,15 +508,16 @@ const CategoryCard = ({
       }}
       whileHover={{ y: -5, scale: 1.02 }}
       className="group cursor-pointer"
-      onClick={() => navigate('/collection')}
+      onClick={() => navigate('/collection', { state: { filter: category.filterValue } })}
     >
       <div className="relative overflow-hidden rounded-2xl bg-white/60 backdrop-blur-sm shadow-lg hover:shadow-2xl transition-all duration-500 border border-amber-100/60">
         {/* Background Image */}
         <div className="relative aspect-[16/10] overflow-hidden">
           <img
             src={category.image}
-            alt={category.title}
+            alt={category.name}
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+            loading="lazy"
           />
           
           {/* Gradient Overlay */}
@@ -473,13 +529,13 @@ const CategoryCard = ({
               className="font-luxury text-2xl font-bold mb-2"
               whileHover={{ scale: 1.05 }}
             >
-              {category.title}
+              {category.name}
             </motion.h3>
             <p className="text-white/90 text-sm mb-4 leading-relaxed">
               {category.description}
             </p>
             <div className="bg-white/20 backdrop-blur-sm rounded-full px-4 py-2 text-xs font-semibold">
-              {category.count}
+              Explore Collection
             </div>
           </div>
           
@@ -501,6 +557,9 @@ const ProductDetailPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { addToCart } = useCartWithToast();
+  
+  // Get random 4 categories on component mount
+  const [displayCategories] = useState(() => getRandomCategories());
 
   // Get product data from route state or create mock data
   const productData: ProductData = location.state?.product || {
@@ -896,7 +955,7 @@ const ProductDetailPage = () => {
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {categories.map((category, index) => (
+            {displayCategories.map((category, index) => (
               <CategoryCard 
                 key={category.id} 
                 category={category} 
