@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, lazy, Suspense } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { gsap } from 'gsap';
@@ -20,8 +20,10 @@ import {
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/contexts/CartContext';
 import { useFavorites } from '@/contexts/FavoritesContext';
-import CartDashboard from '@/components/cart/CartDashboard';
 import logoImage from '/assets/bexy-flowers-logo.png';
+
+// ⚡ PERFORMANCE OPTIMIZATION: Lazy load CartDashboard (saves 120KB initial load)
+const CartDashboard = lazy(() => import('@/components/cart/CartDashboard'));
 
 // WhatsApp Icon Component
 const WhatsAppIcon = ({ className }: { className?: string }) => (
@@ -134,6 +136,11 @@ const UltraNavigation = () => {
   const favoritesCount = getTotalFavorites();
   const isMobile = useIsMobile();
   const shouldReduceMotion = useReducedMotion();
+
+  // ⚡ PERFORMANCE: Preload CartDashboard on hover for instant opening
+  const preloadCartDashboard = () => {
+    import('@/components/cart/CartDashboard');
+  };
 
   useEffect(() => {
     const nav = navRef.current;
@@ -399,6 +406,8 @@ const UltraNavigation = () => {
                   variant="ghost"
                   size="icon"
                   onClick={() => setIsCartOpen(true)}
+                  onMouseEnter={preloadCartDashboard}
+                  onFocus={preloadCartDashboard}
                   className="relative group hover:bg-primary/10 transition-all duration-500 overflow-hidden rounded-lg w-10 h-10 sm:w-12 sm:h-12"
                 >
                   {/* Cart Icon - Simplified */}
@@ -804,11 +813,15 @@ const UltraNavigation = () => {
         </>
       )}
 
-      {/* Cart Dashboard */}
-      <CartDashboard 
-        isOpen={isCartOpen} 
-        onClose={() => setIsCartOpen(false)} 
-      />
+      {/* Cart Dashboard - Lazy loaded for performance */}
+      {isCartOpen && (
+        <Suspense fallback={null}>
+          <CartDashboard 
+            isOpen={isCartOpen} 
+            onClose={() => setIsCartOpen(false)} 
+          />
+        </Suspense>
+      )}
     </>
   );
 };

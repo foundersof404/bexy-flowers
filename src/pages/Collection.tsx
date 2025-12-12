@@ -21,7 +21,6 @@ import {
 const Collection = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedBouquet, setSelectedBouquet] = useState<Bouquet | null>(null);
-  const [filteredBouquets, setFilteredBouquets] = useState<Bouquet[]>(generatedBouquets);
   const containerRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
 
@@ -51,14 +50,13 @@ const Collection = () => {
     }
   }, [location.search]);
 
-  useEffect(() => {
+  // ⚡ PERFORMANCE: Use useMemo instead of useEffect for filtering
+  // This prevents unnecessary re-renders and state updates
+  const filteredBouquets = useMemo(() => {
     if (selectedCategory === "all") {
-      setFilteredBouquets(generatedBouquets);
-    } else {
-      setFilteredBouquets(
-        generatedBouquets.filter((b) => b.category === selectedCategory)
-      );
+      return generatedBouquets;
     }
+    return generatedBouquets.filter((b) => b.category === selectedCategory);
   }, [selectedCategory]);
 
   useEffect(() => {
@@ -75,9 +73,19 @@ const Collection = () => {
 
   const categories = useMemo(() => generatedCategories, []);
   
-  // Use callback for handlers
+  // Use callback for handlers with smooth scroll
   const handleCategoryChange = useCallback((category: string) => {
     setSelectedCategory(category);
+    
+    // ⚡ PERFORMANCE: Smooth scroll to grid when category changes
+    setTimeout(() => {
+      const gridElement = document.getElementById('main-collection-grid');
+      if (gridElement) {
+        const yOffset = -100;
+        const y = gridElement.getBoundingClientRect().top + window.pageYOffset + yOffset;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+      }
+    }, 100);
   }, []);
   
   const handleBouquetClick = useCallback((bouquet: Bouquet) => {
@@ -107,15 +115,37 @@ const Collection = () => {
           onCategoryChange={handleCategoryChange}
         />
         
-        {/* Main Bouquet Grid - No Gaps */}
+        {/* Main Bouquet Grid - With Smooth Category Transitions */}
         <section id="main-collection-grid" className="py-12 md:py-16 lg:py-20 px-3 sm:px-4 md:px-6 lg:px-8 w-full">
           <div className="max-w-7xl mx-auto w-full">
+            {/* Category count and transition */}
+            <motion.div
+              key={`count-${selectedCategory}`}
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              transition={{ duration: 0.3 }}
+              className="mb-8 text-center"
+            >
+              <p className="text-sm text-gray-600">
+                Showing <span className="font-bold text-[#C29A43]">{filteredBouquets.length}</span> beautiful bouquet{filteredBouquets.length !== 1 ? 's' : ''}
+              </p>
+            </motion.div>
+            
+            {/* Grid with smooth transition */}
             <AnimatePresence mode="wait">
-              <BouquetGrid 
+              <motion.div
                 key={selectedCategory}
-                bouquets={filteredBouquets}
-                onBouquetClick={handleBouquetClick}
-              />
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+              >
+                <BouquetGrid 
+                  bouquets={filteredBouquets}
+                  onBouquetClick={handleBouquetClick}
+                />
+              </motion.div>
             </AnimatePresence>
           </div>
         </section>

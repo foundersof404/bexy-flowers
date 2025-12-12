@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, memo } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Heart, Eye, ShoppingCart } from "lucide-react";
@@ -8,6 +8,7 @@ import { useFavorites } from "@/contexts/FavoritesContext";
 import { useFlyingHeart } from "@/contexts/FlyingHeartContext";
 import { useNavigate } from "react-router-dom";
 import { OptimizedImage } from "@/components/OptimizedImage";
+import { useProgressiveRender } from "@/hooks/useProgressiveRender";
 import type { Bouquet } from "@/types/bouquet";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -79,7 +80,9 @@ const BouquetCard = memo(({
           boxShadow: isHovered 
             ? '0 16px 40px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(194, 154, 67, 0.25)'
             : '0 4px 20px rgba(0, 0, 0, 0.08)',
-          willChange: isHovered ? 'transform' : 'auto'
+          willChange: isHovered ? 'transform' : 'auto',
+          // ⚡ PERFORMANCE: CSS containment for better scroll performance
+          contain: 'layout style paint'
         }}
         onClick={() => {
           navigate(`/product/${bouquet.id}`, { 
@@ -299,7 +302,11 @@ BouquetCard.displayName = 'BouquetCard';
 const BouquetGridComponent = ({ bouquets, onBouquetClick }: BouquetGridProps) => {
   const gridRef = useRef<HTMLDivElement>(null);
   const [imagesLoaded, setImagesLoaded] = useState(0);
-  const totalImages = bouquets.length;
+  
+  // ⚡ PERFORMANCE: Progressive rendering for smooth initial load
+  const itemsToRender = useProgressiveRender(bouquets.length, 12, 50);
+  const visibleBouquets = bouquets.slice(0, itemsToRender);
+  const totalImages = visibleBouquets.length;
 
   // Track image loading progress
   const handleImageLoad = () => {
@@ -324,7 +331,7 @@ const BouquetGridComponent = ({ bouquets, onBouquetClick }: BouquetGridProps) =>
         ref={gridRef}
         className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-5 lg:gap-8 w-full px-0"
       >
-        {bouquets.map((bouquet, index) => (
+        {visibleBouquets.map((bouquet, index) => (
           <BouquetCard
             key={bouquet.id}
             bouquet={bouquet}
@@ -333,6 +340,16 @@ const BouquetGridComponent = ({ bouquets, onBouquetClick }: BouquetGridProps) =>
           />
         ))}
       </div>
+      
+      {/* Progressive loading indicator */}
+      {itemsToRender < bouquets.length && (
+        <div className="mt-8 text-center">
+          <div className="inline-flex items-center gap-2 text-sm text-slate-500">
+            <div className="w-4 h-4 border-2 border-[#C29A43] border-t-transparent rounded-full animate-spin" />
+            <span>Loading {bouquets.length - itemsToRender} more bouquets...</span>
+          </div>
+        </div>
+      )}
     </>
   );
 };

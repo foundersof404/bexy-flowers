@@ -10,6 +10,7 @@ interface OptimizedImageProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, 
   objectFit?: 'cover' | 'contain' | 'fill' | 'none' | 'scale-down';
   blurDataURL?: string; // Optional blur placeholder
   onLoadComplete?: () => void;
+  sizes?: string; // ⚡ Responsive image sizes for optimal loading
 }
 
 /**
@@ -32,6 +33,7 @@ export const OptimizedImage = ({
   objectFit = 'cover',
   blurDataURL,
   onLoadComplete,
+  sizes = '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw', // ⚡ Default responsive sizes
   ...props
 }: OptimizedImageProps) => {
   const [isLoading, setIsLoading] = useState(true);
@@ -154,6 +156,7 @@ export const OptimizedImage = ({
           loading={priority ? 'eager' : 'lazy'}
           decoding="async"
           draggable={false}
+          sizes={sizes}
           initial={{ opacity: 0 }}
           animate={{ opacity: isLoading ? 0 : 1 }}
           transition={{ duration: 0.3 }}

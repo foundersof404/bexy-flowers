@@ -253,7 +253,9 @@ const Favorites = memo(() => {
                           boxShadow: isHovered 
                             ? '0 24px 48px rgba(199, 158, 72, 0.2), 0 0 0 2px rgba(199, 158, 72, 0.4)'
                             : '0 8px 32px rgba(0, 0, 0, 0.08)',
-                          willChange: 'transform, box-shadow'
+                          willChange: 'transform, box-shadow',
+                          // ⚡ PERFORMANCE: CSS containment for better scroll performance
+                          contain: 'layout style paint'
                         }}
                         animate={{
                           y: isHovered ? -4 : 0,
@@ -306,6 +308,9 @@ const Favorites = memo(() => {
                             src={favorite.image || favorite.imageUrl}
                             alt={favorite.title || favorite.name || 'Favorite'}
                             className="w-full h-full object-cover"
+                            loading="lazy"
+                            decoding="async"
+                            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 33vw"
                             style={{
                               willChange: 'transform'
                             }}
