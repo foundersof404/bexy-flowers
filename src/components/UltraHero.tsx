@@ -51,23 +51,33 @@ const UltraHero = () => {
   return (
     <section 
       ref={heroRef}
-      className={`relative min-h-[100dvh] flex items-center justify-center overflow-hidden perspective-1000 text-center ${
+      className={`relative flex items-center justify-center overflow-hidden perspective-1000 text-center ${
         isMobile ? '-mt-20 md:bg-transparent md:pt-16 md:sm:pt-8' : 'pt-16 sm:pt-8 -mt-20'
       }`}
       style={{ 
-        minHeight: '100dvh',
+        minHeight: isMobile ? '100dvh' : 'clamp(650px, 100vh, 900px)',
+        height: isMobile ? 'auto' : 'clamp(650px, 100vh, 900px)',
         padding: isMobile ? '5rem 1.4rem' : '6rem 2rem'
       }}
     >
       {/* Background Image with 3D Parallax */}
       <div 
-      
-        className={`absolute inset-0 z-0 ${isMobile ? '' : '-top-4'}`}
+        className={`absolute inset-0 z-0 ${isMobile ? '' : ''}`}
+        style={{
+          top: isMobile ? 0 : 0,
+          left: 0,
+          width: '100%',
+          height: '100%'
+        }}
       >
         <motion.img
           src={heroBackground}
           alt="Luxury floral background"
-          className={`w-full h-full object-cover ${isMobile ? 'opacity-70 scale-105 blur-[2px]' : 'transform-3d shadow-gold opacity-10'}`}
+          className={`w-full h-full ${isMobile ? 'opacity-70 scale-105 blur-[2px]' : 'transform-3d shadow-gold opacity-10'}`}
+          style={{
+            objectFit: 'cover',
+            objectPosition: 'center center'
+          }}
           initial={
             isMobile
               ? { scale: 1.05, opacity: 0 }
@@ -90,14 +100,16 @@ const UltraHero = () => {
           decoding="async"
         />
         <div 
-          className={`absolute inset-0 ${isMobile ? '' : '-top-4'} ${isMobile ? '' : 'bg-gradient-to-b from-background/90 via-background/70 to-background/90'}`}
+          className={`absolute inset-0 ${isMobile ? '' : 'bg-gradient-to-b from-background/90 via-background/70 to-background/90'}`}
           style={
             isMobile
               ? {
                   background: 'linear-gradient(180deg, rgba(8,8,8,0.15) 0%, rgba(255,255,255,0.1) 45%, rgba(255,255,255,0.85) 100%)',
                   pointerEvents: 'none'
                 }
-              : undefined
+              : {
+                  pointerEvents: 'none'
+                }
           }
         />
       </div>
@@ -144,7 +156,7 @@ const UltraHero = () => {
       <div className={`relative z-20 max-w-7xl mx-auto w-full ${
         isMobile ? 'px-4 sm:px-6 h-full flex items-center justify-center py-0' : 'px-4 xs:px-5 sm:px-6 lg:px-8'
       }`}>
-        <div className={`${isMobile ? 'w-full max-w-[860px]' : 'grid lg:grid-cols-2'} ${isMobile ? '' : 'gap-6 sm:gap-8 lg:gap-10 xl:gap-12'} items-center ${isMobile ? 'h-full py-0' : 'min-h-[70vh] sm:min-h-[75vh] lg:min-h-[80vh]'}`}>
+        <div className={`${isMobile ? 'w-full max-w-[860px]' : 'grid lg:grid-cols-2'} ${isMobile ? '' : 'gap-6 sm:gap-8 lg:gap-10 xl:gap-12'} items-center ${isMobile ? 'h-full py-0' : ''}`} style={!isMobile ? { minHeight: 'clamp(500px, 60vh, 700px)' } : undefined}>
           
           {/* Content Container */}
           <div className={`${isMobile ? 'w-full text-center space-y-4 mt-2 mx-auto max-w-[100vw] overflow-x-hidden' : 'space-y-4 sm:space-y-6 lg:space-y-8 text-center lg:text-left'}`}>
@@ -659,7 +671,7 @@ const UltraHero = () => {
               }}
               style={{ willChange: shouldReduceMotion ? "auto" : "transform, opacity" }}
             >
-              <div className="relative w-full h-80 md:h-96 lg:h-[500px] perspective-1000" style={{ transformStyle: "preserve-3d", willChange: "transform" }}>
+              <div className="relative w-full perspective-1000" style={{ transformStyle: "preserve-3d", willChange: "transform", height: 'clamp(320px, 40vh, 500px)' }}>
                 {/* Subtle glow effect */}
                 <motion.div 
                   className="absolute inset-0 bg-gradient-radial from-primary/10 via-primary/5 to-transparent rounded-full blur-3xl scale-110"
