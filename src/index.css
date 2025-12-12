@@ -519,12 +519,25 @@ All colors MUST be HSL. No rounded corners - sharp and architectural.
     @apply py-8 sm:py-12 lg:py-16 xl:py-20;
   }
 
-  /* Touch-friendly targets */
+  /* Touch-friendly targets - Enhanced for better mobile UX */
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
   @media (hover: none) and (pointer: coarse) {
     .touch-target {
-      min-height: 44px;
-      min-width: 44px;
+      min-height: 48px;
+      min-width: 48px;
     }
+  }
+
+  /* Active state for touch feedback */
+  .touch-target:active {
+    transform: scale(0.95);
+    transition: transform 0.1s ease;
   }
 
   /* Performance Optimizations */
