@@ -143,32 +143,25 @@ const WeddingHero = () => {
     return () => ctx.revert();
   }, []);
 
-  // Auto-scroll after 2 seconds on mount
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      window.scrollTo({ top: 100, behavior: 'smooth' });
-    }, 2000);
-    return () => clearTimeout(timer);
-  }, []);
-
   return (
-    <section ref={heroRef} className="relative h-screen flex items-center justify-center overflow-hidden bg-gradient-to-b from-[#fafafa] to-white">
-      {/* Hero Image - Full screen */}
+    <section ref={heroRef} className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-b from-[#fafafa] to-white" style={{ marginTop: '-12.3rem', paddingTop: '50' }}>
+      {/* Hero Image */}
       <div
         ref={imageRef}
         className="absolute inset-0 w-full h-full"
+        style={{ top: '12rem', height: 'calc(100% - 12rem)' }}
       >
         <img
           src={heroWeddingImage}
           alt="Elegant Wedding Couple"
-          className="w-full h-full object-cover object-center"
+          className="w-full h-full object-cover"
         />
         {/* Elegant overlay gradient */}
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/60" />
       </div>
 
       {/* Content */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 md:py-16 text-center"  style={{ marginTop: '8rem' }}>
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 md:py-16 text-center" style={{ marginTop: '12rem', transform: 'scale(0.85)' }}>
         <div ref={textRef} className="space-y-3 sm:space-y-4 md:space-y-6">
           <motion.div
             initial={{ opacity: 0 }}
@@ -247,15 +240,8 @@ const WeddingHero = () => {
         </div>
       </div>
 
-      {/* Scroll indicator with text */}
-      <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 z-10 flex flex-col items-center">
-        <motion.p 
-          className="text-white/80 text-sm mb-2 font-light tracking-wider"
-          animate={{ opacity: [0.5, 1, 0.5] }}
-          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-        >
-          Scroll to Explore
-        </motion.p>
+      {/* Subtle decorative elements - elegant, not distracting */}
+      <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 z-10">
         <motion.div
           animate={{ y: [0, 10, 0] }}
           transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
@@ -1748,7 +1734,7 @@ const ContactSection = () => {
             </motion.div>
 
               <h2 
-                className={`${isMobile ? 'text-2xl sm:text-3xl' : 'text-3xl md:text-4xl lg:text-5xl'} font-luxury font-bold mb-3 sm:mb-4 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 bg-clip-text text-transparent relative uppercase`}
+                className={`${isMobile ? 'text-4xl sm:text-5xl' : 'text-5xl md:text-7xl lg:text-8xl'} font-luxury font-bold mb-3 sm:mb-4 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 bg-clip-text text-transparent relative uppercase`}
                 style={{
                   filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))',
                   letterSpacing: '0.05em'
@@ -1756,16 +1742,13 @@ const ContactSection = () => {
               >
               READY TO BEGIN YOUR JOURNEY?
             </h2>
-              <p className={`${isMobile ? 'text-sm sm:text-base' : 'text-base md:text-lg'} text-gray-600 mb-6 sm:mb-8`}>
+              <p className={`${isMobile ? 'text-sm sm:text-base' : 'text-base md:text-lg lg:text-xl'} text-gray-600 mb-6 sm:mb-8`}>
               Let's discuss how we can make your special day unforgettable
             </p>
           </div>
 
             <div className="space-y-3 sm:space-y-4">
-            <motion.a
-                href="https://wa.me/96176104882?text=Hello%2C%20I%27m%20interested%20in%20your%20wedding%20and%20events%20services.%20I%27d%20like%20to%20discuss%20my%20special%20day%21%20%F0%9F%92%90"
-                target="_blank"
-                rel="noopener noreferrer"
+            <motion.div
                 whileHover={isMobile ? {} : { scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
@@ -1783,7 +1766,7 @@ const ContactSection = () => {
                   Schedule a Consultation
                 </span>
               </Button>
-            </motion.a>
+            </motion.div>
 
             <motion.div
                 whileHover={isMobile ? {} : { scale: 1.02 }}
