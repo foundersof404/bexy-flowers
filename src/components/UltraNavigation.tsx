@@ -153,10 +153,24 @@ const UltraNavigation = () => {
   }, [isMobile, shouldReduceMotion]);
 
   const handleMenuToggle = () => {
-    setIsMenuOpen(!isMenuOpen);
+    const newState = !isMenuOpen;
+    setIsMenuOpen(newState);
+    
+    // Prevent body scroll when menu is open on mobile
+    if (isMobile) {
+      if (newState) {
+        document.body.style.overflow = "hidden";
+        document.body.style.position = "fixed";
+        document.body.style.width = "100%";
+      } else {
+        document.body.style.overflow = "";
+        document.body.style.position = "";
+        document.body.style.width = "";
+      }
+    }
     
     if (menuRef.current) {
-      if (!isMenuOpen) {
+      if (newState) {
         gsap.fromTo(menuRef.current, 
           { opacity: 0, y: -50, scale: 0.9 },
           { opacity: 1, y: 0, scale: 1, duration: 0.5, ease: "power2.out" }
@@ -198,6 +212,13 @@ const UltraNavigation = () => {
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
     navigate(path);
     setIsMenuOpen(false);
+    
+    // Restore body scroll on mobile
+    if (isMobile) {
+      document.body.style.overflow = "";
+      document.body.style.position = "";
+      document.body.style.width = "";
+    }
     // Run again on next frame to beat layout/animation timing
     requestAnimationFrame(() => {
       window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
@@ -223,22 +244,28 @@ const UltraNavigation = () => {
               // Removed will-change as it causes performance issues with scroll
             }}
           >
-        <div className="max-w-7xl mx-auto px-3 xs:px-4 sm:px-6 py-2 xs:py-3 sm:py-4">
+        <div className="max-w-7xl mx-auto px-3 xs:px-4 sm:px-6 py-2 xs:py-3 sm:py-4" style={{ paddingTop: isMobile ? 'env(safe-area-inset-top, 0.5rem)' : undefined }}>
           <div className="flex items-center">
             
-            {/* Logo and Brand - Absolute Left */}
+            {/* Logo and Brand - Absolute Left - Mobile Optimized */}
             <motion.div
               ref={logoRef}
               className="flex items-center flex-shrink-0 mr-auto"
             >
               <Button
                 variant="ghost"
-                className="relative p-1 sm:p-2 hover:bg-primary/5 transition-all duration-500 group flex items-center rounded-lg"
+                className="relative p-1 sm:p-2 hover:bg-primary/5 transition-all duration-500 group flex items-center rounded-lg touch-target"
                 onClick={() => navigate('/')}
+                style={{
+                  WebkitTapHighlightColor: 'transparent',
+                  touchAction: 'manipulation',
+                  minHeight: '44px',
+                  minWidth: '44px',
+                }}
               >
-                {/* Logo Container - Clean Luxury */}
+                {/* Logo Container - Clean Luxury - Responsive */}
                 <div 
-                  className="w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 relative"
+                  className="w-10 h-10 xs:w-12 xs:h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 lg:w-20 lg:h-20 relative flex-shrink-0"
                 >
                   <img
                     src={logoImage}
@@ -247,10 +274,10 @@ const UltraNavigation = () => {
                   />
                 </div>
                 
-                {/* Brand Name - Clean Luxury Text */}
-                <div className="ml-0 sm:ml-0.5">
+                {/* Brand Name - Clean Luxury Text - Responsive */}
+                <div className="ml-1 sm:ml-1.5 hidden xs:block">
                   <h1 
-                    className="font-luxury text-sm sm:text-lg md:text-xl lg:text-2xl font-bold text-foreground"
+                    className="font-luxury text-xs xs:text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold text-foreground whitespace-nowrap"
                   >
                     Bexy Flowers
                   </h1>
@@ -396,7 +423,7 @@ const UltraNavigation = () => {
                 </Button>
               </motion.div>
 
-              {/* Cart with Simplified Hover Effects */}
+              {/* Cart with Simplified Hover Effects - Mobile Optimized */}
               <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -408,15 +435,24 @@ const UltraNavigation = () => {
                   onClick={() => setIsCartOpen(true)}
                   onMouseEnter={preloadCartDashboard}
                   onFocus={preloadCartDashboard}
-                  className="relative group hover:bg-primary/10 transition-all duration-500 overflow-hidden rounded-lg w-10 h-10 sm:w-12 sm:h-12"
+                  className="relative group hover:bg-primary/10 transition-all duration-500 overflow-hidden rounded-lg touch-target"
+                  style={{
+                    WebkitTapHighlightColor: 'transparent',
+                    touchAction: 'manipulation',
+                    width: isMobile ? '48px' : undefined,
+                    height: isMobile ? '48px' : undefined,
+                    minWidth: '48px',
+                    minHeight: '48px',
+                  }}
                 >
                   {/* Cart Icon - Simplified */}
                   <motion.div
-                    className="relative z-10"
+                    className="relative z-10 flex items-center justify-center"
                     whileHover={!isMobile && !shouldReduceMotion ? { 
                       scale: 1.15, 
                       color: "rgb(196,166,105)"
                     } : {}}
+                    whileTap={isMobile ? { scale: 0.95 } : {}}
                     transition={{ duration: 0.3 }}
                   >
                     <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 text-foreground transition-all duration-300" />
@@ -468,7 +504,7 @@ const UltraNavigation = () => {
                 </Button>
               </motion.div>
 
-              {/* Favorites Icon - Mobile (shows on mobile when cart is shown) */}
+              {/* Favorites Icon - Mobile (shows on mobile when cart is shown) - Touch-Friendly */}
               <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -479,9 +515,17 @@ const UltraNavigation = () => {
                   variant="ghost"
                   size="icon"
                   onClick={() => handleNavigation("/favorites")}
-                  className={`relative group hover:bg-primary/10 transition-all duration-300 overflow-hidden rounded-lg w-10 h-10 sm:w-12 sm:h-12 ${
+                  className={`relative group hover:bg-primary/10 transition-all duration-300 overflow-hidden rounded-lg touch-target ${
                     location.pathname === "/favorites" ? 'text-foreground' : 'text-foreground'
                   }`}
+                  style={{
+                    WebkitTapHighlightColor: 'transparent',
+                    touchAction: 'manipulation',
+                    width: '48px',
+                    height: '48px',
+                    minWidth: '48px',
+                    minHeight: '48px',
+                  }}
                 >
                   <motion.span 
                     className="relative z-10"
@@ -514,7 +558,7 @@ const UltraNavigation = () => {
                 </Button>
               </motion.div>
 
-              {/* Mobile Menu Button - Simplified */}
+              {/* Mobile Menu Button - Touch-Friendly */}
               <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -525,7 +569,15 @@ const UltraNavigation = () => {
                   variant="ghost"
                   size="icon"
                   onClick={handleMenuToggle}
-                  className="relative group hover:bg-primary/10 transition-all duration-300 overflow-hidden rounded-lg w-10 h-10 sm:w-12 sm:h-12"
+                  className="relative group hover:bg-primary/10 transition-all duration-300 overflow-hidden rounded-lg touch-target"
+                  style={{
+                    WebkitTapHighlightColor: 'transparent',
+                    touchAction: 'manipulation',
+                    width: '48px',
+                    height: '48px',
+                    minWidth: '48px',
+                    minHeight: '48px',
+                  }}
                 >
                   
                   <AnimatePresence mode="wait">
@@ -567,27 +619,36 @@ const UltraNavigation = () => {
           </div>
         </div>
 
-        {/* Mobile Menu */}
+        {/* Mobile Menu - Full-Screen Overlay */}
         <AnimatePresence>
           {isMenuOpen && (
             <>
-              {/* Backdrop - Click outside to close */}
+              {/* Backdrop - Full Screen on Mobile */}
               <motion.div
-                className="lg:hidden fixed inset-0 bg-black/20 backdrop-blur-sm z-[99]"
+                className="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-md z-[99]"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.3 }}
                 onClick={() => setIsMenuOpen(false)}
+                style={{
+                  top: 'env(safe-area-inset-top, 0)',
+                  bottom: 'env(safe-area-inset-bottom, 0)',
+                }}
               />
             <motion.div
               ref={menuRef}
-                className="lg:hidden absolute top-full left-0 right-0 bg-background/98 backdrop-blur-xl border-t border-primary/20 shadow-luxury z-[100]"
-              style={{ backgroundColor: 'rgba(229, 228, 226, 0.98)' }}
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
+                className="lg:hidden fixed inset-0 top-[var(--nav-height,4rem)] sm:top-[var(--nav-height,5rem)] bg-background/98 backdrop-blur-xl shadow-luxury z-[100] overflow-y-auto"
+              style={{ 
+                backgroundColor: 'rgba(229, 228, 226, 0.98)',
+                paddingTop: isMobile ? 'env(safe-area-inset-top, 1rem)' : undefined,
+                paddingBottom: isMobile ? 'env(safe-area-inset-bottom, 2rem)' : undefined,
+                WebkitOverflowScrolling: 'touch',
+              }}
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
             >
               <div className="px-4 sm:px-6 py-6 sm:py-8 space-y-3 sm:space-y-4">
                 {navigationItems.map((item, index) => {
@@ -607,12 +668,18 @@ const UltraNavigation = () => {
                     >
                       <Button
                         variant="ghost"
-                        className={`w-full justify-start p-3 sm:p-4 text-left group relative overflow-hidden rounded-xl transition-all duration-500 ${
+                        className={`w-full justify-start text-left group relative overflow-hidden rounded-xl transition-all duration-500 touch-target ${
                           isActive
                             ? 'text-foreground'
                             : 'text-foreground hover:text-foreground'
                         }`}
                         onClick={() => handleNavigation(item.path)}
+                        style={{
+                          WebkitTapHighlightColor: 'transparent',
+                          touchAction: 'manipulation',
+                          padding: isMobile ? '1rem 1.25rem' : undefined,
+                          minHeight: '56px',
+                        }}
                       >
                         {/* Active Gold Background */}
                         {isActive && (
@@ -687,12 +754,18 @@ const UltraNavigation = () => {
                 >
                   <Button
                     variant="ghost"
-                    className={`w-full justify-start p-3 sm:p-4 text-left group relative overflow-hidden rounded-xl transition-all duration-500 ${
+                    className={`w-full justify-start text-left group relative overflow-hidden rounded-xl transition-all duration-500 touch-target ${
                       location.pathname === "/favorites"
                         ? 'text-foreground'
                         : 'text-foreground'
                     }`}
                     onClick={() => handleNavigation("/favorites")}
+                    style={{
+                      WebkitTapHighlightColor: 'transparent',
+                      touchAction: 'manipulation',
+                      padding: isMobile ? '1rem 1.25rem' : undefined,
+                      minHeight: '56px',
+                    }}
                   >
                     {location.pathname === "/favorites" && (
                       <motion.div
@@ -753,42 +826,60 @@ const UltraNavigation = () => {
                   }}
                   className="pt-4 border-t border-primary/20 mt-4"
                 >
-                  <div className="flex items-center justify-center gap-3">
-                    {/* WhatsApp */}
+                  <div className="flex items-center justify-center gap-4 sm:gap-3">
+                    {/* WhatsApp - Touch-Friendly */}
                     <motion.a
                       href="https://api.whatsapp.com/send/?phone=96176104882&text&type=phone_number&app_absent=0&wame_ctl=1"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center text-primary hover:bg-primary hover:text-background transition-colors"
+                      className="w-12 h-12 sm:w-10 sm:h-10 bg-primary/20 rounded-full flex items-center justify-center text-primary hover:bg-primary hover:text-background transition-colors touch-target"
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.95 }}
                       aria-label="WhatsApp"
+                      style={{
+                        WebkitTapHighlightColor: 'transparent',
+                        touchAction: 'manipulation',
+                        minWidth: '48px',
+                        minHeight: '48px',
+                      }}
                     >
-                      <WhatsAppIcon className="w-4 h-4" />
+                      <WhatsAppIcon className="w-5 h-5 sm:w-4 sm:h-4" />
                     </motion.a>
 
-                    {/* Instagram */}
+                    {/* Instagram - Touch-Friendly */}
                     <motion.a
                       href="https://www.instagram.com/bexyflowers?igsh=cTcybzM0dzVkc25v"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center text-primary hover:bg-primary hover:text-background transition-colors"
+                      className="w-12 h-12 sm:w-10 sm:h-10 bg-primary/20 rounded-full flex items-center justify-center text-primary hover:bg-primary hover:text-background transition-colors touch-target"
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.95 }}
                       aria-label="Instagram"
+                      style={{
+                        WebkitTapHighlightColor: 'transparent',
+                        touchAction: 'manipulation',
+                        minWidth: '48px',
+                        minHeight: '48px',
+                      }}
                     >
-                      <Instagram className="w-4 h-4" />
+                      <Instagram className="w-5 h-5 sm:w-4 sm:h-4" />
                     </motion.a>
 
-                    {/* TikTok */}
+                    {/* TikTok - Touch-Friendly */}
                     <motion.a
                       href="https://www.tiktok.com/@bexyflower?_r=1&_t=ZS-91i2FtAJdVF"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center text-primary hover:bg-primary hover:text-background transition-colors"
+                      className="w-12 h-12 sm:w-10 sm:h-10 bg-primary/20 rounded-full flex items-center justify-center text-primary hover:bg-primary hover:text-background transition-colors touch-target"
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.95 }}
                       aria-label="TikTok"
+                      style={{
+                        WebkitTapHighlightColor: 'transparent',
+                        touchAction: 'manipulation',
+                        minWidth: '48px',
+                        minHeight: '48px',
+                      }}
                     >
                       <svg
                         className="w-4 h-4"

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
 import { X, ShoppingCart, Trash2, Plus, Minus, CreditCard, ArrowRight, Sparkles, Package } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { Button } from '@/components/ui/button';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface CartDashboardProps {
   isOpen: boolean;
@@ -12,10 +13,55 @@ interface CartDashboardProps {
 const CartDashboard: React.FC<CartDashboardProps> = ({ isOpen, onClose }) => {
   const { cartItems, removeFromCart, updateQuantity, getTotalItems, getTotalPrice, clearCart } = useCart();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const isMobile = useIsMobile();
 
   const isEmpty = cartItems.length === 0;
   const totalPrice = getTotalPrice();
   const accentColor = '#C79E48';
+
+  // Swipe-to-close for mobile
+  const y = useMotionValue(0);
+  const opacity = useTransform(y, [0, 300], [1, 0]);
+  const translateY = useTransform(y, [0, 300], [0, 300]);
+
+  // Prevent body scroll when cart is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+      if (isMobile) {
+        document.body.style.position = "fixed";
+        document.body.style.width = "100%";
+      }
+    } else {
+      document.body.style.overflow = "";
+      if (isMobile) {
+        document.body.style.position = "";
+        document.body.style.width = "";
+      }
+      // Reset swipe position
+      y.set(0);
+    }
+
+    return () => {
+      document.body.style.overflow = "";
+      if (isMobile) {
+        document.body.style.position = "";
+        document.body.style.width = "";
+      }
+    };
+  }, [isOpen, isMobile, y]);
+
+  // Handle swipe gesture for mobile
+  const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    if (!isMobile) return;
+    
+    y.set(0); // Reset position
+    
+    // Close cart if swiped down more than 150px or with velocity > 500
+    if (info.offset.y > 150 || info.velocity.y > 500) {
+      onClose();
+    }
+  };
 
   const handleCheckout = (e?: React.MouseEvent<HTMLButtonElement> | MouseEvent) => {
     try {
@@ -253,17 +299,35 @@ const CartDashboard: React.FC<CartDashboardProps> = ({ isOpen, onClose }) => {
             onClick={onClose}
           />
 
-          {/* Dashboard - Sharp Architectural Design */}
+          {/* Dashboard - Mobile Full-Screen / Desktop Side Panel */}
           <motion.div
-            initial={{ opacity: 0, x: '100%' }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: '100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed top-0 right-0 h-full w-full max-w-md sm:max-w-lg bg-white shadow-2xl z-50 overflow-hidden"
-            style={{
-              clipPath: 'polygon(0 0, calc(100% - 30px) 0, 100% 30px, 100% 100%, 30px 100%, 0 calc(100% - 30px))'
+            initial={{ opacity: 0, [isMobile ? 'y' : 'x']: isMobile ? '100%' : '100%' }}
+            animate={{ 
+              opacity: isMobile ? opacity : 1, 
+              [isMobile ? 'y' : 'x']: isMobile ? translateY : 0 
             }}
+            exit={{ opacity: 0, [isMobile ? 'y' : 'x']: isMobile ? '100%' : '100%' }}
+            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            className={`fixed ${
+              isMobile 
+                ? 'top-0 left-0 right-0 bottom-0 h-full w-full' 
+                : 'top-0 right-0 h-full w-full max-w-md sm:max-w-lg'
+            } bg-white shadow-2xl z-50 overflow-hidden`}
+            style={{
+              clipPath: isMobile ? 'none' : 'polygon(0 0, calc(100% - 30px) 0, 100% 30px, 100% 100%, 30px 100%, 0 calc(100% - 30px))',
+              paddingTop: isMobile ? 'env(safe-area-inset-top, 0)' : undefined,
+              paddingBottom: isMobile ? 'env(safe-area-inset-bottom, 0)' : undefined,
+            }}
+            drag={isMobile ? "y" : false}
+            dragConstraints={{ top: 0, bottom: 0 }}
+            dragElastic={0.2}
+            onDragEnd={handleDragEnd}
+            dragDirectionLock
           >
+            {/* Swipe Indicator for Mobile */}
+            {isMobile && (
+              <div className="absolute top-2 left-1/2 transform -translate-x-1/2 w-12 h-1 bg-gray-300 rounded-full z-20" />
+            )}
             {/* Geometric Pattern Background */}
             <div 
               className="absolute inset-0 opacity-[0.02] pointer-events-none"
@@ -276,33 +340,41 @@ const CartDashboard: React.FC<CartDashboardProps> = ({ isOpen, onClose }) => {
               }}
             />
 
-            {/* Header - Sharp Professional Design */}
+            {/* Header - Mobile Optimized */}
             <div 
-              className="relative flex items-center justify-between p-6 border-b-2"
+              className={`relative flex items-center justify-between border-b-2 ${
+                isMobile ? 'p-4' : 'p-6'
+              }`}
               style={{
                 borderColor: `${accentColor}20`,
-                background: `linear-gradient(135deg, ${accentColor}08 0%, white 100%)`
+                background: `linear-gradient(135deg, ${accentColor}08 0%, white 100%)`,
+                paddingTop: isMobile ? 'calc(env(safe-area-inset-top, 0) + 1rem)' : undefined,
               }}
             >
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-3 sm:space-x-4">
                 <div 
-                  className="w-12 h-12 flex items-center justify-center"
+                  className={`flex items-center justify-center ${
+                    isMobile ? 'w-10 h-10' : 'w-12 h-12'
+                  }`}
                   style={{
                     background: `linear-gradient(135deg, ${accentColor} 0%, ${accentColor}dd 100%)`,
-                    clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))',
+                    clipPath: isMobile ? 'none' : 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))',
+                    borderRadius: isMobile ? '0.5rem' : undefined,
                     boxShadow: `0 4px 12px ${accentColor}30`
                   }}
                 >
-                  <ShoppingCart className="w-6 h-6 text-white" strokeWidth={2.5} />
+                  <ShoppingCart className={`${isMobile ? 'w-5 h-5' : 'w-6 h-6'} text-white`} strokeWidth={2.5} />
                 </div>
                 <div>
                   <h2 
-                    className="font-luxury text-2xl font-bold text-slate-900"
+                    className={`font-luxury font-bold text-slate-900 ${
+                      isMobile ? 'text-xl' : 'text-2xl'
+                    }`}
                     style={{ letterSpacing: '-0.02em' }}
                   >
                     Shopping Cart
                   </h2>
-                  <p className="text-sm text-slate-600 font-medium">
+                  <p className={`text-slate-600 font-medium ${isMobile ? 'text-xs' : 'text-sm'}`}>
                     {getTotalItems()} {getTotalItems() === 1 ? 'item' : 'items'}
                   </p>
                 </div>
@@ -311,17 +383,44 @@ const CartDashboard: React.FC<CartDashboardProps> = ({ isOpen, onClose }) => {
                 variant="ghost"
                 size="icon"
                 onClick={onClose}
-                className="w-10 h-10 rounded-lg hover:bg-slate-100"
+                className={`rounded-lg hover:bg-slate-100 touch-target ${
+                  isMobile ? 'w-12 h-12' : 'w-10 h-10'
+                }`}
                 style={{
-                  clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'
+                  clipPath: isMobile ? 'none' : 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))',
+                  WebkitTapHighlightColor: 'transparent',
+                  touchAction: 'manipulation',
+                  minWidth: '48px',
+                  minHeight: '48px',
                 }}
               >
-                <X className="w-5 h-5" />
+                <X className={`${isMobile ? 'w-6 h-6' : 'w-5 h-5'}`} />
               </Button>
             </div>
 
-            {/* Content */}
-            <div className="flex flex-col h-[calc(100%-80px)]">
+            {/* Content - Scrollable */}
+            <div 
+              className={`flex flex-col ${
+                isMobile ? 'h-[calc(100%-var(--header-height,4.5rem))]' : 'h-[calc(100%-80px)]'
+              } overflow-y-auto`}
+              style={{
+                WebkitOverflowScrolling: 'touch',
+                scrollbarWidth: 'thin',
+                scrollbarColor: `${accentColor}50 transparent`,
+              }}
+            >
+              <style>{`
+                div::-webkit-scrollbar {
+                  width: 4px;
+                }
+                div::-webkit-scrollbar-track {
+                  background: transparent;
+                }
+                div::-webkit-scrollbar-thumb {
+                  background-color: ${accentColor}50;
+                  border-radius: 2px;
+                }
+              `}</style>
               {isEmpty ? (
                 /* Empty State - Sharp Design */
                 <div className="flex-1 flex items-center justify-center p-8">
@@ -532,11 +631,17 @@ const CartDashboard: React.FC<CartDashboardProps> = ({ isOpen, onClose }) => {
                                 </div>
                               )}
                               
-                              {/* Quantity Controls - Enhanced Sharp Design */}
-                              <div className="flex items-center justify-between pt-3 border-t border-slate-200">
+                              {/* Quantity Controls - Mobile Optimized */}
+                              <div className={`flex items-center justify-between pt-3 border-t border-slate-200 ${
+                                isMobile ? 'flex-col gap-3' : ''
+                              }`}>
                                 <div className="flex items-center gap-2.5">
-                                  <span className="text-xs text-slate-600 font-semibold uppercase tracking-wider">Quantity:</span>
-                                  <div className="flex items-center gap-1.5 bg-slate-50 p-1 rounded-lg" style={{ clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))' }}>
+                                  <span className={`text-slate-600 font-semibold uppercase tracking-wider ${
+                                    isMobile ? 'text-xs' : 'text-xs'
+                                  }`}>Quantity:</span>
+                                  <div className={`flex items-center gap-1.5 bg-slate-50 rounded-lg ${
+                                    isMobile ? 'p-1.5' : 'p-1'
+                                  }`} style={{ clipPath: isMobile ? 'none' : 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))' }}>
                                     <motion.button
                                       onClick={(e) => {
                                         e.stopPropagation();
@@ -551,18 +656,27 @@ const CartDashboard: React.FC<CartDashboardProps> = ({ isOpen, onClose }) => {
                                         }
                                       }}
                                       disabled={item.quantity <= 1}
-                                      className="w-8 h-8 flex items-center justify-center text-slate-700 hover:text-slate-900 hover:bg-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                      className={`flex items-center justify-center text-slate-700 hover:text-slate-900 hover:bg-white transition-all disabled:opacity-50 disabled:cursor-not-allowed touch-target ${
+                                        isMobile ? 'w-10 h-10' : 'w-8 h-8'
+                                      }`}
                                       style={{
-                                        clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))',
-                                        border: '1px solid #e2e8f0'
+                                        clipPath: isMobile ? 'none' : 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))',
+                                        border: '1px solid #e2e8f0',
+                                        borderRadius: isMobile ? '0.5rem' : undefined,
+                                        WebkitTapHighlightColor: 'transparent',
+                                        touchAction: 'manipulation',
+                                        minWidth: '44px',
+                                        minHeight: '44px',
                                       }}
-                                      whileHover={item.quantity > 1 ? { scale: 1.05, backgroundColor: 'white' } : {}}
+                                      whileHover={item.quantity > 1 && !isMobile ? { scale: 1.05, backgroundColor: 'white' } : {}}
                                       whileTap={item.quantity > 1 ? { scale: 0.95 } : {}}
                                       title={item.quantity <= 1 ? 'Minimum quantity is 1' : 'Decrease quantity'}
                                     >
-                                      <Minus className="w-4 h-4" strokeWidth={2.5} />
+                                      <Minus className={`${isMobile ? 'w-5 h-5' : 'w-4 h-4'}`} strokeWidth={2.5} />
                                     </motion.button>
-                                    <span className="w-10 text-center text-sm font-bold text-slate-900">{item.quantity}</span>
+                                    <span className={`text-center font-bold text-slate-900 ${
+                                      isMobile ? 'w-12 text-base' : 'w-10 text-sm'
+                                    }`}>{item.quantity}</span>
                                     <motion.button
                                       onClick={(e) => {
                                         e.stopPropagation();
@@ -578,16 +692,23 @@ const CartDashboard: React.FC<CartDashboardProps> = ({ isOpen, onClose }) => {
                                         }
                                       }}
                                       disabled={item.quantity >= 99}
-                                      className="w-8 h-8 flex items-center justify-center text-slate-700 hover:text-slate-900 hover:bg-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                      className={`flex items-center justify-center text-slate-700 hover:text-slate-900 hover:bg-white transition-all disabled:opacity-50 disabled:cursor-not-allowed touch-target ${
+                                        isMobile ? 'w-10 h-10' : 'w-8 h-8'
+                                      }`}
                                       style={{
-                                        clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))',
-                                        border: '1px solid #e2e8f0'
+                                        clipPath: isMobile ? 'none' : 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))',
+                                        border: '1px solid #e2e8f0',
+                                        borderRadius: isMobile ? '0.5rem' : undefined,
+                                        WebkitTapHighlightColor: 'transparent',
+                                        touchAction: 'manipulation',
+                                        minWidth: '44px',
+                                        minHeight: '44px',
                                       }}
-                                      whileHover={item.quantity < 99 ? { scale: 1.05, backgroundColor: 'white' } : {}}
+                                      whileHover={item.quantity < 99 && !isMobile ? { scale: 1.05, backgroundColor: 'white' } : {}}
                                       whileTap={item.quantity < 99 ? { scale: 0.95 } : {}}
                                       title={item.quantity >= 99 ? 'Maximum quantity is 99' : 'Increase quantity'}
                                     >
-                                      <Plus className="w-4 h-4" strokeWidth={2.5} />
+                                      <Plus className={`${isMobile ? 'w-5 h-5' : 'w-4 h-4'}`} strokeWidth={2.5} />
                                     </motion.button>
                                   </div>
                                 </div>
@@ -605,7 +726,7 @@ const CartDashboard: React.FC<CartDashboardProps> = ({ isOpen, onClose }) => {
                               </div>
                             </div>
 
-                            {/* Remove Button - Enhanced Sharp Design with Confirmation */}
+                            {/* Remove Button - Mobile Optimized */}
                             <motion.button
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -619,17 +740,24 @@ const CartDashboard: React.FC<CartDashboardProps> = ({ isOpen, onClose }) => {
                                   console.error('Error removing item:', error);
                                 }
                               }}
-                              className="w-9 h-9 flex items-center justify-center text-red-600 hover:text-red-700 hover:bg-red-50 transition-all flex-shrink-0"
+                              className={`flex items-center justify-center text-red-600 hover:text-red-700 hover:bg-red-50 transition-all flex-shrink-0 touch-target ${
+                                isMobile ? 'w-12 h-12' : 'w-9 h-9'
+                              }`}
                               style={{
-                                clipPath: 'polygon(0 0, calc(100% - 5px) 0, 100% 5px, 100% 100%, 5px 100%, 0 calc(100% - 5px))',
+                                WebkitTapHighlightColor: 'transparent',
+                                touchAction: 'manipulation',
+                                minWidth: '44px',
+                                minHeight: '44px',
+                                clipPath: isMobile ? 'none' : 'polygon(0 0, calc(100% - 5px) 0, 100% 5px, 100% 100%, 5px 100%, 0 calc(100% - 5px))',
+                                borderRadius: isMobile ? '0.5rem' : undefined,
                                 border: '1.5px solid #fee2e2',
                                 boxShadow: '0 1px 3px rgba(239, 68, 68, 0.1)'
                               }}
-                              whileHover={{ scale: 1.1, backgroundColor: '#fef2f2' }}
+                              whileHover={!isMobile ? { scale: 1.1, backgroundColor: '#fef2f2' } : {}}
                               whileTap={{ scale: 0.9 }}
                               title="Remove item from cart"
                             >
-                              <Trash2 className="w-4 h-4" strokeWidth={2.5} />
+                              <Trash2 className={`${isMobile ? 'w-5 h-5' : 'w-4 h-4'}`} strokeWidth={2.5} />
                             </motion.button>
                           </div>
                         </div>
