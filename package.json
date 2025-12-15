@@ -9,7 +9,13 @@
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
-    "migrate": "node scripts/migrate-to-supabase.mjs"
+    "migrate": "node scripts/migrate-to-supabase.mjs",
+    "convert:webp": "node scripts/convert-images-to-webp.mjs",
+    "prune:non-webp": "node scripts/prune-non-webp.mjs",
+    "fix:wedding-webp": "node scripts/fix-wedding-creations-local-to-webp.mjs",
+    "convert:public-webp": "node scripts/convert-public-assets-to-webp.mjs",
+    "delete:originals": "node scripts/delete-original-images.mjs",
+    "convert:public-webp": "node scripts/convert-public-assets-to-webp.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -45,6 +51,7 @@
     "@studio-freight/lenis": "^1.0.42",
     "@supabase/supabase-js": "^2.87.1",
     "@tanstack/react-query": "^5.83.0",
+    "dotenv": "^16.4.5",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
@@ -68,7 +75,8 @@
     "tailwindcss-animate": "^1.0.7",
     "three": "^0.158.0",
     "vaul": "^0.9.9",
-    "zod": "^3.25.76"
+    "zod": "^3.25.76",
+    "sharp": "^0.33.4"
   },
   "devDependencies": {
     "@eslint/js": "^9.32.0",

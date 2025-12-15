@@ -23,42 +23,42 @@ const SIGNATURE_BOUQUETS: SignatureBouquet[] = [
     id: 1,
     name: "Royal Red Elegance",
     price: "$299",
-    image: "/assets/red roses/medium red roses flower in a black box.png",
+    image: "/assets/red roses/medium red roses flower in a black box.webp",
     description: "Luxurious red roses with glittering accents"
   },
   {
     id: 2,
     name: "Wedding Serenity",
     price: "$349",
-    image: "/assets/wedding % events/IMG_1673.JPG",
+    image: "/assets/wedding % events/IMG_1673.webp",
     description: "Pure elegant arrangement for special moments"
   },
   {
     id: 3,
     name: "Golden Heart",
     price: "$425",
-    image: "/assets/red roses/red roses in a golden heart shaped box.jpg",
+    image: "/assets/red roses/red roses in a golden heart shaped box.webp",
     description: "Premium roses in a stunning golden heart box"
   },
   {
     id: 4,
     name: "Event Grandeur",
     price: "$289",
-    image: "/assets/wedding % events/events/IMG-20251126-WA0024.jpg",
+    image: "/assets/wedding % events/events/IMG-20251126-WA0024.webp",
     description: "Spectacular floral design for grand events"
   },
   {
     id: 5,
     name: "Heart's Desire",
     price: "$399",
-    image: "/assets/heart shape/IMG-20251001-WA0018.jpg",
+    image: "/assets/heart shape/IMG-20251001-WA0018.webp",
     description: "Romantic heart-shaped arrangement"
   },
   {
     id: 6,
     name: "Glittering Passion",
     price: "$329",
-    image: "/assets/red roses/red roses bouquet with red glitter.jpg",
+    image: "/assets/red roses/red roses bouquet with red glitter.webp",
     description: "Radiant red roses with a touch of sparkle"
   }
 ];

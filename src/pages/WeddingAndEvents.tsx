@@ -20,21 +20,21 @@ const GOLD_HEX = "#c79e48";
 
 // Wedding images will be loaded from Supabase
 
-// Event flowers images - automatically rotating
+// Event flowers images - automatically rotating (use .webp optimized versions)
 const eventFlowersImages = [
-  encodeURI("/assets/wedding % events/events/IMG-20251126-WA0018.jpg"),
-  encodeURI("/assets/wedding % events/events/IMG-20251126-WA0020.jpg"),
-  encodeURI("/assets/wedding % events/events/IMG-20251126-WA0022.jpg"),
-  encodeURI("/assets/wedding % events/events/IMG-20251126-WA0023.jpg"),
-  encodeURI("/assets/wedding % events/events/IMG-20251126-WA0024.jpg"),
-  encodeURI("/assets/wedding % events/events/WhatsApp Image 2025-11-26 at 03.14.12_6dbd359d.jpg"),
+  encodeURI("/assets/wedding % events/events/IMG-20251126-WA0018.webp"),
+  encodeURI("/assets/wedding % events/events/IMG-20251126-WA0020.webp"),
+  encodeURI("/assets/wedding % events/events/IMG-20251126-WA0022.webp"),
+  encodeURI("/assets/wedding % events/events/IMG-20251126-WA0023.webp"),
+  encodeURI("/assets/wedding % events/events/IMG-20251126-WA0024.webp"),
+  encodeURI("/assets/wedding % events/events/WhatsApp Image 2025-11-26 at 03.14.12_6dbd359d.webp"),
 ];
 
-// Wedding flowers images - automatically rotating
+// Wedding flowers images - automatically rotating (use .webp optimized versions)
 const weddingFlowersImages = [
-  encodeURI("/assets/wedding % events/wedding/IMG_1784.jpg"),
-  encodeURI("/assets/wedding % events/wedding/IMG-20251126-WA0019.jpg"),
-  encodeURI("/assets/wedding % events/wedding/IMG-20251126-WA0021.jpg"),
+  encodeURI("/assets/wedding % events/wedding/IMG_1784.webp"),
+  encodeURI("/assets/wedding % events/wedding/IMG-20251126-WA0019.webp"),
+  encodeURI("/assets/wedding % events/wedding/IMG-20251126-WA0021.webp"),
 ];
 
 const WeddingHero = () => {

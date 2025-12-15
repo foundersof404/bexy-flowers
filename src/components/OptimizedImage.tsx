@@ -40,12 +40,13 @@ export const OptimizedImage = ({
   const [isInView, setIsInView] = useState(priority); // Priority images load immediately
   const [hasError, setHasError] = useState(false);
   const [imageSrc, setImageSrc] = useState<string | null>(priority ? src : null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
 
-  // Intersection Observer for lazy loading
+  // Intersection Observer for lazy loading - observe container instead of image
   useEffect(() => {
-    if (priority || !imgRef.current) return;
+    if (priority || !containerRef.current) return;
 
     observerRef.current = new IntersectionObserver(
       (entries) => {
@@ -58,13 +59,13 @@ export const OptimizedImage = ({
         });
       },
       {
-        rootMargin: '50px', // Start loading 50px before image enters viewport
+        rootMargin: '100px', // Start loading 100px before image enters viewport for better UX
         threshold: 0.01,
       }
     );
 
-    if (imgRef.current) {
-      observerRef.current.observe(imgRef.current);
+    if (containerRef.current) {
+      observerRef.current.observe(containerRef.current);
     }
 
     return () => {
@@ -100,6 +101,7 @@ export const OptimizedImage = ({
 
   return (
     <div
+      ref={containerRef}
       className={`relative overflow-hidden ${className}`}
       style={{ aspectRatio: aspectRatio || 'auto' }}
     >
@@ -141,28 +143,27 @@ export const OptimizedImage = ({
         />
       )}
 
-      {/* Main image */}
-      {isInView && (
-        <motion.img
-          ref={imgRef}
-          src={hasError ? fallbackSrc : imageSrc || src}
-          alt={alt}
-          className={`w-full h-full ${className}`}
-          style={{
-            objectFit,
-            opacity: isLoading ? 0 : 1,
-            transition: 'opacity 0.3s ease-in-out',
-          }}
-          loading={priority ? 'eager' : 'lazy'}
-          decoding="async"
-          draggable={false}
-          sizes={sizes}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: isLoading ? 0 : 1 }}
-          transition={{ duration: 0.3 }}
-          {...props}
-        />
-      )}
+      {/* Main image - always render but control visibility */}
+      <motion.img
+        ref={imgRef}
+        src={hasError ? fallbackSrc : (isInView ? (imageSrc || src) : '')}
+        alt={alt}
+        className={`w-full h-full ${className}`}
+        style={{
+          objectFit,
+          opacity: isLoading || !isInView ? 0 : 1,
+          transition: 'opacity 0.3s ease-in-out',
+          visibility: isInView ? 'visible' : 'hidden',
+        }}
+        loading={priority ? 'eager' : 'lazy'}
+        decoding="async"
+        draggable={false}
+        sizes={sizes}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: isLoading || !isInView ? 0 : 1 }}
+        transition={{ duration: 0.3 }}
+        {...props}
+      />
 
       {/* Loading indicator for priority images */}
       {priority && isLoading && (

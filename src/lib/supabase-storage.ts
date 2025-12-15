@@ -1,5 +1,38 @@
 import { supabase } from './supabase';
 
+// Default WebP quality for client-side conversion (0-1 range)
+const DEFAULT_WEBP_QUALITY = 0.82;
+
+/**
+ * Convert an image File to WebP in the browser. On the server (Node scripts), this is a no-op.
+ */
+async function ensureWebpFile(file: File): Promise<File> {
+  // Node path: skip conversion to avoid DOM APIs
+  if (typeof window === 'undefined') return file;
+  if (file.type === 'image/webp') return file;
+
+  // Convert using a canvas
+  const imageBitmap = await createImageBitmap(file);
+  const canvas = document.createElement('canvas');
+  canvas.width = imageBitmap.width;
+  canvas.height = imageBitmap.height;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return file;
+  ctx.drawImage(imageBitmap, 0, 0);
+
+  const blob: Blob | null = await new Promise((resolve) =>
+    canvas.toBlob(
+      (b) => resolve(b),
+      'image/webp',
+      DEFAULT_WEBP_QUALITY
+    )
+  );
+  if (!blob) return file;
+
+  const newName = file.name.replace(/\.[^.]+$/, '.webp');
+  return new File([blob], newName, { type: 'image/webp', lastModified: Date.now() });
+}
+
 export type StorageBucket = 'product-images' | 'flower-images' | 'accessory-images' | 'wedding-creations';
 
 /**
@@ -14,18 +47,22 @@ export async function uploadImage(
   file: File,
   folder?: string
 ): Promise<{ url: string; path: string }> {
+  // Ensure new uploads are WebP on the client; Node scripts skip conversion
+  const uploadFile = await ensureWebpFile(file);
+
   try {
     // Generate unique filename
-    const fileExt = file.name.split('.').pop();
+    const fileExt = uploadFile.name.split('.').pop();
     const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
     const filePath = folder ? `${folder}/${fileName}` : fileName;
 
     // Upload file
     const { data, error: uploadError } = await supabase.storage
       .from(bucket)
-      .upload(filePath, file, {
+      .upload(filePath, uploadFile, {
         cacheControl: '3600',
         upsert: false,
+        contentType: uploadFile.type || 'image/webp',
       });
 
     if (uploadError) {
