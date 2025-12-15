@@ -383,7 +383,7 @@ CREATE POLICY "Allow all operations on accessories"
 1. In Supabase dashboard, go to **Storage** (left sidebar)
 2. Click **"New bucket"**
 
-Create these three buckets (one at a time):
+Create these four buckets (one at a time):
 
 ### Bucket 1: `product-images`
 - **Name:** `product-images`
@@ -397,6 +397,11 @@ Create these three buckets (one at a time):
 
 ### Bucket 3: `accessory-images`
 - **Name:** `accessory-images`
+- **Public bucket:** ✅ Check this
+- Click **"Create bucket"**
+
+### Bucket 4: `wedding-creations`
+- **Name:** `wedding-creations`
 - **Public bucket:** ✅ Check this
 - Click **"Create bucket"**
 
@@ -438,7 +443,7 @@ For each bucket you created, configure policies:
   ```
 - Click **"Save"**
 
-**Repeat for all three buckets:** `product-images`, `flower-images`, `accessory-images`
+**Repeat for all four buckets:** `product-images`, `flower-images`, `accessory-images`, `wedding-creations`
 
 ---
 
@@ -456,10 +461,11 @@ For each bucket you created, configure policies:
    - ✅ `signature_collections`
 
 3. Go to **Storage**
-4. You should see 3 buckets:
+4. You should see 4 buckets:
    - ✅ `product-images`
    - ✅ `flower-images`
    - ✅ `accessory-images`
+   - ✅ `wedding-creations`
 
 ---
 
@@ -493,7 +499,7 @@ For each bucket you created, configure policies:
 - The admin policies should allow all operations
 
 ### Error: "bucket does not exist"
-- **Fix:** Check bucket names are exactly: `product-images`, `flower-images`, `accessory-images`
+- **Fix:** Check bucket names are exactly: `product-images`, `flower-images`, `accessory-images`, `wedding-creations`
 - Make sure buckets are set to **Public**
 
 ### Error: "Failed to upload image"

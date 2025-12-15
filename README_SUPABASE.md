@@ -91,6 +91,7 @@ In Supabase dashboard, go to **Storage**:
 1. Click **New bucket** → name it `product-images` → set to **Public** → Create
 2. Click **New bucket** → name it `flower-images` → set to **Public** → Create
 3. Click **New bucket** → name it `accessory-images` → set to **Public** → Create
+4. Click **New bucket** → name it `wedding-creations` → set to **Public** → Create
 
 For each bucket, configure policies (click bucket → Policies):
 - Allow **SELECT** for everyone (public read)

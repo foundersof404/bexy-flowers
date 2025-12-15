@@ -52,3 +52,4 @@ CREATE POLICY "Admins can manage wedding creations"
 
 
 
+

@@ -27,6 +27,15 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
 
   React.useEffect(() => {
     setPreviewUrls(images);
+    // Reset uploaded files if images change and none are blob URLs (meaning they're external URLs, not local file previews)
+    const hasBlobUrls = images.some(url => url.startsWith('blob:'));
+    if (!hasBlobUrls && images.length > 0) {
+      // Clear uploaded files when external URLs are set (e.g., when editing existing items)
+      setUploadedFiles([]);
+    } else if (images.length === 0) {
+      // Clear uploaded files when images array is empty
+      setUploadedFiles([]);
+    }
   }, [images]);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -34,26 +43,41 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
     
     if (files.length === 0) return;
 
+    // For single image mode, replace existing; for multiple, add to existing
+    const newPreviewUrls = files.map((file) => URL.createObjectURL(file));
+    const finalPreviewUrls = multiple 
+      ? [...previewUrls, ...newPreviewUrls]
+      : newPreviewUrls;
+
     // Check max images limit
-    const totalImages = previewUrls.length + files.length;
-    if (totalImages > maxImages) {
+    if (finalPreviewUrls.length > maxImages) {
+      // Revoke the blob URLs we just created
+      newPreviewUrls.forEach(url => URL.revokeObjectURL(url));
       alert(`Maximum ${maxImages} images allowed`);
       return;
     }
 
-    // Create preview URLs
-    const newPreviewUrls = files.map((file) => URL.createObjectURL(file));
-    setPreviewUrls([...previewUrls, ...newPreviewUrls]);
+    // Revoke old blob URLs if replacing (single image mode)
+    if (!multiple && previewUrls.length > 0) {
+      previewUrls.forEach(url => {
+        if (url.startsWith('blob:')) {
+          URL.revokeObjectURL(url);
+        }
+      });
+    }
 
-    // Store files for upload
-    const newFiles = [...uploadedFiles, ...files];
-    setUploadedFiles(newFiles);
+    setPreviewUrls(finalPreviewUrls);
+
+    // Store files for upload - replace for single, add for multiple
+    const finalFiles = multiple ? [...uploadedFiles, ...files] : files;
+    setUploadedFiles(finalFiles);
     if (onFilesChange) {
-      onFilesChange(newFiles);
+      onFilesChange(finalFiles);
     }
 
     // Update images array with placeholder URLs (will be replaced with actual URLs after upload)
-    onImagesChange([...images, ...newPreviewUrls]);
+    const finalImages = multiple ? [...images, ...newPreviewUrls] : newPreviewUrls;
+    onImagesChange(finalImages);
 
     // Reset input
     if (fileInputRef.current) {
@@ -93,8 +117,10 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
     );
 
     if (files.length > 0) {
+      // For single image mode, only take the first file
+      const filesToUse = multiple ? files : [files[0]];
       const dataTransfer = new DataTransfer();
-      files.forEach((file) => dataTransfer.items.add(file));
+      filesToUse.forEach((file) => dataTransfer.items.add(file));
       
       if (fileInputRef.current) {
         fileInputRef.current.files = dataTransfer.files;
