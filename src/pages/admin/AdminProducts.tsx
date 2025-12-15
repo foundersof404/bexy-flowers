@@ -1,19 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   Plus,
   Edit,
   Trash2,
   Search,
-  Filter,
   X,
   Save,
-  Upload,
-  Image as ImageIcon,
   DollarSign,
   Percent,
-  Package,
   Heart,
   ShoppingCart,
   CheckCircle,
@@ -21,7 +17,9 @@ import {
   Calendar,
   AlertCircle,
   ArrowLeft,
-  Eye,
+  Loader2,
+  Tag,
+  Download,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,22 +32,20 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { generatedBouquets, generatedCategories } from "@/data/generatedBouquets";
-import type { Bouquet } from "@/types/bouquet";
+import { generatedCategories } from "@/data/generatedBouquets";
+import { ImageUpload } from "@/components/admin/ImageUpload";
+import {
+  getCollectionProducts,
+  getCollectionProduct,
+  createCollectionProduct,
+  updateCollectionProduct,
+  deleteCollectionProduct,
+  getAllTags,
+} from "@/lib/api/collection-products";
+import { migrateProductsToSupabase } from "@/lib/migrateProducts";
+import { encodeImageUrl } from "@/lib/imageUtils";
 
 const GOLD_COLOR = "rgb(199, 158, 72)";
-
-// Extended product interface
-interface ExtendedProduct extends Bouquet {
-  outOfStock?: boolean;
-  soldOut?: boolean;
-  seasonal?: boolean;
-  discount?: number;
-  favoritesCount?: number;
-  cartAdditionsCount?: number;
-  description?: string;
-  images?: string[];
-}
 
 const AdminProducts = () => {
   const { id } = useParams<{ id?: string }>();
@@ -59,53 +55,36 @@ const AdminProducts = () => {
   const isCreating = id === "new";
 
   // State management
-  const [products, setProducts] = useState<ExtendedProduct[]>(() => {
-    // Load products from localStorage or use generated data
-    const saved = localStorage.getItem("adminProducts");
-    if (saved) {
-      return JSON.parse(saved);
-    }
-    // Initialize with extended data
-    return generatedBouquets.map((p) => ({
-      ...p,
-      outOfStock: false,
-      soldOut: false,
-      seasonal: false,
-      discount: 0,
-      favoritesCount: Math.floor(Math.random() * 50),
-      cartAdditionsCount: Math.floor(Math.random() * 30),
-      images: [p.image],
-    }));
-  });
-
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [migrating, setMigrating] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [showProductForm, setShowProductForm] = useState(isEditing || isCreating);
-  const [selectedProduct, setSelectedProduct] = useState<ExtendedProduct | null>(null);
-  const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; product: ExtendedProduct | null }>({
+  const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; product: any | null }>({
     open: false,
     product: null,
   });
 
   // Form state
-  const [formData, setFormData] = useState<ExtendedProduct>({
-    id: "",
-    name: "",
-    price: 0,
-    image: "",
+  const [formData, setFormData] = useState<any>({
+    title: "",
     description: "",
+    price: 0,
     category: "",
-    displayCategory: "",
+    display_category: "",
     featured: false,
-    outOfStock: false,
-    soldOut: false,
-    seasonal: false,
-    discount: 0,
-    favoritesCount: 0,
-    cartAdditionsCount: 0,
-    images: [],
+    tags: [],
+    image_urls: [],
+    is_active: true,
   });
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [imagesToDelete, setImagesToDelete] = useState<string[]>([]);
+  const [allTags, setAllTags] = useState<string[]>([]);
+  const [newTag, setNewTag] = useState("");
 
   useEffect(() => {
     const isAuthenticated = localStorage.getItem("adminAuthenticated");
@@ -114,137 +93,221 @@ const AdminProducts = () => {
       return;
     }
 
-    // Load products
-    const saved = localStorage.getItem("adminProducts");
-    if (saved) {
-      setProducts(JSON.parse(saved));
-    }
+    loadData();
+  }, [navigate]);
 
-    // Load product for editing
+  useEffect(() => {
     if (isEditing && id) {
-      const product = products.find((p) => p.id === id);
-      if (product) {
-        setSelectedProduct(product);
-        setFormData(product);
-        setShowProductForm(true);
-      } else {
-        navigate("/admin/products");
-      }
+      loadProduct(id);
     } else if (isCreating) {
       setFormData({
-        id: `product-${Date.now()}`,
-        name: "",
-        price: 0,
-        image: "",
+        title: "",
         description: "",
+        price: 0,
         category: "",
-        displayCategory: "",
+        display_category: "",
         featured: false,
-        outOfStock: false,
-        soldOut: false,
-        seasonal: false,
-        discount: 0,
-        favoritesCount: 0,
-        cartAdditionsCount: 0,
-        images: [],
+        tags: [],
+        image_urls: [],
+        is_active: true,
       });
       setShowProductForm(true);
     }
-  }, [id, isEditing, isCreating, navigate]);
+  }, [id, isEditing, isCreating]);
 
-  // Save products to localStorage
-  const saveProducts = (updatedProducts: ExtendedProduct[]) => {
-    setProducts(updatedProducts);
-    localStorage.setItem("adminProducts", JSON.stringify(updatedProducts));
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      const [productsData, tagsData] = await Promise.all([
+        getCollectionProducts(),
+        getAllTags(),
+      ]);
+      setProducts(productsData);
+      setAllTags(tagsData);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to load data",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadProduct = async (productId: string) => {
+    try {
+      const product = await getCollectionProduct(productId);
+      if (product) {
+        setSelectedProduct(product);
+        setFormData({
+          title: product.title,
+          description: product.description || "",
+          price: product.price,
+          category: product.category || "",
+          display_category: product.display_category || "",
+          featured: product.featured,
+          tags: product.tags || [],
+          image_urls: product.image_urls || [],
+          is_active: product.is_active,
+        });
+        setShowProductForm(true);
+      } else {
+        toast({
+          title: "Error",
+          description: "Product not found",
+          variant: "destructive",
+        });
+        navigate("/admin/products");
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to load product",
+        variant: "destructive",
+      });
+      navigate("/admin/products");
+    }
   };
 
   // Filter products
   const filteredProducts = products.filter((product) => {
-    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    const matchesSearch = product.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       product.description?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = categoryFilter === "all" || product.category === categoryFilter;
-    const matchesStatus =
-      statusFilter === "all" ||
-      (statusFilter === "in-stock" && !product.outOfStock && !product.soldOut && !product.seasonal) ||
-      (statusFilter === "out-of-stock" && product.outOfStock) ||
-      (statusFilter === "sold-out" && product.soldOut) ||
-      (statusFilter === "seasonal" && product.seasonal);
+    const matchesStatus = statusFilter === "all" || 
+      (statusFilter === "active" && product.is_active) ||
+      (statusFilter === "inactive" && !product.is_active);
 
     return matchesSearch && matchesCategory && matchesStatus;
   });
 
   // Handle product save
-  const handleSave = () => {
-    if (!formData.name || !formData.price || !formData.image) {
+  const handleSave = async () => {
+    if (!formData.title || !formData.price || (formData.image_urls.length === 0 && imageFiles.length === 0)) {
       toast({
         title: "Validation Error",
-        description: "Please fill in all required fields (name, price, image).",
+        description: "Please fill in all required fields (title, price, at least one image).",
         variant: "destructive",
       });
       return;
     }
 
-    let updatedProducts: ExtendedProduct[];
+    try {
+      setSaving(true);
 
-    if (isEditing || selectedProduct) {
-      // Update existing product
-      updatedProducts = products.map((p) => (p.id === formData.id ? formData : p));
+      if (isEditing && selectedProduct) {
+        // Update existing product
+        await updateCollectionProduct(
+          selectedProduct.id,
+          formData,
+          imageFiles,
+          imagesToDelete
+        );
+        toast({
+          title: "Product Updated",
+          description: `${formData.title} has been updated successfully.`,
+        });
+      } else {
+        // Create new product
+        await createCollectionProduct(formData, imageFiles);
+        toast({
+          title: "Product Created",
+          description: `${formData.title} has been created successfully.`,
+        });
+      }
+
+      setShowProductForm(false);
+      setSelectedProduct(null);
+      setImageFiles([]);
+      setImagesToDelete([]);
+      navigate("/admin/products");
+      await loadData();
+    } catch (error) {
       toast({
-        title: "Product Updated",
-        description: `${formData.name} has been updated successfully.`,
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to save product",
+        variant: "destructive",
       });
-    } else {
-      // Create new product
-      updatedProducts = [...products, formData];
-      toast({
-        title: "Product Created",
-        description: `${formData.name} has been created successfully.`,
-      });
+    } finally {
+      setSaving(false);
     }
-
-    saveProducts(updatedProducts);
-    setShowProductForm(false);
-    setSelectedProduct(null);
-    navigate("/admin/products");
   };
 
   // Handle product delete
-  const handleDelete = (product: ExtendedProduct) => {
-    const updatedProducts = products.filter((p) => p.id !== product.id);
-    saveProducts(updatedProducts);
-    setDeleteDialog({ open: false, product: null });
-    toast({
-      title: "Product Deleted",
-      description: `${product.name} has been deleted.`,
-    });
-  };
-
-  // Handle image upload (mock - replace with actual upload)
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const imageUrl = reader.result as string;
-        setFormData({ ...formData, image: imageUrl, images: [imageUrl, ...(formData.images || [])] });
-      };
-      reader.readAsDataURL(file);
+  const handleDelete = async (product: any) => {
+    try {
+      await deleteCollectionProduct(product.id);
+      toast({
+        title: "Product Deleted",
+        description: `${product.title} has been deleted.`,
+      });
+      setDeleteDialog({ open: false, product: null });
+      await loadData();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to delete product",
+        variant: "destructive",
+      });
     }
   };
 
-  // Get product stats
-  const getProductStats = (product: ExtendedProduct) => {
-    return {
-      favorites: product.favoritesCount || 0,
-      cartAdditions: product.cartAdditionsCount || 0,
-      stockStatus: product.soldOut
-        ? "sold-out"
-        : product.outOfStock
-        ? "out-of-stock"
-        : product.seasonal
-        ? "seasonal"
-        : "in-stock",
-    };
+  // Handle image changes
+  const handleImagesChange = (images: string[]) => {
+    setFormData({ ...formData, image_urls: images });
+  };
+
+  const handleFilesChange = (files: File[]) => {
+    setImageFiles(files);
+  };
+
+  // Handle tag management
+  const handleAddTag = () => {
+    if (newTag && !formData.tags.includes(newTag)) {
+      setFormData({ ...formData, tags: [...formData.tags, newTag] });
+      if (!allTags.includes(newTag)) {
+        setAllTags([...allTags, newTag]);
+      }
+      setNewTag("");
+    }
+  };
+
+  const handleRemoveTag = (tag: string) => {
+    setFormData({
+      ...formData,
+      tags: formData.tags.filter((t: string) => t !== tag),
+    });
+  };
+
+  // Handle migration
+  const handleMigrate = async () => {
+    const confirmed = window.confirm(
+      "This will import all existing products from your codebase into Supabase. Continue?"
+    );
+    if (!confirmed) return;
+
+    try {
+      setMigrating(true);
+      const { generatedBouquets } = await import("@/data/generatedBouquets");
+      const result = await migrateProductsToSupabase(generatedBouquets);
+      
+      toast({
+        title: "Migration Complete",
+        description: `Successfully migrated ${result.success} products. ${result.failed > 0 ? `${result.failed} failed.` : ''}`,
+      });
+
+      // Reload products
+      await loadData();
+    } catch (error) {
+      toast({
+        title: "Migration Error",
+        description: error instanceof Error ? error.message : "Failed to migrate products",
+        variant: "destructive",
+      });
+    } finally {
+      setMigrating(false);
+    }
   };
 
   return (
@@ -265,25 +328,47 @@ const AdminProducts = () => {
               </Button>
               <div>
                 <h1 className="text-2xl font-serif font-bold" style={{ color: "#1a1a1a" }}>
-                  Product Management
+                  Collection Products
                 </h1>
                 <p className="text-sm text-gray-500">Manage all products, prices, and inventory</p>
               </div>
             </div>
-            <Button
-              onClick={() => {
-                navigate("/admin/products/new");
-                setShowProductForm(true);
-              }}
-              className="gap-2"
-              style={{
-                background: `linear-gradient(135deg, ${GOLD_COLOR} 0%, rgba(199, 158, 72, 0.9) 100%)`,
-                color: "white",
-              }}
-            >
-              <Plus className="w-4 h-4" />
-              Add Product
-            </Button>
+            <div className="flex items-center gap-2">
+              {products.length === 0 && (
+                <Button
+                  onClick={handleMigrate}
+                  disabled={migrating}
+                  variant="outline"
+                  className="gap-2"
+                >
+                  {migrating ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Migrating...
+                    </>
+                  ) : (
+                    <>
+                      <Download className="w-4 h-4" />
+                      Import Existing Products
+                    </>
+                  )}
+                </Button>
+              )}
+              <Button
+                onClick={() => {
+                  navigate("/admin/products/new");
+                  setShowProductForm(true);
+                }}
+                className="gap-2"
+                style={{
+                  background: `linear-gradient(135deg, ${GOLD_COLOR} 0%, rgba(199, 158, 72, 0.9) 100%)`,
+                  color: "white",
+                }}
+              >
+                <Plus className="w-4 h-4" />
+                Add Product
+              </Button>
+            </div>
           </div>
         </div>
       </header>
@@ -325,10 +410,8 @@ const AdminProducts = () => {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Status</SelectItem>
-                      <SelectItem value="in-stock">In Stock</SelectItem>
-                      <SelectItem value="out-of-stock">Out of Stock</SelectItem>
-                      <SelectItem value="sold-out">Sold Out</SelectItem>
-                      <SelectItem value="seasonal">Seasonal</SelectItem>
+                      <SelectItem value="active">Active</SelectItem>
+                      <SelectItem value="inactive">Inactive</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -342,89 +425,119 @@ const AdminProducts = () => {
                 <CardDescription>Manage your product catalog</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Image</TableHead>
-                        <TableHead>Product Name</TableHead>
-                        <TableHead>Category</TableHead>
-                        <TableHead>Price</TableHead>
-                        <TableHead>Discount</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Favorites</TableHead>
-                        <TableHead>Cart Adds</TableHead>
-                        <TableHead>Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredProducts.map((product) => {
-                        const stats = getProductStats(product);
-                        const finalPrice = product.discount
-                          ? product.price * (1 - product.discount / 100)
-                          : product.price;
-
-                        return (
+                {loading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+                  </div>
+                ) : filteredProducts.length === 0 ? (
+                  <div className="text-center py-12">
+                    {searchQuery || categoryFilter !== "all" || statusFilter !== "all" ? (
+                      <>
+                        <p className="text-gray-500">No products found.</p>
+                        <p className="text-sm mt-2 text-gray-400">Try adjusting your filters.</p>
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-gray-500 mb-4">No products in database yet.</p>
+                        <div className="flex flex-col items-center gap-3">
+                          <p className="text-sm text-gray-400">
+                            Import your existing products from the codebase
+                          </p>
+                          <Button
+                            onClick={handleMigrate}
+                            disabled={migrating}
+                            className="gap-2"
+                            style={{
+                              background: `linear-gradient(135deg, ${GOLD_COLOR} 0%, rgba(199, 158, 72, 0.9) 100%)`,
+                              color: "white",
+                            }}
+                          >
+                            {migrating ? (
+                              <>
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                                Migrating Products...
+                              </>
+                            ) : (
+                              <>
+                                <Download className="w-4 h-4" />
+                                Import Existing Products
+                              </>
+                            )}
+                          </Button>
+                          <p className="text-xs text-gray-400 mt-2">
+                            or click "Add Product" to create a new one
+                          </p>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Image</TableHead>
+                          <TableHead>Product Name</TableHead>
+                          <TableHead>Category</TableHead>
+                          <TableHead>Price</TableHead>
+                          <TableHead>Tags</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {filteredProducts.map((product) => (
                           <TableRow key={product.id}>
                             <TableCell>
-                              <img
-                                src={product.image}
-                                alt={product.name}
-                                className="w-16 h-16 object-cover rounded"
-                              />
+                              {product.image_urls?.[0] ? (
+                                <img
+                                  src={encodeImageUrl(product.image_urls[0])}
+                                  alt={product.title}
+                                  className="w-16 h-16 object-cover rounded"
+                                  onError={(e) => {
+                                    // Fallback if image fails to load
+                                    (e.target as HTMLImageElement).style.display = 'none';
+                                  }}
+                                />
+                              ) : (
+                                <div className="w-16 h-16 bg-gray-200 rounded flex items-center justify-center">
+                                  <span className="text-xs text-gray-400">No image</span>
+                                </div>
+                              )}
                             </TableCell>
                             <TableCell>
-                              <div className="font-medium">{product.name}</div>
+                              <div className="font-medium">{product.title}</div>
                               {product.featured && (
                                 <Badge variant="secondary" className="mt-1 text-xs">
                                   Featured
                                 </Badge>
                               )}
                             </TableCell>
-                            <TableCell>{product.displayCategory || product.category}</TableCell>
+                            <TableCell>{product.display_category || product.category}</TableCell>
                             <TableCell>
-                              <div className="flex items-center gap-2">
-                                {product.discount ? (
-                                  <>
-                                    <span className="text-gray-400 line-through">${product.price}</span>
-                                    <span className="font-bold text-green-600">${finalPrice.toFixed(2)}</span>
-                                  </>
-                                ) : (
-                                  <span className="font-medium">${product.price}</span>
+                              <span className="font-medium">${product.price}</span>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex flex-wrap gap-1">
+                                {product.tags?.slice(0, 2).map((tag: string) => (
+                                  <Badge key={tag} variant="outline" className="text-xs">
+                                    {tag}
+                                  </Badge>
+                                ))}
+                                {product.tags?.length > 2 && (
+                                  <Badge variant="outline" className="text-xs">
+                                    +{product.tags.length - 2}
+                                  </Badge>
                                 )}
                               </div>
                             </TableCell>
                             <TableCell>
-                              {product.discount ? (
-                                <Badge className="bg-red-500">{product.discount}% OFF</Badge>
-                              ) : (
-                                <span className="text-gray-400">-</span>
-                              )}
-                            </TableCell>
-                            <TableCell>
-                              {stats.stockStatus === "sold-out" ? (
-                                <Badge variant="destructive">Sold Out</Badge>
-                              ) : stats.stockStatus === "out-of-stock" ? (
-                                <Badge variant="outline" className="border-red-500 text-red-600">
-                                  Out of Stock
-                                </Badge>
-                              ) : stats.stockStatus === "seasonal" ? (
-                                <Badge className="bg-blue-500">Seasonal</Badge>
-                              ) : (
-                                <Badge className="bg-green-500">In Stock</Badge>
-                              )}
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex items-center gap-1 text-pink-600">
-                                <Heart className="w-4 h-4" />
-                                <span>{stats.favorites}</span>
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex items-center gap-1 text-orange-600">
-                                <ShoppingCart className="w-4 h-4" />
-                                <span>{stats.cartAdditions}</span>
-                              </div>
+                              <Badge
+                                variant={product.is_active ? "default" : "secondary"}
+                                className={product.is_active ? "bg-green-500" : ""}
+                              >
+                                {product.is_active ? "Active" : "Inactive"}
+                              </Badge>
                             </TableCell>
                             <TableCell>
                               <div className="flex items-center gap-2">
@@ -433,9 +546,6 @@ const AdminProducts = () => {
                                   size="sm"
                                   onClick={() => {
                                     navigate(`/admin/products/${product.id}`);
-                                    setSelectedProduct(product);
-                                    setFormData(product);
-                                    setShowProductForm(true);
                                   }}
                                   className="gap-1"
                                 >
@@ -452,11 +562,11 @@ const AdminProducts = () => {
                               </div>
                             </TableCell>
                           </TableRow>
-                        );
-                      })}
-                    </TableBody>
-                  </Table>
-                </div>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </>
@@ -491,13 +601,13 @@ const AdminProducts = () => {
                   {/* Basic Information */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                      <Label htmlFor="name">
-                        Product Name <span className="text-red-500">*</span>
+                      <Label htmlFor="title">
+                        Product Title <span className="text-red-500">*</span>
                       </Label>
                       <Input
-                        id="name"
-                        value={formData.name}
-                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        id="title"
+                        value={formData.title}
+                        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                         placeholder="e.g., Celebration Sparkle"
                       />
                     </div>
@@ -512,7 +622,7 @@ const AdminProducts = () => {
                           setFormData({
                             ...formData,
                             category: value,
-                            displayCategory: category?.name || "",
+                            display_category: category?.name || "",
                           });
                         }}
                       >
@@ -536,7 +646,7 @@ const AdminProducts = () => {
                     <Label htmlFor="description">Description</Label>
                     <Textarea
                       id="description"
-                      value={formData.description || ""}
+                      value={formData.description}
                       onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                       placeholder="Product description..."
                       rows={4}
@@ -544,47 +654,14 @@ const AdminProducts = () => {
                   </div>
 
                   {/* Image Upload */}
-                  <div className="space-y-4">
-                    <Label>
-                      Product Image <span className="text-red-500">*</span>
-                    </Label>
-                    <div className="flex items-center gap-4">
-                      {formData.image && (
-                        <img
-                          src={formData.image}
-                          alt="Product preview"
-                          className="w-32 h-32 object-cover rounded-lg border"
-                        />
-                      )}
-                      <div className="flex-1">
-                        <Input
-                          type="file"
-                          accept="image/*"
-                          onChange={handleImageUpload}
-                          className="hidden"
-                          id="image-upload"
-                        />
-                        <Label htmlFor="image-upload">
-                          <Button variant="outline" type="button" className="gap-2 cursor-pointer" asChild>
-                            <span>
-                              <Upload className="w-4 h-4" />
-                              Upload Image
-                            </span>
-                          </Button>
-                        </Label>
-                        <p className="text-sm text-gray-500 mt-2">
-                          Or enter image URL:
-                        </p>
-                        <Input
-                          type="url"
-                          value={formData.image}
-                          onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                          placeholder="https://example.com/image.jpg"
-                          className="mt-2"
-                        />
-                      </div>
-                    </div>
-                  </div>
+                  <ImageUpload
+                    images={formData.image_urls}
+                    onImagesChange={handleImagesChange}
+                    onFilesChange={handleFilesChange}
+                    maxImages={10}
+                    multiple={true}
+                    label="Product Images (Drag to reorder, first is primary)"
+                  />
 
                   {/* Pricing */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -607,166 +684,92 @@ const AdminProducts = () => {
                         />
                       </div>
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="discount">Discount (%)</Label>
-                      <div className="relative">
-                        <Percent className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                        <Input
-                          id="discount"
-                          type="number"
-                          min="0"
-                          max="100"
-                          value={formData.discount || 0}
-                          onChange={(e) =>
-                            setFormData({ ...formData, discount: parseInt(e.target.value) || 0 })
-                          }
-                          className="pl-10"
-                          placeholder="0"
-                        />
-                      </div>
-                      {formData.discount && formData.discount > 0 && (
-                        <p className="text-sm text-green-600">
-                          Final Price: ${(formData.price * (1 - formData.discount / 100)).toFixed(2)}
-                        </p>
-                      )}
-                    </div>
                   </div>
 
-                  {/* Stock Status */}
+                  {/* Tags */}
                   <div className="space-y-4">
-                    <Label>Stock Status</Label>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="flex items-center justify-between p-4 border rounded-lg">
-                        <div className="flex items-center gap-3">
-                          <CheckCircle className="w-5 h-5 text-green-600" />
-                          <div>
-                            <Label htmlFor="in-stock" className="font-medium cursor-pointer">
-                              In Stock
-                            </Label>
-                            <p className="text-xs text-gray-500">Product is available</p>
-                          </div>
-                        </div>
-                        <Switch
-                          id="in-stock"
-                          checked={!formData.outOfStock && !formData.soldOut && !formData.seasonal}
-                          onCheckedChange={(checked) => {
-                            if (checked) {
-                              setFormData({
-                                ...formData,
-                                outOfStock: false,
-                                soldOut: false,
-                                seasonal: false,
-                              });
-                            }
-                          }}
-                        />
+                    <Label>Tags (for filtering and search)</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        placeholder="Enter a tag..."
+                        value={newTag}
+                        onChange={(e) => setNewTag(e.target.value)}
+                        onKeyPress={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            handleAddTag();
+                          }
+                        }}
+                      />
+                      <Button
+                        type="button"
+                        onClick={handleAddTag}
+                        disabled={!newTag}
+                        variant="outline"
+                        className="gap-2"
+                      >
+                        <Plus className="w-4 h-4" />
+                        Add Tag
+                      </Button>
+                    </div>
+                    {allTags.length > 0 && (
+                      <div className="flex flex-wrap gap-2 p-3 bg-gray-50 rounded-lg">
+                        <span className="text-xs text-gray-500">Suggested:</span>
+                        {allTags.filter(t => !formData.tags.includes(t)).map((tag) => (
+                          <Badge
+                            key={tag}
+                            variant="outline"
+                            className="cursor-pointer hover:bg-primary hover:text-white"
+                            onClick={() => setFormData({ ...formData, tags: [...formData.tags, tag] })}
+                          >
+                            {tag}
+                          </Badge>
+                        ))}
                       </div>
-                      <div className="flex items-center justify-between p-4 border rounded-lg">
-                        <div className="flex items-center gap-3">
-                          <XCircle className="w-5 h-5 text-red-600" />
-                          <div>
-                            <Label htmlFor="out-of-stock" className="font-medium cursor-pointer">
-                              Out of Stock
-                            </Label>
-                            <p className="text-xs text-gray-500">Temporarily unavailable</p>
-                          </div>
-                        </div>
-                        <Switch
-                          id="out-of-stock"
-                          checked={formData.outOfStock || false}
-                          onCheckedChange={(checked) => {
-                            setFormData({
-                              ...formData,
-                              outOfStock: checked,
-                              soldOut: checked ? false : formData.soldOut,
-                              seasonal: checked ? false : formData.seasonal,
-                            });
-                          }}
-                        />
-                      </div>
-                      <div className="flex items-center justify-between p-4 border rounded-lg">
-                        <div className="flex items-center gap-3">
-                          <AlertCircle className="w-5 h-5 text-gray-600" />
-                          <div>
-                            <Label htmlFor="sold-out" className="font-medium cursor-pointer">
-                              Sold Out
-                            </Label>
-                            <p className="text-xs text-gray-500">No longer available</p>
-                          </div>
-                        </div>
-                        <Switch
-                          id="sold-out"
-                          checked={formData.soldOut || false}
-                          onCheckedChange={(checked) => {
-                            setFormData({
-                              ...formData,
-                              soldOut: checked,
-                              outOfStock: checked ? false : formData.outOfStock,
-                              seasonal: checked ? false : formData.seasonal,
-                            });
-                          }}
-                        />
-                      </div>
-                      <div className="flex items-center justify-between p-4 border rounded-lg">
-                        <div className="flex items-center gap-3">
-                          <Calendar className="w-5 h-5 text-blue-600" />
-                          <div>
-                            <Label htmlFor="seasonal" className="font-medium cursor-pointer">
-                              Seasonal
-                            </Label>
-                            <p className="text-xs text-gray-500">Seasonal flower</p>
-                          </div>
-                        </div>
-                        <Switch
-                          id="seasonal"
-                          checked={formData.seasonal || false}
-                          onCheckedChange={(checked) => {
-                            setFormData({
-                              ...formData,
-                              seasonal: checked,
-                              outOfStock: checked ? false : formData.outOfStock,
-                              soldOut: checked ? false : formData.soldOut,
-                            });
-                          }}
-                        />
-                      </div>
+                    )}
+                    <div className="flex flex-wrap gap-2">
+                      {formData.tags.map((tag: string) => (
+                        <Badge key={tag} className="gap-2">
+                          {tag}
+                          <X
+                            className="w-3 h-3 cursor-pointer"
+                            onClick={() => handleRemoveTag(tag)}
+                          />
+                        </Badge>
+                      ))}
                     </div>
                   </div>
 
-                  {/* Featured */}
-                  <div className="flex items-center justify-between p-4 border rounded-lg">
-                    <div>
-                      <Label htmlFor="featured" className="font-medium cursor-pointer">
-                        Featured Product
-                      </Label>
-                      <p className="text-sm text-gray-500">Show on homepage</p>
+                  {/* Switches */}
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between p-4 border rounded-lg">
+                      <div>
+                        <Label htmlFor="featured" className="font-medium cursor-pointer">
+                          Featured Product
+                        </Label>
+                        <p className="text-sm text-gray-500">Display prominently in collection</p>
+                      </div>
+                      <Switch
+                        id="featured"
+                        checked={formData.featured}
+                        onCheckedChange={(checked) => setFormData({ ...formData, featured: checked })}
+                      />
                     </div>
-                    <Switch
-                      id="featured"
-                      checked={formData.featured || false}
-                      onCheckedChange={(checked) => setFormData({ ...formData, featured: checked })}
-                    />
-                  </div>
 
-                  {/* Analytics Display (if editing) */}
-                  {isEditing && (
-                    <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <Heart className="w-5 h-5 text-pink-600" />
-                        <div>
-                          <p className="text-sm text-gray-600">Favorites</p>
-                          <p className="text-xl font-bold">{formData.favoritesCount || 0}</p>
-                        </div>
+                    <div className="flex items-center justify-between p-4 border rounded-lg">
+                      <div>
+                        <Label htmlFor="is_active" className="font-medium cursor-pointer">
+                          Active
+                        </Label>
+                        <p className="text-sm text-gray-500">Show on website</p>
                       </div>
-                      <div className="flex items-center gap-3">
-                        <ShoppingCart className="w-5 h-5 text-orange-600" />
-                        <div>
-                          <p className="text-sm text-gray-600">Cart Additions</p>
-                          <p className="text-xl font-bold">{formData.cartAdditionsCount || 0}</p>
-                        </div>
-                      </div>
+                      <Switch
+                        id="is_active"
+                        checked={formData.is_active}
+                        onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
+                      />
                     </div>
-                  )}
+                  </div>
 
                   {/* Actions */}
                   <div className="flex items-center justify-end gap-4 pt-4 border-t">
@@ -776,19 +779,30 @@ const AdminProducts = () => {
                         setShowProductForm(false);
                         navigate("/admin/products");
                       }}
+                      disabled={saving}
                     >
                       Cancel
                     </Button>
                     <Button
                       onClick={handleSave}
+                      disabled={saving}
                       className="gap-2"
                       style={{
                         background: `linear-gradient(135deg, ${GOLD_COLOR} 0%, rgba(199, 158, 72, 0.9) 100%)`,
                         color: "white",
                       }}
                     >
-                      <Save className="w-4 h-4" />
-                      {isEditing ? "Update Product" : "Create Product"}
+                      {saving ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Saving...
+                        </>
+                      ) : (
+                        <>
+                          <Save className="w-4 h-4" />
+                          {isEditing ? "Update Product" : "Create Product"}
+                        </>
+                      )}
                     </Button>
                   </div>
                 </div>
@@ -803,11 +817,11 @@ const AdminProducts = () => {
             <DialogHeader>
               <DialogTitle>Delete Product</DialogTitle>
               <DialogDescription>
-                Are you sure you want to delete "{deleteDialog.product?.name}"? This action cannot be undone.
+                Are you sure you want to delete "{deleteDialog.product?.title}"? This action cannot be undone.
               </DialogDescription>
             </DialogHeader>
             <div className="flex items-center justify-end gap-4 mt-4">
-              <Button variant="outline" onClick={() => setDeleteDialog({ open: false, product: null })}>
+              <Button variant="outline" onClick={() => setDeleteDialog({ open, product: null })}>
                 Cancel
               </Button>
               <Button
@@ -825,4 +839,3 @@ const AdminProducts = () => {
 };
 
 export default AdminProducts;
-

@@ -13,16 +13,48 @@ import { CollectionStats } from "@/components/collection/CollectionStats";
 import BackToTop from "@/components/BackToTop";
 import LazySection from "@/components/LazySection";
 import type { Bouquet } from "@/types/bouquet";
-import {
-  generatedBouquets,
-  generatedCategories
-} from "@/data/generatedBouquets";
+import { generatedCategories } from "@/data/generatedBouquets";
+import { getCollectionProducts } from "@/lib/api/collection-products";
+import { encodeImageUrl } from "@/lib/imageUtils";
 
 const Collection = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedBouquet, setSelectedBouquet] = useState<Bouquet | null>(null);
+  const [bouquets, setBouquets] = useState<Bouquet[]>([]);
+  const [loading, setLoading] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
+
+  // Fetch products from Supabase
+  useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        setLoading(true);
+        const products = await getCollectionProducts({ isActive: true });
+        
+        // Transform to match Bouquet interface
+        const transformedBouquets: Bouquet[] = products.map((product) => ({
+          id: product.id,
+          name: product.title,
+          price: product.price,
+          image: encodeImageUrl(product.image_urls?.[0] || ''),
+          description: product.description || '',
+          category: product.category || '',
+          displayCategory: product.display_category || '',
+          featured: product.featured || false,
+        }));
+        
+        setBouquets(transformedBouquets);
+      } catch (error) {
+        console.error('Error loading products:', error);
+        setBouquets([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadProducts();
+  }, []);
 
   useEffect(() => {
     // Ensure page loads at the very top on navigation
@@ -54,10 +86,10 @@ const Collection = () => {
   // This prevents unnecessary re-renders and state updates
   const filteredBouquets = useMemo(() => {
     if (selectedCategory === "all") {
-      return generatedBouquets;
+      return bouquets;
     }
-    return generatedBouquets.filter((b) => b.category === selectedCategory);
-  }, [selectedCategory]);
+    return bouquets.filter((b) => b.category === selectedCategory);
+  }, [selectedCategory, bouquets]);
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
@@ -67,8 +99,8 @@ const Collection = () => {
 
   // Memoize featured bouquets calculation
   const featuredBouquets = useMemo(
-    () => generatedBouquets.filter((b) => b.featured),
-    []
+    () => bouquets.filter((b) => b.featured),
+    [bouquets]
   );
 
   const categories = useMemo(() => generatedCategories, []);
@@ -118,21 +150,28 @@ const Collection = () => {
         {/* Main Bouquet Grid - With Smooth Category Transitions */}
         <section id="main-collection-grid" className="py-12 md:py-16 lg:py-20 px-3 sm:px-4 md:px-6 lg:px-8 w-full">
           <div className="max-w-7xl mx-auto w-full">
-            {/* Category count and transition */}
-            <motion.div
-              key={`count-${selectedCategory}`}
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 10 }}
-              transition={{ duration: 0.3 }}
-              className="mb-8 text-center"
-            >
-              <p className="text-sm text-gray-600">
-                Showing <span className="font-bold text-[#C29A43]">{filteredBouquets.length}</span> beautiful bouquet{filteredBouquets.length !== 1 ? 's' : ''}
-              </p>
-            </motion.div>
-            
-            {/* Grid with smooth transition */}
+            {loading ? (
+              <div className="text-center py-20">
+                <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-amber-500"></div>
+                <p className="mt-4 text-gray-600">Loading collection...</p>
+              </div>
+            ) : (
+              <>
+                {/* Category count and transition */}
+                <motion.div
+                  key={`count-${selectedCategory}`}
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  transition={{ duration: 0.3 }}
+                  className="mb-8 text-center"
+                >
+                  <p className="text-sm text-gray-600">
+                    Showing <span className="font-bold text-[#C29A43]">{filteredBouquets.length}</span> beautiful bouquet{filteredBouquets.length !== 1 ? 's' : ''}
+                  </p>
+                </motion.div>
+                
+                {/* Grid with smooth transition */}
             <AnimatePresence mode="wait">
               <motion.div
                 key={selectedCategory}
@@ -147,6 +186,8 @@ const Collection = () => {
                 />
               </motion.div>
             </AnimatePresence>
+              </>
+            )}
           </div>
         </section>
         
@@ -172,10 +213,12 @@ const Collection = () => {
         </motion.div>
         
         {/* Featured Carousel */}
-        <FeaturedCarousel 
-          bouquets={featuredBouquets}
-          onBouquetClick={handleBouquetClick}
-        />
+        {!loading && featuredBouquets.length > 0 && (
+          <FeaturedCarousel 
+            bouquets={featuredBouquets}
+            onBouquetClick={handleBouquetClick}
+          />
+        )}
 
         {/* Global stats for the collection (moved from hero) */}
         <CollectionStats />

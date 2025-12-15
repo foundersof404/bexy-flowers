@@ -7,53 +7,10 @@ import { useCartWithToast } from '@/hooks/useCartWithToast';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import SignatureQuickView from './SignatureQuickView';
+import { getActiveSignatureCollections } from '@/lib/api/signature-collection';
+import { encodeImageUrl } from '@/lib/imageUtils';
 
 gsap.registerPlugin(ScrollTrigger);
-
-const bouquets = [
-  {
-    id: 1,
-    name: "Royal Red Elegance",
-    price: "$299",
-    image: encodeURI("/assets/red roses/medium red roses flower in a black box.png"),
-    description: "Luxurious red roses with glittering accents"
-  },
-  {
-    id: 2,
-    name: "Wedding Serenity",
-    price: "$349",
-    image: encodeURI("/assets/wedding % events/IMG_1673.JPG"),
-    description: "Pure elegant arrangement for special moments"
-  },
-  {
-    id: 3,
-    name: "Golden Heart",
-    price: "$425",
-    image: encodeURI("/assets/red roses/red roses in a golden heart shaped box.jpg"),
-    description: "Premium roses in a stunning golden heart box"
-  },
-  {
-    id: 4,
-    name: "Event Grandeur",
-    price: "$289",
-    image: encodeURI("/assets/wedding % events/events/IMG-20251126-WA0024.jpg"),
-    description: "Spectacular floral design for grand events"
-  },
-  {
-    id: 5,
-    name: "Heart's Desire",
-    price: "$399",
-    image: encodeURI("/assets/heart shape/IMG-20251001-WA0018.jpg"),
-    description: "Romantic heart-shaped arrangement"
-  },
-  {
-    id: 6,
-    name: "Glittering Passion",
-    price: "$329",
-    image: encodeURI("/assets/red roses/red roses bouquet with red glitter.jpg"),
-    description: "Radiant red roses with a touch of sparkle"
-  }
-];
 
 const UltraFeaturedBouquets = () => {
   const navigate = useNavigate();
@@ -64,8 +21,44 @@ const UltraFeaturedBouquets = () => {
   const [selectedBouquet, setSelectedBouquet] = useState<any>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAutoScroll, setIsAutoScroll] = useState(true);
+  const [bouquets, setBouquets] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
+  // Fetch signature collection from Supabase
   useEffect(() => {
+    const loadSignatureCollection = async () => {
+      try {
+        setLoading(true);
+        const data = await getActiveSignatureCollections();
+        
+        // Transform to match existing interface
+        const formattedBouquets = data.map((item) => ({
+          id: item.product?.id || '',
+          name: item.product?.title || '',
+          price: `$${item.product?.price || 0}`,
+          image: item.product?.image_urls?.[0] || '',
+          description: item.product?.description || '',
+          // Include full product data for modal
+          productData: item.product,
+        }));
+        
+        setBouquets(formattedBouquets);
+      } catch (error) {
+        console.error('Error loading signature collection:', error);
+        // Fallback to empty array on error
+        setBouquets([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadSignatureCollection();
+  }, []);
+
+  // Setup GSAP animations when bouquets are loaded
+  useEffect(() => {
+    if (loading || bouquets.length === 0) return;
+    
     const section = sectionRef.current;
     const cards = cardsRef.current;
 
@@ -284,6 +277,16 @@ const UltraFeaturedBouquets = () => {
             className="w-full"
             style={{ marginTop: '1.5em' }}
           >
+            {loading ? (
+              <div className="text-center py-20">
+                <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-amber-500"></div>
+                <p className="mt-4 text-slate-600">Loading signature collection...</p>
+              </div>
+            ) : bouquets.length === 0 ? (
+              <div className="text-center py-20">
+                <p className="text-slate-600">No signature collection items available.</p>
+              </div>
+            ) : (
             <div 
               className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8 max-w-6xl mx-auto px-2 sm:px-4 w-full"
             >
@@ -363,7 +366,7 @@ const UltraFeaturedBouquets = () => {
                        }}
                      >
                   <motion.img
-                    src={bouquet.image}
+                    src={encodeImageUrl(bouquet.image)}
                     alt={bouquet.name}
                          style={{
                            width: '100%',
@@ -371,6 +374,10 @@ const UltraFeaturedBouquets = () => {
                            objectFit: 'cover'
                          }}
                          className="transition-all duration-300 ease-out group-hover:scale-105"
+                         onError={(e) => {
+                           // Fallback if image fails to load
+                           (e.target as HTMLImageElement).style.display = 'none';
+                         }}
                        />
 
                        {/* Icon with sophisticated cut-out effect */}
@@ -511,6 +518,7 @@ const UltraFeaturedBouquets = () => {
              );
            })}
             </div>
+            )}
           </div>
         </div>
 

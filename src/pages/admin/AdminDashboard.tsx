@@ -267,19 +267,79 @@ const AdminDashboard = () => {
               </Button>
               <Button
                 variant="outline"
-                onClick={() => navigate("/admin/analytics")}
-                className="h-auto flex-col gap-2 py-6"
-              >
-                <TrendingUp className="w-6 h-6" />
-                <span>View Analytics</span>
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => navigate("/admin/images")}
+                onClick={() => navigate("/admin/signature-collection")}
                 className="h-auto flex-col gap-2 py-6"
               >
                 <ImageIcon className="w-6 h-6" />
-                <span>Manage Images</span>
+                <span>Signature Collection</span>
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => navigate("/admin/accessories")}
+                className="h-auto flex-col gap-2 py-6"
+              >
+                <Package className="w-6 h-6" />
+                <span>Accessories</span>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Custom Page Management */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle>Custom Page Management</CardTitle>
+            <CardDescription>Manage luxury boxes, flowers, and accessories for custom bouquets</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <Button
+                variant="outline"
+                onClick={() => navigate("/admin/boxes")}
+                className="h-auto flex-col gap-2 py-6"
+              >
+                <Package className="w-6 h-6" />
+                <span>Luxury Boxes</span>
+                <span className="text-xs text-gray-500">Manage boxes, colors & sizes</span>
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => navigate("/admin/flowers")}
+                className="h-auto flex-col gap-2 py-6"
+              >
+                <Flower2 className="w-6 h-6" />
+                <span>Flowers</span>
+                <span className="text-xs text-gray-500">Manage flower types & colors</span>
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => navigate("/admin/accessories")}
+                className="h-auto flex-col gap-2 py-6"
+              >
+                <Package className="w-6 h-6" />
+                <span>Accessories</span>
+                <span className="text-xs text-gray-500">Manage accessories</span>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Wedding & Events Management */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle>Wedding & Events Management</CardTitle>
+            <CardDescription>Manage photos for the Wedding & Events page</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <Button
+                variant="outline"
+                onClick={() => navigate("/admin/wedding-creations")}
+                className="h-auto flex-col gap-2 py-6"
+              >
+                <ImageIcon className="w-6 h-6" />
+                <span>Wedding Creations</span>
+                <span className="text-xs text-gray-500">Manage gallery photos</span>
               </Button>
             </div>
           </CardContent>

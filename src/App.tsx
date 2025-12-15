@@ -28,6 +28,11 @@ const CartPage = lazy(() => import("./components/cart/CartPage"));
 const AdminLogin = lazy(() => import("./pages/admin/AdminLogin"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
 const AdminProducts = lazy(() => import("./pages/admin/AdminProducts"));
+const AdminSignatureCollection = lazy(() => import("./pages/admin/AdminSignatureCollection"));
+const AdminAccessories = lazy(() => import("./pages/admin/AdminAccessories"));
+const AdminFlowers = lazy(() => import("./pages/admin/AdminFlowers"));
+const AdminLuxuryBoxes = lazy(() => import("./pages/admin/AdminLuxuryBoxes"));
+const AdminWeddingCreations = lazy(() => import("./pages/admin/AdminWeddingCreations"));
 
 const queryClient = new QueryClient();
 
@@ -64,6 +69,11 @@ const App = () => {
                       <Route path="/admin/products" element={<AdminProducts />} />
                       <Route path="/admin/products/:id" element={<AdminProducts />} />
                       <Route path="/admin/products/new" element={<AdminProducts />} />
+                      <Route path="/admin/signature-collection" element={<AdminSignatureCollection />} />
+                      <Route path="/admin/accessories" element={<AdminAccessories />} />
+                      <Route path="/admin/flowers" element={<AdminFlowers />} />
+                      <Route path="/admin/boxes" element={<AdminLuxuryBoxes />} />
+                      <Route path="/admin/wedding-creations" element={<AdminWeddingCreations />} />
                       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                       <Route path="*" element={<NotFound />} />
                     </Routes>

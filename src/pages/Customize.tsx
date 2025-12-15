@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Box, Gift, ChevronLeft, ShoppingCart, Plus, Minus, Check, Sparkles, Heart, Star, Square, Circle, Triangle, Wand2, RefreshCw, Download, MessageCircle, Eye, Crown, Candy, CreditCard, ArrowDown } from "lucide-react";
+import { Box, Gift, ChevronLeft, ShoppingCart, Plus, Minus, Check, Sparkles, Heart, Star, Square, Circle, Triangle, Wand2, RefreshCw, Download, MessageCircle, Eye, Crown, Candy, CreditCard, ArrowDown, Package as PackageIcon, Flower2 } from "lucide-react";
 import UltraNavigation from "@/components/UltraNavigation";
 import Footer from "@/components/Footer";
 import BackToTop from "@/components/BackToTop";
@@ -9,6 +9,9 @@ import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
 import heroBouquetMain from "@/assets/bouquet-4.jpg";
 import heroBouquetAccent from "@/assets/bouquet-5.jpg";
+import { getAccessories } from "@/lib/api/accessories";
+import { getFlowerTypes, getFlowerColors } from "@/lib/api/flowers";
+import { encodeImageUrl } from "@/lib/imageUtils";
 
 const GOLD = "rgb(199, 158, 72)";
 
@@ -52,9 +55,11 @@ interface FlowerColor {
 interface Flower {
   id: string;
   name: string;
+  title?: string;
   price: number;
   image: string;
-  colors: FlowerColor[];
+  quantity: number;
+  colors: (FlowerColor & { quantity: number })[];
 }
 
 interface WrapColor {
@@ -67,7 +72,8 @@ interface WrapColor {
 interface Accessory {
   id: string;
   name: string;
-  icon: any;
+  icon?: any; // Optional icon component for fallback
+  image_url?: string; // Image URL from Supabase
   price: number;
   description: string;
 }
@@ -108,78 +114,7 @@ const wrapSizes: Size[] = [
   { id: "custom", name: "Custom", capacity: 0, price: 0, description: "Choose quantity" }
 ];
 
-const flowers: Flower[] = [
-  { 
-    id: "rose", 
-    name: "Roses", 
-    price: 5, 
-    image: "/src/assets/flowers/red.png",
-    colors: [
-      { id: "red", name: "Red", value: "red" },
-      { id: "pink", name: "Pink", value: "pink" },
-      { id: "white", name: "White", value: "white" },
-      { id: "yellow", name: "Yellow", value: "yellow" },
-      { id: "orange", name: "Orange", value: "orange" }
-    ]
-  },
-  { 
-    id: "peony", 
-    name: "Peonies", 
-    price: 7, 
-    image: "/src/assets/flowers/pink.png",
-    colors: [
-      { id: "pink", name: "Pink", value: "pink" },
-      { id: "white", name: "White", value: "white" },
-      { id: "coral", name: "Coral", value: "coral" }
-    ]
-  },
-  { 
-    id: "lily", 
-    name: "Lilies", 
-    price: 6, 
-    image: "/src/assets/flowers/white .png",
-    colors: [
-      { id: "white", name: "White", value: "white" },
-      { id: "pink", name: "Pink", value: "pink" },
-      { id: "orange", name: "Orange", value: "orange" }
-    ]
-  },
-  { 
-    id: "tulip", 
-    name: "Tulips", 
-    price: 4, 
-    image: "/src/assets/flowers/red.png",
-    colors: [
-      { id: "red", name: "Red", value: "red" },
-      { id: "pink", name: "Pink", value: "pink" },
-      { id: "white", name: "White", value: "white" },
-      { id: "yellow", name: "Yellow", value: "yellow" },
-      { id: "purple", name: "Purple", value: "purple" }
-    ]
-  },
-  { 
-    id: "orchid", 
-    name: "Orchids", 
-    price: 8, 
-    image: "/src/assets/flowers/pink.png",
-    colors: [
-      { id: "purple", name: "Purple", value: "purple" },
-      { id: "white", name: "White", value: "white" },
-      { id: "pink", name: "Pink", value: "pink" }
-    ]
-  },
-  { 
-    id: "carnation", 
-    name: "Carnations", 
-    price: 3, 
-    image: "/src/assets/flowers/white .png",
-    colors: [
-      { id: "pink", name: "Pink", value: "pink" },
-      { id: "red", name: "Red", value: "red" },
-      { id: "white", name: "White", value: "white" }
-    ]
-  }
-];
+// Flowers will be loaded from Supabase
 
 const wrapColors: WrapColor[] = [
   { id: "white", name: "Pure White", color: "#FFFFFF", gradient: "linear-gradient(135deg, #FFFFFF 0%, #F5F5F5 100%)" },
@@ -190,12 +125,7 @@ const wrapColors: WrapColor[] = [
   { id: "lavender", name: "Lavender", color: "#E6E6FA", gradient: "linear-gradient(135deg, #E6E6FA 0%, #D8BFD8 100%)" }
 ];
 
-const accessories: Accessory[] = [
-  { id: "crown", name: "Crown", icon: Crown, price: 15, description: "Golden crown accessory" },
-  { id: "teddy", name: "Teddy Bear", icon: Heart, price: 20, description: "Cute plush teddy bear" },
-  { id: "chocolates", name: "Chocolates", icon: Candy, price: 12, description: "Premium chocolates box" },
-  { id: "card", name: "Greeting Card", icon: CreditCard, price: 5, description: "Beautiful greeting card" }
-];
+// Accessories will be loaded from Supabase
 
 // Simple floating petal component
 const FloatingPetal = ({ delay }: { delay: number }) => (
@@ -277,6 +207,10 @@ const Customize: React.FC = () => {
   const [aiRefinementText, setAiRefinementText] = useState("");
   const [showRefinement, setShowRefinement] = useState(false);
   const [flowerInputValues, setFlowerInputValues] = useState<Record<string, Record<string, string>>>({});
+  const [accessories, setAccessories] = useState<Accessory[]>([]);
+  const [loadingAccessories, setLoadingAccessories] = useState(true);
+  const [flowers, setFlowers] = useState<Flower[]>([]);
+  const [loadingFlowers, setLoadingFlowers] = useState(true);
   const { addToCart } = useCart();
 
   // Refs for scrolling
@@ -373,6 +307,99 @@ const Customize: React.FC = () => {
   const completedSteps = steps.filter(step => step.complete).length;
   const progressPercent = Math.round((completedSteps / steps.length) * 100);
 
+  // Load accessories from Supabase
+  useEffect(() => {
+    const loadAccessories = async () => {
+      try {
+        setLoadingAccessories(true);
+        const data = await getAccessories();
+        // Filter for active accessories only
+        const activeAccessories = data
+          .filter(acc => acc.is_active)
+          .map(acc => ({
+            id: acc.id,
+            name: acc.name,
+            image_url: acc.image_url || undefined,
+            price: acc.price,
+            description: acc.description || '',
+            icon: PackageIcon, // Default fallback icon
+          }));
+        setAccessories(activeAccessories);
+      } catch (error) {
+        console.error('Failed to load accessories:', error);
+        toast.error('Failed to load accessories', { closeButton: true });
+        // Fallback to empty array
+        setAccessories([]);
+      } finally {
+        setLoadingAccessories(false);
+      }
+    };
+
+    loadAccessories();
+  }, []);
+
+  // Load flowers from Supabase
+  useEffect(() => {
+    const loadFlowers = async () => {
+      try {
+        setLoadingFlowers(true);
+        const flowerTypes = await getFlowerTypes();
+        
+        // Filter for active flower types only
+        const activeFlowerTypes = flowerTypes.filter(flower => flower.is_active);
+        
+        // Fetch colors for each flower type
+        const flowersWithColors = await Promise.all(
+          activeFlowerTypes
+            .filter(flowerType => (flowerType.quantity || 0) > 0) // Only show flowers with quantity > 0
+            .map(async (flowerType) => {
+              const colors = await getFlowerColors(flowerType.id);
+              
+              // Filter for colors with quantity > 0 (include all colors that have stock)
+              const availableColors = colors.filter(color => {
+                // Only include colors with quantity > 0
+                return (color.quantity || 0) > 0;
+              });
+              
+              // Only return flowers that have at least one available color
+              if (availableColors.length === 0) {
+                return null;
+              }
+              
+              return {
+                id: flowerType.id,
+                name: flowerType.name,
+                title: flowerType.title || '',
+                price: flowerType.price_per_stem,
+                image: flowerType.image_url || '',
+                quantity: flowerType.quantity || 0,
+                colors: availableColors.map(color => ({
+                  id: color.id,
+                  name: color.name,
+                  value: color.color_value || color.name.toLowerCase(),
+                  quantity: color.quantity || 0,
+                })),
+              };
+            })
+        );
+        
+        // Filter out null values (flowers with no available colors)
+        const validFlowers: Flower[] = flowersWithColors.filter((flower): flower is NonNullable<typeof flower> => flower !== null);
+        
+        setFlowers(validFlowers);
+      } catch (error) {
+        console.error('Failed to load flowers:', error);
+        toast.error('Failed to load flowers', { closeButton: true });
+        // Fallback to empty array
+        setFlowers([]);
+      } finally {
+        setLoadingFlowers(false);
+      }
+    };
+
+    loadFlowers();
+  }, []);
+
   // Sync input values with actual counts
   useEffect(() => {
     const synced: Record<string, Record<string, string>> = {};
@@ -386,9 +413,32 @@ const Customize: React.FC = () => {
   }, [colorQuantities]);
 
   const adjustFlowerColor = (flowerId: string, colorId: string, delta: number) => {
-    if (delta > 0 && totalFlowers >= maxFlowers) {
-      toast.error(`Maximum ${maxFlowers} flowers`, { icon: "🌸", closeButton: true });
-      return;
+    // Find the flower and color to check quantities
+    const flower = flowers.find(f => f.id === flowerId);
+    const color = flower?.colors.find(c => c.id === colorId);
+    
+    if (delta > 0) {
+      // Check max flowers limit
+      if (totalFlowers >= maxFlowers) {
+        toast.error(`Maximum ${maxFlowers} flowers`, { icon: "🌸", closeButton: true });
+        return;
+      }
+      
+      // Check color quantity availability
+      const current = colorQuantities[flowerId]?.[colorId] || 0;
+      const availableQuantity = color?.quantity || 0;
+      
+      if (current >= availableQuantity) {
+        toast.error(`Only ${availableQuantity} available for this color`, { icon: "🌸", closeButton: true });
+        return;
+      }
+      
+      // Check total flower quantity
+      const totalSelectedForFlower = Object.values(colorQuantities[flowerId] || {}).reduce((a, b) => a + b, 0);
+      if (totalSelectedForFlower >= (flower?.quantity || 0)) {
+        toast.error(`Only ${flower?.quantity || 0} available for this flower type`, { icon: "🌸", closeButton: true });
+        return;
+      }
     }
     
     setColorQuantities(prev => {
@@ -840,19 +890,27 @@ const Customize: React.FC = () => {
 
             {/* Step 5: Flowers */}
             <CustomizeSection title="Select Flowers" isActive={!!selectedSize} ref={flowersRef}>
-              <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-[#fffbf5] border border-[#C79E48]/20 rounded-lg sm:rounded-xl flex flex-col sm:flex-row justify-between items-center gap-2 sm:gap-0">
-                <span className="text-sm sm:text-base">
-                  <span className="font-bold text-[#C79E48]">{totalFlowers}</span> / {maxFlowers} Stems Selected
-                </span>
-                <div className="w-full sm:w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-[#C79E48] transition-all duration-300"
-                    style={{ width: `${Math.min(100, (totalFlowers / maxFlowers) * 100)}%` }}
-                  />
+              {loadingFlowers ? (
+                <div className="flex items-center justify-center py-12">
+                  <RefreshCw className="w-8 h-8 text-[#C79E48] animate-spin" />
                 </div>
-              </div>
+              ) : flowers.length === 0 ? (
+                <p className="text-gray-500 text-sm text-center py-8">No flowers available at the moment.</p>
+              ) : (
+                <>
+                  <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-[#fffbf5] border border-[#C79E48]/20 rounded-lg sm:rounded-xl flex flex-col sm:flex-row justify-between items-center gap-2 sm:gap-0">
+                    <span className="text-sm sm:text-base">
+                      <span className="font-bold text-[#C79E48]">{totalFlowers}</span> / {maxFlowers} Stems Selected
+                    </span>
+                    <div className="w-full sm:w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-[#C79E48] transition-all duration-300"
+                        style={{ width: `${Math.min(100, (totalFlowers / maxFlowers) * 100)}%` }}
+                      />
+                    </div>
+                  </div>
 
-              <div className="space-y-3 sm:space-y-4">
+                  <div className="space-y-3 sm:space-y-4">
                 {flowers.map((flower) => {
                   const flowerColorMap = colorQuantities[flower.id] || {};
                   const totalCount = Object.values(flowerColorMap).reduce((a, b) => a + b, 0);
@@ -860,7 +918,24 @@ const Customize: React.FC = () => {
                   return (
                     <div key={flower.id} className={`border rounded-lg sm:rounded-xl p-3 sm:p-4 transition-all ${totalCount > 0 ? 'border-[#C79E48] bg-[#C79E48]/5' : 'border-gray-100'}`}>
                       <div className="flex items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
-                        <img src={flower.image} alt={flower.name} className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-lg object-cover shadow-sm" />
+                        {flower.image ? (
+                          <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden">
+                            <img 
+                              src={encodeImageUrl(flower.image)} 
+                              alt={flower.name} 
+                              className="w-full h-full object-contain p-1"
+                              onError={(e) => {
+                                // Hide broken image
+                                const target = e.target as HTMLImageElement;
+                                target.style.display = 'none';
+                              }}
+                            />
+                          </div>
+                        ) : (
+                          <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-lg bg-gray-100 flex items-center justify-center">
+                            <Flower2 className="w-6 h-6 sm:w-8 sm:h-8 text-gray-400" />
+                          </div>
+                        )}
                         <div>
                           <h4 className="font-bold text-base sm:text-lg">{flower.name}</h4>
                           <p className="text-[#C79E48] font-medium text-sm sm:text-base">${flower.price} / stem</p>
@@ -873,6 +948,12 @@ const Customize: React.FC = () => {
                           const inputKey = `${flower.id}-${color.id}`;
                           const inputValue = flowerInputValues[flower.id]?.[color.id] ?? count.toString();
                           const quickQuantities = [5, 10, 15, 20];
+                          const availableColorQuantity = color.quantity || 0;
+                          const totalSelectedForFlower = Object.values(flowerColorMap).reduce((a, b) => a + b, 0);
+                          const availableFlowerQuantity = flower.quantity || 0;
+                          const isColorSoldOut = count >= availableColorQuantity;
+                          const isFlowerSoldOut = totalSelectedForFlower >= availableFlowerQuantity;
+                          const canAddMore = !isColorSoldOut && !isFlowerSoldOut && totalFlowers < maxFlowers;
                           
                           const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
                             const value = e.target.value;
@@ -922,7 +1003,15 @@ const Customize: React.FC = () => {
                           return (
                             <div key={color.id} className="space-y-1.5 sm:space-y-2">
                               <div className="flex justify-between items-center gap-2">
-                                <span className="text-xs sm:text-sm font-luxury font-medium text-gray-700 uppercase tracking-wide">{color.name}</span>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-xs sm:text-sm font-luxury font-medium text-gray-700 uppercase tracking-wide">{color.name}</span>
+                                  {availableColorQuantity > 0 && (
+                                    <span className="text-[10px] text-gray-500">({availableColorQuantity} available)</span>
+                                  )}
+                                  {availableColorQuantity === 0 && (
+                                    <span className="text-[10px] text-red-500 font-medium">(Sold Out)</span>
+                                  )}
+                                </div>
                                 <div className="flex items-center gap-1.5 sm:gap-2">
                                   <motion.button 
                                     onClick={() => adjustFlowerColor(flower.id, color.id, -1)}
@@ -962,10 +1051,15 @@ const Customize: React.FC = () => {
                                         scrollToSection(extrasRef);
                                       }
                                     }}
-                                    className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gradient-to-br from-[#C79E48] to-[#b08d45] text-white flex items-center justify-center hover:shadow-lg transition-all shadow-md"
-                                    disabled={totalFlowers >= maxFlowers}
-                                    whileHover={totalFlowers < maxFlowers ? { scale: 1.1, boxShadow: '0 4px 12px rgba(199, 158, 72, 0.4)' } : {}}
-                                    whileTap={totalFlowers < maxFlowers ? { scale: 0.95 } : {}}
+                                    className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center transition-all shadow-md ${
+                                      canAddMore
+                                        ? 'bg-gradient-to-br from-[#C79E48] to-[#b08d45] text-white hover:shadow-lg'
+                                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                    }`}
+                                    disabled={!canAddMore}
+                                    whileHover={canAddMore ? { scale: 1.1, boxShadow: '0 4px 12px rgba(199, 158, 72, 0.4)' } : {}}
+                                    whileTap={canAddMore ? { scale: 0.95 } : {}}
+                                    title={isColorSoldOut ? `Only ${availableColorQuantity} available` : isFlowerSoldOut ? `Only ${availableFlowerQuantity} available for this flower` : ''}
                                   >
                                     <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" strokeWidth={2.5} />
                                   </motion.button>
@@ -995,7 +1089,9 @@ const Customize: React.FC = () => {
                     </div>
                   );
                 })}
-              </div>
+                  </div>
+                </>
+              )}
             </CustomizeSection>
 
             {/* Step 6: Accessories & Extras */}
@@ -1003,23 +1099,57 @@ const Customize: React.FC = () => {
               <div className="space-y-4 sm:space-y-6">
                 <div>
                   <h3 className="font-bold mb-3 sm:mb-4 text-gray-700 text-sm sm:text-base">Add Accessories</h3>
-                  <div className="grid grid-cols-2 gap-3 sm:gap-4">
-                    {accessories.map((acc) => (
-                      <button
-                        key={acc.id}
-                        onClick={() => toggleAccessory(acc.id)}
-                        className={`p-3 sm:p-4 rounded-lg sm:rounded-xl border-2 flex items-center gap-2 sm:gap-3 transition-all ${
-                          selectedAccessories.includes(acc.id) ? 'border-[#C79E48] bg-[#C79E48]/5' : 'border-gray-100'
-                        }`}
-                      >
-                        <acc.icon className={`w-4 h-4 sm:w-5 sm:h-5 ${selectedAccessories.includes(acc.id) ? 'text-[#C79E48]' : 'text-gray-400'}`} />
-                        <div className="text-left">
-                          <p className="font-bold text-xs sm:text-sm">{acc.name}</p>
-                          <p className="text-[10px] sm:text-xs text-gray-500">+${acc.price}</p>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
+                  {loadingAccessories ? (
+                    <div className="flex items-center justify-center py-8">
+                      <RefreshCw className="w-6 h-6 text-[#C79E48] animate-spin" />
+                    </div>
+                  ) : accessories.length === 0 ? (
+                    <p className="text-gray-500 text-sm text-center py-4">No accessories available at the moment.</p>
+                  ) : (
+                    <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                      {accessories.map((acc) => {
+                        const IconComponent = acc.icon || PackageIcon;
+                        const isSelected = selectedAccessories.includes(acc.id);
+                        
+                        return (
+                          <button
+                            key={acc.id}
+                            onClick={() => toggleAccessory(acc.id)}
+                            className={`p-3 sm:p-4 rounded-lg sm:rounded-xl border-2 flex items-center gap-2 sm:gap-3 transition-all ${
+                              isSelected ? 'border-[#C79E48] bg-[#C79E48]/5' : 'border-gray-100'
+                            }`}
+                          >
+                            {acc.image_url ? (
+                              <img
+                                src={encodeImageUrl(acc.image_url)}
+                                alt={acc.name}
+                                className={`w-8 h-8 sm:w-10 sm:h-10 object-cover rounded ${
+                                  isSelected ? 'ring-2 ring-[#C79E48]' : ''
+                                }`}
+                                onError={(e) => {
+                                  // Hide image and show icon fallback
+                                  const target = e.target as HTMLImageElement;
+                                  target.style.display = 'none';
+                                  const fallback = target.parentElement?.querySelector('.icon-fallback') as HTMLElement;
+                                  if (fallback) {
+                                    fallback.style.display = 'block';
+                                  }
+                                }}
+                              />
+                            ) : null}
+                            <IconComponent
+                              className={`w-4 h-4 sm:w-5 sm:h-5 icon-fallback ${isSelected ? 'text-[#C79E48]' : 'text-gray-400'}`}
+                              style={{ display: acc.image_url ? 'none' : 'block' }}
+                            />
+                            <div className="text-left flex-1">
+                              <p className="font-bold text-xs sm:text-sm">{acc.name}</p>
+                              <p className="text-[10px] sm:text-xs text-gray-500">+${acc.price}</p>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
 
                 <div className="p-3 sm:p-4 rounded-lg sm:rounded-xl border border-[#C79E48]/20 bg-[#fffbf5]">

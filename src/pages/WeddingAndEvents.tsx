@@ -2,7 +2,7 @@ import React, { Suspense, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Calendar, ArrowRight, Sparkles, Flower2, Palette, Heart, ArrowUp } from "lucide-react";
+import { Calendar, ArrowRight, Sparkles, Flower2, Palette, Heart, ArrowUp, Loader2 } from "lucide-react";
 import LazySection from "@/components/LazySection";
 import UltraNavigation from "@/components/UltraNavigation";
 import Footer from "@/components/Footer";
@@ -10,38 +10,15 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import heroWeddingImage from "@/assets/heroWedding.jpg";
+import { getActiveWeddingCreations } from "@/lib/api/wedding-creations";
+import { encodeImageUrl } from "@/lib/imageUtils";
 
 gsap.registerPlugin(ScrollTrigger);
 
 const GOLD_COLOR = "rgb(199, 158, 72)";
 const GOLD_HEX = "#c79e48";
 
-// Wedding images - properly encoded paths
-const weddingImages = [
-  // Keep first 4 original images
-  encodeURI("/assets/wedding % events/IMG_5461.jpg"),
-  encodeURI("/assets/wedding % events/IMG_4875.jpg"),
-  encodeURI("/assets/wedding % events/IMG_2670.jpg"),
-  encodeURI("/assets/wedding % events/IMG_1791.jpg"),
-  // Add all event images (replaces image 6)
-  encodeURI("/assets/wedding % events/events/IMG-20251126-WA0018.jpg"),
-  encodeURI("/assets/wedding % events/events/IMG-20251126-WA0020.jpg"),
-  encodeURI("/assets/wedding % events/events/IMG-20251126-WA0022.jpg"),
-  encodeURI("/assets/wedding % events/events/IMG-20251126-WA0023.jpg"),
-  encodeURI("/assets/wedding % events/events/IMG-20251126-WA0024.jpg"),
-  encodeURI("/assets/wedding % events/events/WhatsApp Image 2025-11-26 at 03.14.12_6dbd359d.jpg"),
-  // Keep one original (image 7)
-  encodeURI("/assets/wedding % events/IMG_1672.JPG"),
-  // Add all wedding images (replaces image 8)
-  encodeURI("/assets/wedding % events/wedding/IMG_1784.jpg"),
-  encodeURI("/assets/wedding % events/wedding/IMG_1791.jpg"),
-  encodeURI("/assets/wedding % events/wedding/IMG-20251126-WA0019.jpg"),
-  encodeURI("/assets/wedding % events/wedding/IMG-20251126-WA0021.jpg"),
-  // Keep remaining original images
-  encodeURI("/assets/wedding % events/IMG_1673.JPG"),
-  encodeURI("/assets/wedding % events/IMG_1649.jpg"),
-  encodeURI("/assets/wedding % events/IMG_2802.JPG"),
-];
+// Wedding images will be loaded from Supabase
 
 // Event flowers images - automatically rotating
 const eventFlowersImages = [
@@ -1385,11 +1362,33 @@ const ImageModal = ({
 const ImageGallery = () => {
   const [selectedImage, setSelectedImage] = React.useState<number | null>(null);
   const [currentIndex, setCurrentIndex] = React.useState(0);
+  const [weddingImages, setWeddingImages] = useState<string[]>([]);
+  const [loadingImages, setLoadingImages] = useState(true);
   const isMobile = useIsMobile();
   const sectionRef = useRef<HTMLElement>(null);
   const galleryRef = useRef<HTMLDivElement>(null);
   const touchStartX = useRef<number | null>(null);
   const touchEndX = useRef<number | null>(null);
+
+  // Load wedding images from Supabase
+  useEffect(() => {
+    const loadWeddingImages = async () => {
+      try {
+        setLoadingImages(true);
+        const creations = await getActiveWeddingCreations();
+        const imageUrls = creations.map(creation => encodeImageUrl(creation.image_url));
+        setWeddingImages(imageUrls);
+      } catch (error) {
+        console.error('Failed to load wedding images:', error);
+        // Fallback to empty array
+        setWeddingImages([]);
+      } finally {
+        setLoadingImages(false);
+      }
+    };
+
+    loadWeddingImages();
+  }, []);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -1600,6 +1599,30 @@ const ImageGallery = () => {
   }
 
   // Desktop layout
+  if (loadingImages) {
+    return (
+      <section className="relative py-12 sm:py-16 md:py-24 lg:py-32 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center py-12">
+            <Loader2 className="w-8 h-8 animate-spin text-gray-400 mx-auto" />
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (weddingImages.length === 0) {
+    return (
+      <section className="relative py-12 sm:py-16 md:py-24 lg:py-32 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center py-12 text-gray-500">
+            <p>No wedding creation photos available at the moment.</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <>
       <section ref={sectionRef} className="relative py-12 sm:py-16 md:py-24 lg:py-32 bg-white overflow-hidden">
