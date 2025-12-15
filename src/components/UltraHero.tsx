@@ -688,8 +688,8 @@ const UltraHero = () => {
                 
                 {/* Main flower image */}
                 <motion.img
-                  src="/assets/flower1.jpg"
-                  alt="Beautiful Flower"
+                  src="/assets/flower1.webp"
+                  alt="Elegant flower for every single occasion"
                   className="relative w-full h-full object-contain z-10 ml-4 md:ml-6 lg:ml-8"
                   initial={{ 
                     filter: shouldReduceMotion ? "drop-shadow(0 20px 40px rgba(0,0,0,0.5))" : "blur(8px) brightness(0.9) drop-shadow(0 0 15px rgba(0,0,0,0.6)) drop-shadow(0 0 25px rgba(0,0,0,0.4))",
