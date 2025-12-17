@@ -647,6 +647,16 @@ All colors MUST be HSL. No rounded corners - sharp and architectural.
       /* transform: translateZ(0); - Removed as it breaks position: fixed */
     }
 
+    /* Disable hover effects on mobile to reduce GPU load */
+    * {
+      pointer-events: auto;
+    }
+
+    /* Reduce motion on mobile for better performance */
+    [data-framer-component] {
+      will-change: auto !important;
+    }
+
     /* Simplify shadows on mobile for better performance */
     .shadow-lg,
     .shadow-xl,

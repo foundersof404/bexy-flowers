@@ -130,6 +130,8 @@ const UltraNavigation = () => {
   const menuRef = useRef<HTMLDivElement>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isNavbarVisible, setIsNavbarVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
   const { getTotalItems } = useCart();
   const { getTotalFavorites } = useFavorites();
   const cartItems = getTotalItems();
@@ -141,6 +143,45 @@ const UltraNavigation = () => {
   const preloadCartDashboard = () => {
     import('@/components/cart/CartDashboard');
   };
+
+  // Auto-hide navbar on scroll down, show on scroll up
+  useEffect(() => {
+    if (!isMobile) return; // Only apply on mobile
+
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      // Show navbar at top of page
+      if (currentScrollY < 50) {
+        setIsNavbarVisible(true);
+      } 
+      // Hide navbar when scrolling down
+      else if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        setIsNavbarVisible(false);
+      } 
+      // Show navbar when scrolling up
+      else if (currentScrollY < lastScrollY) {
+        setIsNavbarVisible(true);
+      }
+
+      setLastScrollY(currentScrollY);
+    };
+
+    // Throttle scroll events for better performance
+    let ticking = false;
+    const scrollListener = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          handleScroll();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    window.addEventListener('scroll', scrollListener, { passive: true });
+    return () => window.removeEventListener('scroll', scrollListener);
+  }, [lastScrollY, isMobile]);
 
   useEffect(() => {
     const nav = navRef.current;
@@ -234,13 +275,15 @@ const UltraNavigation = () => {
         <>
           <nav
             ref={navRef}
-            className="ultra-navigation fixed top-0 left-0 right-0 z-[100] backdrop-blur-xl shadow-luxury"
+            className="ultra-navigation fixed top-0 left-0 right-0 backdrop-blur-xl shadow-luxury"
             style={{
               backgroundColor: 'transparent', // Make header transparent
-              transition: 'none', // Remove transition to prevent black flash
+              transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)', // Smooth hide/show transition
               pointerEvents: 'auto', // Ensure navigation is clickable
               position: 'fixed',
               width: '100%',
+              zIndex: 9999, // Ensure navbar stays on top
+              transform: isNavbarVisible ? 'translateY(0)' : 'translateY(-100%)', // Auto-hide on scroll
               // Removed will-change as it causes performance issues with scroll
             }}
           >
