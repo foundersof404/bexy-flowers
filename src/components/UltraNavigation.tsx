@@ -20,7 +20,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/contexts/CartContext';
 import { useFavorites } from '@/contexts/FavoritesContext';
-import logoImage from '/assets/bexy-flowers-logo.png';
+import logoImage from '/assets/bexy-flowers-logo.webp';
 
 // ⚡ PERFORMANCE OPTIMIZATION: Lazy load CartDashboard (saves 120KB initial load)
 const CartDashboard = lazy(() => import('@/components/cart/CartDashboard'));
