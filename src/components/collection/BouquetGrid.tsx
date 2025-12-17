@@ -106,14 +106,14 @@ const BouquetCard = memo(({
         }}
       >
         {/* Image Section */}
-        <div 
+        <motion.div 
           className="relative overflow-hidden aspect-square"
         >
-          <div className="w-full h-full">
+          <motion.div className="w-full h-full">
             <OptimizedImage
               src={bouquet.image}
               alt={bouquet.name}
-              className="w-full h-full object-cover transition-transform duration-[400ms] ease-[cubic-bezier(0.4,0,0.2,1)] group-hover:scale-[1.02]"
+              className="w-full h-full object-cover transition-transform duration-400 ease-out group-hover:scale-[1.02]"
               style={{
                 willChange: 'transform',
                 transform: 'translateZ(0)',
@@ -123,7 +123,7 @@ const BouquetCard = memo(({
               objectFit="cover"
               priority={index < 4}
             />
-          </div>
+          </motion.div>
 
           {/* Featured Badge */}
           {bouquet.featured && (
