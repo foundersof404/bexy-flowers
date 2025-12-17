@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo, Suspense } from "react";
-import { motion, AnimatePresence, useScroll, useTransform, useSpring } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useLocation } from "react-router-dom";
 import UltraNavigation from "@/components/UltraNavigation";
 import { CollectionHero } from "@/components/collection/CollectionHero";
@@ -8,7 +8,6 @@ import { BouquetGrid } from "@/components/collection/BouquetGrid";
 import { FeaturedCarousel } from "@/components/collection/FeaturedCarousel";
 import { ProductModal } from "@/components/collection/ProductModal";
 import Footer from "@/components/Footer";
-import { FloatingBackground } from "@/components/collection/FloatingBackground";
 import { CollectionStats } from "@/components/collection/CollectionStats";
 import BackToTop from "@/components/BackToTop";
 import LazySection from "@/components/LazySection";
@@ -17,8 +16,13 @@ import { generatedCategories } from "@/data/generatedBouquets";
 import { getCollectionProducts } from "@/lib/api/collection-products";
 import { encodeImageUrl } from "@/lib/imageUtils";
 
+const DEFAULT_CATEGORY_ID =
+  generatedCategories.find((cat) => cat.id === "red-roses")?.id ||
+  generatedCategories.find((cat) => cat.id !== "all")?.id ||
+  "all";
+
 const Collection = () => {
-  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedCategory, setSelectedCategory] = useState(DEFAULT_CATEGORY_ID);
   const [selectedBouquet, setSelectedBouquet] = useState<Bouquet | null>(null);
   const [bouquets, setBouquets] = useState<Bouquet[]>([]);
   const [loading, setLoading] = useState(true);
@@ -103,7 +107,17 @@ const Collection = () => {
     [bouquets]
   );
 
-  const categories = useMemo(() => generatedCategories, []);
+  const categories = useMemo(
+    () =>
+      generatedCategories
+        .filter((cat) => cat.id !== "all")
+        .sort((a, b) => {
+          if (a.id === "red-roses") return -1;
+          if (b.id === "red-roses") return 1;
+          return 0;
+        }),
+    []
+  );
   
   // Use callback for handlers with smooth scroll
   const handleCategoryChange = useCallback((category: string) => {
@@ -128,30 +142,10 @@ const Collection = () => {
     setSelectedBouquet(null);
   }, []);
 
-  // Smooth scroll progress tracking
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start start", "end end"]
-  });
-
-  // Smooth spring animation for scroll-based effects
-  const smoothProgress = useSpring(scrollYProgress, {
-    stiffness: 100,
-    damping: 30,
-    restDelta: 0.001
-  });
-
-  // Transform scroll progress to various values
-  const opacity = useTransform(smoothProgress, [0, 0.2], [0.3, 1]);
-  const scale = useTransform(smoothProgress, [0, 0.2], [0.95, 1]);
-
   return (
     <div ref={containerRef} className="relative min-h-screen bg-background overflow-hidden">
       {/* Ultra Navigation */}
       <UltraNavigation />
-      
-      {/* Floating 3D Background */}
-      <FloatingBackground />
       
       <div className="collection-content relative z-10">
         {/* Immersive Hero Section */}
@@ -168,9 +162,31 @@ const Collection = () => {
         <section id="main-collection-grid" className="py-12 md:py-16 lg:py-20 px-3 sm:px-4 md:px-6 lg:px-8 w-full">
           <div className="max-w-7xl mx-auto w-full">
             {loading ? (
-              <div className="text-center py-20">
-                <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-amber-500"></div>
-                <p className="mt-4 text-gray-600">Loading collection...</p>
+              <div className="py-12 md:py-16 lg:py-20">
+                <div className="mb-8 text-center">
+                  <p className="text-xs md:text-sm tracking-[0.2em] text-gray-500 uppercase">
+                    Preparing your luxury collection
+                  </p>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-5 lg:gap-8">
+                  {Array.from({ length: 6 }).map((_, index) => (
+                    <div
+                      key={index}
+                      className="rounded-2xl md:rounded-3xl bg-white/80 border border-gray-200/60 shadow-sm overflow-hidden"
+                    >
+                      <div className="aspect-square bg-gradient-to-br from-slate-100 to-slate-200 animate-pulse" />
+                      <div className="p-3 md:p-4 space-y-3">
+                        <div className="h-3 w-1/2 bg-slate-200 rounded-full animate-pulse" />
+                        <div className="h-3 w-3/4 bg-slate-100 rounded-full animate-pulse" />
+                        <div className="h-px w-full bg-slate-200/80" />
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="h-4 w-16 bg-slate-200 rounded-full animate-pulse" />
+                          <div className="h-8 w-20 bg-slate-100 rounded-full animate-pulse" />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             ) : (
               <>

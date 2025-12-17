@@ -64,7 +64,8 @@ const CollectionHeroComponent = () => {
               rotate: idx % 2 === 0 ? [0, 4, -4, 0] : [0, -5, 5, 0],
               y: [-20, 30, -40]
             }}
-            transition={{ duration: 24 + idx * 4, repeat: Infinity, ease: "easeInOut" }}
+            // Run once for the same visual effect without an infinite loop
+            transition={{ duration: 24 + idx * 4, repeat: 0, ease: "easeInOut" }}
             className="absolute w-[50vw] h-[50vw] bg-gradient-to-br from-[#c9a14e1f] via-[#fff6e6] to-transparent blur-3xl"
             style={{
               top: idx === 0 ? '-5%' : idx === 1 ? '25%' : '55%',
@@ -74,16 +75,16 @@ const CollectionHeroComponent = () => {
         ))}
       </div>
 
-      {/* Background Image with Parallax Effect - Reduced on mobile */}
+      {/* Background Image with Parallax Effect - Reduced on mobile and desktop for performance */}
       <motion.div
         className="absolute inset-0 z-0"
         initial={{ scale: shouldReduceMotion || isMobile ? 1 : 1.1 }}
         animate={{ scale: 1 }}
         transition={{ 
+          // Keep an initial smooth reveal but avoid an infinite loop
           duration: shouldReduceMotion || isMobile ? 0 : 20, 
-          ease: "linear", 
-          repeat: shouldReduceMotion || isMobile ? 0 : Infinity, 
-          repeatType: "reverse" 
+          ease: "linear",
+          repeat: 0
         }}
         style={{ willChange: shouldReduceMotion || isMobile ? "auto" : "transform" }}
       >

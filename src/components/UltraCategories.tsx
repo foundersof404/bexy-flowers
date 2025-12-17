@@ -156,7 +156,7 @@ const UltraCategories = () => {
     };
   }, []);
 
-  // Seamless infinite scroll effect for desktop (single row)
+  // Seamless auto-scroll effect for desktop (single row)
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -164,10 +164,10 @@ const UltraCategories = () => {
     // Auto scroll - infinite seamless loop
     const cardWidth = 352; // Card width (w-80 = 320px + gap-8 = 32px = 352px)
     const singleSetWidth = categories.length * cardWidth;
-    
+
     // Set initial position
     gsap.set(container, { x: 0 });
-    
+
     const tween = gsap.to(container, {
       x: -singleSetWidth,
       duration: 30,
@@ -184,11 +184,34 @@ const UltraCategories = () => {
           }
           return `${val}px`;
         }
-      }
+      },
+      paused: true
     });
+
+    // Pause auto-scroll while the user is actively scrolling the page
+    let scrollTimeout: number | undefined;
+
+    const handleScroll = () => {
+      tween.pause();
+      if (scrollTimeout) {
+        window.clearTimeout(scrollTimeout);
+      }
+      scrollTimeout = window.setTimeout(() => {
+        tween.play();
+      }, 300);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    // Start auto-scroll when the section first mounts
+    tween.play();
 
     return () => {
       tween.kill();
+      window.removeEventListener('scroll', handleScroll);
+      if (scrollTimeout) {
+        window.clearTimeout(scrollTimeout);
+      }
       gsap.killTweensOf(container);
     };
   }, []);
