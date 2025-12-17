@@ -66,11 +66,11 @@ const BouquetCard = memo(({
   return (
     <motion.div
       initial={{ opacity: 0, y: 30, scale: 0.95 }}
-      whileInView={{ opacity: 1, y: 0, scale: 1 }}
-      viewport={{ once: false, amount: 0.2 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      viewport={{ once: false, amount: 0.1 }}
       transition={{ 
-        duration: 0.6,
-        delay: index * 0.08,
+        duration: 0.5,
+        delay: index * 0.05,
         ease: [0.23, 1, 0.32, 1]
       }}
       className="group cursor-pointer"
@@ -147,9 +147,8 @@ const BouquetCard = memo(({
           <motion.div 
             className="absolute top-2 right-2 md:top-4 md:right-4 flex gap-1.5 md:gap-2 z-20"
             initial={{ opacity: 0, x: 20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: false }}
-            transition={{ duration: 0.4, delay: index * 0.1 + 0.3 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.4, delay: index * 0.05 + 0.2 }}
           >
             <motion.button 
               ref={heartButtonRef}
@@ -231,9 +230,8 @@ const BouquetCard = memo(({
         <motion.div 
           className="p-3 md:p-4 lg:p-6 relative z-10"
           initial={{ opacity: 0, y: 10 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: false }}
-          transition={{ duration: 0.4, delay: index * 0.08 + 0.2 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: index * 0.05 + 0.15 }}
         >
           {/* Title */}
           <motion.h2 
@@ -252,9 +250,8 @@ const BouquetCard = memo(({
                 background: 'linear-gradient(90deg, #C29A43 0%, #F6E4C2 100%)'
               }}
               initial={{ width: '0%' }}
-              whileInView={{ width: '100%' }}
-              viewport={{ once: false }}
-              transition={{ duration: 0.8, delay: index * 0.08 + 0.3 }}
+              animate={{ width: '100%' }}
+              transition={{ duration: 0.6, delay: index * 0.05 + 0.25 }}
             />
           </motion.div>
 
@@ -262,9 +259,8 @@ const BouquetCard = memo(({
           <motion.p 
             className="text-gray-600 leading-relaxed text-[11px] md:text-xs lg:text-sm line-clamp-2 mt-1"
             initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: false }}
-            transition={{ duration: 0.5, delay: index * 0.08 + 0.4 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.4, delay: index * 0.05 + 0.3 }}
           >
             {bouquet.description}
           </motion.p>
@@ -280,9 +276,8 @@ const BouquetCard = memo(({
                   color: tag.color
                 }}
                 initial={{ opacity: 0, scale: 0.8, y: 10 }}
-                whileInView={{ opacity: 1, scale: 1, y: 0 }}
-                viewport={{ once: false }}
-                transition={{ duration: 0.4, delay: index * 0.08 + 0.5 + tagIndex * 0.1 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: index * 0.05 + 0.35 + tagIndex * 0.05 }}
                 whileHover={{ scale: 1.1 }}
               >
                 {tag.name}
@@ -294,9 +289,8 @@ const BouquetCard = memo(({
           <motion.div 
             className="w-full border-t border-gray-200/70 my-3 md:my-4 lg:my-5"
             initial={{ scaleX: 0 }}
-            whileInView={{ scaleX: 1 }}
-            viewport={{ once: false }}
-            transition={{ duration: 0.6, delay: index * 0.08 + 0.6 }}
+            animate={{ scaleX: 1 }}
+            transition={{ duration: 0.5, delay: index * 0.05 + 0.4 }}
           />
 
           {/* Price and Add to Cart */}
@@ -304,9 +298,8 @@ const BouquetCard = memo(({
             <motion.div 
               className="flex items-baseline justify-between"
               initial={{ opacity: 0, x: -10 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: false }}
-              transition={{ duration: 0.4, delay: index * 0.08 + 0.7 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.4, delay: index * 0.05 + 0.45 }}
             >
               <div>
                 <motion.span 
@@ -329,9 +322,8 @@ const BouquetCard = memo(({
 
             <motion.button
               initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: false }}
-              transition={{ duration: 0.4, delay: index * 0.08 + 0.8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: index * 0.05 + 0.5 }}
               whileHover={{ scale: 1.03, y: -2 }}
               whileTap={{ scale: 0.97 }}
               className="w-full h-9 md:h-10 lg:h-12 rounded-lg md:rounded-xl font-semibold text-white flex items-center justify-center gap-1.5 md:gap-2 relative overflow-hidden transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] text-xs md:text-sm lg:text-base"
@@ -405,9 +397,8 @@ const BouquetGridComponent = ({ bouquets, onBouquetClick, selectedCategory }: Bo
         ref={gridRef}
         className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-5 lg:gap-8 w-full px-0"
         initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: false, amount: 0.1 }}
-        transition={{ duration: 0.6 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.4 }}
       >
         {visibleBouquets.map((bouquet, index) => (
           <BouquetCard
