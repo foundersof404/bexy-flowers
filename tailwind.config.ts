@@ -244,7 +244,6 @@ export default {
     require("@tailwindcss/typography"),
     // Helpful for media that must keep its aspect ratio on all breakpoints
     require("@tailwindcss/aspect-ratio"),
-    // Useful for safely clamping overflowing copy on small screens
-    require("@tailwindcss/line-clamp"),
+    // Note: @tailwindcss/line-clamp is now included by default in Tailwind v3.3+
   ],
 } satisfies Config;

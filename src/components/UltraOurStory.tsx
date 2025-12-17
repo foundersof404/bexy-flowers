@@ -16,7 +16,7 @@ import {
   Leaf
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import logoImage from '/assets/bexy-flowers-logo.png';
+import logoImage from '/assets/bexy-flowers-logo.webp';
 import whoWeAreImage from '@/assets/who we-are-bexy-flowers.jpeg';
 import ThreeJSErrorBoundary from '@/components/3D/ThreeJSErrorBoundary';
 import { useWebGL } from '@/hooks/useWebGL';
