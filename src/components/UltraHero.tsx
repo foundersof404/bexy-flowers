@@ -52,7 +52,7 @@ const UltraHero = () => {
     <section 
       ref={heroRef}
       className={`relative flex items-center justify-center overflow-hidden perspective-1000 text-center ${
-        isMobile ? '-mt-20 md:bg-transparent md:pt-16 md:sm:pt-8' : 'pt-16 sm:pt-8 -mt-20'
+        isMobile ? '-mt-20 md:bg-transparent md:pt-16 md:sm:pt-8' : 'pt-16 sm:pt-8 mt-[-80px]'
       }`}
       style={{ 
         minHeight: isMobile ? '100dvh' : 'clamp(650px, 100vh, 900px)',
@@ -176,17 +176,18 @@ const UltraHero = () => {
                style={{ willChange: shouldReduceMotion || isMobile ? "auto" : "transform, opacity" }}
              >
                <motion.h1 
-                 className={`${isMobile ? 'font-luxury text-[clamp(1.6rem,7vw,2.6rem)]' : 'font-luxury text-3xl md:text-4xl lg:text-5xl'} font-bold mb-2 text-black relative uppercase`}
-                 initial={{ opacity: 0, y: 30 }}
-                 animate={{ opacity: 1, y: 0 }}
-                 transition={{ duration: shouldReduceMotion || isMobile ? 0 : 0.8, delay: shouldReduceMotion || isMobile ? 0 : 0.4 }}
-                 style={{ 
-                   filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))',
-                   letterSpacing: '0.05em'
-                 }}
-               >
-                 ELEGANT FLOWER FOR EVERY SINGLE OCCASION
-               </motion.h1>
+                className={`${isMobile ? 'font-luxury text-[clamp(1.6rem,7vw,2.6rem)]' : 'font-luxury text-3xl md:text-4xl lg:text-5xl xl:text-6xl'} font-bold mb-3 text-slate-800 relative`}
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: shouldReduceMotion || isMobile ? 0 : 0.8, delay: shouldReduceMotion || isMobile ? 0 : 0.4 }}
+                style={{ 
+                  filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.08))',
+                  letterSpacing: '0.02em',
+                  lineHeight: '1.2'
+                }}
+              >
+                Elegant Florals for Every Occasion
+              </motion.h1>
 
                    {/* Gold Arc - Mobile Only */}
                    {isMobile && (
@@ -329,6 +330,18 @@ const UltraHero = () => {
                   </span>
                 </motion.button>
               )}
+
+              {/* Microcopy - Mobile */}
+              {isMobile && (
+                <motion.p
+                  className="text-xs text-gray-600 text-center mb-4"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.6, delay: 1.3 }}
+                >
+                  Free consultation • No obligation
+                </motion.p>
+              )}
                
                {/* Subtitle with elegant reveal */}
                <motion.div
@@ -363,7 +376,7 @@ const UltraHero = () => {
                       backdropFilter: isMobile ? undefined : 'blur(8px)'
                     }}
                   >
-                    Crafting timeless beauty through floral artistry
+                    Crafting timeless beauty through refined floral artistry
                   </span>
                    
                    {/* Decorative line - hidden on mobile */}
@@ -484,7 +497,7 @@ const UltraHero = () => {
                   <Button
                     size="lg"
                     variant="outline"
-                    className="font-body text-sm xs:text-base sm:text-lg px-5 xs:px-6 sm:px-8 py-2.5 xs:py-3 sm:py-4 border-2 border-muted-foreground/30 text-muted-foreground hover:border-primary hover:bg-primary/5 hover:text-primary transition-all duration-300 rounded-full backdrop-blur-sm relative overflow-hidden group touch-target min-h-[44px] sm:min-h-[auto] w-full sm:w-auto"
+                    className="font-body text-sm xs:text-base sm:text-lg px-5 xs:px-6 sm:px-8 py-2.5 xs:py-3 sm:py-4 border-2 border-slate-300/50 text-slate-600 hover:border-primary/60 hover:bg-primary/5 hover:text-primary transition-all duration-300 rounded-full backdrop-blur-sm relative overflow-hidden group touch-target min-h-[44px] sm:min-h-[auto] w-full sm:w-auto"
                     onClick={() => {
                       const el = document.querySelector('[data-section="custom-bouquet"]');
                       if (el) {
@@ -510,6 +523,18 @@ const UltraHero = () => {
               </motion.div>
             )}
 
+            {/* Microcopy below CTAs - Desktop */}
+            {!isMobile && (
+              <motion.p
+                className="text-sm text-slate-500 text-center lg:text-left mt-3"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.8, delay: 0.9 }}
+              >
+                Free consultation • No obligation • Luxury guaranteed
+              </motion.p>
+            )}
+
              {/* Statistics with Enhanced Animations - Hidden on mobile */}
              {!isMobile && (
                <motion.div
@@ -526,9 +551,9 @@ const UltraHero = () => {
                style={{ willChange: shouldReduceMotion || isMobile ? "auto" : "transform, opacity" }}
              >
                {[
-                 { number: "1+", label: "years experience", color: "#c6a151" },
-                 { number: "100+", label: "flowers", color: "#ffd700" },
-                 { number: "98%", label: "satisfied rate", color: "#e4b55c" }
+                 { number: "1+", label: "Years of Excellence", color: "#c6a151" },
+                 { number: "100+", label: "Premium Varieties", color: "#ffd700" },
+                 { number: "98%", label: "Client Satisfaction", color: "#e4b55c" }
                ].map((stat, index) => (
                   <motion.div 
                    key={index}
@@ -732,21 +757,24 @@ const UltraHero = () => {
             >
               {[
                 { 
-                  icon: "M12 2L13.09 8.26L20 9L13.09 9.74L12 16L10.91 9.74L4 9L10.91 8.26L12 2Z", 
-                  title: "Wedding Arrangements" 
+                  icon: "M12 2L15.09 8.26L22 9L17 14L18.18 21L12 17.27L5.82 21L7 14L2 9L8.91 8.26L12 2Z", 
+                  title: "Wedding Arrangements",
+                  link: "/wedding-events"
                 },
                 { 
-                  icon: "M12 2L13.5 7.5L20 9L14.5 10.5L12 16L9.5 10.5L4 9L10.5 7.5L12 2Z", 
-                  title: "Custom Bouquets" 
+                  icon: "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z", 
+                  title: "Custom Bouquets",
+                  link: "/customize"
                 },
                 { 
-                  icon: "M12 2L13.5 6L18 7.5L14.5 10L15 14L12 12L9 14L9.5 10L6 7.5L10.5 6L12 2Z", 
-                  title: "Event Decor" 
+                  icon: "M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zm-7-7c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm0 1c1.93 0 3.5 1.57 3.5 3.5V17h-7v-.5c0-1.93 1.57-3.5 3.5-3.5z", 
+                  title: "Event Decor",
+                  link: "/wedding-events"
                 }
               ].map((service, index) => (
                 <motion.div 
                   key={index}
-                  className="relative group"
+                  className="relative group cursor-pointer"
                   initial={{ opacity: 0, x: 30, y: 20 }}
                   animate={{ opacity: 1, x: 0, y: 0 }}
                   transition={{ 
@@ -758,14 +786,16 @@ const UltraHero = () => {
                   }}
                   whileHover={{ 
                     y: -8, 
-                    scale: 1.02,
+                    scale: 1.05,
                     transition: { duration: 0.3, ease: "easeOut" }
                   }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => navigate(service.link)}
                 >
                   <motion.div 
-                    className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-4 pr-6 shadow-2xl hover:shadow-[0_25px_50px_rgba(255,255,255,0.15)] hover:bg-white/15 transition-all duration-500 relative overflow-hidden"
+                    className="bg-white/15 backdrop-blur-xl border border-white/30 rounded-2xl p-4 pr-6 shadow-2xl hover:shadow-[0_30px_60px_rgba(198,161,81,0.25)] hover:bg-white/25 hover:border-[rgba(198,161,81,0.5)] transition-all duration-500 relative overflow-hidden"
                     whileHover={{
-                      borderColor: "rgba(198,161,81,0.4)",
+                      borderColor: "rgba(198,161,81,0.6)",
                       transition: { duration: 0.3 }
                     }}
                   >
@@ -834,7 +864,7 @@ const UltraHero = () => {
             className="flex flex-col items-center text-muted-foreground cursor-pointer group"
             onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}
           >
-            <span className="font-body text-xs sm:text-sm mb-4 tracking-wide opacity-80 group-hover:opacity-100 transition-opacity">
+            <span className="font-body text-xs sm:text-sm mb-1 tracking-wide opacity-80 group-hover:opacity-100 transition-opacity">
               DISCOVER LUXURY
             </span>
             <div className="relative w-12 h-12 flex items-center justify-center rounded-full border border-primary/30 bg-white/60 shadow-lg shadow-primary/10 backdrop-blur-sm">
