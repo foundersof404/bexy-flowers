@@ -15,8 +15,7 @@
     "fix:wedding-webp": "node scripts/fix-wedding-creations-local-to-webp.mjs",
     "convert:public-webp": "node scripts/convert-public-assets-to-webp.mjs",
     "delete:originals": "node scripts/delete-original-images.mjs",
-    "cleanup:duplicates": "node scripts/cleanup-all-duplicates.mjs",
-    "convert:public-webp": "node scripts/convert-public-assets-to-webp.mjs"
+    "cleanup:duplicates": "node scripts/cleanup-all-duplicates.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
