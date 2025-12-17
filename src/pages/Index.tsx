@@ -57,7 +57,7 @@ const ProfessionalCustomSection = React.memo(() => {
 
   return (
     <section 
-      className="relative py-16 sm:py-24 md:py-32 px-4 sm:px-6 lg:px-8 overflow-hidden"
+      className="relative py-12 sm:py-16 md:py-24 lg:py-32 px-4 sm:px-6 lg:px-8 overflow-hidden"
       style={{
         background: 'linear-gradient(180deg, #faf7f3 0%, #ffffff 100%)'
       }}
@@ -166,7 +166,7 @@ const ProfessionalCustomSection = React.memo(() => {
             <div className="absolute top-6 left-8 w-40 h-40 rounded-full bg-[#F1E2CE]/30 blur-xl opacity-60" />
             <div className="absolute bottom-4 right-20 w-48 h-48 rounded-full bg-[#F6EADC]/25 blur-xl opacity-60" />
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8 lg:gap-10 xl:gap-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 md:gap-8 lg:gap-10 xl:gap-12">
             {features.map((feature, index) => {
               const getInitialState = () => {
                 if (feature.direction === "left") {
@@ -287,14 +287,14 @@ const ProfessionalCustomSection = React.memo(() => {
 
         {/* CTA Button Section - Elegant Frame */}
         <motion.div
-          className="relative text-center mt-8"
+          className="relative text-center mt-6 sm:mt-8"
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.5, margin: "0px 0px -100px 0px" }}
           transition={{ duration: 0.8, delay: 0.6 }}
         >
           {/* Elegant Decorative Frame */}
-          <div className="relative inline-block px-8 sm:px-12 md:px-16 py-8 sm:py-10 md:py-12">
+          <div className="relative inline-block px-4 sm:px-8 md:px-12 lg:px-16 py-6 sm:py-8 md:py-10 lg:py-12">
             {/* Top Left Corner */}
             <motion.div
               className="absolute top-0 left-0 w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16"
@@ -373,7 +373,7 @@ const ProfessionalCustomSection = React.memo(() => {
             {/* CTA Button */}
             <motion.a
               href="/customize"
-              className="group inline-flex items-center gap-2 sm:gap-3 md:gap-4 px-6 sm:px-8 md:px-10 py-3 sm:py-4 md:py-5 rounded-xl sm:rounded-2xl font-bold text-white relative overflow-hidden w-full sm:w-auto"
+              className="group inline-flex items-center gap-2 sm:gap-3 md:gap-4 px-4 sm:px-6 md:px-8 lg:px-10 py-2.5 sm:py-3 md:py-4 lg:py-5 rounded-lg sm:rounded-xl md:rounded-2xl font-bold text-white relative overflow-hidden w-full sm:w-auto touch-target min-h-[44px] sm:min-h-[auto] text-xs sm:text-sm md:text-base"
               style={{
                 background: 'linear-gradient(90deg, #B88A44 0%, #D4A85A 50%, #CFA340 100%)',
                 boxShadow: '0 8px 32px rgba(184, 138, 68, 0.4)',
