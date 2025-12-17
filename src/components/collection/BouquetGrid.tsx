@@ -16,6 +16,7 @@ gsap.registerPlugin(ScrollTrigger);
 interface BouquetGridProps {
   bouquets: Bouquet[];
   onBouquetClick: (bouquet: Bouquet) => void;
+  selectedCategory?: string;
 }
 
 // Function to get tags for bouquets - Premium Luxury Style
@@ -64,25 +65,34 @@ const BouquetCard = memo(({
   
   return (
     <motion.div
-      initial={{ opacity: 1 }}
-      animate={{ opacity: 1 }}
+      initial={{ opacity: 0, y: 30, scale: 0.95 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+      viewport={{ once: false, amount: 0.2 }}
+      transition={{ 
+        duration: 0.6,
+        delay: index * 0.08,
+        ease: [0.23, 1, 0.32, 1]
+      }}
       className="group cursor-pointer"
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
     >
       {/* Premium Luxury Card */}
-      <div 
-        className="w-full rounded-2xl md:rounded-3xl overflow-hidden relative transition-all duration-300 ease-out"
+      <motion.div 
+        className="w-full rounded-2xl md:rounded-3xl overflow-hidden relative"
         style={{
           background: 'linear-gradient(180deg, #ffffff 0%, #f8f5f1 100%)',
           border: '1px solid rgba(255, 255, 255, 0.2)',
-          transform: isHovered ? 'translateY(-8px)' : 'translateY(0)',
-          boxShadow: isHovered 
-            ? '0 16px 40px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(194, 154, 67, 0.25)'
-            : '0 4px 20px rgba(0, 0, 0, 0.08)',
-          willChange: isHovered ? 'transform' : 'auto',
           // ⚡ PERFORMANCE: CSS containment for better scroll performance
           contain: 'layout style paint'
+        }}
+        whileHover={{ 
+          y: -12,
+          boxShadow: '0 20px 50px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(194, 154, 67, 0.3)',
+          transition: { duration: 0.3, ease: [0.23, 1, 0.32, 1] }
+        }}
+        initial={{
+          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)'
         }}
         onClick={() => {
           navigate(`/product/${bouquet.id}`, { 
@@ -101,22 +111,25 @@ const BouquetCard = memo(({
         }}
       >
         {/* Image Section */}
-        <div className="relative overflow-hidden aspect-square">
-          <OptimizedImage
-            src={bouquet.image}
-            alt={bouquet.name}
-            className="w-full h-full object-cover transition-transform duration-500 ease-out"
-            aspectRatio="1/1"
-            objectFit="cover"
-            priority={index < 4}
-            style={{
-              transform: isHovered ? 'scale(1.05)' : 'scale(1)',
-              filter: isHovered 
-                ? 'brightness(1.03) contrast(1.01)'
-                : 'brightness(1) contrast(1)',
-              willChange: isHovered ? 'transform' : 'auto'
-            }}
-          />
+        <motion.div 
+          className="relative overflow-hidden aspect-square"
+          whileHover={{ scale: 1.02 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+        >
+          <motion.div
+            whileHover={{ scale: 1.1 }}
+            transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
+            className="w-full h-full"
+          >
+            <OptimizedImage
+              src={bouquet.image}
+              alt={bouquet.name}
+              className="w-full h-full object-cover"
+              aspectRatio="1/1"
+              objectFit="cover"
+              priority={index < 4}
+            />
+          </motion.div>
 
           {/* Featured Badge */}
           {bouquet.featured && (
@@ -131,15 +144,24 @@ const BouquetCard = memo(({
           )}
 
           {/* Floating Action Buttons */}
-          <div className="absolute top-2 right-2 md:top-4 md:right-4 flex gap-1.5 md:gap-2 z-20">
-            <button 
+          <motion.div 
+            className="absolute top-2 right-2 md:top-4 md:right-4 flex gap-1.5 md:gap-2 z-20"
+            initial={{ opacity: 0, x: 20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: false }}
+            transition={{ duration: 0.4, delay: index * 0.1 + 0.3 }}
+          >
+            <motion.button 
               ref={heartButtonRef}
-              className="w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center relative transition-transform duration-200 hover:scale-105 active:scale-95"
+              className="w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center relative"
               style={{
                 background: isFav ? 'rgba(220, 38, 127, 0.15)' : 'rgba(255, 255, 255, 0.7)',
                 boxShadow: isFav ? '0 4px 12px rgba(220, 38, 127, 0.25)' : '0 4px 12px rgba(0, 0, 0, 0.08)',
                 backdropFilter: 'blur(8px)'
               }}
+              whileHover={{ scale: 1.15, rotate: [0, -10, 10, 0] }}
+              whileTap={{ scale: 0.9 }}
+              transition={{ duration: 0.3 }}
               onClick={(e) => {
                 e.stopPropagation();
                 
@@ -183,72 +205,111 @@ const BouquetCard = memo(({
                 className={`w-3.5 h-3.5 md:w-4 md:h-4 ${isFav ? 'fill-[#dc267f] text-[#dc267f]' : 'text-slate-700'}`} 
                 strokeWidth={2} 
               />
-            </button>
+            </motion.button>
             
-            <button 
-              className="w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center relative transition-transform duration-200 hover:scale-105 active:scale-95"
+            <motion.button 
+              className="w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center relative"
               style={{
                 background: 'rgba(255, 255, 255, 0.7)',
                 boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
                 backdropFilter: 'blur(8px)'
               }}
+              whileHover={{ scale: 1.15, rotate: 360 }}
+              whileTap={{ scale: 0.9 }}
+              transition={{ duration: 0.3 }}
               onClick={(e) => {
                 e.stopPropagation();
                 onBouquetClick(bouquet);
               }}
             >
               <Eye className="w-3.5 h-3.5 md:w-4 md:h-4 text-slate-700" strokeWidth={2} />
-            </button>
-          </div>
-        </div>
+            </motion.button>
+          </motion.div>
+        </motion.div>
 
         {/* Info Section */}
-        <div className="p-3 md:p-4 lg:p-6 relative z-10">
+        <motion.div 
+          className="p-3 md:p-4 lg:p-6 relative z-10"
+          initial={{ opacity: 0, y: 10 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: false }}
+          transition={{ duration: 0.4, delay: index * 0.08 + 0.2 }}
+        >
           {/* Title */}
-          <h2 className="font-serif font-bold text-gray-900 text-base md:text-lg lg:text-xl line-clamp-1">
+          <motion.h2 
+            className="font-serif font-bold text-gray-900 text-base md:text-lg lg:text-xl line-clamp-1"
+            whileHover={{ x: 5 }}
+            transition={{ duration: 0.2 }}
+          >
             {bouquet.name}
-          </h2>
+          </motion.h2>
           
           {/* Gold Underline */}
-          <div className="relative h-[2px] mt-1 mb-3 w-20 overflow-hidden">
-            <div 
-              className="h-full absolute left-0 top-0 transition-all duration-500 ease-out"
+          <motion.div className="relative h-[2px] mt-1 mb-3 w-20 overflow-hidden">
+            <motion.div 
+              className="h-full absolute left-0 top-0"
               style={{
-                background: 'linear-gradient(90deg, #C29A43 0%, #F6E4C2 100%)',
-                width: isHovered ? '100%' : '0%'
+                background: 'linear-gradient(90deg, #C29A43 0%, #F6E4C2 100%)'
               }}
+              initial={{ width: '0%' }}
+              whileInView={{ width: '100%' }}
+              viewport={{ once: false }}
+              transition={{ duration: 0.8, delay: index * 0.08 + 0.3 }}
             />
-          </div>
+          </motion.div>
 
           {/* Description */}
-          <p className="text-gray-600 leading-relaxed text-[11px] md:text-xs lg:text-sm line-clamp-2 mt-1">
+          <motion.p 
+            className="text-gray-600 leading-relaxed text-[11px] md:text-xs lg:text-sm line-clamp-2 mt-1"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: false }}
+            transition={{ duration: 0.5, delay: index * 0.08 + 0.4 }}
+          >
             {bouquet.description}
-          </p>
+          </motion.p>
 
           {/* Tags */}
           <div className="flex gap-1 md:gap-1.5 lg:gap-2 mt-2 md:mt-3 flex-wrap">
             {tags.slice(0, 2).map((tag, tagIndex) => (
-              <span
+              <motion.span
                 key={tagIndex}
                 className="px-1.5 md:px-2 py-0.5 md:py-[3px] text-[9px] md:text-[10px] lg:text-[11px] rounded-md font-semibold"
                 style={{
                   backgroundColor: tag.bgColor,
                   color: tag.color
                 }}
+                initial={{ opacity: 0, scale: 0.8, y: 10 }}
+                whileInView={{ opacity: 1, scale: 1, y: 0 }}
+                viewport={{ once: false }}
+                transition={{ duration: 0.4, delay: index * 0.08 + 0.5 + tagIndex * 0.1 }}
+                whileHover={{ scale: 1.1 }}
               >
                 {tag.name}
-              </span>
+              </motion.span>
             ))}
           </div>
 
           {/* Divider */}
-          <div className="w-full border-t border-gray-200/70 my-3 md:my-4 lg:my-5"></div>
+          <motion.div 
+            className="w-full border-t border-gray-200/70 my-3 md:my-4 lg:my-5"
+            initial={{ scaleX: 0 }}
+            whileInView={{ scaleX: 1 }}
+            viewport={{ once: false }}
+            transition={{ duration: 0.6, delay: index * 0.08 + 0.6 }}
+          />
 
           {/* Price and Add to Cart */}
           <div className="flex flex-col gap-2 md:gap-3">
-            <div className="flex items-baseline justify-between">
+            <motion.div 
+              className="flex items-baseline justify-between"
+              initial={{ opacity: 0, x: -10 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: false }}
+              transition={{ duration: 0.4, delay: index * 0.08 + 0.7 }}
+            >
               <div>
-                <span 
+                <motion.span 
                   className="text-xl md:text-2xl lg:text-3xl font-bold"
                   style={{
                     backgroundImage: 'linear-gradient(90deg, #B7893C 0%, #E7D4A8 100%)',
@@ -257,14 +318,22 @@ const BouquetCard = memo(({
                     WebkitTextFillColor: 'transparent',
                     color: 'transparent'
                   }}
+                  whileHover={{ scale: 1.05 }}
+                  transition={{ duration: 0.2 }}
                 >
                   ${bouquet.price}
-                </span>
+                </motion.span>
                 <span className="text-gray-500 text-xs md:text-sm ml-1">USD</span>
               </div>
-            </div>
+            </motion.div>
 
-            <button
+            <motion.button
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: false }}
+              transition={{ duration: 0.4, delay: index * 0.08 + 0.8 }}
+              whileHover={{ scale: 1.03, y: -2 }}
+              whileTap={{ scale: 0.97 }}
               className="w-full h-9 md:h-10 lg:h-12 rounded-lg md:rounded-xl font-semibold text-white flex items-center justify-center gap-1.5 md:gap-2 relative overflow-hidden transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] text-xs md:text-sm lg:text-base"
               style={{
                 background: 'linear-gradient(90deg, #B88A44 0%, #F6E3B5 100%)',
@@ -289,17 +358,17 @@ const BouquetCard = memo(({
               
               <ShoppingCart className="w-3.5 h-3.5 md:w-4 md:h-4 relative z-10" strokeWidth={2} />
               <span className="relative z-10">Add to Cart</span>
-            </button>
+            </motion.button>
           </div>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </motion.div>
   );
 });
 
 BouquetCard.displayName = 'BouquetCard';
 
-const BouquetGridComponent = ({ bouquets, onBouquetClick }: BouquetGridProps) => {
+const BouquetGridComponent = ({ bouquets, onBouquetClick, selectedCategory }: BouquetGridProps) => {
   const gridRef = useRef<HTMLDivElement>(null);
   const [imagesLoaded, setImagesLoaded] = useState(0);
   
@@ -319,17 +388,26 @@ const BouquetGridComponent = ({ bouquets, onBouquetClick }: BouquetGridProps) =>
     <>
       {/* Loading progress indicator (optional) */}
       {imagesLoaded < totalImages && imagesLoaded > 0 && (
-        <div className="mb-4 text-center">
+        <motion.div 
+          className="mb-4 text-center"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 10 }}
+        >
           <div className="inline-flex items-center gap-2 text-sm text-slate-500">
             <div className="w-4 h-4 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
             Loading images... {imagesLoaded}/{totalImages}
           </div>
-        </div>
+        </motion.div>
       )}
       
-      <div 
+      <motion.div 
         ref={gridRef}
         className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-5 lg:gap-8 w-full px-0"
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: false, amount: 0.1 }}
+        transition={{ duration: 0.6 }}
       >
         {visibleBouquets.map((bouquet, index) => (
           <BouquetCard
@@ -339,16 +417,25 @@ const BouquetGridComponent = ({ bouquets, onBouquetClick }: BouquetGridProps) =>
             onBouquetClick={onBouquetClick}
           />
         ))}
-      </div>
+      </motion.div>
       
       {/* Progressive loading indicator */}
       {itemsToRender < bouquets.length && (
-        <div className="mt-8 text-center">
+        <motion.div 
+          className="mt-8 text-center"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
           <div className="inline-flex items-center gap-2 text-sm text-slate-500">
-            <div className="w-4 h-4 border-2 border-[#C29A43] border-t-transparent rounded-full animate-spin" />
+            <motion.div 
+              className="w-4 h-4 border-2 border-[#C29A43] border-t-transparent rounded-full"
+              animate={{ rotate: 360 }}
+              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+            />
             <span>Loading {bouquets.length - itemsToRender} more bouquets...</span>
           </div>
-        </div>
+        </motion.div>
       )}
     </>
   );

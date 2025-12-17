@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo, Suspense } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useScroll, useTransform, useSpring } from "framer-motion";
 import { useLocation } from "react-router-dom";
 import UltraNavigation from "@/components/UltraNavigation";
 import { CollectionHero } from "@/components/collection/CollectionHero";
@@ -128,6 +128,23 @@ const Collection = () => {
     setSelectedBouquet(null);
   }, []);
 
+  // Smooth scroll progress tracking
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end end"]
+  });
+
+  // Smooth spring animation for scroll-based effects
+  const smoothProgress = useSpring(scrollYProgress, {
+    stiffness: 100,
+    damping: 30,
+    restDelta: 0.001
+  });
+
+  // Transform scroll progress to various values
+  const opacity = useTransform(smoothProgress, [0, 0.2], [0.3, 1]);
+  const scale = useTransform(smoothProgress, [0, 0.2], [0.95, 1]);
+
   return (
     <div ref={containerRef} className="relative min-h-screen bg-background overflow-hidden">
       {/* Ultra Navigation */}
@@ -157,59 +174,74 @@ const Collection = () => {
               </div>
             ) : (
               <>
-                {/* Category count and transition */}
+                {/* Category count with smooth scroll animation */}
                 <motion.div
-                  key={`count-${selectedCategory}`}
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
-                  transition={{ duration: 0.3 }}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: false, amount: 0.3 }}
+                  transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
                   className="mb-8 text-center"
                 >
-                  <p className="text-sm text-gray-600">
-                    Showing <span className="font-bold text-[#C29A43]">{filteredBouquets.length}</span> beautiful bouquet{filteredBouquets.length !== 1 ? 's' : ''}
-                  </p>
+                  <motion.p 
+                    className="text-sm text-gray-600"
+                    initial={{ scale: 0.9 }}
+                    whileInView={{ scale: 1 }}
+                    viewport={{ once: false }}
+                    transition={{ duration: 0.4, delay: 0.1 }}
+                  >
+                    Showing <motion.span 
+                      className="font-bold text-[#C29A43]"
+                      initial={{ opacity: 0 }}
+                      whileInView={{ opacity: 1 }}
+                      viewport={{ once: false }}
+                      transition={{ duration: 0.5, delay: 0.2 }}
+                    >
+                      {filteredBouquets.length}
+                    </motion.span> beautiful bouquet{filteredBouquets.length !== 1 ? 's' : ''}
+                  </motion.p>
                 </motion.div>
                 
-                {/* Grid with smooth transition */}
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={selectedCategory}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
-              >
+                {/* Grid without filtration animation - smooth scroll animations inside */}
                 <BouquetGrid 
                   bouquets={filteredBouquets}
                   onBouquetClick={handleBouquetClick}
+                  selectedCategory={selectedCategory}
                 />
-              </motion.div>
-            </AnimatePresence>
               </>
             )}
           </div>
         </section>
         
-        {/* Simplified Category Divider - Reduced animation complexity */}
+        {/* Featured Collections Divider - Enhanced with smooth animations */}
         <motion.div 
           className="relative py-16 text-center"
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: false, amount: 0.5 }}
+          transition={{ duration: 0.8, ease: [0.23, 1, 0.32, 1] }}
         >
-          <div className="absolute inset-0 flex items-center justify-center">
+          <motion.div 
+            className="absolute inset-0 flex items-center justify-center"
+            initial={{ scaleX: 0 }}
+            whileInView={{ scaleX: 1 }}
+            viewport={{ once: false, amount: 0.5 }}
+            transition={{ duration: 1.2, delay: 0.2, ease: "easeInOut" }}
+          >
             <div className="h-px w-full bg-gradient-to-r from-transparent via-primary to-transparent" />
-          </div>
-          <h2 className="font-luxury text-4xl md:text-6xl font-bold text-slate-800 relative z-10 bg-background px-8 inline-block"
-              style={{
-                filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))',
-                letterSpacing: '0.05em'
-              }}
+          </motion.div>
+          <motion.h2 
+            className="font-luxury text-4xl md:text-6xl font-bold text-slate-800 relative z-10 bg-background px-8 inline-block"
+            style={{
+              filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))',
+              letterSpacing: '0.05em'
+            }}
+            initial={{ scale: 0.8, opacity: 0 }}
+            whileInView={{ scale: 1, opacity: 1 }}
+            viewport={{ once: false, amount: 0.5 }}
+            transition={{ duration: 0.6, delay: 0.4, ease: [0.23, 1, 0.32, 1] }}
           >
             FEATURED COLLECTIONS
-          </h2>
+          </motion.h2>
         </motion.div>
         
         {/* Featured Carousel */}
