@@ -629,47 +629,45 @@ const UltraNavigation = () => {
                   </motion.div>
 
                   {/* Mobile Menu Button - Touch-Friendly */}
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 1.4, duration: 0.6 }}
-                    className="lg:hidden"
-                  >
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleMenuToggle(e);
-                  }}
-                  onTouchStart={(e) => {
-                    // Handle touch events immediately for mobile
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleMenuToggle(e);
-                  }}
-                  className="relative group hover:bg-primary/10 transition-all duration-200 overflow-hidden rounded-lg touch-target"
-                  style={{
-                    WebkitTapHighlightColor: 'transparent',
-                    touchAction: 'manipulation',
-                    width: '48px',
-                    height: '48px',
-                    minWidth: '48px',
-                    minHeight: '48px',
-                    zIndex: 10001, // Ensure it's above everything
-                    position: 'relative',
-                    pointerEvents: 'auto',
-                  }}
-                >
-
+                  <div className="lg:hidden relative flex items-center justify-center" style={{ zIndex: 10001, pointerEvents: 'auto' }}>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleMenuToggle(e);
+                      }}
+                      onTouchStart={(e) => {
+                        // Handle touch events immediately for mobile
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleMenuToggle(e);
+                      }}
+                      className="relative group hover:bg-primary/10 transition-all duration-200 touch-target flex items-center justify-center"
+                      style={{
+                        WebkitTapHighlightColor: 'transparent',
+                        touchAction: 'manipulation',
+                        width: '48px',
+                        height: '48px',
+                        minWidth: '48px',
+                        minHeight: '48px',
+                        zIndex: 10001,
+                        position: 'relative',
+                        pointerEvents: 'auto',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
                       {isMenuOpen ? (
                         <LuxuryCloseIcon className="w-6 h-6 sm:w-7 sm:h-7 text-foreground transition-opacity duration-150" strokeWidth={2.5} />
                       ) : (
                         <LuxuryMenuIcon className="w-6 h-6 sm:w-7 sm:h-7 text-foreground transition-opacity duration-150" strokeWidth={2.5} />
                       )}
                     </Button>
-                  </motion.div>
+                  </div>
                 </div>
               </div>
             </div>
