@@ -139,10 +139,10 @@ const UltraNavigation = () => {
   const isMobile = useIsMobile();
   const shouldReduceMotion = useReducedMotion();
 
-  // ⚡ PERFORMANCE: Preload CartDashboard on hover for instant opening
-  const preloadCartDashboard = () => {
+  // ⚡ PERFORMANCE: Preload CartDashboard immediately for instant opening
+  useEffect(() => {
     import('@/components/cart/CartDashboard');
-  };
+  }, []);
 
   // Auto-hide navbar on scroll down, show on scroll up
   useEffect(() => {
@@ -195,6 +195,7 @@ const UltraNavigation = () => {
 
   const handleMenuToggle = (e?: React.MouseEvent) => {
     if (e) {
+      e.preventDefault();
       e.stopPropagation();
     }
     
@@ -631,11 +632,11 @@ const UltraNavigation = () => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
+                transition={{ duration: 0.1 }}
                 onClick={handleCloseMenu}
                 style={{
                   zIndex: 9998,
-                  top: '75%',
+                  top: 'calc(75% + 80px)', // Account for header height
                   left: 0,
                   right: 0,
                   bottom: 0,
@@ -644,7 +645,7 @@ const UltraNavigation = () => {
                 }}
               />
               
-              {/* Menu Panel - 75% from top */}
+              {/* Menu Panel - 75% from top, starts below header */}
               <motion.div
                 ref={menuRef}
                 className="lg:hidden fixed bg-background/98 backdrop-blur-xl shadow-2xl overflow-y-auto"
@@ -652,17 +653,17 @@ const UltraNavigation = () => {
                   backgroundColor: 'rgba(229, 228, 226, 0.98)',
                   WebkitOverflowScrolling: 'touch',
                   zIndex: 9999,
-                  top: 0,
+                  top: '80px', // 5cm below header
                   left: 0,
                   right: 0,
-                  height: '75%',
-                  paddingTop: isMobile ? 'calc(env(safe-area-inset-top, 0) + 1rem)' : '1rem',
+                  height: 'calc(75% - 80px)',
+                  paddingTop: '1rem',
                   paddingBottom: '1rem',
                 }}
-                initial={{ y: '-100%' }}
-                animate={{ y: 0 }}
-                exit={{ y: '-100%' }}
-                transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
+                initial={{ y: '-100%', opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: '-100%', opacity: 0 }}
+                transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
                 onClick={(e) => e.stopPropagation()}
               >
                 {/* Close Button - Visible at top */}
@@ -683,15 +684,8 @@ const UltraNavigation = () => {
                 {navigationItems.map((item, index) => {
                   const isActive = location.pathname === item.path;
                   return (
-                    <motion.div
+                    <div
                       key={item.name}
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ 
-                        delay: index * 0.03, 
-                        duration: 0.2,
-                        ease: [0.4, 0, 0.2, 1]
-                      }}
                     >
                       <Button
                         variant="ghost"
@@ -763,20 +757,12 @@ const UltraNavigation = () => {
                           </div>
                         </div>
                       </Button>
-                    </motion.div>
+                    </div>
                   );
                 })}
                 
                 {/* Favorites - Icon Only in Mobile Menu */}
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ 
-                    delay: navigationItems.length * 0.03, 
-                    duration: 0.2,
-                    ease: [0.4, 0, 0.2, 1]
-                  }}
-                >
+                <div>
                   <Button
                     variant="ghost"
                     className={`w-full justify-start text-left group relative overflow-hidden rounded-xl transition-all duration-500 touch-target ${
@@ -839,19 +825,10 @@ const UltraNavigation = () => {
                       </div>
                     </div>
                   </Button>
-                </motion.div>
+                </div>
 
                 {/* Social Media Icons - Mobile Menu */}
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ 
-                    delay: (navigationItems.length + 1) * 0.03, 
-                    duration: 0.2,
-                    ease: [0.4, 0, 0.2, 1]
-                  }}
-                  className="pt-4 border-t border-primary/20 mt-4"
-                >
+                <div className="pt-4 border-t border-primary/20 mt-4">
                   <div className="flex items-center justify-center gap-4 sm:gap-3">
                     {/* WhatsApp - Touch-Friendly */}
                     <motion.a
@@ -917,7 +894,7 @@ const UltraNavigation = () => {
                       </svg>
                     </motion.a>
                   </div>
-                </motion.div>
+                </div>
               </div>
             </motion.div>
             </>
