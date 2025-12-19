@@ -593,8 +593,12 @@ const UltraNavigation = () => {
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={handleMenuToggle}
-                  className="relative group hover:bg-primary/10 transition-all duration-300 overflow-hidden rounded-lg touch-target"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleMenuToggle(e);
+                  }}
+                  className="relative group hover:bg-primary/10 transition-all duration-200 overflow-hidden rounded-lg touch-target"
                   style={{
                     WebkitTapHighlightColor: 'transparent',
                     touchAction: 'manipulation',
@@ -606,23 +610,9 @@ const UltraNavigation = () => {
                 >
                   
                   {isMenuOpen ? (
-                    <motion.div
-                      className="relative z-10"
-                      initial={{ rotate: -90, opacity: 0 }}
-                      animate={{ rotate: 0, opacity: 1 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <LuxuryCloseIcon className="w-6 h-6 sm:w-7 sm:h-7 text-foreground" style={{ strokeWidth: 2.5 }} />
-                    </motion.div>
+                    <LuxuryCloseIcon className="w-6 h-6 sm:w-7 sm:h-7 text-foreground transition-opacity duration-150" style={{ strokeWidth: 2.5 }} />
                   ) : (
-                    <motion.div
-                      className="relative z-10"
-                      initial={{ rotate: 90, opacity: 0 }}
-                      animate={{ rotate: 0, opacity: 1 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <LuxuryMenuIcon className="w-6 h-6 sm:w-7 sm:h-7 text-foreground" style={{ strokeWidth: 2.5 }} />
-                    </motion.div>
+                    <LuxuryMenuIcon className="w-6 h-6 sm:w-7 sm:h-7 text-foreground transition-opacity duration-150" style={{ strokeWidth: 2.5 }} />
                   )}
                 </Button>
               </motion.div>
@@ -631,71 +621,76 @@ const UltraNavigation = () => {
         </div>
        </nav>
 
-        {/* Mobile Menu - Slide-in Panel - Outside nav for proper z-index */}
-        <AnimatePresence>
+        {/* Mobile Menu - Slide Down from Top - Outside nav for proper z-index */}
+        <AnimatePresence mode="wait">
           {isMenuOpen && (
             <>
-              {/* Backdrop - Click outside to close */}
+              {/* Blurred Background - Shows 25% of page blurred at bottom */}
               <motion.div
-                className="lg:hidden fixed inset-0 bg-black/40 backdrop-blur-sm"
+                className="lg:hidden fixed backdrop-blur-lg"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 0.3 }}
+                transition={{ duration: 0.2 }}
                 onClick={handleCloseMenu}
                 style={{
                   zIndex: 9998,
+                  top: '75%',
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  backgroundColor: 'rgba(0, 0, 0, 0.4)',
+                  pointerEvents: 'auto',
                 }}
               />
-            <motion.div
-              ref={menuRef}
+              
+              {/* Menu Panel - 75% from top */}
+              <motion.div
+                ref={menuRef}
                 className="lg:hidden fixed bg-background/98 backdrop-blur-xl shadow-2xl overflow-y-auto"
-              style={{ 
-                backgroundColor: 'rgba(229, 228, 226, 0.98)',
-                WebkitOverflowScrolling: 'touch',
-                zIndex: 9999,
-                top: 0,
-                right: 0,
-                bottom: 0,
-                width: '85%',
-                maxWidth: '400px',
-                paddingTop: isMobile ? 'calc(env(safe-area-inset-top, 0) + 1rem)' : '1rem',
-                paddingBottom: isMobile ? 'env(safe-area-inset-bottom, 1rem)' : '1rem',
-              }}
-              initial={{ x: '100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '100%' }}
-              transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Close Button - Visible at top */}
-              <div className="flex justify-end px-4 pb-4 border-b border-gray-200/50">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={handleCloseMenu}
-                  className="w-10 h-10 rounded-full hover:bg-gray-200/50 transition-colors"
-                  style={{
-                    WebkitTapHighlightColor: 'transparent',
-                  }}
-                >
-                  <LuxuryCloseIcon className="w-6 h-6 text-foreground" style={{ strokeWidth: 2.5 }} />
-                </Button>
-              </div>
+                style={{ 
+                  backgroundColor: 'rgba(229, 228, 226, 0.98)',
+                  WebkitOverflowScrolling: 'touch',
+                  zIndex: 9999,
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  height: '75%',
+                  paddingTop: isMobile ? 'calc(env(safe-area-inset-top, 0) + 1rem)' : '1rem',
+                  paddingBottom: '1rem',
+                }}
+                initial={{ y: '-100%' }}
+                animate={{ y: 0 }}
+                exit={{ y: '-100%' }}
+                transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* Close Button - Visible at top */}
+                <div className="flex justify-end px-4 pb-4 border-b border-gray-200/50">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={handleCloseMenu}
+                    className="w-10 h-10 rounded-full hover:bg-gray-200/50 transition-colors"
+                    style={{
+                      WebkitTapHighlightColor: 'transparent',
+                    }}
+                  >
+                    <LuxuryCloseIcon className="w-6 h-6 text-foreground" style={{ strokeWidth: 2.5 }} />
+                  </Button>
+                </div>
               <div className="px-4 sm:px-6 py-6 sm:py-8 space-y-3 sm:space-y-4">
                 {navigationItems.map((item, index) => {
                   const isActive = location.pathname === item.path;
                   return (
                     <motion.div
                       key={item.name}
-                      initial={{ opacity: 0, x: -50, scale: 0.95 }}
-                      animate={{ opacity: 1, x: 0, scale: 1 }}
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
                       transition={{ 
-                        delay: index * 0.1, 
-                        duration: 0.6,
-                        type: "spring",
-                        stiffness: 100,
-                        damping: 15
+                        delay: index * 0.03, 
+                        duration: 0.2,
+                        ease: [0.4, 0, 0.2, 1]
                       }}
                     >
                       <Button
@@ -774,14 +769,12 @@ const UltraNavigation = () => {
                 
                 {/* Favorites - Icon Only in Mobile Menu */}
                 <motion.div
-                  initial={{ opacity: 0, x: -50, scale: 0.95 }}
-                  animate={{ opacity: 1, x: 0, scale: 1 }}
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
                   transition={{ 
-                    delay: navigationItems.length * 0.1, 
-                    duration: 0.6,
-                    type: "spring",
-                    stiffness: 100,
-                    damping: 15
+                    delay: navigationItems.length * 0.03, 
+                    duration: 0.2,
+                    ease: [0.4, 0, 0.2, 1]
                   }}
                 >
                   <Button
@@ -850,11 +843,12 @@ const UltraNavigation = () => {
 
                 {/* Social Media Icons - Mobile Menu */}
                 <motion.div
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ 
-                    delay: (navigationItems.length + 1) * 0.1, 
-                    duration: 0.6 
+                    delay: (navigationItems.length + 1) * 0.03, 
+                    duration: 0.2,
+                    ease: [0.4, 0, 0.2, 1]
                   }}
                   className="pt-4 border-t border-primary/20 mt-4"
                 >
