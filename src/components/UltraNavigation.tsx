@@ -476,8 +476,6 @@ const UltraNavigation = () => {
                   variant="ghost"
                   size="icon"
                   onClick={() => setIsCartOpen(true)}
-                  onMouseEnter={preloadCartDashboard}
-                  onFocus={preloadCartDashboard}
                   className="relative group hover:bg-primary/10 transition-all duration-500 overflow-hidden rounded-lg touch-target"
                   style={{
                     WebkitTapHighlightColor: 'transparent',
