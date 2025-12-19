@@ -239,16 +239,33 @@ const UltraNavigation = () => {
     // Close menu first
     handleCloseMenu();
     
-    // Force scroll reset around navigation to ensure new page starts at top
+    // Force scroll reset BEFORE navigation
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+    
+    // Navigate
     navigate(path);
     
-    // Run again on next frame to beat layout/animation timing
-    requestAnimationFrame(() => {
+    // Force scroll reset AFTER navigation (multiple attempts to ensure it works)
+    const scrollReset = () => {
       window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
       document.documentElement.scrollTop = 0;
       document.body.scrollTop = 0;
+    };
+    
+    // Immediate
+    scrollReset();
+    
+    // On next frame
+    requestAnimationFrame(() => {
+      scrollReset();
+      // One more time after a tiny delay
+      setTimeout(scrollReset, 0);
     });
+    
+    // Fallback after a short delay
+    setTimeout(scrollReset, 50);
   };
 
 
@@ -281,7 +298,7 @@ const UltraNavigation = () => {
               <Button
                 variant="ghost"
                 className="relative p-1 sm:p-2 hover:bg-primary/5 transition-all duration-500 group flex items-center rounded-lg touch-target"
-                onClick={() => navigate('/')}
+                onClick={() => handleNavigation('/')}
                 style={{
                   WebkitTapHighlightColor: 'transparent',
                   touchAction: 'manipulation',
