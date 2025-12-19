@@ -318,9 +318,9 @@ const UltraNavigation = () => {
                 </div>
                 
                 {/* Brand Name - Clean Luxury Text - Responsive */}
-                <div className="ml-1 sm:ml-1.5 hidden xs:block">
+                <div className="ml-1 sm:ml-1.5 block">
                   <h1 
-                    className="font-luxury text-xs xs:text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold text-foreground whitespace-nowrap"
+                    className="font-luxury text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl font-bold text-foreground whitespace-nowrap"
                   >
                     Bexy Flowers
                   </h1>
