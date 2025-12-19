@@ -195,7 +195,6 @@ const UltraNavigation = () => {
 
   const handleMenuToggle = (e?: React.MouseEvent) => {
     if (e) {
-      e.preventDefault();
       e.stopPropagation();
     }
     
@@ -206,56 +205,43 @@ const UltraNavigation = () => {
     if (isMobile) {
       if (newState) {
         document.body.style.overflow = "hidden";
-        document.body.style.position = "fixed";
-        document.body.style.width = "100%";
       } else {
         document.body.style.overflow = "";
-        document.body.style.position = "";
-        document.body.style.width = "";
       }
     }
   };
 
-  // Close menu when clicking outside
+  const handleCloseMenu = () => {
+    setIsMenuOpen(false);
+    if (isMobile) {
+      document.body.style.overflow = "";
+    }
+  };
+
+  // Close menu when clicking outside or pressing Escape
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (isMenuOpen && menuRef.current && navRef.current) {
-        const target = event.target as Node;
-        // Check if click is outside both menu and navigation
-        if (
-          !menuRef.current.contains(target) &&
-          !navRef.current.contains(target)
-        ) {
-          setIsMenuOpen(false);
-        }
+    if (!isMenuOpen) return;
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        handleCloseMenu();
       }
     };
 
-    if (isMenuOpen) {
-      // Add event listener with a small delay to avoid immediate closing
-      const timeoutId = setTimeout(() => {
-        document.addEventListener('mousedown', handleClickOutside);
-      }, 100);
-
-      return () => {
-        clearTimeout(timeoutId);
-        document.removeEventListener('mousedown', handleClickOutside);
-      };
-    }
-  }, [isMenuOpen]);
+    document.addEventListener('keydown', handleEscape);
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [isMenuOpen, isMobile]);
 
   const handleNavigation = (path: string) => {
+    // Close menu first
+    handleCloseMenu();
+    
     // Force scroll reset around navigation to ensure new page starts at top
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
     navigate(path);
-    setIsMenuOpen(false);
     
-    // Restore body scroll on mobile
-    if (isMobile) {
-      document.body.style.overflow = "";
-      document.body.style.position = "";
-      document.body.style.width = "";
-    }
     // Run again on next frame to beat layout/animation timing
     requestAnimationFrame(() => {
       window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
@@ -273,12 +259,12 @@ const UltraNavigation = () => {
             ref={navRef}
             className="ultra-navigation fixed top-0 left-0 right-0 backdrop-blur-xl shadow-luxury"
             style={{
-              backgroundColor: 'transparent', // Make header transparent
-              transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)', // Smooth hide/show transition
+              backgroundColor: 'rgba(255, 255, 255, 0.15)',
+              transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s ease', // Smooth hide/show transition
               pointerEvents: 'auto', // Ensure navigation is clickable
               position: 'fixed',
               width: '100%',
-              zIndex: 9999, // Ensure navbar stays on top
+              zIndex: 10000, // Ensure navbar stays on top of menu
               transform: isNavbarVisible ? 'translateY(0)' : 'translateY(-100%)', // Auto-hide on scroll
               // Removed will-change as it causes performance issues with scroll
             }}
@@ -619,39 +605,25 @@ const UltraNavigation = () => {
                   }}
                 >
                   
-                  <AnimatePresence mode="wait">
-                    {isMenuOpen ? (
-                      <motion.div
-                        key="close"
-                        className="relative z-10"
-                        initial={{ rotate: -90, opacity: 0, scale: 0.8 }}
-                        animate={{ rotate: 0, opacity: 1, scale: 1 }}
-                        exit={{ rotate: 90, opacity: 0, scale: 0.8 }}
-                        transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
-                        whileHover={!isMobile && !shouldReduceMotion ? {
-                          scale: 1.1,
-                          color: "rgb(196,166,105)"
-                        } : {}}
-                      >
-                        <LuxuryCloseIcon className="w-6 h-6 sm:w-7 sm:h-7 text-foreground transition-all duration-300" />
-                      </motion.div>
-                    ) : (
-                      <motion.div
-                        key="menu"
-                        className="relative z-10"
-                        initial={{ rotate: 90, opacity: 0, scale: 0.8 }}
-                        animate={{ rotate: 0, opacity: 1, scale: 1 }}
-                        exit={{ rotate: -90, opacity: 0, scale: 0.8 }}
-                        transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
-                        whileHover={!isMobile && !shouldReduceMotion ? {
-                          scale: 1.1,
-                          color: "rgb(196,166,105)"
-                        } : {}}
-                      >
-                        <LuxuryMenuIcon className="w-6 h-6 sm:w-7 sm:h-7 text-foreground transition-all duration-300" />
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                  {isMenuOpen ? (
+                    <motion.div
+                      className="relative z-10"
+                      initial={{ rotate: -90, opacity: 0 }}
+                      animate={{ rotate: 0, opacity: 1 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <LuxuryCloseIcon className="w-6 h-6 sm:w-7 sm:h-7 text-foreground" style={{ strokeWidth: 2.5 }} />
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      className="relative z-10"
+                      initial={{ rotate: 90, opacity: 0 }}
+                      animate={{ rotate: 0, opacity: 1 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <LuxuryMenuIcon className="w-6 h-6 sm:w-7 sm:h-7 text-foreground" style={{ strokeWidth: 2.5 }} />
+                    </motion.div>
+                  )}
                 </Button>
               </motion.div>
             </div>
@@ -659,43 +631,57 @@ const UltraNavigation = () => {
         </div>
        </nav>
 
-        {/* Mobile Menu - Full-Screen Overlay - Outside nav for proper z-index */}
+        {/* Mobile Menu - Slide-in Panel - Outside nav for proper z-index */}
         <AnimatePresence>
           {isMenuOpen && (
             <>
-              {/* Backdrop - Full Screen on Mobile */}
+              {/* Backdrop - Click outside to close */}
               <motion.div
-                className="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-md"
+                className="lg:hidden fixed inset-0 bg-black/40 backdrop-blur-sm"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.3 }}
-                onClick={() => setIsMenuOpen(false)}
+                onClick={handleCloseMenu}
                 style={{
-                  top: 'env(safe-area-inset-top, 0)',
-                  bottom: 'env(safe-area-inset-bottom, 0)',
                   zIndex: 9998,
                 }}
               />
             <motion.div
               ref={menuRef}
-                className="lg:hidden fixed bg-background/98 backdrop-blur-xl shadow-luxury overflow-y-auto"
+                className="lg:hidden fixed bg-background/98 backdrop-blur-xl shadow-2xl overflow-y-auto"
               style={{ 
                 backgroundColor: 'rgba(229, 228, 226, 0.98)',
-                paddingTop: isMobile ? 'calc(env(safe-area-inset-top, 0) + 4.5rem)' : '5rem',
-                paddingBottom: isMobile ? 'env(safe-area-inset-bottom, 2rem)' : '2rem',
                 WebkitOverflowScrolling: 'touch',
                 zIndex: 9999,
                 top: 0,
-                left: 0,
                 right: 0,
                 bottom: 0,
+                width: '85%',
+                maxWidth: '400px',
+                paddingTop: isMobile ? 'calc(env(safe-area-inset-top, 0) + 1rem)' : '1rem',
+                paddingBottom: isMobile ? 'env(safe-area-inset-bottom, 1rem)' : '1rem',
               }}
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
+              onClick={(e) => e.stopPropagation()}
             >
+              {/* Close Button - Visible at top */}
+              <div className="flex justify-end px-4 pb-4 border-b border-gray-200/50">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleCloseMenu}
+                  className="w-10 h-10 rounded-full hover:bg-gray-200/50 transition-colors"
+                  style={{
+                    WebkitTapHighlightColor: 'transparent',
+                  }}
+                >
+                  <LuxuryCloseIcon className="w-6 h-6 text-foreground" style={{ strokeWidth: 2.5 }} />
+                </Button>
+              </div>
               <div className="px-4 sm:px-6 py-6 sm:py-8 space-y-3 sm:space-y-4">
                 {navigationItems.map((item, index) => {
                   const isActive = location.pathname === item.path;
