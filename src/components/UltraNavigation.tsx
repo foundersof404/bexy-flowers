@@ -141,7 +141,10 @@ const UltraNavigation = () => {
 
   // ⚡ PERFORMANCE: Preload CartDashboard immediately for instant opening
   useEffect(() => {
-    import('@/components/cart/CartDashboard');
+    // Preload cart dashboard on mount for instant opening
+    import('@/components/cart/CartDashboard').catch(() => {
+      // Silently handle import errors
+    });
   }, []);
 
   // Auto-hide navbar on scroll down, show on scroll up
