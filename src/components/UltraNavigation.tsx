@@ -193,7 +193,12 @@ const UltraNavigation = () => {
     }
   }, [isMobile, shouldReduceMotion]);
 
-  const handleMenuToggle = () => {
+  const handleMenuToggle = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
     const newState = !isMenuOpen;
     setIsMenuOpen(newState);
     
@@ -207,15 +212,6 @@ const UltraNavigation = () => {
         document.body.style.overflow = "";
         document.body.style.position = "";
         document.body.style.width = "";
-      }
-    }
-    
-    if (menuRef.current) {
-      if (newState) {
-        gsap.fromTo(menuRef.current, 
-          { opacity: 0, y: -50, scale: 0.9 },
-          { opacity: 1, y: 0, scale: 1, duration: 0.5, ease: "power2.out" }
-        );
       }
     }
   };
@@ -661,14 +657,15 @@ const UltraNavigation = () => {
             </div>
           </div>
         </div>
+       </nav>
 
-        {/* Mobile Menu - Full-Screen Overlay */}
+        {/* Mobile Menu - Full-Screen Overlay - Outside nav for proper z-index */}
         <AnimatePresence>
           {isMenuOpen && (
             <>
               {/* Backdrop - Full Screen on Mobile */}
               <motion.div
-                className="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-md z-[99]"
+                className="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-md"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -677,16 +674,22 @@ const UltraNavigation = () => {
                 style={{
                   top: 'env(safe-area-inset-top, 0)',
                   bottom: 'env(safe-area-inset-bottom, 0)',
+                  zIndex: 9998,
                 }}
               />
             <motion.div
               ref={menuRef}
-                className="lg:hidden fixed inset-0 top-[var(--nav-height,4rem)] sm:top-[var(--nav-height,5rem)] bg-background/98 backdrop-blur-xl shadow-luxury z-[100] overflow-y-auto"
+                className="lg:hidden fixed bg-background/98 backdrop-blur-xl shadow-luxury overflow-y-auto"
               style={{ 
                 backgroundColor: 'rgba(229, 228, 226, 0.98)',
-                paddingTop: isMobile ? 'env(safe-area-inset-top, 1rem)' : undefined,
-                paddingBottom: isMobile ? 'env(safe-area-inset-bottom, 2rem)' : undefined,
+                paddingTop: isMobile ? 'calc(env(safe-area-inset-top, 0) + 4.5rem)' : '5rem',
+                paddingBottom: isMobile ? 'env(safe-area-inset-bottom, 2rem)' : '2rem',
                 WebkitOverflowScrolling: 'touch',
+                zIndex: 9999,
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
               }}
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -940,7 +943,6 @@ const UltraNavigation = () => {
             </>
           )}
          </AnimatePresence>
-       </nav>
 
           {/* Spacer for fixed navigation */}
           <div className="h-16 sm:h-20" />
