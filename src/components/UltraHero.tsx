@@ -73,27 +73,18 @@ const UltraHero = () => {
         <motion.img
           src={heroBackground}
           alt="Luxury floral background"
-          className={`w-full h-full ${isMobile ? 'opacity-70 scale-105 blur-[2px]' : 'transform-3d shadow-gold opacity-10'}`}
+          className={`w-full h-full ${isMobile ? 'opacity-70' : 'transform-3d shadow-gold opacity-10'}`}
           style={{
             objectFit: 'cover',
             objectPosition: 'center center'
           }}
-          initial={
-            isMobile
-              ? { scale: 1.05, opacity: 0 }
-              : { scale: shouldReduceMotion ? 1 : 1.2, rotateX: shouldReduceMotion ? 0 : -5 }
-          }
-          animate={
-            isMobile
-              ? { opacity: 1, scale: 1 }
-              : { scale: 1, rotateX: 0 }
-          }
-          whileInView={!isMobile ? { scale: 1, rotateX: 0 } : undefined}
-          viewport={!isMobile ? { once: true, amount: 0.2 } : undefined}
-          transition={{
-            // Keep a smooth initial parallax reveal but avoid an infinite loop on desktop
-            duration: shouldReduceMotion ? 0 : 20,
-            ease: "linear",
+          initial={isMobile ? {} : { scale: shouldReduceMotion ? 1 : 1.2, rotateX: shouldReduceMotion ? 0 : -5 }}
+          animate={isMobile ? {} : { scale: 1, rotateX: 0 }}
+          whileInView={isMobile ? undefined : { scale: 1, rotateX: 0 }}
+          viewport={isMobile ? undefined : { once: true, amount: 0.2 }}
+          transition={isMobile ? {} : {
+            duration: shouldReduceMotion ? 0 : 0.5, // Reduced from 20s
+            ease: "easeOut",
             repeat: 0
           }}
           loading="eager"

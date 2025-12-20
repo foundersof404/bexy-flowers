@@ -65,12 +65,12 @@ const BouquetCard = memo(({
   
   return (
     <motion.div
-      initial={{ opacity: 0, y: 30, scale: 0.95 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      viewport={{ once: false, amount: 0.1 }}
+      initial={isMobile ? {} : { opacity: 0, y: 30, scale: 0.95 }}
+      animate={isMobile ? {} : { opacity: 1, y: 0, scale: 1 }}
+      viewport={{ once: true, amount: 0.1 }}
       transition={{ 
-        duration: 0.5,
-        delay: index * 0.05,
+        duration: isMobile ? 0 : 0.5,
+        delay: isMobile ? 0 : index * 0.05,
         ease: [0.23, 1, 0.32, 1]
       }}
       className="group cursor-pointer"
@@ -113,8 +113,8 @@ const BouquetCard = memo(({
             <OptimizedImage
               src={bouquet.image}
               alt={bouquet.name}
-              className="w-full h-full object-cover transition-transform duration-400 ease-out group-hover:scale-[1.02]"
-              style={{
+              className={`w-full h-full object-cover transition-transform duration-400 ease-out ${isMobile ? '' : 'group-hover:scale-[1.02]'}`}
+              style={isMobile ? {} : {
                 willChange: 'transform',
                 transform: 'translateZ(0)',
                 backfaceVisibility: 'hidden'
@@ -140,17 +140,17 @@ const BouquetCard = memo(({
           {/* Floating Action Buttons */}
           <motion.div 
             className="absolute top-2 right-2 md:top-4 md:right-4 flex gap-1.5 md:gap-2 z-20"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.4, delay: index * 0.05 + 0.2 }}
+            initial={isMobile ? {} : { opacity: 0, x: 20 }}
+            animate={isMobile ? {} : { opacity: 1, x: 0 }}
+            transition={isMobile ? {} : { duration: 0.4, delay: index * 0.05 + 0.2 }}
           >
             <motion.button 
               ref={heartButtonRef}
               className="w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center relative transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:scale-105 active:scale-95"
               style={{
-                background: isFav ? 'rgba(220, 38, 127, 0.15)' : 'rgba(255, 255, 255, 0.7)',
+                background: isFav ? 'rgba(220, 38, 127, 0.15)' : 'rgba(255, 255, 255, 0.9)',
                 boxShadow: isFav ? '0 4px 12px rgba(220, 38, 127, 0.25)' : '0 4px 12px rgba(0, 0, 0, 0.08)',
-                backdropFilter: 'blur(8px)'
+                ...(isMobile ? {} : { backdropFilter: 'blur(8px)' })
               }}
               onClick={(e) => {
                 e.stopPropagation();

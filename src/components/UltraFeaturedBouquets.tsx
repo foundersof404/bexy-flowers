@@ -358,11 +358,11 @@ const UltraFeaturedBouquets = () => {
               initial={{ opacity: 0, y: 100 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ 
-                duration: 0.8, 
-                delay: index * 0.1,
+                duration: 0.3, // Reduced from 0.8 for faster animation
+                delay: index * 0.05, // Reduced from 0.1
                 ease: [0.23, 1, 0.32, 1]
               }}
-              viewport={{ once: true }}
+              viewport={{ once: true, margin: "-50px" }} // Only animate when closer to viewport
               onClick={() => {
                 if (bouquet.id && bouquet.productData) {
                   navigate(`/product/${bouquet.id}`, {
@@ -410,7 +410,8 @@ const UltraFeaturedBouquets = () => {
                            height: '100%',
                            objectFit: 'cover'
                          }}
-                         className="transition-all duration-300 ease-out group-hover:scale-105"
+                         className="transition-all duration-200 ease-out"
+                         loading="lazy"
                          onError={(e) => {
                            // Fallback if image fails to load
                            (e.target as HTMLImageElement).style.display = 'none';
