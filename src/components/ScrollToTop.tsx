@@ -5,52 +5,26 @@ const ScrollToTop = () => {
   const { pathname, search, hash } = useLocation();
 
   useEffect(() => {
-    // Disable browser's automatic scroll restoration
     if ("scrollRestoration" in window.history) {
+      const original = window.history.scrollRestoration;
       window.history.scrollRestoration = "manual";
+      return () => {
+        window.history.scrollRestoration = original;
+      };
     }
   }, []);
 
   useLayoutEffect(() => {
-    // Force scroll to top immediately on route change
-    const scrollToTop = () => {
-      // Multiple methods to ensure it works across all browsers
+    // Always jump to top on route changes (robust version)
+    const reset = () => {
       window.scrollTo({ top: 0, left: 0, behavior: "auto" });
       document.documentElement.scrollTop = 0;
       document.body.scrollTop = 0;
-      document.documentElement.scrollLeft = 0;
-      document.body.scrollLeft = 0;
-      
-      // Also try scrolling the window directly
-      if (window.scrollY !== 0) {
-        window.scrollTo(0, 0);
-      }
     };
-
-    // Execute immediately
-    scrollToTop();
-
-    // Execute again on next frame to catch any delayed renders
-    const rafId = requestAnimationFrame(() => {
-      scrollToTop();
-      // One more time after a tiny delay to ensure it sticks
-      setTimeout(scrollToTop, 0);
-    });
-
-    return () => {
-      cancelAnimationFrame(rafId);
-    };
-  }, [pathname, search, hash]);
-
-  // Additional useEffect as fallback for slower route changes
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
-      document.documentElement.scrollTop = 0;
-      document.body.scrollTop = 0;
-    }, 100);
-
-    return () => clearTimeout(timer);
+    // Run now and again on next frame to beat layout/animations
+    reset();
+    const id = requestAnimationFrame(reset);
+    return () => cancelAnimationFrame(id);
   }, [pathname, search, hash]);
 
   return null;

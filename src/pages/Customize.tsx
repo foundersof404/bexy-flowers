@@ -615,7 +615,7 @@ const Customize: React.FC = () => {
       </div>
 
       {/* Header */}
-      <div className={`relative ${isMobile ? 'pt-20 sm:pt-24' : 'pt-24 sm:pt-28 md:pt-32'} pb-8 sm:pb-12 md:pb-16 lg:pb-20 px-4 sm:px-6 overflow-hidden`}>
+      <div className={`relative ${isMobile ? 'pt-20 sm:pt-24' : 'pt-28 md:pt-32'} pb-12 sm:pb-16 md:pb-20 px-4 sm:px-6 overflow-hidden`}>
         <motion.div
           className="absolute inset-0"
           initial={{ scale: 1.08, opacity: 0 }}
@@ -639,7 +639,7 @@ const Customize: React.FC = () => {
         >
           {/* Luxury Typography with Gold Accent */}
           <motion.h1 
-            className="font-luxury text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl 2xl:text-8xl font-bold mb-3 sm:mb-4 md:mb-6 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 bg-clip-text text-transparent relative px-2"
+            className="font-luxury text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-8xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 bg-clip-text text-transparent relative"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
@@ -665,7 +665,7 @@ const Customize: React.FC = () => {
           </div>
 
           <motion.p 
-            className="font-body text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed font-light px-4"
+            className="font-body text-sm sm:text-base md:text-lg lg:text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed font-light px-2"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
@@ -676,14 +676,14 @@ const Customize: React.FC = () => {
       </div>
 
       {/* Animated Step Timeline */}
-      <div className="relative z-10 -mt-4 sm:-mt-6 md:-mt-8 pb-8 sm:pb-12 md:pb-16 px-4 sm:px-6">
+      <div className="relative z-10 -mt-6 sm:-mt-8 pb-12 sm:pb-16 px-4 sm:px-6">
         <motion.div 
-          className="max-w-6xl mx-auto bg-white/80 backdrop-blur-md border border-[#C79E48]/15 rounded-xl sm:rounded-2xl md:rounded-3xl p-3 sm:p-4 md:p-6 lg:p-8 shadow-[0_25px_80px_rgba(0,0,0,0.08)]"
+          className="max-w-6xl mx-auto bg-white/80 backdrop-blur-md border border-[#C79E48]/15 rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 shadow-[0_25px_80px_rgba(0,0,0,0.08)]"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
         >
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 sm:gap-3 md:gap-4 mb-3 sm:mb-4 md:mb-6">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
             <div>
               <p className="text-xs sm:text-sm uppercase tracking-[0.2em] sm:tracking-[0.3em] text-slate-400">Creative journey</p>
               <p className="text-lg sm:text-xl md:text-2xl font-luxury font-semibold text-slate-800">You're {progressPercent}% ready</p>
@@ -733,11 +733,11 @@ const Customize: React.FC = () => {
         </motion.div>
       </div>
 
-      <div className="max-w-[1600px] mx-auto px-3 sm:px-4 md:px-6 pb-8 sm:pb-12 md:pb-16 lg:pb-20 relative z-10">
-        <div className="grid lg:grid-cols-12 gap-4 sm:gap-6 md:gap-8 lg:gap-10 items-start">
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 pb-12 sm:pb-16 md:pb-20 relative z-10">
+        <div className="grid lg:grid-cols-12 gap-6 sm:gap-8 md:gap-10 items-start">
           
           {/* Left Column: Customization Steps */}
-          <div className="lg:col-span-7 flex flex-col gap-4 sm:gap-6 md:gap-8">
+          <div className="lg:col-span-7 space-y-4 sm:space-y-6 md:space-y-8">
             
             {/* Step 1: Package */}
             <CustomizeSection title="1. Choose Presentation" isActive={true} ref={packageRef}>
@@ -910,7 +910,7 @@ const Customize: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="flex flex-col gap-3 sm:gap-4">
+                  <div className="space-y-3 sm:space-y-4">
                 {flowers.map((flower) => {
                   const flowerColorMap = colorQuantities[flower.id] || {};
                   const totalCount = Object.values(flowerColorMap).reduce((a, b) => a + b, 0);
@@ -942,7 +942,7 @@ const Customize: React.FC = () => {
                         </div>
                       </div>
                       
-                      <div className="flex flex-col gap-2 sm:gap-3 pl-3 sm:pl-4 border-l-2 border-[#C79E48]/20">
+                      <div className="space-y-2 sm:space-y-3 pl-3 sm:pl-4 border-l-2 border-[#C79E48]/20">
                         {flower.colors.map((color) => {
                           const count = flowerColorMap[color.id] || 0;
                           const inputKey = `${flower.id}-${color.id}`;
@@ -1001,7 +1001,7 @@ const Customize: React.FC = () => {
                           };
 
                           return (
-                            <div key={color.id} className="flex flex-col gap-1.5 sm:gap-2">
+                            <div key={color.id} className="space-y-1.5 sm:space-y-2">
                               <div className="flex justify-between items-center gap-2">
                                 <div className="flex items-center gap-2">
                                   <span className="text-xs sm:text-sm font-luxury font-medium text-gray-700 uppercase tracking-wide">{color.name}</span>
@@ -1096,7 +1096,7 @@ const Customize: React.FC = () => {
 
             {/* Step 6: Accessories & Extras */}
             <CustomizeSection title="Final Touches" isActive={totalFlowers > 0} ref={extrasRef}>
-              <div className="flex flex-col gap-4 sm:gap-6">
+              <div className="space-y-4 sm:space-y-6">
                 <div>
                   <h3 className="font-bold mb-3 sm:mb-4 text-gray-700 text-sm sm:text-base">Add Accessories</h3>
                   {loadingAccessories ? (
@@ -1183,17 +1183,17 @@ const Customize: React.FC = () => {
           </div>
 
           {/* Right Column: Preview & Cart - Sticky */}
-          <div className="lg:col-span-5 mt-6 lg:mt-0">
-            <div className="lg:sticky lg:top-20 xl:top-24 flex flex-col gap-4 sm:gap-6">
+          <div className="lg:col-span-5">
+            <div className="lg:sticky lg:top-24 space-y-4 sm:space-y-6">
               
               {/* AI Preview Card */}
-              <div className="bg-white rounded-xl sm:rounded-2xl md:rounded-3xl p-3 sm:p-4 md:p-6 shadow-2xl border border-[#C79E48]/20">
-                <div className="flex items-center justify-between mb-3 sm:mb-4 md:mb-6">
-                  <h3 className="text-lg sm:text-xl md:text-2xl font-luxury font-bold text-[#C79E48]">Your Design</h3>
+              <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-2xl border border-[#C79E48]/20">
+                <div className="flex items-center justify-between mb-4 sm:mb-6">
+                  <h3 className="text-xl sm:text-2xl font-luxury font-bold text-[#C79E48]">Your Design</h3>
                   <Wand2 className="w-5 h-5 sm:w-6 sm:h-6 text-[#C79E48]" />
                 </div>
 
-                <div className="aspect-square rounded-lg sm:rounded-xl md:rounded-2xl bg-gray-50 mb-3 sm:mb-4 md:mb-6 overflow-hidden relative group">
+                <div className="aspect-square rounded-xl sm:rounded-2xl bg-gray-50 mb-4 sm:mb-6 overflow-hidden relative group">
                   {generatedImage ? (
                     <>
                       <img src={generatedImage} alt="Preview" className="w-full h-full object-cover" />
@@ -1224,14 +1224,14 @@ const Customize: React.FC = () => {
                 <button
                   onClick={generateBouquetImage}
                   disabled={isGenerating || totalFlowers === 0}
-                  className="w-full py-2.5 sm:py-3 md:py-4 bg-[#C79E48] text-white font-bold rounded-lg sm:rounded-xl shadow-lg hover:bg-[#b08d45] disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 mb-3 sm:mb-4 text-xs sm:text-sm md:text-base touch-target min-h-[44px]"
+                  className="w-full py-3 sm:py-4 bg-[#C79E48] text-white font-bold rounded-lg sm:rounded-xl shadow-lg hover:bg-[#b08d45] disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 mb-4 text-sm sm:text-base"
                 >
                   <Wand2 className="w-4 h-4 sm:w-5 sm:h-5" />
                   {generatedImage ? "Regenerate Preview" : "Generate Preview"}
                 </button>
 
                 {/* Summary & Total */}
-                <div className="border-t border-gray-100 pt-3 sm:pt-4 md:pt-6 flex flex-col gap-2 sm:gap-3">
+                <div className="border-t border-gray-100 pt-4 sm:pt-6 space-y-2 sm:space-y-3">
                   <div className="flex justify-between text-xs sm:text-sm text-gray-600">
                     <span>Base Price</span>
                     <span>${selectedPackage?.price || 0}</span>
@@ -1258,7 +1258,7 @@ const Customize: React.FC = () => {
                 <button
                   onClick={handleAddToCart}
                   disabled={totalFlowers === 0}
-                  className="w-full mt-3 sm:mt-4 md:mt-6 py-2.5 sm:py-3 md:py-4 bg-black text-white font-bold rounded-lg sm:rounded-xl shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-xs sm:text-sm md:text-base touch-target min-h-[44px]"
+                  className="w-full mt-4 sm:mt-6 py-3 sm:py-4 bg-black text-white font-bold rounded-lg sm:rounded-xl shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm sm:text-base"
                 >
                   <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5" />
                   Add to Cart

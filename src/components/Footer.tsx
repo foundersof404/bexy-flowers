@@ -27,9 +27,9 @@ const TikTokIcon = ({ className }: { className?: string }) => (
 
 const Footer = () => {
   return (
-    <footer className="bg-foreground text-background py-10 sm:py-12 md:py-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="grid md:grid-cols-4 gap-6 sm:gap-8 mb-8 sm:mb-10 md:mb-12">
+    <footer className="bg-foreground text-background py-16">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="grid md:grid-cols-4 gap-8 mb-12">
           {/* Brand */}
           <motion.div
             className="space-y-4"
@@ -95,7 +95,7 @@ const Footer = () => {
             viewport={{ once: true }}
           >
             <h4 className="font-luxury text-xl font-semibold text-primary">Get In Touch</h4>
-            <div className="flex flex-col gap-3 font-body">
+            <div className="space-y-3 font-body">
               <div className="flex items-center space-x-3">
                 <Phone className="w-4 h-4 text-primary" />
                 <a 
@@ -130,13 +130,12 @@ const Footer = () => {
             </div>
 
             {/* Social Media */}
-            <div className="flex gap-3 sm:gap-4 pt-3 sm:pt-4">
+            <div className="flex space-x-4 pt-4">
               <motion.a
                 href="https://api.whatsapp.com/send/?phone=96176104882&text&type=phone_number&app_absent=0&wame_ctl=1"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-10 h-10 sm:w-11 sm:h-11 bg-primary/20 rounded-full flex items-center justify-center text-primary hover:bg-primary hover:text-background transition-colors touch-target"
-                style={{ minWidth: '44px', minHeight: '44px' }}
+                className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center text-primary hover:bg-primary hover:text-background transition-colors"
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
                 aria-label="WhatsApp"
@@ -147,8 +146,7 @@ const Footer = () => {
                 href="https://www.instagram.com/bexyflowers?igsh=cTcybzM0dzVkc25v"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-10 h-10 sm:w-11 sm:h-11 bg-primary/20 rounded-full flex items-center justify-center text-primary hover:bg-primary hover:text-background transition-colors touch-target"
-                style={{ minWidth: '44px', minHeight: '44px' }}
+                className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center text-primary hover:bg-primary hover:text-background transition-colors"
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
                 aria-label="Instagram"
@@ -159,8 +157,7 @@ const Footer = () => {
                 href="https://www.tiktok.com/@bexyflower?_r=1&_t=ZS-91i2FtAJdVF"
                 target="_blank"
                 rel="noopener noreferrer"
-                  className="w-10 h-10 sm:w-11 sm:h-11 bg-primary/20 rounded-full flex items-center justify-center text-primary hover:bg-primary hover:text-background transition-colors touch-target"
-                  style={{ minWidth: '44px', minHeight: '44px' }}
+                  className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center text-primary hover:bg-primary hover:text-background transition-colors"
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.95 }}
                 aria-label="TikTok"
@@ -173,7 +170,7 @@ const Footer = () => {
 
         {/* Bottom Section */}
         <motion.div
-          className="border-t border-background/20 pt-6 sm:pt-8 flex flex-col md:flex-row justify-between items-center gap-4 md:gap-0"
+          className="border-t border-background/20 pt-8 flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0"
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.4 }}
@@ -182,7 +179,7 @@ const Footer = () => {
           <p className="font-body text-background/60 text-sm">
             © 2024 Bexy Flowers. All rights reserved. Crafted with care and elegance.
           </p>
-          <div className="flex gap-4 sm:gap-6 font-body text-xs sm:text-sm">
+          <div className="flex space-x-6 font-body text-sm">
             <a href="#" className="text-background/60 hover:text-primary transition-colors">Privacy Policy</a>
             <a href="#" className="text-background/60 hover:text-primary transition-colors">Terms of Service</a>
             <a href="#" className="text-background/60 hover:text-primary transition-colors">Cookies</a>

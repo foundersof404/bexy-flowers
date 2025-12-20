@@ -20,8 +20,11 @@ const CategoryNavigationComponent = ({
   onCategoryChange 
 }: CategoryNavigationProps) => {
   return (
-    <nav
+    <motion.nav
       className="sticky top-0 z-40 backdrop-blur-xl bg-background/80 border-b border-border/20"
+      initial={{ y: -100, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ delay: 4, duration: 0.8, ease: "easeOut" }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-center py-4 sm:py-6">
@@ -75,7 +78,7 @@ const CategoryNavigationComponent = ({
       
       {/* Bottom gradient line */}
       <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
-    </nav>
+    </motion.nav>
   );
 };
 

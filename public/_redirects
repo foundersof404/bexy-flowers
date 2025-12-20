@@ -1,4 +1,0 @@
-# Netlify redirects for React Router SPA
-# All routes should serve index.html with 200 status (not a redirect)
-/*    /index.html   200
-

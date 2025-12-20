@@ -4,7 +4,6 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useNavigate } from 'react-router-dom';
 import { Heart, Gift, Cake, Crown, Briefcase, Flower2, Star, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
-import { useIsMobile } from '@/hooks/use-mobile';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -108,7 +107,6 @@ const UltraCategories = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const mobileRow1Ref = useRef<HTMLDivElement>(null);
   const mobileRow2Ref = useRef<HTMLDivElement>(null);
-  const isMobile = useIsMobile();
   // Removed isAutoScroll state to force auto scroll always
 
   const handleExplore = (filterValue: string) => {
@@ -158,12 +156,12 @@ const UltraCategories = () => {
     };
   }, []);
 
-  // Seamless auto-scroll effect for desktop (single row) - DISABLED ON MOBILE
+  // Seamless auto-scroll effect for desktop (single row)
   useEffect(() => {
     const container = containerRef.current;
-    if (!container || isMobile) return; // Skip on mobile for performance
+    if (!container) return;
 
-    // Auto scroll - infinite seamless loop for desktop
+    // Auto scroll - infinite seamless loop
     const cardWidth = 352; // Card width (w-80 = 320px + gap-8 = 32px = 352px)
     const singleSetWidth = categories.length * cardWidth;
 
@@ -186,38 +184,100 @@ const UltraCategories = () => {
           }
           return `${val}px`;
         }
-      }
+      },
+      paused: true
     });
 
-    // Start auto-scroll immediately and keep it running continuously
+    // Pause auto-scroll while the user is actively scrolling the page
+    let scrollTimeout: number | undefined;
+
+    const handleScroll = () => {
+      tween.pause();
+      if (scrollTimeout) {
+        window.clearTimeout(scrollTimeout);
+      }
+      scrollTimeout = window.setTimeout(() => {
+        tween.play();
+      }, 300);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    // Start auto-scroll when the section first mounts
     tween.play();
 
     return () => {
       tween.kill();
+      window.removeEventListener('scroll', handleScroll);
+      if (scrollTimeout) {
+        window.clearTimeout(scrollTimeout);
+      }
       gsap.killTweensOf(container);
     };
-  }, [isMobile]);
+  }, []);
 
-  // Mobile: Two rows with opposite scroll directions - DISABLED FOR PERFORMANCE
-  // Auto-scroll causes severe lag on mobile, so we disable it completely
+  // Mobile: Two rows with opposite scroll directions
   useEffect(() => {
-    // Completely disable auto-scroll on mobile to prevent lag
-    if (!isMobile) return;
-    
     const row1 = mobileRow1Ref.current;
     const row2 = mobileRow2Ref.current;
     
     if (!row1 || !row2) return;
 
-    // Just set initial positions, no animations
-    gsap.set(row1, { x: 0 });
-    gsap.set(row2, { x: 0 });
+    const cardWidth = 196; // Reduced by 30% (280 * 0.7 = 196)
+    const gap = 12; // gap-3 = 12px
+    const cardTotalWidth = cardWidth + gap;
+    const row1Cards = 5; // First 5 categories
+    const row2Cards = 4; // Last 4 categories
+    
+    // Calculate the exact width of one complete set
+    const singleSetWidth1 = row1Cards * cardTotalWidth;
+    const singleSetWidth2 = row2Cards * cardTotalWidth;
+
+    let tween1: gsap.core.Tween | null = null;
+    let tween2: gsap.core.Tween | null = null;
+
+    // Row 1: Scrolls left (normal direction) - infinite seamless loop
+    // Force auto scroll always
+    tween1 = gsap.to(row1, {
+      x: -singleSetWidth1,
+      duration: 15,
+      ease: "none",
+      force3D: true,
+      repeat: -1,
+      repeatDelay: 0,
+      modifiers: {
+        x: (x) => {
+          const val = parseFloat(x);
+          return `${val % singleSetWidth1}px`;
+        }
+      }
+    });
+
+    // Row 2: Scrolls right (opposite direction) - infinite seamless loop
+    // Start from negative position for right scroll
+    gsap.set(row2, { x: -singleSetWidth2 });
+    tween2 = gsap.to(row2, {
+      x: 0,
+      duration: 25,
+      ease: "none",
+      force3D: true,
+      repeat: -1,
+      repeatDelay: 0,
+      modifiers: {
+        x: (x) => {
+          const val = parseFloat(x);
+          return `${val % singleSetWidth2}px`;
+        }
+      }
+    });
 
     return () => {
+      if (tween1) tween1.kill();
+      if (tween2) tween2.kill();
       gsap.killTweensOf(row1);
       gsap.killTweensOf(row2);
     };
-  }, [isMobile]);
+  }, []); // Empty dependency array to run once and keep running
 
   const scrollLeft = () => {
     const container = containerRef.current;
@@ -281,7 +341,7 @@ const UltraCategories = () => {
         >
           {/* Modern Floating Badge */}
           <motion.div 
-            className="inline-flex items-center gap-1.5 sm:gap-2 px-4 sm:px-6 py-2 sm:py-3 rounded-full bg-gradient-to-r from-slate-800/10 to-slate-700/10 md:backdrop-blur-xl border border-slate-600/20 mb-6 sm:mb-8"
+            className="inline-flex items-center gap-1.5 sm:gap-2 px-4 sm:px-6 py-2 sm:py-3 rounded-full bg-gradient-to-r from-slate-800/10 to-slate-700/10 backdrop-blur-xl border border-slate-600/20 mb-6 sm:mb-8"
             initial={{ scale: 0.8, opacity: 0 }}
             whileInView={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.2 }}
@@ -361,7 +421,7 @@ const UltraCategories = () => {
               >
                 <div className="relative h-full w-full">
                   {/* Ultra-Modern Glassmorphism Card */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-white/95 via-slate-50/90 to-slate-100/95 md:backdrop-blur-xl border border-slate-200/50 rounded-[30px] shadow-[0_20px_60px_rgba(198,161,81,0.15)] hover:shadow-[0_30px_80px_rgba(198,161,81,0.25)] transition-all duration-700 ease-out overflow-hidden hover:scale-95 hover:-translate-y-2">
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/95 via-slate-50/90 to-slate-100/95 backdrop-blur-xl border border-slate-200/50 rounded-[30px] shadow-[0_20px_60px_rgba(198,161,81,0.15)] hover:shadow-[0_30px_80px_rgba(198,161,81,0.25)] transition-all duration-700 ease-out overflow-hidden hover:scale-95 hover:-translate-y-2">
                     
                     {/* Enhanced Background Image */}
                     <div className="absolute inset-0 overflow-hidden rounded-[30px]">
@@ -453,26 +513,36 @@ const UltraCategories = () => {
           <div className="w-full overflow-hidden">
               <div 
                 ref={mobileRow1Ref} 
-                className="flex gap-3"
+                className="flex gap-3" 
+                style={{ 
+                  willChange: 'transform',
+                  transform: 'translateZ(0)',
+                  backfaceVisibility: 'hidden',
+                  perspective: '1000px'
+                }}
               >
-              {/* First 5 categories - NO TRIPLING, just single set */}
-              {categories.slice(0, 5).map((category, index) => (
+              {/* First 5 categories, tripled for seamless infinite scroll */}
+              {[...categories.slice(0, 5), ...categories.slice(0, 5), ...categories.slice(0, 5)].map((category, index) => (
                 <div
                   key={`row1-${category.id}-${index}`}
                   className="flex-shrink-0 w-[196px] h-56 group cursor-pointer"
                   onClick={() => handleExplore(category.filterValue)}
+                  style={{ 
+                    willChange: 'transform',
+                    backfaceVisibility: 'hidden',
+                    transform: 'translateZ(0)'
+                  }}
                 >
                   <div className="relative h-full w-full">
                     {/* Ultra-Modern Glassmorphism Card - Mobile */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-white/95 via-slate-50/90 to-slate-100/95 border border-slate-200/50 rounded-[24px] shadow-[0_15px_45px_rgba(198,161,81,0.15)] active:shadow-[0_20px_60px_rgba(198,161,81,0.25)] transition-all duration-300 ease-out overflow-hidden active:scale-95">
+                    <div className="absolute inset-0 bg-gradient-to-br from-white/95 via-slate-50/90 to-slate-100/95 backdrop-blur-xl border border-slate-200/50 rounded-[24px] shadow-[0_15px_45px_rgba(198,161,81,0.15)] active:shadow-[0_20px_60px_rgba(198,161,81,0.25)] transition-all duration-700 ease-out overflow-hidden active:scale-95">
                       
                       {/* Enhanced Background Image */}
                       <div className="absolute inset-0 overflow-hidden rounded-[24px]">
                         <img
                           src={category.image}
                           alt={category.name}
-                          className="w-full h-full object-cover transition-all duration-300 ease-out"
-                          loading="lazy"
+                          className="w-full h-full object-cover transition-all duration-700 ease-out"
                         />
                         
                         {/* Modern Gradient Overlay */}
@@ -494,7 +564,7 @@ const UltraCategories = () => {
                         
                         {/* Top Icon with Modern Design */}
                         <div className="flex justify-end">
-                          <div className="w-12 h-12 bg-gradient-to-br from-[#C79E48]/80 to-[#8B6F3A]/90 rounded-xl flex items-center justify-center border border-[#C79E48]/50 transition-all duration-300 ease-out shadow-lg">
+                          <div className="w-12 h-12 bg-gradient-to-br from-[#C79E48]/80 to-[#8B6F3A]/90 backdrop-blur-xl rounded-xl flex items-center justify-center border border-[#C79E48]/50 transition-all duration-700 ease-out shadow-lg">
                             <category.icon className="w-6 h-6 text-white transition-all duration-700 ease-out" />
                           </div>
                         </div>
@@ -518,26 +588,36 @@ const UltraCategories = () => {
           <div className="w-full overflow-hidden">
               <div 
                 ref={mobileRow2Ref} 
-                className="flex gap-3"
+                className="flex gap-3" 
+                style={{ 
+                  willChange: 'transform',
+                  transform: 'translateZ(0)',
+                  backfaceVisibility: 'hidden',
+                  perspective: '1000px'
+                }}
               >
-              {/* Last 4 categories - NO TRIPLING, just single set */}
-              {categories.slice(5, 9).map((category, index) => (
+              {/* Last 4 categories, tripled for seamless infinite scroll */}
+              {[...categories.slice(5, 9), ...categories.slice(5, 9), ...categories.slice(5, 9)].map((category, index) => (
                 <div
                   key={`row2-${category.id}-${index}`}
                   className="flex-shrink-0 w-[196px] h-56 group cursor-pointer"
                   onClick={() => handleExplore(category.filterValue)}
+                  style={{ 
+                    willChange: 'transform',
+                    backfaceVisibility: 'hidden',
+                    transform: 'translateZ(0)'
+                  }}
                 >
                   <div className="relative h-full w-full">
                     {/* Ultra-Modern Glassmorphism Card - Mobile */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-white/95 via-slate-50/90 to-slate-100/95 border border-slate-200/50 rounded-[24px] shadow-[0_15px_45px_rgba(198,161,81,0.15)] active:shadow-[0_20px_60px_rgba(198,161,81,0.25)] transition-all duration-300 ease-out overflow-hidden active:scale-95">
+                    <div className="absolute inset-0 bg-gradient-to-br from-white/95 via-slate-50/90 to-slate-100/95 backdrop-blur-xl border border-slate-200/50 rounded-[24px] shadow-[0_15px_45px_rgba(198,161,81,0.15)] active:shadow-[0_20px_60px_rgba(198,161,81,0.25)] transition-all duration-700 ease-out overflow-hidden active:scale-95">
                       
                       {/* Enhanced Background Image */}
                       <div className="absolute inset-0 overflow-hidden rounded-[24px]">
                         <img
                           src={category.image}
                           alt={category.name}
-                          className="w-full h-full object-cover transition-all duration-300 ease-out"
-                          loading="lazy"
+                          className="w-full h-full object-cover transition-all duration-700 ease-out"
                         />
                         
                         {/* Modern Gradient Overlay */}
@@ -559,7 +639,7 @@ const UltraCategories = () => {
                         
                         {/* Top Icon with Modern Design */}
                         <div className="flex justify-end">
-                          <div className="w-12 h-12 bg-gradient-to-br from-[#C79E48]/80 to-[#8B6F3A]/90 rounded-xl flex items-center justify-center border border-[#C79E48]/50 transition-all duration-300 ease-out shadow-lg">
+                          <div className="w-12 h-12 bg-gradient-to-br from-[#C79E48]/80 to-[#8B6F3A]/90 backdrop-blur-xl rounded-xl flex items-center justify-center border border-[#C79E48]/50 transition-all duration-700 ease-out shadow-lg">
                             <category.icon className="w-6 h-6 text-white transition-all duration-700 ease-out" />
                           </div>
                         </div>

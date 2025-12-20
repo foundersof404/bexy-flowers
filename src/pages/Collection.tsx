@@ -190,14 +190,32 @@ const Collection = () => {
               </div>
             ) : (
               <>
-                {/* Category count - always visible, no animation */}
-                <div className="mb-8 text-center">
-                  <p className="text-sm text-gray-600">
-                    Showing <span className="font-bold text-[#C29A43]">
+                {/* Category count with smooth scroll animation */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: false, amount: 0.3 }}
+                  transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
+                  className="mb-8 text-center"
+                >
+                  <motion.p 
+                    className="text-sm text-gray-600"
+                    initial={{ scale: 0.9 }}
+                    whileInView={{ scale: 1 }}
+                    viewport={{ once: false }}
+                    transition={{ duration: 0.4, delay: 0.1 }}
+                  >
+                    Showing <motion.span 
+                      className="font-bold text-[#C29A43]"
+                      initial={{ opacity: 0 }}
+                      whileInView={{ opacity: 1 }}
+                      viewport={{ once: false }}
+                      transition={{ duration: 0.5, delay: 0.2 }}
+                    >
                       {filteredBouquets.length}
-                    </span> beautiful bouquet{filteredBouquets.length !== 1 ? 's' : ''}
-                  </p>
-                </div>
+                    </motion.span> beautiful bouquet{filteredBouquets.length !== 1 ? 's' : ''}
+                  </motion.p>
+                </motion.div>
                 
                 {/* Grid without filtration animation - smooth scroll animations inside */}
                 <BouquetGrid 
@@ -228,7 +246,7 @@ const Collection = () => {
             <div className="h-px w-full bg-gradient-to-r from-transparent via-primary to-transparent" />
           </motion.div>
           <motion.h2 
-            className="font-luxury text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-slate-800 relative z-10 bg-background px-4 sm:px-6 md:px-8 inline-block"
+            className="font-luxury text-4xl md:text-6xl font-bold text-slate-800 relative z-10 bg-background px-8 inline-block"
             style={{
               filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))',
               letterSpacing: '0.05em'
