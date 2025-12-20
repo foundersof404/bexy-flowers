@@ -83,6 +83,9 @@ const BouquetCard = memo(({
           contain: 'layout style paint',
           boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)'
         }}
+        whileHover={{ scale: 1.02, y: -4 }}
+        whileTap={{ scale: 0.98 }}
+        transition={{ duration: 0.3, ease: "easeOut" }}
         onClick={() => {
           navigate(`/product/${bouquet.id}`, { 
             state: { 
@@ -105,11 +108,13 @@ const BouquetCard = memo(({
         >
           <motion.div
             className="w-full h-full"
+            whileHover={{ scale: 1.05 }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
           >
             <OptimizedImage
               src={bouquet.image}
               alt={bouquet.name}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover transition-transform duration-400 ease-out group-hover:scale-110"
               aspectRatio="1/1"
               objectFit="cover"
               priority={index < 4}
@@ -143,6 +148,8 @@ const BouquetCard = memo(({
                 boxShadow: isFav ? '0 4px 12px rgba(220, 38, 127, 0.25)' : '0 4px 12px rgba(0, 0, 0, 0.08)',
                 backdropFilter: 'blur(8px)'
               }}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
               transition={{ duration: 0.3 }}
               onClick={(e) => {
                 e.stopPropagation();
@@ -196,6 +203,8 @@ const BouquetCard = memo(({
                 boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
                 backdropFilter: 'blur(8px)'
               }}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
               transition={{ duration: 0.3 }}
               onClick={(e) => {
                 e.stopPropagation();
@@ -307,6 +316,8 @@ const BouquetCard = memo(({
                 background: 'linear-gradient(90deg, #B88A44 0%, #F6E3B5 100%)',
                 boxShadow: '0 4px 12px rgba(184, 138, 68, 0.3)'
               }}
+              whileHover={{ scale: 1.02, boxShadow: '0 6px 16px rgba(184, 138, 68, 0.4)' }}
+              whileTap={{ scale: 0.98 }}
               onClick={(e) => {
                 e.stopPropagation();
                 addToCart({

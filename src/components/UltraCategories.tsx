@@ -184,34 +184,14 @@ const UltraCategories = () => {
           }
           return `${val}px`;
         }
-      },
-      paused: true
+      }
     });
 
-    // Pause auto-scroll while the user is actively scrolling the page
-    let scrollTimeout: number | undefined;
-
-    const handleScroll = () => {
-      tween.pause();
-      if (scrollTimeout) {
-        window.clearTimeout(scrollTimeout);
-      }
-      scrollTimeout = window.setTimeout(() => {
-        tween.play();
-      }, 300);
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-
-    // Start auto-scroll when the section first mounts
+    // Start auto-scroll immediately and keep it running continuously
     tween.play();
 
     return () => {
       tween.kill();
-      window.removeEventListener('scroll', handleScroll);
-      if (scrollTimeout) {
-        window.clearTimeout(scrollTimeout);
-      }
       gsap.killTweensOf(container);
     };
   }, []);

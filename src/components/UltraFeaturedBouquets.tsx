@@ -343,6 +343,23 @@ const UltraFeaturedBouquets = () => {
                 ease: [0.23, 1, 0.32, 1]
               }}
               viewport={{ once: true }}
+              onClick={() => {
+                if (bouquet.id && bouquet.productData) {
+                  navigate(`/product/${bouquet.id}`, {
+                    state: {
+                      product: {
+                        id: bouquet.productData.id,
+                        title: bouquet.productData.title || bouquet.name,
+                        price: bouquet.productData.price || parseFloat(bouquet.price.replace('$', '')) || 0,
+                        description: bouquet.productData.description || bouquet.description,
+                        imageUrl: bouquet.image,
+                        images: bouquet.productData.image_urls || [bouquet.image],
+                        category: bouquet.productData.category || 'Signature Collection'
+                      }
+                    }
+                  });
+                }
+              }}
             >
                  {/* Card structure with fully rounded corners */}
                  <div 
@@ -438,8 +455,21 @@ const UltraFeaturedBouquets = () => {
                       whileTap={{ scale: 0.9 }}
                     onClick={(e) => {
                       e.stopPropagation();
-                      setSelectedBouquet(bouquet);
-                      setIsModalOpen(true);
+                      if (bouquet.id && bouquet.productData) {
+                        navigate(`/product/${bouquet.id}`, {
+                          state: {
+                            product: {
+                              id: bouquet.productData.id,
+                              title: bouquet.productData.title || bouquet.name,
+                              price: bouquet.productData.price || parseFloat(bouquet.price.replace('$', '')) || 0,
+                              description: bouquet.productData.description || bouquet.description,
+                              imageUrl: bouquet.image,
+                              images: bouquet.productData.image_urls || [bouquet.image],
+                              category: bouquet.productData.category || 'Signature Collection'
+                            }
+                          }
+                        });
+                      }
                     }}
                   >
                           <ArrowUpRight color="#fff" size={22} strokeWidth={1.8} />

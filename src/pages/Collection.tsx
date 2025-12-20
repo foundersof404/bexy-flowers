@@ -246,7 +246,7 @@ const Collection = () => {
             <div className="h-px w-full bg-gradient-to-r from-transparent via-primary to-transparent" />
           </motion.div>
           <motion.h2 
-            className="font-luxury text-4xl md:text-6xl font-bold text-slate-800 relative z-10 bg-background px-8 inline-block"
+            className="font-luxury text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-slate-800 relative z-10 bg-background px-4 sm:px-6 md:px-8 inline-block"
             style={{
               filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))',
               letterSpacing: '0.05em'
