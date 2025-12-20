@@ -757,14 +757,8 @@ All colors MUST be HSL. No rounded corners - sharp and architectural.
    ============================================ */
 @media (max-width: 768px) {
   /* Disable backdrop blur completely on mobile - major performance killer */
-  * {
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-  }
-
-  /* Replace backdrop-blur with solid backgrounds */
   [class*="backdrop-blur"] {
-    background-color: rgba(229, 228, 226, 0.95) !important;
+    background-color: rgba(255, 255, 255, 0.95) !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
   }
@@ -772,11 +766,11 @@ All colors MUST be HSL. No rounded corners - sharp and architectural.
   /* Disable heavy blur filters on mobile */
   [class*="blur-2xl"],
   [class*="blur-3xl"] {
-    filter: blur(8px) !important; /* Reduced from 40px+ */
+    filter: none !important;
   }
 
   [class*="blur-xl"] {
-    filter: blur(4px) !important; /* Reduced from 24px */
+    filter: none !important;
   }
 
   /* Remove will-change on mobile to prevent layout thrashing */
@@ -791,8 +785,10 @@ All colors MUST be HSL. No rounded corners - sharp and architectural.
   }
 
   /* Optimize transitions - reduce duration for better performance */
-  * {
-    transition-duration: 0.2s !important;
+  .transition-all,
+  .transition-transform,
+  .transition-opacity {
+    transition-duration: 0.15s !important;
     transition-timing-function: ease-out !important;
   }
 
@@ -813,23 +809,18 @@ All colors MUST be HSL. No rounded corners - sharp and architectural.
   }
 
   /* Disable expensive gradient animations */
-  [style*="gradient"] {
+  [style*="gradient"][style*="animation"] {
     animation: none !important;
   }
 
   /* Optimize image rendering */
   img {
-    image-rendering: -webkit-optimize-contrast;
-    image-rendering: crisp-edges;
-  }
-
-  /* Prevent layout shifts */
-  * {
-    contain: layout style paint;
+    image-rendering: auto !important;
+    -webkit-font-smoothing: antialiased;
   }
 
   /* Optimize scroll performance */
-  * {
+  html, body {
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
   }
@@ -846,10 +837,10 @@ All colors MUST be HSL. No rounded corners - sharp and architectural.
     animation: none !important;
   }
 
-  /* Disable parallax and complex transforms on mobile */
-  [style*="transform: translateY"],
-  [style*="transform: translate3d"],
-  [style*="transform: scale"] {
+  /* Disable parallax and complex transforms on mobile - BUT NOT ALL TRANSFORMS */
+  [style*="translateY"],
+  [style*="translate3d"],
+  [style*="translateZ"] {
     transform: none !important;
   }
 
@@ -860,25 +851,15 @@ All colors MUST be HSL. No rounded corners - sharp and architectural.
     animation: none !important;
   }
 
-  /* Optimize images - disable lazy loading delays */
+  /* Optimize images - keep lazy loading for performance */
   img[loading="lazy"] {
-    loading: eager;
+    content-visibility: auto;
   }
 
   /* Reduce repaints - disable expensive filters */
-  [style*="filter:"] {
+  [style*="filter:blur"],
+  [style*="filter: blur"] {
     filter: none !important;
-  }
-
-  /* Disable backdrop filters completely */
-  * {
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-  }
-
-  /* Simplify gradients - use solid colors instead */
-  [style*="gradient"] {
-    background: rgba(229, 228, 226, 0.95) !important;
   }
 
   /* Simplify box shadows on mobile for better performance */
@@ -887,7 +868,7 @@ All colors MUST be HSL. No rounded corners - sharp and architectural.
   }
 
   /* Optimize font rendering */
-  * {
+  body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeSpeed;

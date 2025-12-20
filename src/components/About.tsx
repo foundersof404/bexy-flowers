@@ -30,12 +30,12 @@ const About = () => {
     return () => mq.removeEventListener?.("change", handler as (ev: MediaQueryListEvent) => void);
   }, []);
 
-  // CRITICAL: Disable all scroll-based animations on mobile
-  const { scrollYProgress } = useScroll({ 
-    target: sectionRef, 
-    offset: ["start end", "end start"],
-    enabled: !isMobile // Disable scroll tracking on mobile
-  });
+  // CRITICAL: Completely disable scroll tracking on mobile
+  const scrollOptions = {
+    target: sectionRef,
+    offset: ["start end", "end start"] as const
+  };
+  const { scrollYProgress } = useScroll(isMobile ? {} : scrollOptions);
   
   const parallaxYPrimary = useTransform(scrollYProgress, [0, 1], isMobile ? [0, 0] : [-60, 60]);
   const parallaxYSecondary = useTransform(scrollYProgress, [0, 1], isMobile ? [0, 0] : [40, -40]);
@@ -44,11 +44,11 @@ const About = () => {
   const ySecondary = (isMobile || prefersReducedMotion) ? 0 : (parallaxYSecondary as unknown as number | any);
 
   // Enhanced scroll effect for signature image - DISABLED ON MOBILE
-  const { scrollYProgress: imageScrollProgress } = useScroll({
+  const imageScrollOptions = {
     target: imageRef,
-    offset: ["start end", "end start"],
-    enabled: !isMobile // Disable on mobile
-  });
+    offset: ["start end", "end start"] as const
+  };
+  const { scrollYProgress: imageScrollProgress } = useScroll(isMobile ? {} : imageScrollOptions);
   const imageScale = useTransform(imageScrollProgress, [0, 1], [1, 1.1]);
   const finalImageScale = (isMobile || prefersReducedMotion) ? 1 : imageScale;
 
