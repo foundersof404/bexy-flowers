@@ -8,7 +8,6 @@ import { useFavorites } from "@/contexts/FavoritesContext";
 import { useFlyingHeart } from "@/contexts/FlyingHeartContext";
 import { useNavigate } from "react-router-dom";
 import { OptimizedImage } from "@/components/OptimizedImage";
-import { useIsMobile } from "@/hooks/use-mobile";
 import type { Bouquet } from "@/types/bouquet";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -58,37 +57,32 @@ const BouquetCard = memo(({
   const { toggleFavorite, isFavorite } = useFavorites();
   const { triggerFlyingHeart } = useFlyingHeart();
   const navigate = useNavigate();
-  const isMobile = useIsMobile();
   
   const tags = getBouquetTags(bouquet);
   const isFav = isFavorite(bouquet.id);
   
   return (
     <motion.div
-      initial={isMobile ? {} : { opacity: 0, y: 30, scale: 0.95 }}
-      animate={isMobile ? {} : { opacity: 1, y: 0, scale: 1 }}
-      viewport={{ once: true, amount: 0.1 }}
+      initial={{ opacity: 0, y: 30, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      viewport={{ once: false, amount: 0.1 }}
       transition={{ 
-        duration: isMobile ? 0 : 0.5,
-        delay: isMobile ? 0 : index * 0.05,
+        duration: 0.5,
+        delay: index * 0.05,
         ease: [0.23, 1, 0.32, 1]
       }}
       className="group cursor-pointer"
     >
       {/* Premium Luxury Card */}
       <motion.div 
-        className="w-full rounded-2xl md:rounded-3xl overflow-hidden relative group"
+        className="w-full rounded-2xl md:rounded-3xl overflow-hidden relative"
         style={{
           background: 'linear-gradient(180deg, #ffffff 0%, #f8f5f1 100%)',
           border: '1px solid rgba(255, 255, 255, 0.2)',
           // ⚡ PERFORMANCE: CSS containment for better scroll performance
           contain: 'layout style paint',
-          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
-          transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
+          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)'
         }}
-        whileHover={!isMobile ? { scale: 1.01, y: -2 } : undefined}
-        whileTap={!isMobile ? { scale: 0.99 } : undefined}
-        transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
         onClick={() => {
           navigate(`/product/${bouquet.id}`, { 
             state: { 
@@ -109,16 +103,13 @@ const BouquetCard = memo(({
         <motion.div 
           className="relative overflow-hidden aspect-square"
         >
-          <motion.div className="w-full h-full">
+          <motion.div
+            className="w-full h-full"
+          >
             <OptimizedImage
               src={bouquet.image}
               alt={bouquet.name}
-              className={`w-full h-full object-cover transition-transform duration-400 ease-out ${isMobile ? '' : 'group-hover:scale-[1.02]'}`}
-              style={isMobile ? {} : {
-                willChange: 'transform',
-                transform: 'translateZ(0)',
-                backfaceVisibility: 'hidden'
-              }}
+              className="w-full h-full object-cover"
               aspectRatio="1/1"
               objectFit="cover"
               priority={index < 4}
@@ -140,18 +131,19 @@ const BouquetCard = memo(({
           {/* Floating Action Buttons */}
           <motion.div 
             className="absolute top-2 right-2 md:top-4 md:right-4 flex gap-1.5 md:gap-2 z-20"
-            initial={isMobile ? {} : { opacity: 0, x: 20 }}
-            animate={isMobile ? {} : { opacity: 1, x: 0 }}
-            transition={isMobile ? {} : { duration: 0.4, delay: index * 0.05 + 0.2 }}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.4, delay: index * 0.05 + 0.2 }}
           >
             <motion.button 
               ref={heartButtonRef}
-              className="w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center relative transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:scale-105 active:scale-95"
+              className="w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center relative"
               style={{
-                background: isFav ? 'rgba(220, 38, 127, 0.15)' : 'rgba(255, 255, 255, 0.9)',
+                background: isFav ? 'rgba(220, 38, 127, 0.15)' : 'rgba(255, 255, 255, 0.7)',
                 boxShadow: isFav ? '0 4px 12px rgba(220, 38, 127, 0.25)' : '0 4px 12px rgba(0, 0, 0, 0.08)',
-                ...(isMobile ? {} : { backdropFilter: 'blur(8px)' })
+                backdropFilter: 'blur(8px)'
               }}
+              transition={{ duration: 0.3 }}
               onClick={(e) => {
                 e.stopPropagation();
                 
@@ -198,12 +190,13 @@ const BouquetCard = memo(({
             </motion.button>
             
             <motion.button 
-              className="w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center relative transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:scale-105 active:scale-95"
+              className="w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center relative"
               style={{
                 background: 'rgba(255, 255, 255, 0.7)',
                 boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
                 backdropFilter: 'blur(8px)'
               }}
+              transition={{ duration: 0.3 }}
               onClick={(e) => {
                 e.stopPropagation();
                 onBouquetClick(bouquet);
@@ -309,11 +302,10 @@ const BouquetCard = memo(({
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: index * 0.05 + 0.5 }}
-              className="w-full h-9 md:h-10 lg:h-12 rounded-lg md:rounded-xl font-semibold text-white flex items-center justify-center gap-1.5 md:gap-2 relative overflow-hidden text-xs md:text-sm lg:text-base transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:scale-[1.01] active:scale-[0.99]"
+              className="w-full h-9 md:h-10 lg:h-12 rounded-lg md:rounded-xl font-semibold text-white flex items-center justify-center gap-1.5 md:gap-2 relative overflow-hidden transition-all duration-200 text-xs md:text-sm lg:text-base"
               style={{
                 background: 'linear-gradient(90deg, #B88A44 0%, #F6E3B5 100%)',
-                boxShadow: '0 4px 12px rgba(184, 138, 68, 0.3)',
-                transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                boxShadow: '0 4px 12px rgba(184, 138, 68, 0.3)'
               }}
               onClick={(e) => {
                 e.stopPropagation();

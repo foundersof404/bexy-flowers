@@ -44,23 +44,23 @@ export const FeaturedCarousel = ({ bouquets, onBouquetClick }: FeaturedCarouselP
   }, []);
 
   return (
-    <section className="py-12 sm:py-16 md:py-20 relative overflow-hidden">
+    <section className="py-20 relative overflow-hidden">
       <div 
         ref={carouselRef}
-        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
+        className="max-w-7xl mx-auto px-4 lg:px-8"
       >
         {/* Section Header */}
         <motion.div
-          className="text-center mb-8 sm:mb-12 md:mb-16"
+          className="text-center mb-16"
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, ease: "easeOut" }}
         >
-          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-luxury text-foreground mb-3 sm:mb-4 px-2">
+          <h2 className="text-4xl lg:text-5xl font-luxury text-foreground mb-4">
             Featured <span className="text-primary">Masterpieces</span>
           </h2>
-          <p className="text-muted-foreground text-sm sm:text-base md:text-lg max-w-2xl mx-auto font-body px-4">
+          <p className="text-muted-foreground text-lg max-w-2xl mx-auto font-body">
             Our most coveted designs, crafted with rare flowers and premium materials
           </p>
         </motion.div>
@@ -98,7 +98,7 @@ export const FeaturedCarousel = ({ bouquets, onBouquetClick }: FeaturedCarouselP
             {bouquets.map((bouquet, index) => (
               <SwiperSlide
                 key={bouquet.id}
-                className="!w-[280px] sm:!w-80 !h-[360px] sm:!h-96"
+                className="!w-80 !h-96"
               >
                 <motion.div
                   className="relative h-full group cursor-pointer"
@@ -178,18 +178,16 @@ export const FeaturedCarousel = ({ bouquets, onBouquetClick }: FeaturedCarouselP
           <Button
             variant="outline"
             size="icon"
-            className="swiper-button-prev-custom absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 sm:w-12 sm:h-12 border-primary/30 hover:border-primary hover:bg-primary/10 touch-target"
-            style={{ minWidth: '44px', minHeight: '44px' }}
+            className="swiper-button-prev-custom absolute left-4 top-1/2 -translate-y-1/2 z-10 w-12 h-12 border-primary/30 hover:border-primary hover:bg-primary/10"
           >
-            <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+            <ChevronLeft className="w-5 h-5 text-primary" />
           </Button>
           <Button
             variant="outline"
             size="icon"
-            className="swiper-button-next-custom absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 sm:w-12 sm:h-12 border-primary/30 hover:border-primary hover:bg-primary/10 touch-target"
-            style={{ minWidth: '44px', minHeight: '44px' }}
+            className="swiper-button-next-custom absolute right-4 top-1/2 -translate-y-1/2 z-10 w-12 h-12 border-primary/30 hover:border-primary hover:bg-primary/10"
           >
-            <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+            <ChevronRight className="w-5 h-5 text-primary" />
           </Button>
         </div>
       </div>

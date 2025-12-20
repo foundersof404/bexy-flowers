@@ -17,25 +17,8 @@ const LazySection: React.FC<LazySectionProps> = ({
 }) => {
   const ref = useRef<HTMLDivElement | null>(null);
   const [isVisible, setIsVisible] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
 
-  // CRITICAL: Detect mobile and always render on mobile (bypass IntersectionObserver)
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-
-  // CRITICAL: On mobile, always show content immediately (no lazy loading)
-  useEffect(() => {
-    if (isMobile) {
-      setIsVisible(true);
-      return;
-    }
-
     if (!ref.current) return;
     let cancelled = false;
 
@@ -57,10 +40,9 @@ const LazySection: React.FC<LazySectionProps> = ({
       cancelled = true;
       observer.disconnect();
     };
-  }, [rootMargin, threshold, once, isMobile]);
+  }, [rootMargin, threshold, once]);
 
-  // CRITICAL: Always render on mobile, lazy load on desktop
-  return <div ref={ref} className={className}>{isVisible || isMobile ? children : null}</div>;
+  return <div ref={ref} className={className}>{isVisible ? children : null}</div>;
 };
 
 export default LazySection;

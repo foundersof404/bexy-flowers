@@ -55,29 +55,9 @@ const UltraFeaturedBouquets = () => {
     loadSignatureCollection();
   }, []);
 
-  // Setup GSAP animations when bouquets are loaded - Disabled on mobile for performance
+  // Setup GSAP animations when bouquets are loaded
   useEffect(() => {
     if (loading || bouquets.length === 0) return;
-    
-    // Detect mobile devices
-    const isMobile = window.innerWidth < 768;
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    
-    // Skip heavy animations on mobile or if user prefers reduced motion
-    if (isMobile || prefersReducedMotion) {
-      // Simple fade-in only for mobile
-      const cards = cardsRef.current;
-      if (cards.length > 0) {
-        gsap.set(cards, { opacity: 0 });
-        gsap.to(cards, {
-          duration: 0.5,
-          opacity: 1,
-          stagger: 0.1,
-          ease: "power2.out"
-        });
-      }
-      return;
-    }
     
     const section = sectionRef.current;
     const cards = cardsRef.current;
@@ -102,7 +82,7 @@ const UltraFeaturedBouquets = () => {
       // Set initial states
       gsap.set(cards, { y: 100, opacity: 0, rotateX: -15 });
 
-      // Smoother, less aggressive hover effects for desktop
+      // Enhanced 3D hover effects for modern cards
       cards.forEach((card, index) => {
         const image = card.querySelector('img');
         const actionButtons = card.querySelector('[class*="absolute top-4 right-4"]');
@@ -116,29 +96,29 @@ const UltraFeaturedBouquets = () => {
           
           hoverTl
             .to(card, {
-              duration: 0.5,
+              duration: 0.3,
               rotateX: 0,
               rotateY: 0,
               z: 0,
-              scale: 1.01,
+              scale: 1.03,
               ease: "power2.out"
             })
             .to(image, {
-              duration: 0.5,
-              scale: 1.02,
-              filter: "brightness(1.02) saturate(1.02)",
+              duration: 0.3,
+              scale: 1.08,
+              filter: "brightness(1.05) saturate(1.05)",
               ease: "power2.out"
             }, 0)
             .to(actionButtons, {
-              duration: 0.3,
+              duration: 0.25,
               y: 0,
               opacity: 1,
-              ease: "power2.out"
+              ease: "back.out(1.7)"
             }, 0.1)
             .to(button, {
-              duration: 0.3,
+              duration: 0.25,
               y: -1,
-              scale: 1.01,
+              scale: 1.02,
               ease: "power2.out"
             }, 0.2)
             .to(glitterContainer, {
@@ -152,7 +132,7 @@ const UltraFeaturedBouquets = () => {
           if (hoverTl) hoverTl.kill();
           
           gsap.to(card, {
-            duration: 0.4,
+            duration: 0.25,
             rotateX: 0,
             rotateY: 0,
             z: 0,
@@ -160,19 +140,19 @@ const UltraFeaturedBouquets = () => {
             ease: "power2.out"
           });
           gsap.to(image, {
-            duration: 0.4,
+            duration: 0.25,
             scale: 1,
             filter: "brightness(1) saturate(1)",
             ease: "power2.out"
           });
           gsap.to(actionButtons, {
-            duration: 0.3,
+            duration: 0.2,
             y: -8,
             opacity: 0,
             ease: "power2.out"
           });
           gsap.to(button, {
-            duration: 0.3,
+            duration: 0.2,
             y: 0,
             scale: 1,
             ease: "power2.out"
@@ -189,7 +169,7 @@ const UltraFeaturedBouquets = () => {
     return () => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
-  }, [loading, bouquets.length]);
+  }, []);
 
   // Auto-scroll functionality for luxury collection section
   useEffect(() => {
@@ -358,28 +338,11 @@ const UltraFeaturedBouquets = () => {
               initial={{ opacity: 0, y: 100 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ 
-                duration: 0.3, // Reduced from 0.8 for faster animation
-                delay: index * 0.05, // Reduced from 0.1
+                duration: 0.8, 
+                delay: index * 0.1,
                 ease: [0.23, 1, 0.32, 1]
               }}
-              viewport={{ once: true, margin: "-50px" }} // Only animate when closer to viewport
-              onClick={() => {
-                if (bouquet.id && bouquet.productData) {
-                  navigate(`/product/${bouquet.id}`, {
-                    state: {
-                      product: {
-                        id: bouquet.productData.id,
-                        title: bouquet.productData.title || bouquet.name,
-                        price: bouquet.productData.price || parseFloat(bouquet.price.replace('$', '')) || 0,
-                        description: bouquet.productData.description || bouquet.description,
-                        imageUrl: bouquet.image,
-                        images: bouquet.productData.image_urls || [bouquet.image],
-                        category: bouquet.productData.category || 'Signature Collection'
-                      }
-                    }
-                  });
-                }
-              }}
+              viewport={{ once: true }}
             >
                  {/* Card structure with fully rounded corners */}
                  <div 
@@ -410,8 +373,7 @@ const UltraFeaturedBouquets = () => {
                            height: '100%',
                            objectFit: 'cover'
                          }}
-                         className="transition-all duration-200 ease-out"
-                         loading="lazy"
+                         className="transition-all duration-300 ease-out group-hover:scale-105"
                          onError={(e) => {
                            // Fallback if image fails to load
                            (e.target as HTMLImageElement).style.display = 'none';
@@ -476,21 +438,8 @@ const UltraFeaturedBouquets = () => {
                       whileTap={{ scale: 0.9 }}
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (bouquet.id && bouquet.productData) {
-                        navigate(`/product/${bouquet.id}`, {
-                          state: {
-                            product: {
-                              id: bouquet.productData.id,
-                              title: bouquet.productData.title || bouquet.name,
-                              price: bouquet.productData.price || parseFloat(bouquet.price.replace('$', '')) || 0,
-                              description: bouquet.productData.description || bouquet.description,
-                              imageUrl: bouquet.image,
-                              images: bouquet.productData.image_urls || [bouquet.image],
-                              category: bouquet.productData.category || 'Signature Collection'
-                            }
-                          }
-                        });
-                      }
+                      setSelectedBouquet(bouquet);
+                      setIsModalOpen(true);
                     }}
                   >
                           <ArrowUpRight color="#fff" size={22} strokeWidth={1.8} />

@@ -1,11 +1,10 @@
-import React, { createContext, useContext, useEffect, useState, ReactNode, useRef } from 'react';
+import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { FavoriteProduct, FavoritesContextType } from '@/types/favorites';
-import { getVisitorFavorites, addVisitorFavorite, removeVisitorFavorite, clearVisitorFavorites, syncFavoritesToDatabase } from '@/lib/api/visitor-favorites';
 
 // Create the Favorites Context
 const FavoritesContext = createContext<FavoritesContextType | undefined>(undefined);
 
-// Local storage key for persisting favorites data (used as fallback/cache)
+// Local storage key for persisting favorites data
 const FAVORITES_STORAGE_KEY = 'bexy-flowers-favorites';
 
 interface FavoritesProviderProps {
@@ -13,95 +12,30 @@ interface FavoritesProviderProps {
 }
 
 export const FavoritesProvider: React.FC<FavoritesProviderProps> = ({ children }) => {
-  const [favorites, setFavorites] = useState<FavoriteProduct[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const isInitialLoad = useRef(true);
-  const syncTimeoutRef = useRef<number | null>(null);
-
-  // Load favorites from database on mount
-  useEffect(() => {
-    const loadFavoritesFromDatabase = async () => {
-      try {
-        setIsLoading(true);
-        // First, try to load from database
-        const dbFavorites = await getVisitorFavorites();
-        
-        if (dbFavorites.length > 0) {
-          // Database has favorites, use them
-          setFavorites(dbFavorites);
-          // Update localStorage as cache
-          localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(dbFavorites));
-        } else {
-          // No items in database, try localStorage as fallback
-          try {
-            const savedFavorites = localStorage.getItem(FAVORITES_STORAGE_KEY);
-            if (savedFavorites) {
-              const localFavorites = JSON.parse(savedFavorites);
-              setFavorites(localFavorites);
-              // Sync local favorites to database
-              await syncFavoritesToDatabase(localFavorites);
-            }
-          } catch (error) {
-            console.error('Error loading favorites from localStorage:', error);
-          }
-        }
-      } catch (error) {
-        console.error('Error loading favorites from database:', error);
-        // Fallback to localStorage
-        try {
-          const savedFavorites = localStorage.getItem(FAVORITES_STORAGE_KEY);
-          if (savedFavorites) {
-            setFavorites(JSON.parse(savedFavorites));
-          }
-        } catch (localError) {
-          console.error('Error loading favorites from localStorage:', localError);
-        }
-      } finally {
-        setIsLoading(false);
-        isInitialLoad.current = false;
-      }
-    };
-
-    loadFavoritesFromDatabase();
-  }, []);
-
-  // Sync favorites to database whenever favorites changes (debounced)
-  useEffect(() => {
-    // Skip initial load
-    if (isInitialLoad.current) {
-      return;
+  // Initialize favorites state from localStorage or empty array
+  const [favorites, setFavorites] = useState<FavoriteProduct[]>(() => {
+    try {
+      const savedFavorites = localStorage.getItem(FAVORITES_STORAGE_KEY);
+      return savedFavorites ? JSON.parse(savedFavorites) : [];
+    } catch (error) {
+      console.error('Error loading favorites from localStorage:', error);
+      return [];
     }
+  });
 
-    // Clear existing timeout
-    if (syncTimeoutRef.current) {
-      clearTimeout(syncTimeoutRef.current);
+  // Save favorites to localStorage whenever favorites changes
+  useEffect(() => {
+    try {
+      localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(favorites));
+    } catch (error) {
+      console.error('Error saving favorites to localStorage:', error);
     }
-
-    // Debounce database sync (wait 500ms after last change)
-    syncTimeoutRef.current = window.setTimeout(async () => {
-      try {
-        // Save to localStorage as cache
-        localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(favorites));
-        // Sync to database
-        await syncFavoritesToDatabase(favorites);
-      } catch (error) {
-        console.error('Error syncing favorites to database:', error);
-        // Still save to localStorage even if DB sync fails
-      }
-    }, 500);
-
-    // Cleanup timeout on unmount
-    return () => {
-      if (syncTimeoutRef.current) {
-        clearTimeout(syncTimeoutRef.current);
-      }
-    };
   }, [favorites]);
 
   /**
    * Add a product to favorites
    */
-  const addToFavorites = async (product: FavoriteProduct): Promise<void> => {
+  const addToFavorites = (product: FavoriteProduct): void => {
     setFavorites(prevFavorites => {
       // Check if product already exists
       const exists = prevFavorites.some(item => item.id === product.id);
@@ -120,12 +54,6 @@ export const FavoritesProvider: React.FC<FavoritesProviderProps> = ({ children }
         featured: product.featured,
         name: product.name || product.title || ''
       };
-      
-      // Add to database (async, non-blocking)
-      addVisitorFavorite(normalizedProduct).catch(error => {
-        console.error('Error adding favorite to database:', error);
-      });
-
       return [...prevFavorites, normalizedProduct];
     });
   };
@@ -133,15 +61,10 @@ export const FavoritesProvider: React.FC<FavoritesProviderProps> = ({ children }
   /**
    * Remove a product from favorites
    */
-  const removeFromFavorites = async (productId: number | string): Promise<void> => {
+  const removeFromFavorites = (productId: number | string): void => {
     setFavorites(prevFavorites => 
       prevFavorites.filter(item => item.id !== productId)
     );
-
-    // Remove from database (async, non-blocking)
-    removeVisitorFavorite(productId).catch(error => {
-      console.error('Error removing favorite from database:', error);
-    });
   };
 
   /**
@@ -172,13 +95,8 @@ export const FavoritesProvider: React.FC<FavoritesProviderProps> = ({ children }
   /**
    * Clear all favorites
    */
-  const clearFavorites = async (): Promise<void> => {
+  const clearFavorites = (): void => {
     setFavorites([]);
-
-    // Clear from database (async, non-blocking)
-    clearVisitorFavorites().catch(error => {
-      console.error('Error clearing favorites from database:', error);
-    });
   };
 
   const value: FavoritesContextType = {
