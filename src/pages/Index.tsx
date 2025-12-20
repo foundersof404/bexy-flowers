@@ -464,23 +464,31 @@ const ProfessionalCustomSection = React.memo(() => {
 ProfessionalCustomSection.displayName = 'ProfessionalCustomSection';
 
 const Index = () => {
+  const isMobile = useIsMobile();
+
   return (
     <div className="min-h-screen overflow-x-hidden relative">
       <UltraNavigation />
-      <Suspense fallback={null}>
-        <InteractiveBackground />
-      </Suspense>
+      {/* CRITICAL: Completely disable InteractiveBackground on mobile - it crashes the page */}
+      {!isMobile && (
+        <Suspense fallback={<div className="fixed inset-0 pointer-events-none z-0" style={{ background: 'hsl(220 8% 6%)' }} />}>
+          <InteractiveBackground />
+        </Suspense>
+      )}
+      {isMobile && (
+        <div className="fixed inset-0 pointer-events-none z-0" style={{ background: 'hsl(220 8% 6%)' }} />
+      )}
       <div className="relative z-10">
-        <Suspense fallback={null}>
+        <Suspense fallback={<div style={{ minHeight: '100vh' }} />}>
           <UltraHero />
         </Suspense>
         <LazySection rootMargin="400px 0px">
-          <Suspense fallback={null}>
+          <Suspense fallback={<div style={{ minHeight: '400px' }} />}>
             <UltraFeaturedBouquets />
           </Suspense>
         </LazySection>
         <LazySection rootMargin="400px 0px">
-          <Suspense fallback={null}>
+          <Suspense fallback={<div style={{ minHeight: '400px' }} />}>
             <UltraCategories />
           </Suspense>
         </LazySection>
@@ -489,17 +497,17 @@ const Index = () => {
           <ProfessionalCustomSection />
         </LazySection>
         <LazySection rootMargin="400px 0px">
-          <Suspense fallback={null}>
+          <Suspense fallback={<div style={{ minHeight: '400px' }} />}>
             <ZodiacBouquetQuiz />
           </Suspense>
         </LazySection>
         <LazySection rootMargin="400px 0px">
-          <Suspense fallback={null}>
+          <Suspense fallback={<div style={{ minHeight: '400px' }} />}>
             <FlowerCareGuide />
           </Suspense>
         </LazySection>
         <LazySection rootMargin="600px 0px">
-          <Suspense fallback={null}>
+          <Suspense fallback={<div style={{ minHeight: '400px' }} />}>
             <Footer />
           </Suspense>
         </LazySection>
