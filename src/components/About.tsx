@@ -19,9 +19,8 @@ const About = () => {
 
   const sectionRef = useRef<HTMLDivElement | null>(null);
   const imageRef = useRef<HTMLDivElement | null>(null);
-  const { scrollYProgress } = useScroll({ target: sectionRef, offset: ["start end", "end start"] });
   
-  // Detect mobile to reduce parallax amplitude
+  // Detect mobile - DISABLE ALL PARALLAX ON MOBILE FOR PERFORMANCE
   const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 768px)");
@@ -31,19 +30,27 @@ const About = () => {
     return () => mq.removeEventListener?.("change", handler as (ev: MediaQueryListEvent) => void);
   }, []);
 
-  const parallaxYPrimary = useTransform(scrollYProgress, [0, 1], isMobile ? [-20, 20] : [-60, 60]);
-  const parallaxYSecondary = useTransform(scrollYProgress, [0, 1], isMobile ? [15, -15] : [40, -40]);
+  // CRITICAL: Disable all scroll-based animations on mobile
+  const { scrollYProgress } = useScroll({ 
+    target: sectionRef, 
+    offset: ["start end", "end start"],
+    enabled: !isMobile // Disable scroll tracking on mobile
+  });
+  
+  const parallaxYPrimary = useTransform(scrollYProgress, [0, 1], isMobile ? [0, 0] : [-60, 60]);
+  const parallaxYSecondary = useTransform(scrollYProgress, [0, 1], isMobile ? [0, 0] : [40, -40]);
   const prefersReducedMotion = useReducedMotion();
-  const yPrimary = prefersReducedMotion ? 0 : (parallaxYPrimary as unknown as number | any);
-  const ySecondary = prefersReducedMotion ? 0 : (parallaxYSecondary as unknown as number | any);
+  const yPrimary = (isMobile || prefersReducedMotion) ? 0 : (parallaxYPrimary as unknown as number | any);
+  const ySecondary = (isMobile || prefersReducedMotion) ? 0 : (parallaxYSecondary as unknown as number | any);
 
-  // Enhanced scroll effect for signature image - creates un-zoom parallax effect
+  // Enhanced scroll effect for signature image - DISABLED ON MOBILE
   const { scrollYProgress: imageScrollProgress } = useScroll({
     target: imageRef,
-    offset: ["start end", "end start"]
+    offset: ["start end", "end start"],
+    enabled: !isMobile // Disable on mobile
   });
   const imageScale = useTransform(imageScrollProgress, [0, 1], [1, 1.1]);
-  const finalImageScale = prefersReducedMotion ? 1 : imageScale;
+  const finalImageScale = (isMobile || prefersReducedMotion) ? 1 : imageScale;
 
   // --- POWERFUL LUXURY PAGE TRANSITION VARIANTS ---
   const pageTransitionVariants = {

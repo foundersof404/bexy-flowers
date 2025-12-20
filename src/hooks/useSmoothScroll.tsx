@@ -9,7 +9,14 @@ let lenis: Lenis | null = null;
 
 export const useSmoothScroll = () => {
   useEffect(() => {
-    // Initialize Lenis with heavy/strong smooth scroll settings
+    // CRITICAL: Disable Lenis smooth scroll on mobile for performance
+    const isMobile = window.innerWidth < 768;
+    if (isMobile) {
+      // Skip smooth scroll entirely on mobile - native scrolling is faster
+      return;
+    }
+
+    // Initialize Lenis with heavy/strong smooth scroll settings (desktop only)
     lenis = new Lenis({
       duration: 1.2, // Longer duration for heavier feel
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // Smooth easing
