@@ -15,6 +15,7 @@ import {
 import LazySection from "@/components/LazySection";
 import UltraNavigation from "@/components/UltraNavigation";
 import BackToTop from "@/components/BackToTop";
+import { useIsMobile } from "@/hooks/use-mobile";
 const InteractiveBackground = React.lazy(() => import("@/components/interactive/InteractiveBackground"));
 const UltraHero = React.lazy(() => import("@/components/UltraHero"));
 const UltraFeaturedBouquets = React.lazy(() => import("@/components/UltraFeaturedBouquets"));
@@ -27,6 +28,7 @@ const Footer = React.lazy(() => import("@/components/Footer"));
 
 // Professional Custom Bouquet Section Component - Optimized for performance
 const ProfessionalCustomSection = React.memo(() => {
+  const isMobile = useIsMobile();
 
   const features = [
     {
@@ -62,36 +64,38 @@ const ProfessionalCustomSection = React.memo(() => {
         background: 'linear-gradient(180deg, #faf7f3 0%, #ffffff 100%)'
       }}
     >
-      {/* Optimized Floating Background Elements - Reduced for performance */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <motion.div
-          className="absolute top-20 -left-20 w-96 h-96 bg-gradient-to-br from-[#C79E48]/8 to-transparent rounded-full blur-2xl opacity-60"
-          animate={{
-            scale: [1, 1.15, 1],
-            opacity: [0.4, 0.6, 0.4]
-          }}
-          transition={{
-            duration: 10,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-          style={{ willChange: 'transform, opacity' }}
-        />
-        <motion.div
-          className="absolute bottom-20 -right-20 w-96 h-96 bg-gradient-to-br from-[#B88A44]/8 to-transparent rounded-full blur-2xl opacity-60"
-          animate={{
-            scale: [1.15, 1, 1.15],
-            opacity: [0.6, 0.4, 0.6]
-          }}
-          transition={{
-            duration: 10,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: 1
-          }}
-          style={{ willChange: 'transform, opacity' }}
-        />
-      </div>
+      {/* Optimized Floating Background Elements - DISABLED ON MOBILE FOR PERFORMANCE */}
+      {!isMobile && (
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <motion.div
+            className="absolute top-20 -left-20 w-96 h-96 bg-gradient-to-br from-[#C79E48]/8 to-transparent rounded-full blur-2xl opacity-60"
+            animate={{
+              scale: [1, 1.15, 1],
+              opacity: [0.4, 0.6, 0.4]
+            }}
+            transition={{
+              duration: 10,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+            style={{ willChange: 'transform, opacity' }}
+          />
+          <motion.div
+            className="absolute bottom-20 -right-20 w-96 h-96 bg-gradient-to-br from-[#B88A44]/8 to-transparent rounded-full blur-2xl opacity-60"
+            animate={{
+              scale: [1.15, 1, 1.15],
+              opacity: [0.6, 0.4, 0.6]
+            }}
+            transition={{
+              duration: 10,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 1
+            }}
+            style={{ willChange: 'transform, opacity' }}
+          />
+        </div>
+      )}
 
       <div className="relative z-10 max-w-7xl mx-auto">
         {/* Premium Header */}
@@ -104,7 +108,7 @@ const ProfessionalCustomSection = React.memo(() => {
         >
           {/* Modern Floating Badge */}
           <motion.div 
-            className="inline-flex items-center gap-1.5 sm:gap-2 px-4 sm:px-6 py-2 sm:py-3 rounded-full bg-gradient-to-r from-slate-800/10 to-slate-700/10 backdrop-blur-xl border border-slate-600/20 mb-6 sm:mb-8"
+            className="inline-flex items-center gap-1.5 sm:gap-2 px-4 sm:px-6 py-2 sm:py-3 rounded-full bg-gradient-to-r from-slate-800/10 to-slate-700/10 md:backdrop-blur-xl border border-slate-600/20 mb-6 sm:mb-8"
             initial={{ scale: 0.8, opacity: 0 }}
             whileInView={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.2 }}
@@ -161,11 +165,13 @@ const ProfessionalCustomSection = React.memo(() => {
 
         {/* Feature Cards - Premium Grid */}
         <div className="relative mb-16">
-          {/* Optimized decorative elements - reduced for performance */}
-          <div className="pointer-events-none absolute inset-0 -z-10">
-            <div className="absolute top-6 left-8 w-40 h-40 rounded-full bg-[#F1E2CE]/30 blur-xl opacity-60" />
-            <div className="absolute bottom-4 right-20 w-48 h-48 rounded-full bg-[#F6EADC]/25 blur-xl opacity-60" />
-          </div>
+          {/* Optimized decorative elements - DISABLED ON MOBILE FOR PERFORMANCE */}
+          {!isMobile && (
+            <div className="pointer-events-none absolute inset-0 -z-10">
+              <div className="absolute top-6 left-8 w-40 h-40 rounded-full bg-[#F1E2CE]/30 blur-xl opacity-60" />
+              <div className="absolute bottom-4 right-20 w-48 h-48 rounded-full bg-[#F6EADC]/25 blur-xl opacity-60" />
+            </div>
+          )}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 md:gap-8 lg:gap-10 xl:gap-12">
             {features.map((feature, index) => {
               const getInitialState = () => {
@@ -206,9 +212,9 @@ const ProfessionalCustomSection = React.memo(() => {
                       background: 'linear-gradient(180deg, #ffffff 0%, #fafaf9 100%)',
                       border: '1px solid rgba(0, 0, 0, 0.06)',
                       boxShadow: '0 4px 24px rgba(0, 0, 0, 0.06)',
-                      willChange: 'transform, box-shadow'
+                      ...(isMobile ? {} : { willChange: 'transform, box-shadow' })
                     }}
-                    whileHover={{
+                    whileHover={isMobile ? {} : {
                       y: -12,
                       boxShadow: '0 20px 45px rgba(0,0,0,0.10)',
                       borderColor: 'rgba(194, 154, 67, 0.35)'
@@ -226,9 +232,9 @@ const ProfessionalCustomSection = React.memo(() => {
                       style={{ 
                         background: gradient135, 
                         boxShadow: '0 8px 24px rgba(194, 154, 67, 0.3)',
-                        willChange: 'transform'
+                        ...(isMobile ? {} : { willChange: 'transform' })
                       }}
-                      whileHover={{ scale: 1.12, rotate: 8 }}
+                      whileHover={isMobile ? {} : { scale: 1.12, rotate: 8 }}
                       transition={{ duration: 0.3 }}
                     >
                       {/* Icon - Ensure it stays visible with proper z-index */}
@@ -255,7 +261,7 @@ const ProfessionalCustomSection = React.memo(() => {
                     <motion.h4
                       className="text-base sm:text-lg font-bold mb-2 transition-all duration-300"
                       style={{ color: '#0a0a0a', letterSpacing: '-0.01em', fontFamily: 'Inter, sans-serif' }}
-                      whileHover={{ color: '#B88A44' }}
+                      whileHover={isMobile ? {} : { color: '#B88A44' }}
                     >
                       {feature.subtitle}
                     </motion.h4>
@@ -263,7 +269,7 @@ const ProfessionalCustomSection = React.memo(() => {
                     <motion.div
                       className="h-[2px] mb-3 sm:mb-4 rounded-full"
                       style={{ background: gradient90, width: '40px' }}
-                      whileHover={{ width: '60px' }}
+                      whileHover={isMobile ? {} : { width: '60px' }}
                       transition={{ duration: 0.4 }}
                     />
 
@@ -347,8 +353,8 @@ const ProfessionalCustomSection = React.memo(() => {
               transition={{ duration: 0.6, delay: 0.8 }}
             />
 
-            {/* Optimized Floating Particles Around Button - Reduced for performance */}
-            {[...Array(4)].map((_, i) => (
+            {/* Optimized Floating Particles Around Button - DISABLED ON MOBILE FOR PERFORMANCE */}
+            {!isMobile && [...Array(4)].map((_, i) => (
               <motion.div
                 key={i}
                 className="absolute w-1 h-1 rounded-full bg-[#C79E48] opacity-60"
@@ -379,50 +385,59 @@ const ProfessionalCustomSection = React.memo(() => {
                 boxShadow: '0 8px 32px rgba(184, 138, 68, 0.4)',
                 fontSize: 'clamp(0.875rem, 2vw, 1.1rem)',
                 letterSpacing: '0.05em',
-                willChange: 'transform, box-shadow'
+                ...(isMobile ? {} : { willChange: 'transform, box-shadow' })
               }}
-              whileHover={{
+              whileHover={isMobile ? {} : {
                 scale: 1.05,
                 boxShadow: '0 12px 48px rgba(194, 154, 67, 0.5)'
               }}
               whileTap={{ scale: 0.98 }}
               transition={{ duration: 0.3 }}
             >
-            {/* Optimized Shimmer Effect */}
-            <motion.div
-              className="absolute inset-0 -left-full w-1/2 h-full pointer-events-none"
-              style={{
-                background: 'linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.3) 50%, transparent 100%)',
-                transform: 'skewX(-20deg)',
-                willChange: 'left'
-              }}
-              animate={{
-                left: ['100%', '-50%']
-              }}
-              transition={{
-                duration: 2.5,
-                repeat: Infinity,
-                ease: "linear",
-                repeatDelay: 1.5
-              }}
-            />
+            {/* Optimized Shimmer Effect - DISABLED ON MOBILE FOR PERFORMANCE */}
+            {!isMobile && (
+              <motion.div
+                className="absolute inset-0 -left-full w-1/2 h-full pointer-events-none"
+                style={{
+                  background: 'linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.3) 50%, transparent 100%)',
+                  transform: 'skewX(-20deg)',
+                  willChange: 'left'
+                }}
+                animate={{
+                  left: ['100%', '-50%']
+                }}
+                transition={{
+                  duration: 2.5,
+                  repeat: Infinity,
+                  ease: "linear",
+                  repeatDelay: 1.5
+                }}
+              />
+            )}
 
             <span className="relative z-10 uppercase tracking-wider text-xs sm:text-sm md:text-base">
               Start Designing Now
             </span>
-            <motion.div
-              className="relative z-10"
-              animate={{
-                x: [0, 4, 0]
-              }}
-              transition={{
-                duration: 1.5,
-                repeat: Infinity,
-                ease: "easeInOut"
-              }}
-            >
-              <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" strokeWidth={2.5} />
-            </motion.div>
+            {!isMobile && (
+              <motion.div
+                className="relative z-10"
+                animate={{
+                  x: [0, 4, 0]
+                }}
+                transition={{
+                  duration: 1.5,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              >
+                <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" strokeWidth={2.5} />
+              </motion.div>
+            )}
+            {isMobile && (
+              <div className="relative z-10">
+                <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" strokeWidth={2.5} />
+              </div>
+            )}
             </motion.a>
 
             {/* Trust Badge */}
