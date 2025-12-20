@@ -453,25 +453,14 @@ const UltraCategories = () => {
           <div className="w-full overflow-hidden">
               <div 
                 ref={mobileRow1Ref} 
-                className="flex gap-3" 
-                style={{ 
-                  willChange: 'transform',
-                  transform: 'translateZ(0)',
-                  backfaceVisibility: 'hidden',
-                  perspective: '1000px'
-                }}
+                className="flex gap-3"
               >
-              {/* First 5 categories, tripled for seamless infinite scroll */}
-              {[...categories.slice(0, 5), ...categories.slice(0, 5), ...categories.slice(0, 5)].map((category, index) => (
+              {/* First 5 categories - NO TRIPLING, just single set */}
+              {categories.slice(0, 5).map((category, index) => (
                 <div
                   key={`row1-${category.id}-${index}`}
                   className="flex-shrink-0 w-[196px] h-56 group cursor-pointer"
                   onClick={() => handleExplore(category.filterValue)}
-                  style={{ 
-                    willChange: 'transform',
-                    backfaceVisibility: 'hidden',
-                    transform: 'translateZ(0)'
-                  }}
                 >
                   <div className="relative h-full w-full">
                     {/* Ultra-Modern Glassmorphism Card - Mobile */}
@@ -529,25 +518,14 @@ const UltraCategories = () => {
           <div className="w-full overflow-hidden">
               <div 
                 ref={mobileRow2Ref} 
-                className="flex gap-3" 
-                style={{ 
-                  willChange: 'transform',
-                  transform: 'translateZ(0)',
-                  backfaceVisibility: 'hidden',
-                  perspective: '1000px'
-                }}
+                className="flex gap-3"
               >
-              {/* Last 4 categories, tripled for seamless infinite scroll */}
-              {[...categories.slice(5, 9), ...categories.slice(5, 9), ...categories.slice(5, 9)].map((category, index) => (
+              {/* Last 4 categories - NO TRIPLING, just single set */}
+              {categories.slice(5, 9).map((category, index) => (
                 <div
                   key={`row2-${category.id}-${index}`}
                   className="flex-shrink-0 w-[196px] h-56 group cursor-pointer"
                   onClick={() => handleExplore(category.filterValue)}
-                  style={{ 
-                    willChange: 'transform',
-                    backfaceVisibility: 'hidden',
-                    transform: 'translateZ(0)'
-                  }}
                 >
                   <div className="relative h-full w-full">
                     {/* Ultra-Modern Glassmorphism Card - Mobile */}
