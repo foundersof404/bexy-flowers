@@ -14,6 +14,7 @@ interface CartProviderProps {
 
 export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [isCartOpen, setIsCartOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const isInitialLoad = useRef(true);
   const syncTimeoutRef = useRef<number | null>(null);
@@ -25,7 +26,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
         setIsLoading(true);
         // First, try to load from database
         const dbCart = await getVisitorCart();
-        
+
         if (dbCart.length > 0) {
           // Database has cart items, use them
           setCartItems(dbCart);
@@ -103,22 +104,22 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
    */
   const addToCart = async (product: Product): Promise<void> => {
     setCartItems(prevItems => {
-      const existingItem = prevItems.find(item => 
-        item.id === product.id && 
-        item.size === product.size && 
+      const existingItem = prevItems.find(item =>
+        item.id === product.id &&
+        item.size === product.size &&
         item.personalNote === product.personalNote &&
         item.description === product.description
       );
-      
+
       let newItems: CartItem[];
-      
+
       if (existingItem) {
         // If item exists with same size, note, and description, increment quantity
         newItems = prevItems.map(item =>
-          item.id === product.id && 
-          item.size === product.size && 
-          item.personalNote === product.personalNote &&
-          item.description === product.description
+          item.id === product.id &&
+            item.size === product.size &&
+            item.personalNote === product.personalNote &&
+            item.description === product.description
             ? { ...item, quantity: item.quantity + 1 }
             : item
         );
@@ -134,7 +135,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
         item.personalNote === product.personalNote &&
         item.description === product.description
       );
-      
+
       if (newItem) {
         upsertVisitorCartItem(newItem).catch(error => {
           console.error('Error syncing cart item to database:', error);
@@ -149,10 +150,10 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
    * Remove a product completely from the cart
    */
   const removeFromCart = async (productId: number | string, size?: string, personalNote?: string): Promise<void> => {
-    setCartItems(prevItems => 
-      prevItems.filter(item => 
-        !(item.id === productId && 
-          item.size === size && 
+    setCartItems(prevItems =>
+      prevItems.filter(item =>
+        !(item.id === productId &&
+          item.size === size &&
           item.personalNote === personalNote)
       )
     );
@@ -185,12 +186,12 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       await removeFromCart(productId, size, personalNote);
       return;
     }
-    
+
     setCartItems(prevItems =>
       prevItems.map(item =>
         item.id === productId &&
-        item.size === size &&
-        item.personalNote === personalNote
+          item.size === size &&
+          item.personalNote === personalNote
           ? { ...item, quantity: newQuantity }
           : item
       )
@@ -222,6 +223,8 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     getTotalItems,
     getTotalPrice,
     clearCart,
+    isCartOpen,
+    setIsCartOpen,
   };
 
   return (

@@ -297,8 +297,8 @@ const SizeSelector = ({
           <motion.button
             key={option.id}
             className={`p-3 rounded-lg border-2 transition-all duration-300 ${isSelected
-                ? 'border-amber-400 bg-amber-50 text-amber-800'
-                : 'border-amber-200 hover:border-amber-300 text-slate-600'
+              ? 'border-amber-400 bg-amber-50 text-amber-800'
+              : 'border-amber-200 hover:border-amber-300 text-slate-600'
               }`}
             onClick={() => onSizeChange(option.id)}
             variants={buttonVariants}
@@ -356,8 +356,8 @@ const ImageGallery = ({
           <motion.button
             key={index}
             className={`relative overflow-hidden rounded-lg aspect-square w-20 border-2 transition-all duration-300 ${index === currentImageIndex
-                ? 'border-amber-400'
-                : 'border-amber-200 hover:border-amber-300'
+              ? 'border-amber-400'
+              : 'border-amber-200 hover:border-amber-300'
               }`}
             onClick={() => onImageChange(index)}
             variants={buttonVariants}
@@ -881,7 +881,7 @@ const ProductDetailPage = () => {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="flex overflow-x-auto pb-8 gap-4 snap-x snap-mandatory sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:gap-8 -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-hide">
             {recommendedBouquets.map((bouquet, index) => (
               <motion.div
                 key={bouquet.id}
@@ -889,7 +889,7 @@ const ProductDetailPage = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 viewport={{ once: true }}
-                className="group cursor-pointer"
+                className="group cursor-pointer min-w-[280px] sm:min-w-0 snap-center"
                 onClick={() => navigate(`/product/${bouquet.id}`, {
                   state: {
                     product: {
