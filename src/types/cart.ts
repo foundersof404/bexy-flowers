@@ -32,4 +32,6 @@ export interface CartContextType {
   getTotalItems: () => number;
   getTotalPrice: () => number;
   clearCart: () => void;
+  isCartOpen: boolean;
+  setIsCartOpen: (isOpen: boolean) => void;
 }
