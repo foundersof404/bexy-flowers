@@ -82,12 +82,12 @@ export const OptimizedImage = ({
 
     const img = new Image();
     img.src = imageSrc;
-    
+
     img.onload = () => {
       setIsLoading(false);
       onLoadComplete?.();
     };
-    
+
     img.onerror = () => {
       setHasError(true);
       setIsLoading(false);
@@ -99,8 +99,8 @@ export const OptimizedImage = ({
     };
   }, [imageSrc, onLoadComplete]);
 
-  // Fallback image for errors
-  const fallbackSrc = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="400"%3E%3Crect width="400" height="400" fill="%23f0f0f0"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="18" fill="%23999"%3EImage unavailable%3C/text%3E%3C/svg%3E';
+  // Fallback image for errors - using brand logo
+  const fallbackSrc = '/assets/bexy-flowers-logo.webp';
 
   return (
     <div
@@ -151,9 +151,9 @@ export const OptimizedImage = ({
         ref={imgRef}
         src={hasError ? fallbackSrc : (isInView ? (imageSrc || encodedSrc) : '')}
         alt={alt}
-        className={`w-full h-full ${className}`}
+        className={`w-full h-full ${className} ${hasError ? 'p-8 opacity-50' : ''}`}
         style={{
-          objectFit,
+          objectFit: hasError ? 'contain' : objectFit,
           opacity: isLoading || !isInView ? 0 : 1,
           transition: 'opacity 0.3s ease-in-out',
           visibility: isInView ? 'visible' : 'hidden',

@@ -9,12 +9,12 @@
  */
 export function encodeImageUrl(url: string | null | undefined): string {
   if (!url) return '';
-  
+
   // If it's already a full URL (http/https), return as-is
   if (url.startsWith('http://') || url.startsWith('https://')) {
     return url;
   }
-  
+
   // For local paths, we need to encode each segment separately
   // to handle spaces and special characters in folder/file names
   if (url.startsWith('/')) {
@@ -22,24 +22,16 @@ export function encodeImageUrl(url: string | null | undefined): string {
       // Split by '/' and encode each segment
       const segments = url.split('/').filter(Boolean); // Remove empty segments
       const encodedSegments = segments.map(segment => {
-        // Check if segment contains % character - if so, encode directly without decoding
-        // This prevents issues with Vite's middleware trying to decode malformed URIs
-        if (segment.includes('%')) {
-          // If it contains %, encode it directly - this will encode % as %25
-          return encodeURIComponent(segment);
-        }
-        
-        // For segments without %, try to decode first if already encoded, then re-encode
-        // This handles cases where paths are already partially encoded
+        // Try to decode first to handle already encoded segments
         try {
           const decoded = decodeURIComponent(segment);
           return encodeURIComponent(decoded);
         } catch {
-          // If decode fails, just encode as-is
+          // If decode fails (e.g. malformed URI with standalone %), encode as-is
           return encodeURIComponent(segment);
         }
       });
-      
+
       // Reconstruct the path
       return '/' + encodedSegments.join('/');
     } catch (error) {
@@ -48,7 +40,7 @@ export function encodeImageUrl(url: string | null | undefined): string {
       return url;
     }
   }
-  
+
   // For relative paths, encode the whole thing
   return encodeURI(url);
 }
