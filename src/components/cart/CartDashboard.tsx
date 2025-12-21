@@ -337,7 +337,7 @@ const CartDashboard: React.FC<CartDashboardProps> = ({ isOpen, onClose }) => {
               isMobile 
                 ? 'top-0 left-0 right-0 bottom-0 h-full w-full' 
                 : 'top-0 right-0 h-full w-full max-w-md sm:max-w-lg'
-            } bg-white shadow-2xl z-[60] overflow-hidden`}
+            } bg-white shadow-2xl z-[110] overflow-hidden`}
             style={{
               clipPath: isMobile ? 'none' : 'polygon(0 0, calc(100% - 30px) 0, 100% 30px, 100% 100%, 30px 100%, 0 calc(100% - 30px))',
               paddingTop: isMobile ? 'env(safe-area-inset-top, 0)' : undefined,
