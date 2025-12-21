@@ -27,16 +27,29 @@ const CartDashboard: React.FC<CartDashboardProps> = ({ isOpen, onClose }) => {
   // Prevent body scroll when cart is open
   useEffect(() => {
     if (isOpen) {
+      // Save scroll position for mobile
+      const scrollY = isMobile ? window.scrollY : 0;
+      
       document.body.style.overflow = "hidden";
       if (isMobile) {
+        // Save scroll position before fixing
+        document.body.style.top = `-${scrollY}px`;
         document.body.style.position = "fixed";
         document.body.style.width = "100%";
+        // Store scroll position for restoration
+        document.body.setAttribute('data-scroll-y', scrollY.toString());
       }
     } else {
       document.body.style.overflow = "";
       if (isMobile) {
+        // Restore scroll position
+        const scrollY = parseInt(document.body.getAttribute('data-scroll-y') || '0', 10);
         document.body.style.position = "";
+        document.body.style.top = "";
         document.body.style.width = "";
+        document.body.removeAttribute('data-scroll-y');
+        // Restore scroll position
+        window.scrollTo(0, scrollY);
       }
       // Reset swipe position
       y.set(0);
@@ -45,8 +58,12 @@ const CartDashboard: React.FC<CartDashboardProps> = ({ isOpen, onClose }) => {
     return () => {
       document.body.style.overflow = "";
       if (isMobile) {
+        const scrollY = parseInt(document.body.getAttribute('data-scroll-y') || '0', 10);
         document.body.style.position = "";
+        document.body.style.top = "";
         document.body.style.width = "";
+        document.body.removeAttribute('data-scroll-y');
+        window.scrollTo(0, scrollY);
       }
     };
   }, [isOpen, isMobile, y]);
@@ -277,12 +294,12 @@ const CartDashboard: React.FC<CartDashboardProps> = ({ isOpen, onClose }) => {
 
     if (isOpen) {
       document.addEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'hidden';
+      // Don't set overflow here - it's handled in the main useEffect above
     }
 
     return () => {
       document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'unset';
+      // Don't reset overflow here - it's handled in the main useEffect above
     };
   }, [isOpen, onClose]);
 
@@ -290,20 +307,28 @@ const CartDashboard: React.FC<CartDashboardProps> = ({ isOpen, onClose }) => {
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Backdrop */}
+          {/* Backdrop - Reduced blur on mobile */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
+            className={`fixed inset-0 z-[105] ${
+              isMobile 
+                ? 'bg-black/40' 
+                : 'bg-black/60 backdrop-blur-sm'
+            }`}
             onClick={onClose}
+            style={{
+              // Ensure backdrop doesn't interfere with cart on mobile
+              pointerEvents: isMobile ? 'auto' : 'auto',
+            }}
           />
 
           {/* Dashboard - Mobile Full-Screen / Desktop Side Panel */}
           <motion.div
             initial={{ opacity: 0, [isMobile ? 'y' : 'x']: isMobile ? '100%' : '100%' }}
             animate={{ 
-              opacity: isMobile ? opacity : 1, 
+              opacity: 1, 
               [isMobile ? 'y' : 'x']: isMobile ? translateY : 0 
             }}
             exit={{ opacity: 0, [isMobile ? 'y' : 'x']: isMobile ? '100%' : '100%' }}
@@ -312,17 +337,22 @@ const CartDashboard: React.FC<CartDashboardProps> = ({ isOpen, onClose }) => {
               isMobile 
                 ? 'top-0 left-0 right-0 bottom-0 h-full w-full' 
                 : 'top-0 right-0 h-full w-full max-w-md sm:max-w-lg'
-            } bg-white shadow-2xl z-50 overflow-hidden`}
+            } bg-white shadow-2xl z-[60] overflow-hidden`}
             style={{
               clipPath: isMobile ? 'none' : 'polygon(0 0, calc(100% - 30px) 0, 100% 30px, 100% 100%, 30px 100%, 0 calc(100% - 30px))',
               paddingTop: isMobile ? 'env(safe-area-inset-top, 0)' : undefined,
               paddingBottom: isMobile ? 'env(safe-area-inset-bottom, 0)' : undefined,
+              // Ensure cart is always visible and styled on mobile
+              display: 'flex',
+              flexDirection: 'column',
+              touchAction: 'pan-y',
             }}
             drag={isMobile ? "y" : false}
             dragConstraints={{ top: 0, bottom: 0 }}
             dragElastic={0.2}
             onDragEnd={handleDragEnd}
             dragDirectionLock
+            onClick={(e) => e.stopPropagation()}
           >
             {/* Swipe Indicator for Mobile */}
             {isMobile && (
@@ -342,13 +372,14 @@ const CartDashboard: React.FC<CartDashboardProps> = ({ isOpen, onClose }) => {
 
             {/* Header - Mobile Optimized */}
             <div 
-              className={`relative flex items-center justify-between border-b-2 ${
+              className={`relative flex items-center justify-between border-b-2 flex-shrink-0 ${
                 isMobile ? 'p-4' : 'p-6'
               }`}
               style={{
                 borderColor: `${accentColor}20`,
                 background: `linear-gradient(135deg, ${accentColor}08 0%, white 100%)`,
                 paddingTop: isMobile ? 'calc(env(safe-area-inset-top, 0) + 1rem)' : undefined,
+                minHeight: isMobile ? '4.5rem' : '5rem',
               }}
             >
               <div className="flex items-center space-x-3 sm:space-x-4">
@@ -400,13 +431,16 @@ const CartDashboard: React.FC<CartDashboardProps> = ({ isOpen, onClose }) => {
 
             {/* Content - Scrollable */}
             <div 
-              className={`flex flex-col ${
-                isMobile ? 'h-[calc(100%-var(--header-height,4.5rem))]' : 'h-[calc(100%-80px)]'
-              } overflow-y-auto`}
+              className={`flex flex-col flex-1 overflow-y-auto ${
+                isMobile ? 'min-h-0' : ''
+              }`}
               style={{
                 WebkitOverflowScrolling: 'touch',
                 scrollbarWidth: 'thin',
                 scrollbarColor: `${accentColor}50 transparent`,
+                // Ensure scrolling works on mobile
+                touchAction: 'pan-y',
+                overscrollBehavior: 'contain',
               }}
             >
               <style>{`
