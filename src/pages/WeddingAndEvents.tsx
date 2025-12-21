@@ -22,19 +22,19 @@ const GOLD_HEX = "#c79e48";
 
 // Event flowers images - automatically rotating (use .webp optimized versions)
 const eventFlowersImages = [
-  encodeURI("/assets/wedding % events/events/IMG-20251126-WA0018.webp"),
-  encodeURI("/assets/wedding % events/events/IMG-20251126-WA0020.webp"),
-  encodeURI("/assets/wedding % events/events/IMG-20251126-WA0022.webp"),
-  encodeURI("/assets/wedding % events/events/IMG-20251126-WA0023.webp"),
-  encodeURI("/assets/wedding % events/events/IMG-20251126-WA0024.webp"),
-  encodeURI("/assets/wedding % events/events/WhatsApp Image 2025-11-26 at 03.14.12_6dbd359d.webp"),
+  "/assets/wedding % events/events/IMG-20251126-WA0018.webp",
+  "/assets/wedding % events/events/IMG-20251126-WA0020.webp",
+  "/assets/wedding % events/events/IMG-20251126-WA0022.webp",
+  "/assets/wedding % events/events/IMG-20251126-WA0023.webp",
+  "/assets/wedding % events/events/IMG-20251126-WA0024.webp",
+  "/assets/wedding % events/events/WhatsApp Image 2025-11-26 at 03.14.12_6dbd359d.webp",
 ];
 
 // Wedding flowers images - automatically rotating (use .webp optimized versions)
 const weddingFlowersImages = [
-  encodeURI("/assets/wedding % events/wedding/IMG_1784.webp"),
-  encodeURI("/assets/wedding % events/wedding/IMG-20251126-WA0019.webp"),
-  encodeURI("/assets/wedding % events/wedding/IMG-20251126-WA0021.webp"),
+  "/assets/wedding % events/wedding/IMG_1784.webp",
+  "/assets/wedding % events/wedding/IMG-20251126-WA0019.webp",
+  "/assets/wedding % events/wedding/IMG-20251126-WA0021.webp",
 ];
 
 const WeddingHero = () => {
@@ -1311,7 +1311,7 @@ const ImageModal = ({
         }}
       >
         <motion.img
-          src={images[selectedImage]}
+          src={encodeImageUrl(images[selectedImage])}
           alt={`Wedding decoration ${selectedImage + 1}`}
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -1509,7 +1509,7 @@ const ImageGallery = () => {
                   >
                     <div className="relative rounded-3xl overflow-hidden shadow-2xl aspect-[4/5] cursor-pointer">
               <img
-                src={image}
+                src={encodeImageUrl(image)}
                 alt={`Wedding decoration ${index + 1}`}
                         className="w-full h-full object-cover"
               />
@@ -1576,7 +1576,7 @@ const ImageGallery = () => {
                     }}
                   >
                     <img
-                      src={image}
+                      src={encodeImageUrl(image)}
                       alt={`Thumbnail ${index + 1}`}
                       className="w-full h-full object-cover"
                     />
@@ -1660,7 +1660,7 @@ const ImageGallery = () => {
                 }}
               >
                 <img
-                  src={image}
+                  src={encodeImageUrl(image)}
                   alt={`Wedding decoration ${index + 1}`}
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                 />
