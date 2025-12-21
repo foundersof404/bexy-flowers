@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  ShoppingCart, 
-  Heart, 
-  Plus, 
-  Minus, 
-  Check, 
+import {
+  ShoppingCart,
+  Heart,
+  Plus,
+  Minus,
+  Check,
   ArrowLeft,
   Star,
   Crown,
@@ -188,9 +188,9 @@ const getRandomCategories = (): typeof allCategories => {
 // Animation variants for page transitions
 const pageVariants = {
   hidden: { opacity: 0 },
-  visible: { 
+  visible: {
     opacity: 1,
-    transition: { 
+    transition: {
       duration: 0.8,
       ease: [0.25, 0.46, 0.45, 0.94],
       staggerChildren: 0.2
@@ -199,14 +199,14 @@ const pageVariants = {
 };
 
 const columnVariants = {
-  hidden: { 
-    opacity: 0, 
-    x: (index: number) => index === 0 ? -100 : 100 
+  hidden: {
+    opacity: 0,
+    x: (index: number) => index === 0 ? -100 : 100
   },
-  visible: { 
-    opacity: 1, 
+  visible: {
+    opacity: 1,
     x: 0,
-    transition: { 
+    transition: {
       duration: 1,
       ease: [0.25, 0.46, 0.45, 0.94]
     }
@@ -215,10 +215,10 @@ const columnVariants = {
 
 const imageVariants = {
   hidden: { scale: 1.1, opacity: 0 },
-  visible: { 
-    scale: 1, 
+  visible: {
+    scale: 1,
     opacity: 1,
-    transition: { 
+    transition: {
       duration: 1.2,
       ease: [0.25, 0.46, 0.45, 0.94]
     }
@@ -227,25 +227,25 @@ const imageVariants = {
 
 const buttonVariants = {
   rest: { scale: 1, y: 0 },
-  hover: { 
-    scale: 1.05, 
+  hover: {
+    scale: 1.05,
     y: -2,
-    transition: { 
-      type: "spring", 
-      stiffness: 300, 
-      damping: 20 
+    transition: {
+      type: "spring",
+      stiffness: 300,
+      damping: 20
     }
   },
   tap: { scale: 0.95 }
 };
 
 // Quantity Selector Component
-const QuantitySelector = ({ 
-  quantity, 
-  onQuantityChange 
-}: { 
-  quantity: number; 
-  onQuantityChange: (qty: number) => void; 
+const QuantitySelector = ({
+  quantity,
+  onQuantityChange
+}: {
+  quantity: number;
+  onQuantityChange: (qty: number) => void;
 }) => (
   <div className="flex items-center space-x-3">
     <span className="text-sm font-medium text-slate-600">Quantity</span>
@@ -277,13 +277,13 @@ const QuantitySelector = ({
 );
 
 // Size Selector Component
-const SizeSelector = ({ 
-  selectedSize, 
-  onSizeChange, 
-  basePrice 
-}: { 
-  selectedSize: string; 
-  onSizeChange: (size: string) => void; 
+const SizeSelector = ({
+  selectedSize,
+  onSizeChange,
+  basePrice
+}: {
+  selectedSize: string;
+  onSizeChange: (size: string) => void;
   basePrice: number;
 }) => (
   <div className="space-y-3">
@@ -292,15 +292,14 @@ const SizeSelector = ({
       {sizeOptions.map((option) => {
         const isSelected = selectedSize === option.id;
         const totalPrice = basePrice + option.priceModifier;
-        
+
         return (
           <motion.button
             key={option.id}
-            className={`p-3 rounded-lg border-2 transition-all duration-300 ${
-              isSelected 
-                ? 'border-amber-400 bg-amber-50 text-amber-800' 
+            className={`p-3 rounded-lg border-2 transition-all duration-300 ${isSelected
+                ? 'border-amber-400 bg-amber-50 text-amber-800'
                 : 'border-amber-200 hover:border-amber-300 text-slate-600'
-            }`}
+              }`}
             onClick={() => onSizeChange(option.id)}
             variants={buttonVariants}
             whileHover="hover"
@@ -320,18 +319,18 @@ const SizeSelector = ({
 );
 
 // Image Gallery Component
-const ImageGallery = ({ 
-  images, 
-  currentImageIndex, 
-  onImageChange 
-}: { 
-  images: string[]; 
-  currentImageIndex: number; 
-  onImageChange: (index: number) => void; 
+const ImageGallery = ({
+  images,
+  currentImageIndex,
+  onImageChange
+}: {
+  images: string[];
+  currentImageIndex: number;
+  onImageChange: (index: number) => void;
 }) => (
   <div className="space-y-4">
     {/* Main Image */}
-    <motion.div 
+    <motion.div
       className="relative overflow-hidden rounded-2xl bg-slate-100 aspect-[4/5]"
       variants={imageVariants}
       key={currentImageIndex}
@@ -356,11 +355,10 @@ const ImageGallery = ({
         {images.map((image, index) => (
           <motion.button
             key={index}
-            className={`relative overflow-hidden rounded-lg aspect-square w-20 border-2 transition-all duration-300 ${
-              index === currentImageIndex 
-                ? 'border-amber-400' 
+            className={`relative overflow-hidden rounded-lg aspect-square w-20 border-2 transition-all duration-300 ${index === currentImageIndex
+                ? 'border-amber-400'
                 : 'border-amber-200 hover:border-amber-300'
-            }`}
+              }`}
             onClick={() => onImageChange(index)}
             variants={buttonVariants}
             whileHover="hover"
@@ -388,14 +386,14 @@ const ImageGallery = ({
 
 // Price Display Component with Animation
 const PriceDisplay = ({ price }: { price: number }) => (
-  <motion.div 
+  <motion.div
     className="flex items-baseline space-x-2"
     key={price}
     initial={{ opacity: 0, scale: 0.8 }}
     animate={{ opacity: 1, scale: 1 }}
-    transition={{ 
-      type: "spring", 
-      stiffness: 300, 
+    transition={{
+      type: "spring",
+      stiffness: 300,
       damping: 30,
       duration: 0.5
     }}
@@ -406,12 +404,12 @@ const PriceDisplay = ({ price }: { price: number }) => (
 );
 
 // Suggested Flower Card Component
-const SuggestedFlowerCard = ({ 
-  flower, 
-  index 
-}: { 
-  flower: typeof suggestedFlowers[0]; 
-  index: number; 
+const SuggestedFlowerCard = ({
+  flower,
+  index
+}: {
+  flower: typeof suggestedFlowers[0];
+  index: number;
 }) => {
   const navigate = useNavigate();
 
@@ -419,10 +417,10 @@ const SuggestedFlowerCard = ({
     <motion.div
       initial={{ opacity: 0, y: 60, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ 
-        delay: index * 0.1, 
-        duration: 0.6, 
-        ease: "easeOut" 
+      transition={{
+        delay: index * 0.1,
+        duration: 0.6,
+        ease: "easeOut"
       }}
       whileHover={{ y: -8, scale: 1.02 }}
       className="group cursor-pointer"
@@ -450,24 +448,24 @@ const SuggestedFlowerCard = ({
             alt={flower.title}
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
           />
-          
+
           {/* Overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-          
+
           {/* Category Badge */}
           <div className="absolute top-4 left-4">
             <span className="bg-white/90 backdrop-blur-sm text-xs font-semibold text-slate-700 px-3 py-1 rounded-full">
               {flower.category}
             </span>
           </div>
-          
+
           {/* Quick View Button */}
           <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
             <div className="w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg">
               <Eye className="w-4 h-4 text-slate-700" />
             </div>
           </div>
-          
+
           {/* Price Tag */}
           <div className="absolute bottom-4 left-4">
             <div className="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-3 py-1 rounded-lg font-bold text-sm shadow-lg">
@@ -475,7 +473,7 @@ const SuggestedFlowerCard = ({
             </div>
           </div>
         </div>
-        
+
         {/* Content */}
         <div className="p-5">
           <h3 className="font-luxury text-lg font-bold text-slate-800 mb-2 group-hover:text-amber-600 transition-colors duration-300">
@@ -491,12 +489,12 @@ const SuggestedFlowerCard = ({
 };
 
 // Category Card Component
-const CategoryCard = ({ 
-  category, 
-  index 
-}: { 
-  category: typeof allCategories[0]; 
-  index: number; 
+const CategoryCard = ({
+  category,
+  index
+}: {
+  category: typeof allCategories[0];
+  index: number;
 }) => {
   const navigate = useNavigate();
 
@@ -514,10 +512,10 @@ const CategoryCard = ({
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
             loading="lazy"
           />
-          
+
           {/* Gradient Overlay */}
           <div className={`absolute inset-0 bg-gradient-to-br ${category.color} opacity-80`} />
-          
+
           {/* Content */}
           <div className="absolute inset-0 flex flex-col justify-center items-center text-white p-6 text-center">
             <h3 className="font-luxury text-2xl font-bold mb-2">
@@ -530,7 +528,7 @@ const CategoryCard = ({
               Explore Collection
             </div>
           </div>
-          
+
           {/* Arrow Icon */}
           <div className="absolute bottom-6 right-6 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
             <div className="w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg">
@@ -550,7 +548,7 @@ const ProductDetailPage = () => {
   const navigate = useNavigate();
   const { addToCart } = useCartWithToast();
   const isMobile = useIsMobile();
-  
+
   // Get random 4 categories on component mount
   const [displayCategories] = useState(() => getRandomCategories());
 
@@ -587,21 +585,21 @@ const ProductDetailPage = () => {
     const currentCategory = productData.category;
     const currentId = productData.id;
     const currentPrice = productData.price;
-    
+
     // Find bouquets from the same or related categories
     let sameCategoryBouquets = generatedBouquets.filter(
       b => b.displayCategory === currentCategory && b.id !== currentId
     );
-    
+
     // If not enough same category, find similar price range
     if (sameCategoryBouquets.length < 4) {
       const similarPriceBouquets = generatedBouquets.filter(
-        b => b.id !== currentId && 
-        Math.abs(b.price - currentPrice) <= 50
+        b => b.id !== currentId &&
+          Math.abs(b.price - currentPrice) <= 50
       );
       sameCategoryBouquets = [...sameCategoryBouquets, ...similarPriceBouquets];
     }
-    
+
     // If still not enough, add featured bouquets
     if (sameCategoryBouquets.length < 4) {
       const featuredBouquets = generatedBouquets.filter(
@@ -609,15 +607,15 @@ const ProductDetailPage = () => {
       );
       sameCategoryBouquets = [...sameCategoryBouquets, ...featuredBouquets];
     }
-    
+
     // Remove duplicates and take first 4
     const uniqueBouquets = Array.from(
       new Map(sameCategoryBouquets.map(b => [b.id, b])).values()
     );
-    
+
     return uniqueBouquets.slice(0, 4);
   };
-  
+
   const recommendedBouquets = getRecommendations();
 
   // Ensure page always loads from the top and is scrollable on mobile
@@ -626,7 +624,7 @@ const ProductDetailPage = () => {
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
     document.documentElement.scrollTop = 0;
     document.body.scrollTop = 0;
-    
+
     // Ensure body is scrollable on mobile - use setTimeout to override any other styles
     const restoreScroll = () => {
       document.body.style.overflow = '';
@@ -634,19 +632,19 @@ const ProductDetailPage = () => {
       document.body.style.width = '';
       document.body.style.height = '';
       document.body.style.top = '';
-      
+
       // Ensure html is scrollable
       document.documentElement.style.overflow = '';
       document.documentElement.style.height = '';
       document.documentElement.style.position = '';
     };
-    
+
     // Immediate restore
     restoreScroll();
-    
+
     // Also restore after a short delay to override any conflicting styles
     const timeoutId = setTimeout(restoreScroll, 100);
-    
+
     return () => {
       clearTimeout(timeoutId);
       // Cleanup: ensure scroll is restored
@@ -657,9 +655,9 @@ const ProductDetailPage = () => {
   // Handle add to cart
   const handleAddToCart = async () => {
     if (isLoading) return;
-    
+
     setIsLoading(true);
-    
+
     // Create cart item
     const cartItem = {
       id: productData.id,
@@ -673,7 +671,7 @@ const ProductDetailPage = () => {
     try {
       await addToCart(cartItem);
       setIsAddedToCart(true);
-      
+
       // Reset after 2.5 seconds
       setTimeout(() => {
         setIsAddedToCart(false);
@@ -704,11 +702,7 @@ const ProductDetailPage = () => {
       style={{
         // Ensure page is scrollable on mobile
         overflowX: 'hidden',
-        overflowY: 'auto',
-        touchAction: 'pan-y',
-        WebkitOverflowScrolling: 'touch',
         position: 'relative',
-        height: 'auto',
         minHeight: '100vh',
       }}
     >
@@ -746,7 +740,7 @@ const ProductDetailPage = () => {
       </div>
 
       {/* Main Content */}
-      <div 
+      <div
         className="max-w-7xl mx-auto px-4 pb-16"
         style={{
           // Ensure content is scrollable on mobile
@@ -755,9 +749,9 @@ const ProductDetailPage = () => {
         }}
       >
         <div className={`grid grid-cols-1 ${isMobile ? 'gap-6' : 'lg:grid-cols-[1.2fr_1fr] gap-12 lg:gap-16'}`}>
-          
+
           {/* Left Column - Image Gallery */}
-          <motion.div 
+          <motion.div
             className="space-y-6"
             variants={columnVariants}
             custom={0}
@@ -770,7 +764,7 @@ const ProductDetailPage = () => {
           </motion.div>
 
           {/* Right Column - Product Details */}
-          <motion.div 
+          <motion.div
             className="space-y-8"
             variants={columnVariants}
             custom={1}
@@ -785,11 +779,11 @@ const ProductDetailPage = () => {
                   </span>
                 </div>
               )}
-              
+
               <h1 className="font-luxury text-4xl lg:text-5xl font-bold text-slate-800 leading-tight">
                 {productData.title}
               </h1>
-              
+
               <PriceDisplay price={currentPrice} />
             </div>
 
@@ -864,7 +858,7 @@ const ProductDetailPage = () => {
       </div>
 
       {/* Suggested Flowers Section */}
-      <motion.section 
+      <motion.section
         className="py-16 bg-gradient-to-b from-white/50 to-amber-50/30"
         initial={{ opacity: 0, y: 100 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -872,7 +866,7 @@ const ProductDetailPage = () => {
         viewport={{ once: true }}
       >
         <div className="max-w-7xl mx-auto px-4">
-          <motion.div 
+          <motion.div
             className="text-center mb-12"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -968,7 +962,7 @@ const ProductDetailPage = () => {
       </motion.section>
 
       {/* Categories Section */}
-      <motion.section 
+      <motion.section
         className="py-16 bg-gradient-to-b from-amber-50/30 to-white/50"
         initial={{ opacity: 0, y: 100 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -976,7 +970,7 @@ const ProductDetailPage = () => {
         viewport={{ once: true }}
       >
         <div className="max-w-7xl mx-auto px-4">
-          <motion.div 
+          <motion.div
             className="text-center mb-12"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -993,10 +987,10 @@ const ProductDetailPage = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {displayCategories.map((category, index) => (
-              <CategoryCard 
-                key={category.id} 
-                category={category} 
-                index={index} 
+              <CategoryCard
+                key={category.id}
+                category={category}
+                index={index}
               />
             ))}
           </div>

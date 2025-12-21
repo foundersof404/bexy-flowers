@@ -253,3 +253,5 @@ export async function syncFavoritesToDatabase(favorites: FavoriteProduct[]): Pro
   }
 }
 
+
+

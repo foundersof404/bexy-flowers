@@ -223,3 +223,5 @@ Potential improvements:
 - localStorage provides instant loading
 - Database sync happens in background
 
+
+
