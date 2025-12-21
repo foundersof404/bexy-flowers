@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, ImgHTMLAttributes } from 'react';
 import { motion } from 'framer-motion';
+import { encodeImageUrl } from '@/lib/imageUtils';
 
 interface OptimizedImageProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, 'onLoad' | 'onError'> {
   src: string;
@@ -39,7 +40,9 @@ export const OptimizedImage = ({
   const [isLoading, setIsLoading] = useState(true);
   const [isInView, setIsInView] = useState(priority); // Priority images load immediately
   const [hasError, setHasError] = useState(false);
-  const [imageSrc, setImageSrc] = useState<string | null>(priority ? src : null);
+  // Encode image URL to handle special characters like % in folder names
+  const encodedSrc = encodeImageUrl(src);
+  const [imageSrc, setImageSrc] = useState<string | null>(priority ? encodedSrc : null);
   const containerRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
@@ -53,7 +56,7 @@ export const OptimizedImage = ({
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             setIsInView(true);
-            setImageSrc(src);
+            setImageSrc(encodedSrc);
             observerRef.current?.disconnect();
           }
         });
@@ -71,7 +74,7 @@ export const OptimizedImage = ({
     return () => {
       observerRef.current?.disconnect();
     };
-  }, [src, priority]);
+  }, [encodedSrc, priority]);
 
   // Preload image
   useEffect(() => {
@@ -146,7 +149,7 @@ export const OptimizedImage = ({
       {/* Main image - always render but control visibility */}
       <motion.img
         ref={imgRef}
-        src={hasError ? fallbackSrc : (isInView ? (imageSrc || src) : '')}
+        src={hasError ? fallbackSrc : (isInView ? (imageSrc || encodedSrc) : '')}
         alt={alt}
         className={`w-full h-full ${className}`}
         style={{

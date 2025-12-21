@@ -15,10 +15,12 @@ import {
   Eye
 } from 'lucide-react';
 import { useCartWithToast } from '@/hooks/useCartWithToast';
+import { useIsMobile } from '@/hooks/use-mobile';
 import UltraNavigation from '@/components/UltraNavigation';
 import BackToTop from '@/components/BackToTop';
 import { generatedBouquets } from '@/data/generatedBouquets';
 import type { Bouquet } from '@/types/bouquet';
+import { encodeImageUrl } from '@/lib/imageUtils';
 
 // Import real images from assets
 import bouquet1 from '@/assets/bouquet-1.jpg';
@@ -91,13 +93,14 @@ const suggestedFlowers = [
   }
 ];
 
-// Real categories from UltraCategories component
+// Real categories from UltraCategories component - using correct image paths
+// Note: Paths with special characters work fine with Vite - no encoding needed
 const allCategories = [
   {
     id: 1,
     name: "WEDDINGS",
     description: "Architectural bridal arrangements",
-    image: encodeURI("/assets/wedding % events/wedding/IMG-20251126-WA0021.jpg"),
+    image: "/assets/wedding % events/wedding/IMG-20251126-WA0021.webp",
     gradient: "from-rose-200/20 via-amber-100/30 to-yellow-200/20",
     color: "from-rose-400/80 to-amber-300/90",
     filterValue: "wedding-percent-events"
@@ -106,7 +109,7 @@ const allCategories = [
     id: 2,
     name: "VALENTINE'S",
     description: "Romantic luxury collections",
-    image: encodeURI("/assets/valentine/IMG_4172.jpg"),
+    image: "/assets/valentine/IMG_4172.webp",
     gradient: "from-red-200/20 via-pink-100/30 to-rose-200/20",
     color: "from-red-400/80 to-pink-300/90",
     filterValue: "valentine"
@@ -115,7 +118,7 @@ const allCategories = [
     id: 3,
     name: "MOTHER'S DAY",
     description: "Elegant tribute arrangements",
-    image: encodeURI("/assets/mother day/IMG_8394.JPG"),
+    image: "/assets/mother day/IMG_8394.webp",
     gradient: "from-pink-200/20 via-rose-100/30 to-lavender-200/20",
     color: "from-pink-400/80 to-rose-300/90",
     filterValue: "mother-day"
@@ -124,7 +127,7 @@ const allCategories = [
     id: 4,
     name: "BIRTHDAYS",
     description: "Celebration masterpieces",
-    image: encodeURI("/assets/birthday/IMG_3730 (1).jpg"),
+    image: "/assets/birthday/IMG_3730 (1).webp",
     gradient: "from-purple-200/20 via-violet-100/30 to-indigo-200/20",
     color: "from-purple-400/80 to-violet-300/90",
     filterValue: "birthday"
@@ -133,7 +136,7 @@ const allCategories = [
     id: 5,
     name: "ANNIVERSARIES",
     description: "Timeless love expressions",
-    image: encodeURI("/assets/red roses/red roses the letter J.png"),
+    image: "/assets/red roses/red roses the letter J.webp",
     gradient: "from-amber-200/20 via-yellow-100/30 to-gold-200/20",
     color: "from-amber-400/80 to-yellow-300/90",
     filterValue: "red-roses"
@@ -142,7 +145,7 @@ const allCategories = [
     id: 6,
     name: "CORPORATE",
     description: "Professional luxury designs",
-    image: encodeURI("/assets/wedding % events/events/IMG-20251126-WA0022.jpg"),
+    image: "/assets/wedding % events/events/IMG-20251126-WA0022.webp",
     gradient: "from-slate-200/20 via-gray-100/30 to-zinc-200/20",
     color: "from-slate-400/80 to-gray-300/90",
     filterValue: "wedding-percent-events"
@@ -151,7 +154,7 @@ const allCategories = [
     id: 8,
     name: "SEASONAL",
     description: "Limited edition collections",
-    image: encodeURI("/assets/hand band/IMG_5392.jpg"),
+    image: "/assets/hand band/IMG_5392.webp",
     gradient: "from-emerald-200/20 via-green-100/30 to-teal-200/20",
     color: "from-emerald-400/80 to-green-300/90",
     filterValue: "hand-band"
@@ -160,7 +163,7 @@ const allCategories = [
     id: 9,
     name: "GRADUATION",
     description: "Achievement celebrations",
-    image: encodeURI("/assets/graduation/IMG_0295.jpg"),
+    image: "/assets/graduation/IMG_0295.webp",
     gradient: "from-blue-200/20 via-indigo-100/30 to-purple-200/20",
     color: "from-blue-400/80 to-indigo-300/90",
     filterValue: "graduation"
@@ -169,7 +172,7 @@ const allCategories = [
     id: 10,
     name: "LUXURY GIFTS",
     description: "Premium gift arrangements",
-    image: encodeURI("/assets/red roses/large red roses flower bouquet with gliter.png"),
+    image: "/assets/red roses/large red roses flower bouquet with gliter.webp",
     gradient: "from-orange-200/20 via-amber-100/30 to-yellow-200/20",
     color: "from-orange-400/80 to-amber-300/90",
     filterValue: "red-roses"
@@ -334,7 +337,7 @@ const ImageGallery = ({
       key={currentImageIndex}
     >
       <img
-        src={images[currentImageIndex]}
+        src={encodeImageUrl(images[currentImageIndex])}
         alt="Product detail"
         className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
       />
@@ -364,7 +367,7 @@ const ImageGallery = ({
             whileTap="tap"
           >
             <img
-              src={image}
+              src={encodeImageUrl(image)}
               alt={`View ${index + 1}`}
               className="w-full h-full object-cover"
             />
@@ -443,7 +446,7 @@ const SuggestedFlowerCard = ({
         {/* Image Container */}
         <div className="relative aspect-[4/5] overflow-hidden">
           <img
-            src={flower.image}
+            src={encodeImageUrl(flower.image)}
             alt={flower.title}
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
           />
@@ -498,15 +501,7 @@ const CategoryCard = ({
   const navigate = useNavigate();
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 40, scale: 0.95 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ 
-        delay: index * 0.1, 
-        duration: 0.6, 
-        ease: "easeOut" 
-      }}
-      whileHover={{ y: -5, scale: 1.02 }}
+    <div
       className="group cursor-pointer"
       onClick={() => navigate('/collection', { state: { filter: category.filterValue } })}
     >
@@ -514,7 +509,7 @@ const CategoryCard = ({
         {/* Background Image */}
         <div className="relative aspect-[16/10] overflow-hidden">
           <img
-            src={category.image}
+            src={encodeImageUrl(category.image)}
             alt={category.name}
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
             loading="lazy"
@@ -525,12 +520,9 @@ const CategoryCard = ({
           
           {/* Content */}
           <div className="absolute inset-0 flex flex-col justify-center items-center text-white p-6 text-center">
-            <motion.h3 
-              className="font-luxury text-2xl font-bold mb-2"
-              whileHover={{ scale: 1.05 }}
-            >
+            <h3 className="font-luxury text-2xl font-bold mb-2">
               {category.name}
-            </motion.h3>
+            </h3>
             <p className="text-white/90 text-sm mb-4 leading-relaxed">
               {category.description}
             </p>
@@ -547,7 +539,7 @@ const CategoryCard = ({
           </div>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 };
 
@@ -557,6 +549,7 @@ const ProductDetailPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { addToCart } = useCartWithToast();
+  const isMobile = useIsMobile();
   
   // Get random 4 categories on component mount
   const [displayCategories] = useState(() => getRandomCategories());
@@ -627,11 +620,32 @@ const ProductDetailPage = () => {
   
   const recommendedBouquets = getRecommendations();
 
-  // Ensure page always loads from the top
+  // Ensure page always loads from the top and is scrollable
   useEffect(() => {
+    // Reset scroll position on mount
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
     document.documentElement.scrollTop = 0;
     document.body.scrollTop = 0;
+    
+    // Ensure body is scrollable on mobile
+    document.body.style.overflow = '';
+    document.body.style.position = '';
+    document.body.style.width = '';
+    document.body.style.height = '';
+    
+    // Ensure html is scrollable
+    document.documentElement.style.overflow = '';
+    document.documentElement.style.height = '';
+    
+    return () => {
+      // Cleanup: ensure scroll is restored
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+      document.body.style.height = '';
+      document.documentElement.style.overflow = '';
+      document.documentElement.style.height = '';
+    };
   }, []);
 
   // Handle add to cart
@@ -681,6 +695,12 @@ const ProductDetailPage = () => {
       variants={pageVariants}
       initial="hidden"
       animate="visible"
+      style={{
+        // Ensure page is scrollable on mobile
+        overflowX: 'hidden',
+        touchAction: 'pan-y',
+        WebkitOverflowScrolling: 'touch',
+      }}
     >
       {/* Navigation Bar */}
       <UltraNavigation />
@@ -716,8 +736,15 @@ const ProductDetailPage = () => {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 pb-16">
-        <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-12 lg:gap-16">
+      <div 
+        className="max-w-7xl mx-auto px-4 pb-16"
+        style={{
+          // Ensure content is scrollable on mobile
+          touchAction: 'pan-y',
+          WebkitOverflowScrolling: 'touch',
+        }}
+      >
+        <div className={`grid grid-cols-1 ${isMobile ? 'gap-6' : 'lg:grid-cols-[1.2fr_1fr] gap-12 lg:gap-16'}`}>
           
           {/* Left Column - Image Gallery */}
           <motion.div 
