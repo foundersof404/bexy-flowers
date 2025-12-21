@@ -620,31 +620,37 @@ const ProductDetailPage = () => {
   
   const recommendedBouquets = getRecommendations();
 
-  // Ensure page always loads from the top and is scrollable
+  // Ensure page always loads from the top and is scrollable on mobile
   useEffect(() => {
     // Reset scroll position on mount
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
     document.documentElement.scrollTop = 0;
     document.body.scrollTop = 0;
     
-    // Ensure body is scrollable on mobile
-    document.body.style.overflow = '';
-    document.body.style.position = '';
-    document.body.style.width = '';
-    document.body.style.height = '';
-    
-    // Ensure html is scrollable
-    document.documentElement.style.overflow = '';
-    document.documentElement.style.height = '';
-    
-    return () => {
-      // Cleanup: ensure scroll is restored
+    // Ensure body is scrollable on mobile - use setTimeout to override any other styles
+    const restoreScroll = () => {
       document.body.style.overflow = '';
       document.body.style.position = '';
       document.body.style.width = '';
       document.body.style.height = '';
+      document.body.style.top = '';
+      
+      // Ensure html is scrollable
       document.documentElement.style.overflow = '';
       document.documentElement.style.height = '';
+      document.documentElement.style.position = '';
+    };
+    
+    // Immediate restore
+    restoreScroll();
+    
+    // Also restore after a short delay to override any conflicting styles
+    const timeoutId = setTimeout(restoreScroll, 100);
+    
+    return () => {
+      clearTimeout(timeoutId);
+      // Cleanup: ensure scroll is restored
+      restoreScroll();
     };
   }, []);
 
@@ -698,8 +704,12 @@ const ProductDetailPage = () => {
       style={{
         // Ensure page is scrollable on mobile
         overflowX: 'hidden',
+        overflowY: 'auto',
         touchAction: 'pan-y',
         WebkitOverflowScrolling: 'touch',
+        position: 'relative',
+        height: 'auto',
+        minHeight: '100vh',
       }}
     >
       {/* Navigation Bar */}
