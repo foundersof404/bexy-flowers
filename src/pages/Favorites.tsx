@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, memo, useCallback } from 'react';
+import React, { useEffect, useRef, useState, memo, useCallback, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { gsap } from 'gsap';
@@ -8,6 +8,8 @@ import { useFavorites } from '@/contexts/FavoritesContext';
 import { useCartWithToast } from '@/hooks/useCartWithToast';
 import UltraNavigation from '@/components/UltraNavigation';
 import BackToTop from '@/components/BackToTop';
+
+const Footer = React.lazy(() => import('@/components/Footer'));
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -520,6 +522,11 @@ const Favorites = memo(() => {
         </div>
       </section>
       <BackToTop />
+      
+      {/* Footer */}
+      <Suspense fallback={null}>
+        <Footer />
+      </Suspense>
     </div>
   );
 });
@@ -527,4 +534,3 @@ const Favorites = memo(() => {
 Favorites.displayName = 'Favorites';
 
 export default Favorites;
-

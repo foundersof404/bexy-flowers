@@ -1,10 +1,11 @@
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, useState, ReactNode, useRef } from 'react';
 import { CartItem, CartContextType, Product } from '@/types/cart';
+import { getVisitorCart, upsertVisitorCartItem, removeVisitorCartItem, updateVisitorCartItemQuantity, clearVisitorCart, syncCartToDatabase } from '@/lib/api/visitor-cart';
 
 // Create the Cart Context
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-// Local storage key for persisting cart data
+// Local storage key for persisting cart data (used as fallback/cache)
 const CART_STORAGE_KEY = 'bexy-flowers-cart';
 
 interface CartProviderProps {
@@ -12,66 +13,155 @@ interface CartProviderProps {
 }
 
 export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
-  // Initialize cart state from localStorage or empty array
-  const [cartItems, setCartItems] = useState<CartItem[]>(() => {
-    try {
-      const savedCart = localStorage.getItem(CART_STORAGE_KEY);
-      return savedCart ? JSON.parse(savedCart) : [];
-    } catch (error) {
-      console.error('Error loading cart from localStorage:', error);
-      return [];
-    }
-  });
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const isInitialLoad = useRef(true);
+  const syncTimeoutRef = useRef<number | null>(null);
 
-  // Save cart to localStorage whenever cartItems changes
+  // Load cart from database on mount
   useEffect(() => {
-    try {
-      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartItems));
-    } catch (error) {
-      console.error('Error saving cart to localStorage:', error);
+    const loadCartFromDatabase = async () => {
+      try {
+        setIsLoading(true);
+        // First, try to load from database
+        const dbCart = await getVisitorCart();
+
+        if (dbCart.length > 0) {
+          // Database has cart items, use them
+          setCartItems(dbCart);
+          // Update localStorage as cache
+          localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(dbCart));
+        } else {
+          // No items in database, try localStorage as fallback
+          try {
+            const savedCart = localStorage.getItem(CART_STORAGE_KEY);
+            if (savedCart) {
+              const localCart = JSON.parse(savedCart);
+              setCartItems(localCart);
+              // Sync local cart to database
+              await syncCartToDatabase(localCart);
+            }
+          } catch (error) {
+            console.error('Error loading cart from localStorage:', error);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading cart from database:', error);
+        // Fallback to localStorage
+        try {
+          const savedCart = localStorage.getItem(CART_STORAGE_KEY);
+          if (savedCart) {
+            setCartItems(JSON.parse(savedCart));
+          }
+        } catch (localError) {
+          console.error('Error loading cart from localStorage:', localError);
+        }
+      } finally {
+        setIsLoading(false);
+        isInitialLoad.current = false;
+      }
+    };
+
+    loadCartFromDatabase();
+  }, []);
+
+  // Sync cart to database whenever cartItems changes (debounced)
+  useEffect(() => {
+    // Skip initial load
+    if (isInitialLoad.current) {
+      return;
     }
+
+    // Clear existing timeout
+    if (syncTimeoutRef.current) {
+      clearTimeout(syncTimeoutRef.current);
+    }
+
+    // Debounce database sync (wait 500ms after last change)
+    syncTimeoutRef.current = window.setTimeout(async () => {
+      try {
+        // Save to localStorage as cache
+        localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartItems));
+        // Sync to database
+        await syncCartToDatabase(cartItems);
+      } catch (error) {
+        console.error('Error syncing cart to database:', error);
+        // Still save to localStorage even if DB sync fails
+      }
+    }, 500);
+
+    // Cleanup timeout on unmount
+    return () => {
+      if (syncTimeoutRef.current) {
+        clearTimeout(syncTimeoutRef.current);
+      }
+    };
   }, [cartItems]);
 
   /**
    * Add a product to the cart or increment quantity if it already exists
    */
-  const addToCart = (product: Product): void => {
+  const addToCart = async (product: Product): Promise<void> => {
     setCartItems(prevItems => {
-      const existingItem = prevItems.find(item => 
-        item.id === product.id && 
-        item.size === product.size && 
+      const existingItem = prevItems.find(item =>
+        item.id === product.id &&
+        item.size === product.size &&
         item.personalNote === product.personalNote &&
         item.description === product.description
       );
-      
+
+      let newItems: CartItem[];
+
       if (existingItem) {
         // If item exists with same size, note, and description, increment quantity
-        return prevItems.map(item =>
-          item.id === product.id && 
-          item.size === product.size && 
-          item.personalNote === product.personalNote &&
-          item.description === product.description
+        newItems = prevItems.map(item =>
+          item.id === product.id &&
+            item.size === product.size &&
+            item.personalNote === product.personalNote &&
+            item.description === product.description
             ? { ...item, quantity: item.quantity + 1 }
             : item
         );
       } else {
         // If item doesn't exist with this combination, add it with quantity 1
-        return [...prevItems, { ...product, quantity: 1 }];
+        newItems = [...prevItems, { ...product, quantity: 1 }];
       }
+
+      // Sync the new item to database (async, non-blocking)
+      const newItem = newItems.find(item =>
+        item.id === product.id &&
+        item.size === product.size &&
+        item.personalNote === product.personalNote &&
+        item.description === product.description
+      );
+
+      if (newItem) {
+        upsertVisitorCartItem(newItem).catch(error => {
+          console.error('Error syncing cart item to database:', error);
+        });
+      }
+
+      return newItems;
     });
   };
 
   /**
    * Remove a product completely from the cart
    */
-  const removeFromCart = (productId: number | string, size?: string, personalNote?: string): void => {
-    setCartItems(prevItems => 
-      prevItems.filter(item => 
-        !(item.id === productId && 
-          item.size === size && 
+  const removeFromCart = async (productId: number | string, size?: string, personalNote?: string): Promise<void> => {
+    setCartItems(prevItems =>
+      prevItems.filter(item =>
+        !(item.id === productId &&
+          item.size === size &&
           item.personalNote === personalNote)
       )
     );
+
+    // Remove from database (async, non-blocking)
+    removeVisitorCartItem(productId, size, personalNote).catch(error => {
+      console.error('Error removing cart item from database:', error);
+    });
   };
 
   /**
@@ -91,28 +181,38 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   /**
    * Update the quantity of a specific cart item
    */
-  const updateQuantity = (productId: number | string, newQuantity: number, size?: string, personalNote?: string): void => {
+  const updateQuantity = async (productId: number | string, newQuantity: number, size?: string, personalNote?: string): Promise<void> => {
     if (newQuantity <= 0) {
-      removeFromCart(productId, size, personalNote);
+      await removeFromCart(productId, size, personalNote);
       return;
     }
-    
+
     setCartItems(prevItems =>
       prevItems.map(item =>
         item.id === productId &&
-        item.size === size &&
-        item.personalNote === personalNote
+          item.size === size &&
+          item.personalNote === personalNote
           ? { ...item, quantity: newQuantity }
           : item
       )
     );
+
+    // Update quantity in database (async, non-blocking)
+    updateVisitorCartItemQuantity(productId, newQuantity, size, personalNote).catch(error => {
+      console.error('Error updating cart item quantity in database:', error);
+    });
   };
 
   /**
    * Clear all items from the cart
    */
-  const clearCart = (): void => {
+  const clearCart = async (): Promise<void> => {
     setCartItems([]);
+
+    // Clear from database (async, non-blocking)
+    clearVisitorCart().catch(error => {
+      console.error('Error clearing cart from database:', error);
+    });
   };
 
   const value: CartContextType = {
@@ -123,6 +223,8 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     getTotalItems,
     getTotalPrice,
     clearCart,
+    isCartOpen,
+    setIsCartOpen,
   };
 
   return (

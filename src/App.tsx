@@ -11,6 +11,7 @@ import { ThemeProvider } from "@/hooks/useTheme";
 import { CartProvider } from "@/contexts/CartContext";
 import { FavoritesProvider } from "@/contexts/FavoritesContext";
 import { FlyingHeartProvider } from "@/contexts/FlyingHeartContext";
+import GlobalCartWrapper from "@/components/GlobalCartWrapper";
 
 // ⚡ PERFORMANCE OPTIMIZATION: Route-based code splitting
 // Lazy load all routes to reduce initial bundle size by ~68%
@@ -47,6 +48,7 @@ const App = () => {
           <CartProvider>
             <FavoritesProvider>
               <FlyingHeartProvider>
+                <GlobalCartWrapper />
                 <Toaster />
                 <Sonner />
                 <BrowserRouter>

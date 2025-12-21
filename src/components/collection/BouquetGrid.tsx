@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, memo } from "react";
+import { useRef, memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -8,7 +8,6 @@ import { useFavorites } from "@/contexts/FavoritesContext";
 import { useFlyingHeart } from "@/contexts/FlyingHeartContext";
 import { useNavigate } from "react-router-dom";
 import { OptimizedImage } from "@/components/OptimizedImage";
-import { useProgressiveRender } from "@/hooks/useProgressiveRender";
 import type { Bouquet } from "@/types/bouquet";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -53,7 +52,6 @@ const BouquetCard = memo(({
   index: number; 
   onBouquetClick: (bouquet: Bouquet) => void;
 }) => {
-  const [isHovered, setIsHovered] = useState(false);
   const heartButtonRef = useRef<HTMLButtonElement | null>(null);
   const { addToCart } = useCartWithToast();
   const { toggleFavorite, isFavorite } = useFavorites();
@@ -74,8 +72,6 @@ const BouquetCard = memo(({
         ease: [0.23, 1, 0.32, 1]
       }}
       className="group cursor-pointer"
-      onHoverStart={() => setIsHovered(true)}
-      onHoverEnd={() => setIsHovered(false)}
     >
       {/* Premium Luxury Card */}
       <motion.div 
@@ -84,16 +80,12 @@ const BouquetCard = memo(({
           background: 'linear-gradient(180deg, #ffffff 0%, #f8f5f1 100%)',
           border: '1px solid rgba(255, 255, 255, 0.2)',
           // ⚡ PERFORMANCE: CSS containment for better scroll performance
-          contain: 'layout style paint'
-        }}
-        whileHover={{ 
-          y: -12,
-          boxShadow: '0 20px 50px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(194, 154, 67, 0.3)',
-          transition: { duration: 0.3, ease: [0.23, 1, 0.32, 1] }
-        }}
-        initial={{
+          contain: 'layout style paint',
           boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)'
         }}
+        whileHover={{ scale: 1.02, y: -4 }}
+        whileTap={{ scale: 0.98 }}
+        transition={{ duration: 0.3, ease: "easeOut" }}
         onClick={() => {
           navigate(`/product/${bouquet.id}`, { 
             state: { 
@@ -113,18 +105,16 @@ const BouquetCard = memo(({
         {/* Image Section */}
         <motion.div 
           className="relative overflow-hidden aspect-square"
-          whileHover={{ scale: 1.02 }}
-          transition={{ duration: 0.4, ease: "easeOut" }}
         >
           <motion.div
-            whileHover={{ scale: 1.1 }}
-            transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
             className="w-full h-full"
+            whileHover={{ scale: 1.05 }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
           >
             <OptimizedImage
               src={bouquet.image}
               alt={bouquet.name}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover transition-transform duration-400 ease-out group-hover:scale-110"
               aspectRatio="1/1"
               objectFit="cover"
               priority={index < 4}
@@ -158,7 +148,7 @@ const BouquetCard = memo(({
                 boxShadow: isFav ? '0 4px 12px rgba(220, 38, 127, 0.25)' : '0 4px 12px rgba(0, 0, 0, 0.08)',
                 backdropFilter: 'blur(8px)'
               }}
-              whileHover={{ scale: 1.15, rotate: [0, -10, 10, 0] }}
+              whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               transition={{ duration: 0.3 }}
               onClick={(e) => {
@@ -213,7 +203,7 @@ const BouquetCard = memo(({
                 boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
                 backdropFilter: 'blur(8px)'
               }}
-              whileHover={{ scale: 1.15, rotate: 360 }}
+              whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               transition={{ duration: 0.3 }}
               onClick={(e) => {
@@ -236,7 +226,6 @@ const BouquetCard = memo(({
           {/* Title */}
           <motion.h2 
             className="font-serif font-bold text-gray-900 text-base md:text-lg lg:text-xl line-clamp-1"
-            whileHover={{ x: 5 }}
             transition={{ duration: 0.2 }}
           >
             {bouquet.name}
@@ -278,7 +267,6 @@ const BouquetCard = memo(({
                 initial={{ opacity: 0, scale: 0.8, y: 10 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: index * 0.05 + 0.35 + tagIndex * 0.05 }}
-                whileHover={{ scale: 1.1 }}
               >
                 {tag.name}
               </motion.span>
@@ -311,7 +299,6 @@ const BouquetCard = memo(({
                     WebkitTextFillColor: 'transparent',
                     color: 'transparent'
                   }}
-                  whileHover={{ scale: 1.05 }}
                   transition={{ duration: 0.2 }}
                 >
                   ${bouquet.price}
@@ -324,13 +311,13 @@ const BouquetCard = memo(({
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: index * 0.05 + 0.5 }}
-              whileHover={{ scale: 1.03, y: -2 }}
-              whileTap={{ scale: 0.97 }}
-              className="w-full h-9 md:h-10 lg:h-12 rounded-lg md:rounded-xl font-semibold text-white flex items-center justify-center gap-1.5 md:gap-2 relative overflow-hidden transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] text-xs md:text-sm lg:text-base"
+              className="w-full h-9 md:h-10 lg:h-12 rounded-lg md:rounded-xl font-semibold text-white flex items-center justify-center gap-1.5 md:gap-2 relative overflow-hidden transition-all duration-200 text-xs md:text-sm lg:text-base"
               style={{
                 background: 'linear-gradient(90deg, #B88A44 0%, #F6E3B5 100%)',
-                boxShadow: isHovered ? '0 6px 20px rgba(194, 154, 67, 0.4)' : '0 4px 12px rgba(184, 138, 68, 0.3)'
+                boxShadow: '0 4px 12px rgba(184, 138, 68, 0.3)'
               }}
+              whileHover={{ scale: 1.02, boxShadow: '0 6px 16px rgba(184, 138, 68, 0.4)' }}
+              whileTap={{ scale: 0.98 }}
               onClick={(e) => {
                 e.stopPropagation();
                 addToCart({
@@ -361,74 +348,25 @@ const BouquetCard = memo(({
 BouquetCard.displayName = 'BouquetCard';
 
 const BouquetGridComponent = ({ bouquets, onBouquetClick, selectedCategory }: BouquetGridProps) => {
-  const gridRef = useRef<HTMLDivElement>(null);
-  const [imagesLoaded, setImagesLoaded] = useState(0);
-  
-  // ⚡ PERFORMANCE: Progressive rendering for smooth initial load
-  const itemsToRender = useProgressiveRender(bouquets.length, 12, 50);
-  const visibleBouquets = bouquets.slice(0, itemsToRender);
-  const totalImages = visibleBouquets.length;
-
-  // Track image loading progress
-  const handleImageLoad = () => {
-    setImagesLoaded(prev => prev + 1);
-  };
-
-  // Removed ScrollTrigger cleanup for better scroll performance
+  // Render all bouquets at once when data is ready to avoid extra work while scrolling
+  const visibleBouquets = bouquets;
 
   return (
-    <>
-      {/* Loading progress indicator (optional) */}
-      {imagesLoaded < totalImages && imagesLoaded > 0 && (
-        <motion.div 
-          className="mb-4 text-center"
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 10 }}
-        >
-          <div className="inline-flex items-center gap-2 text-sm text-slate-500">
-            <div className="w-4 h-4 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
-            Loading images... {imagesLoaded}/{totalImages}
-          </div>
-        </motion.div>
-      )}
-      
-      <motion.div 
-        ref={gridRef}
-        className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-5 lg:gap-8 w-full px-0"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.4 }}
-      >
-        {visibleBouquets.map((bouquet, index) => (
-          <BouquetCard
-            key={bouquet.id}
-            bouquet={bouquet}
-            index={index}
-            onBouquetClick={onBouquetClick}
-          />
-        ))}
-      </motion.div>
-      
-      {/* Progressive loading indicator */}
-      {itemsToRender < bouquets.length && (
-        <motion.div 
-          className="mt-8 text-center"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <div className="inline-flex items-center gap-2 text-sm text-slate-500">
-            <motion.div 
-              className="w-4 h-4 border-2 border-[#C29A43] border-t-transparent rounded-full"
-              animate={{ rotate: 360 }}
-              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-            />
-            <span>Loading {bouquets.length - itemsToRender} more bouquets...</span>
-          </div>
-        </motion.div>
-      )}
-    </>
+    <motion.div 
+      className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-5 lg:gap-8 w-full px-0"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.4 }}
+    >
+      {visibleBouquets.map((bouquet, index) => (
+        <BouquetCard
+          key={bouquet.id}
+          bouquet={bouquet}
+          index={index}
+          onBouquetClick={onBouquetClick}
+        />
+      ))}
+    </motion.div>
   );
 };
 

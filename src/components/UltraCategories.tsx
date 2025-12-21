@@ -4,6 +4,7 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useNavigate } from 'react-router-dom';
 import { Heart, Gift, Cake, Crown, Briefcase, Flower2, Star, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
+import { encodeImageUrl } from '@/lib/imageUtils';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -12,7 +13,7 @@ const categories = [
     id: 1,
     name: "WEDDINGS",
     description: "Architectural bridal arrangements",
-    image: encodeURI("/assets/wedding % events/wedding/IMG-20251126-WA0021.webp"),
+    image: "/assets/wedding % events/wedding/IMG-20251126-WA0021.webp",
     gradient: "from-rose-200/20 via-amber-100/30 to-yellow-200/20",
     icon: Crown,
     color: "from-rose-400/80 to-amber-300/90",
@@ -22,7 +23,7 @@ const categories = [
     id: 2,
     name: "VALENTINE'S",
     description: "Romantic luxury collections",
-    image: encodeURI("/assets/valentine/IMG_4172.webp"),
+    image: "/assets/valentine/IMG_4172.webp",
     gradient: "from-red-200/20 via-pink-100/30 to-rose-200/20",
     icon: Heart,
     color: "from-red-400/80 to-pink-300/90",
@@ -32,7 +33,7 @@ const categories = [
     id: 3,
     name: "MOTHER'S DAY",
     description: "Elegant tribute arrangements",
-    image: encodeURI("/assets/mother day/IMG_8394.webp"),
+    image: "/assets/mother day/IMG_8394.webp",
     gradient: "from-pink-200/20 via-rose-100/30 to-lavender-200/20",
     icon: Flower2,
     color: "from-pink-400/80 to-rose-300/90",
@@ -42,7 +43,7 @@ const categories = [
     id: 4,
     name: "BIRTHDAYS",
     description: "Celebration masterpieces",
-    image: encodeURI("/assets/birthday/IMG_3730 (1).webp"),
+    image: "/assets/birthday/IMG_3730 (1).webp",
     gradient: "from-purple-200/20 via-violet-100/30 to-indigo-200/20",
     icon: Cake,
     color: "from-purple-400/80 to-violet-300/90",
@@ -52,7 +53,7 @@ const categories = [
     id: 5,
     name: "ANNIVERSARIES",
     description: "Timeless love expressions",
-    image: encodeURI("/assets/red roses/red roses the letter J.webp"),
+    image: "/assets/red roses/red roses the letter J.webp",
     gradient: "from-amber-200/20 via-yellow-100/30 to-gold-200/20",
     icon: Star,
     color: "from-amber-400/80 to-yellow-300/90",
@@ -62,7 +63,7 @@ const categories = [
     id: 6,
     name: "CORPORATE",
     description: "Professional luxury designs",
-    image: encodeURI("/assets/wedding % events/events/IMG-20251126-WA0022.webp"),
+    image: "/assets/wedding % events/events/IMG-20251126-WA0022.webp",
     gradient: "from-slate-200/20 via-gray-100/30 to-zinc-200/20",
     icon: Briefcase,
     color: "from-slate-400/80 to-gray-300/90",
@@ -72,7 +73,7 @@ const categories = [
     id: 8,
     name: "SEASONAL",
     description: "Limited edition collections",
-    image: encodeURI("/assets/hand band/IMG_5392.webp"),
+    image: "/assets/hand band/IMG_5392.webp",
     gradient: "from-emerald-200/20 via-green-100/30 to-teal-200/20",
     icon: Sparkles,
     color: "from-emerald-400/80 to-green-300/90",
@@ -82,7 +83,7 @@ const categories = [
     id: 9,
     name: "GRADUATION",
     description: "Achievement celebrations",
-    image: encodeURI("/assets/graduation/IMG_0295.webp"),
+    image: "/assets/graduation/IMG_0295.webp",
     gradient: "from-blue-200/20 via-indigo-100/30 to-purple-200/20",
     icon: Star,
     color: "from-blue-400/80 to-indigo-300/90",
@@ -92,7 +93,7 @@ const categories = [
     id: 10,
     name: "LUXURY GIFTS",
     description: "Premium gift arrangements",
-    image: encodeURI("/assets/red roses/large red roses flower bouquet with gliter.webp"),
+    image: "/assets/red%20roses/large%20red%20roses%20flower%20bouquet%20with%20gliter.webp",
     gradient: "from-orange-200/20 via-amber-100/30 to-yellow-200/20",
     icon: Gift,
     color: "from-orange-400/80 to-amber-300/90",
@@ -156,7 +157,7 @@ const UltraCategories = () => {
     };
   }, []);
 
-  // Seamless infinite scroll effect for desktop (single row)
+  // Seamless auto-scroll effect for desktop (single row)
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -164,10 +165,10 @@ const UltraCategories = () => {
     // Auto scroll - infinite seamless loop
     const cardWidth = 352; // Card width (w-80 = 320px + gap-8 = 32px = 352px)
     const singleSetWidth = categories.length * cardWidth;
-    
+
     // Set initial position
     gsap.set(container, { x: 0 });
-    
+
     const tween = gsap.to(container, {
       x: -singleSetWidth,
       duration: 30,
@@ -186,6 +187,9 @@ const UltraCategories = () => {
         }
       }
     });
+
+    // Start auto-scroll immediately and keep it running continuously
+    tween.play();
 
     return () => {
       tween.kill();
@@ -403,7 +407,7 @@ const UltraCategories = () => {
                     {/* Enhanced Background Image */}
                     <div className="absolute inset-0 overflow-hidden rounded-[30px]">
                       <img
-                        src={category.image}
+                        src={encodeImageUrl(category.image)}
                         alt={category.name}
                         className="w-full h-full object-cover transition-all duration-700 ease-out group-hover:scale-110 group-hover:brightness-110"
                       />
@@ -517,7 +521,7 @@ const UltraCategories = () => {
                       {/* Enhanced Background Image */}
                       <div className="absolute inset-0 overflow-hidden rounded-[24px]">
                         <img
-                          src={category.image}
+                          src={encodeImageUrl(category.image)}
                           alt={category.name}
                           className="w-full h-full object-cover transition-all duration-700 ease-out"
                         />
@@ -592,7 +596,7 @@ const UltraCategories = () => {
                       {/* Enhanced Background Image */}
                       <div className="absolute inset-0 overflow-hidden rounded-[24px]">
                         <img
-                          src={category.image}
+                          src={encodeImageUrl(category.image)}
                           alt={category.name}
                           className="w-full h-full object-cover transition-all duration-700 ease-out"
                         />

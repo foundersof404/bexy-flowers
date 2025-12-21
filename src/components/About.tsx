@@ -254,7 +254,7 @@ const About = () => {
   return (
     <motion.section 
       ref={sectionRef} 
-      className="relative py-16 md:py-28 px-4 overflow-hidden bg-white" 
+      className="relative py-12 sm:py-16 md:py-20 lg:py-28 px-4 sm:px-6 overflow-hidden bg-white" 
       variants={pageTransitionVariants}
       initial="hidden"
       animate="visible"
@@ -278,7 +278,7 @@ const About = () => {
       <div className="max-w-7xl mx-auto relative z-10">
         {/* Header */}
         <motion.div
-          className="text-center mb-12 md:mb-20"
+          className="text-center mb-8 sm:mb-12 md:mb-16 lg:mb-20"
           initial="hidden"
           whileInView="show"
           viewport={{ once: true }}
@@ -293,7 +293,7 @@ const About = () => {
         >
           {/* Luxury Typography with Gold Accent */}
           <motion.h1 
-            className="font-luxury text-6xl md:text-8xl font-bold mb-6 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 bg-clip-text text-transparent relative"
+            className="font-luxury text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-8xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 bg-clip-text text-transparent relative px-2"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
@@ -321,7 +321,7 @@ const About = () => {
           </div>
 
           <motion.p 
-            className="font-body text-lg md:text-xl text-slate-600 max-w-4xl mx-auto leading-relaxed font-light px-4" 
+            className="font-body text-sm sm:text-base md:text-lg lg:text-xl text-slate-600 max-w-4xl mx-auto leading-relaxed font-light px-4" 
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
@@ -332,11 +332,11 @@ const About = () => {
         </motion.div>
 
         {/* Main Content (Image-first layout for visual impact) */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center mb-16 md:mb-24">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12 items-center mb-12 sm:mb-16 md:mb-20 lg:mb-24">
           {/* Enhanced Signature Image with Powerful 3D Reveal Effect */}
           <motion.div
             ref={imageRef}
-            className="rounded-3xl lg:rounded-full overflow-hidden shadow-xl order-1 lg:order-2 mx-auto lg:mx-0 w-full max-w-sm lg:max-w-none lg:w-[550px] aspect-square"
+            className="rounded-2xl sm:rounded-3xl lg:rounded-full overflow-hidden shadow-xl order-1 lg:order-2 mx-auto lg:mx-0 w-full max-w-[280px] sm:max-w-sm md:max-w-md lg:max-w-none lg:w-[550px] aspect-square"
             style={{ 
              
               boxShadow: '0 10px 30px rgb(198, 156, 72), 0 0 24px rgba(198, 157, 72, 0.2)'
@@ -359,7 +359,7 @@ const About = () => {
 
           {/* Narrative */}
           <motion.div
-            className="space-y-6 md:space-y-8 order-2 lg:order-1"
+            className="flex flex-col gap-6 md:gap-8 order-2 lg:order-1"
             variants={sectionVariants}
             initial="hidden"
             whileInView="show"
@@ -382,7 +382,7 @@ const About = () => {
             </div>
 
             {/* SUGGESTION: More personal and compelling story */}
-            <div className="space-y-4 md:space-y-6 text-slate-700 text-base md:text-lg leading-relaxed px-2 md:px-0" style={{ fontFamily: 'Inter, ui-sans-serif, system-ui', lineHeight: 1.8 }}>
+            <div className="flex flex-col gap-4 md:gap-6 text-slate-700 text-sm sm:text-base md:text-lg leading-relaxed px-2 md:px-0" style={{ fontFamily: 'Inter, ui-sans-serif, system-ui', lineHeight: 1.8 }}>
               <motion.p variants={paragraphReveal}>
                 Born in 2024 from a <span className="font-medium" style={{ color: 'rgb(201, 161, 78)' }}>family legacy</span> of over <span className="font-medium" style={{ color: 'rgb(201, 161, 78)' }}>25 years</span> in floral design, Bexy Flowers introduced a dream to Lebanon: the country's first <span className="font-medium" style={{ color: 'rgb(201, 161, 78)' }}>glitter flower boutique</span>. We blend time-honored techniques with a spark of <span className="font-medium" style={{ color: 'rgb(201, 161, 78)' }}>modern magic</span>.
               </motion.p>
@@ -394,7 +394,7 @@ const About = () => {
               </motion.p>
             </div>
 
-            <div className="grid sm:grid-cols-2 gap-6 pt-2 items-stretch">
+            <div className="grid sm:grid-cols-2 gap-4 sm:gap-6 pt-2 items-stretch">
               <div className="p-6 rounded-2xl bg-white/80 backdrop-blur border border-amber-100/60 shadow-sm transition-transform duration-300 hover:-translate-y-1 hover:shadow-[0_12px_30px_rgba(198,157,72,0.18)]">
                 <div className="flex items-center gap-2 font-semibold text-slate-800 mb-2" style={{ fontFamily: 'Inter, ui-sans-serif, system-ui' }}>
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#C69D48" strokeWidth="1.5" className="w-5 h-5"><path d="M12 2l3 7h7l-5.5 4 2 7L12 17l-6.5 3 2-7L2 9h7l3-7z"/></svg>
@@ -423,9 +423,9 @@ const About = () => {
         </div>
 
         {/* Enhanced Statistics with Powerful 3D Card Effects */}
-        <div className="mt-16 p-8 rounded-2xl bg-slate-50/70">
+        <div className="mt-12 sm:mt-16 p-4 sm:p-6 md:p-8 rounded-xl sm:rounded-2xl bg-slate-50/70">
         <motion.div
-          className="grid grid-cols-2 md:grid-cols-4 gap-6"
+          className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-6"
           initial="hidden"
           whileInView="show"
           viewport={{ once: true }}
@@ -434,7 +434,7 @@ const About = () => {
           {stats.map((stat) => (
             <motion.div
               key={stat.label}
-              className="text-center p-6 bg-white/70 backdrop-blur-sm rounded-2xl border border-amber-100/60"
+              className="text-center p-4 sm:p-5 md:p-6 bg-white/70 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-amber-100/60"
               variants={statsCardVariants}
               whileHover={{ 
                 scale: 1.05, 
@@ -450,11 +450,11 @@ const About = () => {
               >
                 {stat.icon}
               </motion.div>
-              <div className="font-luxury text-2xl font-bold text-slate-800 mb-2">
-                <span className="text-3xl md:text-4xl" style={{ fontFamily: 'Playfair Display, serif' }}>{stat.number}</span>
+              <div className="font-luxury text-xl sm:text-2xl font-bold text-slate-800 mb-1 sm:mb-2">
+                <span className="text-2xl sm:text-3xl md:text-4xl" style={{ fontFamily: 'Playfair Display, serif' }}>{stat.number}</span>
                 <span className="text-amber-500 text-2xl md:text-3xl">{stat.suffix}</span>
               </div>
-              <div className="text-sm text-slate-600 font-medium">
+              <div className="text-xs sm:text-sm text-slate-600 font-medium">
                 {stat.label}
               </div>
             </motion.div>
@@ -464,7 +464,7 @@ const About = () => {
 
         {/* Enhanced Values Section - Innovation, Sustainability, Authenticity */}
         <motion.div 
-          className="mt-24"
+          className="mt-16 sm:mt-20 md:mt-24"
           initial="hidden"
           whileInView="show"
           viewport={{ once: true, margin: "-100px" }}
@@ -475,18 +475,18 @@ const About = () => {
               hidden: { opacity: 0, y: 30 },
               show: { opacity: 1, y: 0, transition: { duration: 0.6 } }
             }}
-            className="text-center mb-16"
+            className="text-center mb-10 sm:mb-12 md:mb-16"
           >
-            <h2 className="font-luxury text-4xl md:text-5xl font-bold text-slate-900 mb-4">
+            <h2 className="font-luxury text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-slate-900 mb-3 sm:mb-4 px-2">
               Our Core Values
             </h2>
             <div className="w-24 h-1 mx-auto bg-gradient-to-r from-transparent via-amber-400 to-transparent"></div>
           </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-8 lg:gap-12">
+          <div className="grid md:grid-cols-3 gap-4 sm:gap-6 md:gap-8 lg:gap-12">
           {[
               { 
-                icon: <Sparkles className="w-8 h-8" />, 
+                icon: <Sparkles className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8" />, 
                 title: 'Innovation', 
                 body: 'Forward-thinking design techniques and trends.',
                 gradient: 'from-purple-50 to-amber-50',
@@ -494,7 +494,7 @@ const About = () => {
                 accentColor: 'rgba(147, 51, 234, 0.1)'
               }, 
               { 
-                icon: <Flower2 className="w-8 h-8" />, 
+                icon: <Flower2 className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8" />, 
                 title: 'Sustainability', 
                 body: 'Responsible sourcing and mindful operations.',
                 gradient: 'from-green-50 to-emerald-50',
@@ -502,7 +502,7 @@ const About = () => {
                 accentColor: 'rgba(5, 150, 105, 0.1)'
               }, 
               { 
-                icon: <Leaf className="w-8 h-8" />, 
+                icon: <Leaf className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8" />, 
                 title: 'Authenticity', 
                 body: 'Honest craft that honors nature&apos;s beauty.',
                 gradient: 'from-amber-50 to-orange-50',
@@ -512,7 +512,7 @@ const About = () => {
           ].map((v, i) => (
             <motion.div 
               key={i} 
-                className="group relative p-8 rounded-3xl bg-white border-2 border-transparent overflow-hidden h-full"
+                className="group relative p-6 sm:p-7 md:p-8 rounded-2xl sm:rounded-3xl bg-white border-2 border-transparent overflow-hidden h-full"
               variants={{
                   hidden: { opacity: 0, y: 50, scale: 0.95 },
                 show: { 
@@ -573,7 +573,7 @@ const About = () => {
                   </motion.div>
                   
                   <motion.h3 
-                    className="font-luxury text-2xl font-bold text-slate-900"
+                    className="font-luxury text-xl sm:text-2xl font-bold text-slate-900"
                 whileHover={{ x: 5 }}
                 transition={{ duration: 0.2 }}
               >
@@ -605,7 +605,7 @@ const About = () => {
 
         {/* Enhanced CTA Section with Luxury Hover Effects */}
         <motion.div 
-          className="mt-32 relative overflow-hidden"
+          className="mt-20 sm:mt-24 md:mt-32 relative overflow-hidden"
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
@@ -618,9 +618,9 @@ const About = () => {
           <div className="absolute top-0 right-0 w-64 h-64 bg-amber-200/20 rounded-full blur-3xl"></div>
           <div className="absolute bottom-0 left-0 w-48 h-48 bg-amber-200/20 rounded-full blur-3xl"></div>
           
-          <div className="relative z-10 text-center p-12 md:p-16 rounded-3xl border-2 border-amber-100/60 backdrop-blur-sm">
+          <div className="relative z-10 text-center p-6 sm:p-8 md:p-12 lg:p-16 rounded-2xl sm:rounded-3xl border-2 border-amber-100/60 backdrop-blur-sm">
             <motion.h2 
-              className="font-luxury text-4xl md:text-5xl font-bold text-slate-900 mb-6"
+              className="font-luxury text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-slate-900 mb-4 sm:mb-6 px-2"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
@@ -630,7 +630,7 @@ const About = () => {
             </motion.h2>
             
             <motion.p 
-              className="text-slate-600 max-w-2xl mx-auto mb-10 text-lg leading-relaxed"
+              className="text-slate-600 max-w-2xl mx-auto mb-6 sm:mb-8 md:mb-10 text-sm sm:text-base md:text-lg leading-relaxed px-4"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
@@ -640,7 +640,7 @@ const About = () => {
             </motion.p>
             
             <motion.div 
-              className="flex flex-col sm:flex-row gap-6 justify-center"
+              className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
@@ -648,7 +648,7 @@ const About = () => {
             >
             <motion.a 
               href="/collection" 
-                className="group relative px-10 py-4 bg-gradient-to-r from-slate-800 to-slate-900 text-white font-semibold rounded-full shadow-xl overflow-hidden"
+                className="group relative px-6 sm:px-8 md:px-10 py-3 sm:py-4 bg-gradient-to-r from-slate-800 to-slate-900 text-white font-semibold rounded-full shadow-xl overflow-hidden text-sm sm:text-base touch-target min-h-[44px] sm:min-h-[auto]"
                 whileHover={{ 
                   scale: 1.05,
                   boxShadow: '0 12px 32px rgba(0, 0, 0, 0.3)'
@@ -682,7 +682,7 @@ const About = () => {
               
             <motion.a 
               href="/contact" 
-                className="group relative px-10 py-4 bg-white/90 backdrop-blur-md border-2 border-amber-300 text-slate-800 font-semibold rounded-full shadow-lg overflow-hidden"
+                className="group relative px-6 sm:px-8 md:px-10 py-3 sm:py-4 bg-white/90 backdrop-blur-md border-2 border-amber-300 text-slate-800 font-semibold rounded-full shadow-lg overflow-hidden text-sm sm:text-base touch-target min-h-[44px] sm:min-h-[auto]"
                 whileHover={{ 
                   scale: 1.05,
                   backgroundColor: 'rgba(255, 255, 255, 1)',
@@ -720,7 +720,7 @@ const About = () => {
         </motion.div>
 
         {/* Wavy separator */}
-        <div className="mt-24 -mb-10">
+        <div className="mt-16 sm:mt-20 md:mt-24 -mb-8 sm:-mb-10">
           <svg className="w-full h-16 text-white" preserveAspectRatio="none" viewBox="0 0 1200 120" xmlns="http://www.w3.org/2000/svg">
             <path d="M0,0 V40 C150,100 350,100 600,40 C850,-20 1050,-20 1200,40 V0 Z" fill="currentColor" />
           </svg>

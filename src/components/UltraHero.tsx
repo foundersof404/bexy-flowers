@@ -91,10 +91,10 @@ const UltraHero = () => {
           whileInView={!isMobile ? { scale: 1, rotateX: 0 } : undefined}
           viewport={!isMobile ? { once: true, amount: 0.2 } : undefined}
           transition={{
+            // Keep a smooth initial parallax reveal but avoid an infinite loop on desktop
             duration: shouldReduceMotion ? 0 : 20,
             ease: "linear",
-            repeat: !isMobile && !shouldReduceMotion ? Infinity : 0,
-            repeatType: "reverse"
+            repeat: 0
           }}
           loading="eager"
           decoding="async"
