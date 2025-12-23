@@ -100,7 +100,7 @@ const allCategories = [
     id: 1,
     name: "WEDDINGS",
     description: "Architectural bridal arrangements",
-    image: "/assets/wedding % events/wedding/IMG-20251126-WA0021.webp",
+    image: "/assets/wedding-events/wedding/IMG-20251126-WA0021.webp",
     gradient: "from-rose-200/20 via-amber-100/30 to-yellow-200/20",
     color: "from-rose-400/80 to-amber-300/90",
     filterValue: "wedding-percent-events"
@@ -145,7 +145,7 @@ const allCategories = [
     id: 6,
     name: "CORPORATE",
     description: "Professional luxury designs",
-    image: "/assets/wedding % events/events/IMG-20251126-WA0022.webp",
+    image: "/assets/wedding-events/events/IMG-20251126-WA0022.webp",
     gradient: "from-slate-200/20 via-gray-100/30 to-zinc-200/20",
     color: "from-slate-400/80 to-gray-300/90",
     filterValue: "wedding-percent-events"
