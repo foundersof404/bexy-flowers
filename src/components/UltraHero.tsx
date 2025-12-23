@@ -357,11 +357,11 @@ const UltraHero = () => {
                 transition={{ duration: shouldReduceMotion || isMobile ? 0 : 1, delay: shouldReduceMotion || isMobile ? 0 : 0.8 }}
                 style={{ willChange: shouldReduceMotion || isMobile ? "auto" : "transform, opacity" }}
               >
-                <motion.p
+                <motion.div
                   className={`${isMobile ? 'text-[1.05rem] text-gray-600 font-light max-w-[62ch] mx-auto mb-6' : 'text-sm xs:text-base sm:text-lg'} font-light tracking-wide ${isMobile ? '' : 'mb-2 px-2 sm:px-0'} ${isMobile
                       ? 'font-luxury'
                       : 'font-luxury text-primary/100'
-                    }`}
+                    } relative`}
                   initial={{ opacity: shouldReduceMotion || isMobile ? 1 : 0.5, x: shouldReduceMotion || isMobile ? 0 : -50 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: shouldReduceMotion || isMobile ? 0 : 1.2, delay: shouldReduceMotion || isMobile ? 0 : 1, ease: "easeOut" }}
@@ -393,7 +393,7 @@ const UltraHero = () => {
                       transition={{ duration: 1.5, delay: 1.8, ease: "easeOut" }}
                     />
                   )}
-                </motion.p>
+                </motion.div>
               </motion.div>
 
               {/* Mobile CTA Button - After subtitle - REMOVED from here */}
@@ -407,7 +407,7 @@ const UltraHero = () => {
                   transition={{ duration: 1, delay: 1.2 }}
                   style={{ willChange: "transform, opacity" }}
                 >
-                  <motion.p
+                  <motion.div
                     className="font-body text-xs xs:text-sm sm:text-base text-muted-foreground leading-relaxed max-w-2xl relative px-2 sm:px-0"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -433,7 +433,7 @@ const UltraHero = () => {
                       transition={{ duration: 2, delay: 2, ease: "easeOut" }}
                       style={{ transformOrigin: "left" }}
                     />
-                  </motion.p>
+                  </motion.div>
                 </motion.div>
               )}
             </motion.div>

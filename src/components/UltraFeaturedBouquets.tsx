@@ -32,16 +32,32 @@ const UltraFeaturedBouquets = () => {
         const data = await getActiveSignatureCollections();
         
         // Transform to match existing interface
-        const formattedBouquets = data.map((item) => ({
-          id: item.product?.id || '',
-          name: item.product?.title || '',
-          price: `$${item.product?.price || 0}`,
-          image: item.product?.image_urls?.[0] || '',
-          description: item.product?.description || '',
-          // Include full product data for modal
-          productData: item.product,
-        }));
+        // Filter out items without valid images
+        console.log('Loaded signature collections:', data.length, data);
         
+        const formattedBouquets = data
+          .map((item) => {
+            const imageUrl = item.product?.image_urls?.[0];
+            // Only include items with valid image URLs
+            if (!imageUrl || !imageUrl.trim()) {
+              console.warn('Skipping item without image URL:', item.product?.title, item.product?.image_urls);
+              return null;
+            }
+            const encodedImage = encodeImageUrl(imageUrl);
+            console.log('Encoding signature image URL:', imageUrl, '->', encodedImage);
+            return {
+              id: item.product?.id || '',
+              name: item.product?.title || '',
+              price: `$${item.product?.price || 0}`,
+              image: encodedImage,
+              description: item.product?.description || '',
+              // Include full product data for modal
+              productData: item.product,
+            };
+          })
+          .filter((bouquet): bouquet is NonNullable<typeof bouquet> => bouquet !== null);
+        
+        console.log('Final signature bouquets:', formattedBouquets.length, formattedBouquets);
         setBouquets(formattedBouquets);
       } catch (error) {
         console.error('Error loading signature collection:', error);
@@ -63,10 +79,11 @@ const UltraFeaturedBouquets = () => {
     const cards = cardsRef.current;
 
     if (section && cards.length > 0) {
-      // Staggered reveal animation
+      // Staggered reveal animation - optimized with refreshPriority
       ScrollTrigger.create({
         trigger: section,
         start: "top 80%",
+        refreshPriority: -1, // Lower priority for better performance
         onEnter: () => {
           gsap.to(cards, {
             duration: 0.8,
@@ -383,7 +400,7 @@ const UltraFeaturedBouquets = () => {
                        }}
                      >
                   <motion.img
-                    src={encodeImageUrl(bouquet.image)}
+                    src={bouquet.image}
                     alt={bouquet.name}
                          style={{
                            width: '100%',
@@ -392,8 +409,11 @@ const UltraFeaturedBouquets = () => {
                          }}
                          className="transition-all duration-300 ease-out group-hover:scale-105"
                          onError={(e) => {
-                           // Fallback if image fails to load
+                           console.error('Failed to load signature collection image:', bouquet.image, bouquet.name, e);
                            (e.target as HTMLImageElement).style.display = 'none';
+                         }}
+                         onLoad={() => {
+                           console.log('Successfully loaded signature collection image:', bouquet.image, bouquet.name);
                          }}
                        />
 
