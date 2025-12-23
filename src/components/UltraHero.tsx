@@ -764,7 +764,7 @@ const UltraHero = () => {
                 {
                   icon: "M12 2L15.09 8.26L22 9L17 14L18.18 21L12 17.27L5.82 21L7 14L2 9L8.91 8.26L12 2Z",
                   title: "Wedding Arrangements",
-                  link: "/wedding-events"
+                  link: "/wedding-and-events"
                 },
                 {
                   icon: "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z",
@@ -774,7 +774,7 @@ const UltraHero = () => {
                 {
                   icon: "M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zm-7-7c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm0 1c1.93 0 3.5 1.57 3.5 3.5V17h-7v-.5c0-1.93 1.57-3.5 3.5-3.5z",
                   title: "Event Decor",
-                  link: "/wedding-events"
+                  link: "/wedding-and-events"
                 }
               ].map((service, index) => (
                 <motion.div

@@ -5,7 +5,7 @@
 /**
  * Safely encode an image URL for use in img src attributes
  * Handles paths with spaces and special characters properly
- * Specifically handles the % character in folder names (e.g., "wedding % events")
+ * Encodes each path segment separately to handle file/folder names with spaces
  */
 export function encodeImageUrl(url: string | null | undefined): string {
   if (!url) return '';
@@ -15,27 +15,19 @@ export function encodeImageUrl(url: string | null | undefined): string {
     return url;
   }
 
-  // For local paths, we need to encode each segment separately
-  // to handle spaces and special characters in folder/file names
+  // For public assets, encode each segment separately to handle spaces and special chars
   if (url.startsWith('/')) {
     try {
       // Split by '/' and encode each segment
-      const segments = url.split('/').filter(Boolean); // Remove empty segments
+      const segments = url.split('/').filter(Boolean);
       const encodedSegments = segments.map(segment => {
-        // Try to decode first to handle already encoded segments
-        try {
-          const decoded = decodeURIComponent(segment);
-          return encodeURIComponent(decoded);
-        } catch {
-          // If decode fails (e.g. malformed URI with standalone %), encode as-is
-          return encodeURIComponent(segment);
-        }
+        // Encode each segment to handle spaces and special characters in file/folder names
+        return encodeURIComponent(segment);
       });
-
+      
       // Reconstruct the path
       return '/' + encodedSegments.join('/');
     } catch (error) {
-      // If anything fails, try to encode the whole URL
       console.warn('Error encoding image URL:', url, error);
       return url;
     }

@@ -22,19 +22,19 @@ const GOLD_HEX = "#c79e48";
 
 // Event flowers images - automatically rotating (use .webp optimized versions)
 const eventFlowersImages = [
-  "/assets/wedding % events/events/IMG-20251126-WA0018.webp",
-  "/assets/wedding % events/events/IMG-20251126-WA0020.webp",
-  "/assets/wedding % events/events/IMG-20251126-WA0022.webp",
-  "/assets/wedding % events/events/IMG-20251126-WA0023.webp",
-  "/assets/wedding % events/events/IMG-20251126-WA0024.webp",
-  "/assets/wedding % events/events/WhatsApp Image 2025-11-26 at 03.14.12_6dbd359d.webp",
+  "/assets/wedding-events/events/IMG-20251126-WA0018.webp",
+  "/assets/wedding-events/events/IMG-20251126-WA0020.webp",
+  "/assets/wedding-events/events/IMG-20251126-WA0022.webp",
+  "/assets/wedding-events/events/IMG-20251126-WA0023.webp",
+  "/assets/wedding-events/events/IMG-20251126-WA0024.webp",
+  "/assets/wedding-events/events/WhatsApp Image 2025-11-26 at 03.14.12_6dbd359d.webp",
 ];
 
 // Wedding flowers images - automatically rotating (use .webp optimized versions)
 const weddingFlowersImages = [
-  "/assets/wedding % events/wedding/IMG_1784.webp",
-  "/assets/wedding % events/wedding/IMG-20251126-WA0019.webp",
-  "/assets/wedding % events/wedding/IMG-20251126-WA0021.webp",
+  "/assets/wedding-events/wedding/IMG_1784.webp",
+  "/assets/wedding-events/wedding/IMG-20251126-WA0019.webp",
+  "/assets/wedding-events/wedding/IMG-20251126-WA0021.webp",
 ];
 
 const WeddingHero = () => {
@@ -276,7 +276,7 @@ const ServiceSection = ({
     // Preload all images for smooth transitions (no blank moments)
     imageArray.forEach((imgSrc) => {
       const img = new Image();
-      img.src = imgSrc;
+      img.src = encodeImageUrl(imgSrc);
     });
     
     const interval = setInterval(() => {
@@ -496,7 +496,7 @@ const ServiceSection = ({
                 imageArray.map((img, idx) => (
                   <motion.img
                     key={idx}
-                    src={img}
+                    src={encodeImageUrl(img)}
                     alt={title}
                     className="absolute inset-0 w-full h-full object-cover"
                     initial={{ opacity: idx === 0 ? 1 : 0 }}
