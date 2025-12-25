@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Box, Gift, ChevronLeft, ShoppingCart, Plus, Minus, Check, Sparkles, Heart, Star, Square, Circle, Triangle, Wand2, RefreshCw, Download, MessageCircle, Eye, Crown, Candy, CreditCard, ArrowDown, Package as PackageIcon, Flower2 } from "lucide-react";
+import { Box, Gift, ShoppingCart, Check, Circle, Wand2, RefreshCw, Heart } from "lucide-react";
 import UltraNavigation from "@/components/UltraNavigation";
 import Footer from "@/components/Footer";
 import BackToTop from "@/components/BackToTop";
@@ -9,8 +9,6 @@ import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
 import heroBouquetMain from "@/assets/bouquet-4.jpg";
 import heroBouquetAccent from "@/assets/bouquet-5.jpg";
-import { getAccessories } from "@/lib/api/accessories";
-import { getFlowerTypes, getFlowerColors } from "@/lib/api/flowers";
 import { encodeImageUrl } from "@/lib/imageUtils";
 
 const GOLD = "rgb(199, 158, 72)";
@@ -46,36 +44,11 @@ interface Size {
   description: string;
 }
 
-interface FlowerColor {
-  id: string;
-  name: string;
-  value: string;
-}
-
-interface Flower {
-  id: string;
-  name: string;
-  title?: string;
-  price: number;
-  image: string;
-  quantity: number;
-  colors: (FlowerColor & { quantity: number })[];
-}
-
 interface WrapColor {
   id: string;
   name: string;
   color: string;
   gradient: string;
-}
-
-interface Accessory {
-  id: string;
-  name: string;
-  icon?: any; // Optional icon component for fallback
-  image_url?: string; // Image URL from Supabase
-  price: number;
-  description: string;
 }
 
 const packages: Package[] = [
@@ -84,11 +57,9 @@ const packages: Package[] = [
 ];
 
 const boxShapes: BoxShape[] = [
-  { id: "circle", name: "Circle", icon: Circle, description: "Classic round shape" },
-  { id: "rectangle", name: "Rectangle", icon: Square, description: "Elegant rectangular box" },
-  { id: "square", name: "Square", icon: Square, description: "Perfect square box" },
-  { id: "heart", name: "Heart", icon: Heart, description: "Romantic heart-shaped" },
-  { id: "triangle", name: "Triangle", icon: Triangle, description: "Unique triangular design" }
+  { id: "small-round", name: "Small Round", icon: Circle, description: "Small round shape" },
+  { id: "circle", name: "Round", icon: Circle, description: "Classic round shape" },
+  { id: "heart", name: "Heart", icon: Heart, description: "Romantic heart-shaped" }
 ];
 
 const boxColors: BoxColor[] = [
@@ -195,22 +166,15 @@ const Customize: React.FC = () => {
   const [selectedSize, setSelectedSize] = useState<Size | null>(null);
   const [selectedWrapColor, setSelectedWrapColor] = useState<WrapColor | null>(null);
   const [customQty, setCustomQty] = useState(25);
-  const [colorQuantities, setColorQuantities] = useState<Record<string, Record<string, number>>>({});
   const [note, setNote] = useState("");
   const [celebrating, setCelebrating] = useState(false);
   const [withGlitter, setWithGlitter] = useState(false);
-  const [selectedAccessories, setSelectedAccessories] = useState<string[]>([]);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [generatedImageUrl, setGeneratedImageUrl] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [aiRefinementText, setAiRefinementText] = useState("");
   const [showRefinement, setShowRefinement] = useState(false);
-  const [flowerInputValues, setFlowerInputValues] = useState<Record<string, Record<string, string>>>({});
-  const [accessories, setAccessories] = useState<Accessory[]>([]);
-  const [loadingAccessories, setLoadingAccessories] = useState(true);
-  const [flowers, setFlowers] = useState<Flower[]>([]);
-  const [loadingFlowers, setLoadingFlowers] = useState(true);
   const { addToCart } = useCart();
 
   // Refs for scrolling
@@ -219,8 +183,6 @@ const Customize: React.FC = () => {
   const boxColorRef = useRef<HTMLDivElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
   const boxSizeRef = useRef<HTMLDivElement>(null);
-  const flowersRef = useRef<HTMLDivElement>(null);
-  const extrasRef = useRef<HTMLDivElement>(null);
 
   // Scroll helper
   const scrollToSection = (ref: React.RefObject<HTMLDivElement>) => {
@@ -264,274 +226,45 @@ const Customize: React.FC = () => {
 
   const handleSizeSelect = (size: Size) => {
     setSelectedSize(size);
-    scrollToSection(flowersRef);
   };
 
-  // Calculate Stats
-  const totalFlowers = Object.values(colorQuantities).reduce((total, colorMap) => {
-    return total + Object.values(colorMap).reduce((a, b) => a + b, 0);
-  }, 0);
-  const maxFlowers = selectedSize?.id === "custom" ? customQty : selectedSize?.capacity || 0;
-  
-  const flowerCost = Object.entries(colorQuantities).reduce((sum, [flowerId, colors]) => {
-    const flower = flowers.find(f => f.id === flowerId);
-    const flowerTotal = Object.values(colors).reduce((a, b) => a + b, 0);
-    return sum + (flower ? flower.price * flowerTotal : 0);
-  }, 0);
-
-  const accessoriesCost = selectedAccessories.reduce((sum, accId) => {
-    const acc = accessories.find(a => a.id === accId);
-    return sum + (acc ? acc.price : 0);
-  }, 0);
-
+  // Calculate Price
   const totalPrice = (selectedPackage?.price || 0) + 
-                     (selectedSize?.id === "custom" ? 0 : selectedSize?.price || 0) + 
-                     flowerCost + 
-                     accessoriesCost;
-
-  const extrasDetail = selectedAccessories.length > 0
-    ? `${selectedAccessories.length} accessory${selectedAccessories.length > 1 ? 'ies' : ''}`
-    : withGlitter
-      ? "Glitter on"
-      : "Add sparkle";
+                     (selectedSize?.id === "custom" ? 0 : selectedSize?.price || 0);
 
   const steps = [
     { id: 'presentation', label: 'Presentation', detail: selectedPackage ? selectedPackage.name : 'Choose style', complete: !!selectedPackage },
     { id: 'details', label: selectedPackage?.type === 'box' ? 'Box Details' : 'Wrap Details', detail: selectedPackage?.type === 'box' ? (selectedBoxColor ? selectedBoxColor.name : 'Shape & color') : (selectedWrapColor ? selectedWrapColor.name : 'Wrap color'), complete: selectedPackage?.type === 'box' ? !!selectedBoxColor : !!selectedWrapColor },
     { id: 'size', label: 'Size', detail: selectedSize ? selectedSize.name : 'Pick size', complete: !!selectedSize },
-    { id: 'flowers', label: 'Flowers', detail: totalFlowers ? `${totalFlowers} stems` : 'Select stems', complete: totalFlowers > 0 },
-    { id: 'extras', label: 'Final Touch', detail: extrasDetail, complete: selectedAccessories.length > 0 || withGlitter },
     { id: 'preview', label: 'Preview', detail: generatedImage ? 'Ready' : 'Generate look', complete: !!generatedImage }
   ];
 
   const completedSteps = steps.filter(step => step.complete).length;
   const progressPercent = Math.round((completedSteps / steps.length) * 100);
 
-  // Load accessories from Supabase
-  useEffect(() => {
-    const loadAccessories = async () => {
-      try {
-        setLoadingAccessories(true);
-        const data = await getAccessories();
-        // Filter for active accessories only
-        const activeAccessories = data
-          .filter(acc => acc.is_active)
-          .map(acc => ({
-            id: acc.id,
-            name: acc.name,
-            image_url: acc.image_url || undefined,
-            price: acc.price,
-            description: acc.description || '',
-            icon: PackageIcon, // Default fallback icon
-          }));
-        setAccessories(activeAccessories);
-      } catch (error) {
-        console.error('Failed to load accessories:', error);
-        toast.error('Failed to load accessories', { closeButton: true });
-        // Fallback to empty array
-        setAccessories([]);
-      } finally {
-        setLoadingAccessories(false);
-      }
-    };
-
-    loadAccessories();
-  }, []);
-
-  // Load flowers from Supabase
-  useEffect(() => {
-    const loadFlowers = async () => {
-      try {
-        setLoadingFlowers(true);
-        const flowerTypes = await getFlowerTypes();
-        
-        // Filter for active flower types only
-        const activeFlowerTypes = flowerTypes.filter(flower => flower.is_active);
-        
-        // Fetch colors for each flower type
-        const flowersWithColors = await Promise.all(
-          activeFlowerTypes
-            .filter(flowerType => (flowerType.quantity || 0) > 0) // Only show flowers with quantity > 0
-            .map(async (flowerType) => {
-              const colors = await getFlowerColors(flowerType.id);
-              
-              // Filter for colors with quantity > 0 (include all colors that have stock)
-              const availableColors = colors.filter(color => {
-                // Only include colors with quantity > 0
-                return (color.quantity || 0) > 0;
-              });
-              
-              // Only return flowers that have at least one available color
-              if (availableColors.length === 0) {
-                return null;
-              }
-              
-              return {
-                id: flowerType.id,
-                name: flowerType.name,
-                title: flowerType.title || '',
-                price: flowerType.price_per_stem,
-                image: flowerType.image_url || '',
-                quantity: flowerType.quantity || 0,
-                colors: availableColors.map(color => ({
-                  id: color.id,
-                  name: color.name,
-                  value: color.color_value || color.name.toLowerCase(),
-                  quantity: color.quantity || 0,
-                })),
-              };
-            })
-        );
-        
-        // Filter out null values (flowers with no available colors)
-        const validFlowers: Flower[] = flowersWithColors.filter((flower): flower is NonNullable<typeof flower> => flower !== null);
-        
-        setFlowers(validFlowers);
-      } catch (error) {
-        console.error('Failed to load flowers:', error);
-        toast.error('Failed to load flowers', { closeButton: true });
-        // Fallback to empty array
-        setFlowers([]);
-      } finally {
-        setLoadingFlowers(false);
-      }
-    };
-
-    loadFlowers();
-  }, []);
-
-  // Sync input values with actual counts
-  useEffect(() => {
-    const synced: Record<string, Record<string, string>> = {};
-    Object.entries(colorQuantities).forEach(([flowerId, colors]) => {
-      synced[flowerId] = {};
-      Object.entries(colors).forEach(([colorId, count]) => {
-        synced[flowerId][colorId] = count.toString();
-      });
-    });
-    setFlowerInputValues(synced);
-  }, [colorQuantities]);
-
-  const adjustFlowerColor = (flowerId: string, colorId: string, delta: number) => {
-    // Find the flower and color to check quantities
-    const flower = flowers.find(f => f.id === flowerId);
-    const color = flower?.colors.find(c => c.id === colorId);
-    
-    if (delta > 0) {
-      // Check max flowers limit
-      if (totalFlowers >= maxFlowers) {
-        toast.error(`Maximum ${maxFlowers} flowers`, { icon: "🌸", closeButton: true });
-        return;
-      }
-      
-      // Check color quantity availability
-      const current = colorQuantities[flowerId]?.[colorId] || 0;
-      const availableQuantity = color?.quantity || 0;
-      
-      if (current >= availableQuantity) {
-        toast.error(`Only ${availableQuantity} available for this color`, { icon: "🌸", closeButton: true });
-        return;
-      }
-      
-      // Check total flower quantity
-      const totalSelectedForFlower = Object.values(colorQuantities[flowerId] || {}).reduce((a, b) => a + b, 0);
-      if (totalSelectedForFlower >= (flower?.quantity || 0)) {
-        toast.error(`Only ${flower?.quantity || 0} available for this flower type`, { icon: "🌸", closeButton: true });
-        return;
-      }
-    }
-    
-    setColorQuantities(prev => {
-      const flowerColors = prev[flowerId] || {};
-      const current = flowerColors[colorId] || 0;
-      const newVal = Math.max(0, current + delta);
-      
-      if (newVal === 0) {
-        const { [colorId]: removed, ...rest } = flowerColors;
-        if (Object.keys(rest).length === 0) {
-          const { [flowerId]: removedFlower, ...restFlowers } = prev;
-          return restFlowers;
-        }
-        return { ...prev, [flowerId]: rest };
-      }
-      
-      const updated = {
-        ...prev,
-        [flowerId]: {
-          ...flowerColors,
-          [colorId]: newVal
-        }
-      };
-      
-      // Sync input value
-      setFlowerInputValues(prevInput => ({
-        ...prevInput,
-        [flowerId]: {
-          ...(prevInput[flowerId] || {}),
-          [colorId]: newVal.toString()
-        }
-      }));
-      
-      return updated;
-    });
-  };
-
-  const toggleAccessory = (accessoryId: string) => {
-    setSelectedAccessories(prev => {
-      if (prev.includes(accessoryId)) {
-        return prev.filter(id => id !== accessoryId);
-      } else {
-        return [...prev, accessoryId];
-      }
-    });
-  };
 
   // --- AI Generation Logic ---
   const generateBouquetImage = async () => {
     setIsGenerating(true);
     try {
-      // 1. Flower List with exact counts
-      const flowerDetails = Object.entries(colorQuantities)
-        .flatMap(([flowerId, colors]) => {
-          const flower = flowers.find(f => f.id === flowerId);
-          return Object.entries(colors)
-            .filter(([_, count]) => count > 0)
-            .map(([colorId, count]) => {
-              const colorObj = flower?.colors.find(c => c.id === colorId);
-              return `${count} ${colorObj?.name} ${flower?.name}`;
-            });
-        })
-        .join(" and ");
-
-      // 2. Packaging & Setting Description based on Glitter/No-Glitter
+      // Packaging & Setting Description
       let packagingPrompt = "";
       let settingPrompt = "";
       
       if (selectedPackage?.type === "box") {
-        const sizeDesc = selectedSize?.id === 'small' ? "medium-sized" : selectedSize?.id === 'large' ? "large" : "medium-sized";
+        const sizeDesc = selectedSize?.id === 'small' ? "small" : selectedSize?.id === 'large' ? "large" : "medium-sized";
+        const colorName = selectedBoxColor?.name || "black";
         
-        if (!withGlitter) {
-          // Image 1 Style (Classic)
-          packagingPrompt = `in a matte black cylindrical box with a soft velvet finish. The box has the text "Bexy Flowers" written in gold letters on the front. The roses form a perfect, tight hemisphere rising above the box edge. Only the rose blooms are visible, packed so tightly that no green stems or leaves can be seen between them.`;
-          settingPrompt = `The box sits on a light grey stone ledge outdoors. Sunlight hits the red roses creating vibrant highlights. Background is blurred green garden foliage.`;
-        } else {
-          // Image 2 Style (Glitter)
-          packagingPrompt = `in a matte black cylindrical box with a thin double gold ring at the top and bottom. The box has the text "Bexy Flowers" written in gold letters on the front. The roses are deep burgundy red, heavily coated in fine reddish-gold glitter. The roses are packed extremely tight, forming a flat-topped or slightly curved surface.`;
-          settingPrompt = `indoors against a completely plain, solid white background. Lighting is soft, artificial studio lighting with no harsh shadows.`;
-        }
+        packagingPrompt = `A ${sizeDesc} ${colorName} ${selectedBoxShape?.name || "rectangular"} box with the text "Bexy Flowers" written in gold letters on the front. The box has an elegant, luxurious appearance.`;
+        settingPrompt = `The box sits on a light grey stone ledge outdoors. Sunlight creates soft highlights. Background is blurred green garden foliage.`;
       } else {
-        // Wrap fallback
-        packagingPrompt = `wrapped in ${selectedWrapColor?.name} paper with "Bexy Flowers" printed on it. Elegant wrapping style showing stems at the bottom.`;
-        settingPrompt = `indoors against a plain white background with soft studio lighting.`;
+        const colorName = selectedWrapColor?.name || "white";
+        packagingPrompt = `A beautiful bouquet wrapped in ${colorName} paper with "Bexy Flowers" printed on it. Elegant wrapping style.`;
+        settingPrompt = `Indoors against a plain white background with soft studio lighting.`;
       }
 
-      // 3. Accessories
-      const accessoriesPrompt = selectedAccessories.length > 0 
-        ? `Includes ${selectedAccessories.map(id => accessories.find(a => a.id === id)?.name).join(", ")} placed nicely.` 
-        : "";
-
       // Combined Prompt
-      const fullPrompt = `Professional photography of ${flowerDetails} ${packagingPrompt} ${accessoriesPrompt} ${settingPrompt} High resolution, photorealistic, 8k, sharp focus. ${aiRefinementText}`;
+      const fullPrompt = `Professional photography of ${packagingPrompt} ${settingPrompt} High resolution, photorealistic, 8k, sharp focus. ${aiRefinementText}`;
 
       // Use Pollinations AI
       const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(fullPrompt)}?width=1024&height=1024&nologo=true&seed=${Date.now()}&model=flux`;
@@ -555,26 +288,16 @@ const Customize: React.FC = () => {
   };
 
   const handleAddToCart = () => {
-     // ... (Cart Logic)
-    const flowerList = Object.entries(colorQuantities)
-      .map(([flowerId, colors]) => {
-        const flower = flowers.find(f => f.id === flowerId);
-        return Object.entries(colors)
-          .filter(([_, count]) => count > 0)
-          .map(([colorId, count]) => {
-            const colorObj = flower?.colors.find(c => c.id === colorId);
-            return `${count}x ${colorObj?.name} ${flower?.name}`;
-          })
-          .join(", ");
-      })
-      .join(", ");
+    const packageDetails = selectedPackage?.type === "box" 
+      ? `${selectedPackage.name} - ${selectedBoxShape?.name || ""} ${selectedBoxColor?.name || ""} - ${selectedSize?.name || ""}`
+      : `${selectedPackage?.name || ""} - ${selectedWrapColor?.name || ""} - ${selectedSize?.name || ""}`;
 
     addToCart({
       id: `custom-${Date.now()}`,
-      title: "Custom Bouquet",
+      title: "Custom Box",
       price: totalPrice,
       image: generatedImageUrl || generatedImage || "/src/assets/bouquet-1.jpg",
-      description: `${selectedPackage?.name} - ${selectedSize?.name} - ${flowerList}`,
+      description: packageDetails,
       personalNote: note
     });
     setCelebrating(true);
@@ -888,297 +611,6 @@ const Customize: React.FC = () => {
               </CustomizeSection>
             )}
 
-            {/* Step 5: Flowers */}
-            <CustomizeSection title="Select Flowers" isActive={!!selectedSize} ref={flowersRef}>
-              {loadingFlowers ? (
-                <div className="flex items-center justify-center py-12">
-                  <RefreshCw className="w-8 h-8 text-[#C79E48] animate-spin" />
-                </div>
-              ) : flowers.length === 0 ? (
-                <p className="text-gray-500 text-sm text-center py-8">No flowers available at the moment.</p>
-              ) : (
-                <>
-                  <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-[#fffbf5] border border-[#C79E48]/20 rounded-lg sm:rounded-xl flex flex-col sm:flex-row justify-between items-center gap-2 sm:gap-0">
-                    <span className="text-sm sm:text-base">
-                      <span className="font-bold text-[#C79E48]">{totalFlowers}</span> / {maxFlowers} Stems Selected
-                    </span>
-                    <div className="w-full sm:w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
-                      <div 
-                        className="h-full bg-[#C79E48] transition-all duration-300"
-                        style={{ width: `${Math.min(100, (totalFlowers / maxFlowers) * 100)}%` }}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col gap-3 sm:gap-4">
-                {flowers.map((flower) => {
-                  const flowerColorMap = colorQuantities[flower.id] || {};
-                  const totalCount = Object.values(flowerColorMap).reduce((a, b) => a + b, 0);
-                  
-                  return (
-                    <div key={flower.id} className={`border rounded-lg sm:rounded-xl p-3 sm:p-4 transition-all ${totalCount > 0 ? 'border-[#C79E48] bg-[#C79E48]/5' : 'border-gray-100'}`}>
-                      <div className="flex items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
-                        {flower.image ? (
-                          <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden">
-                            <img 
-                              src={encodeImageUrl(flower.image)} 
-                              alt={flower.name} 
-                              className="w-full h-full object-contain p-1"
-                              onError={(e) => {
-                                // Hide broken image
-                                const target = e.target as HTMLImageElement;
-                                target.style.display = 'none';
-                              }}
-                            />
-                          </div>
-                        ) : (
-                          <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-lg bg-gray-100 flex items-center justify-center">
-                            <Flower2 className="w-6 h-6 sm:w-8 sm:h-8 text-gray-400" />
-                          </div>
-                        )}
-                        <div>
-                          <h4 className="font-bold text-base sm:text-lg">{flower.name}</h4>
-                          <p className="text-[#C79E48] font-medium text-sm sm:text-base">${flower.price} / stem</p>
-                        </div>
-                      </div>
-                      
-                      <div className="flex flex-col gap-2 sm:gap-3 pl-3 sm:pl-4 border-l-2 border-[#C79E48]/20">
-                        {flower.colors.map((color) => {
-                          const count = flowerColorMap[color.id] || 0;
-                          const inputKey = `${flower.id}-${color.id}`;
-                          const inputValue = flowerInputValues[flower.id]?.[color.id] ?? count.toString();
-                          const quickQuantities = [5, 10, 15, 20];
-                          const availableColorQuantity = color.quantity || 0;
-                          const totalSelectedForFlower = Object.values(flowerColorMap).reduce((a, b) => a + b, 0);
-                          const availableFlowerQuantity = flower.quantity || 0;
-                          const isColorSoldOut = count >= availableColorQuantity;
-                          const isFlowerSoldOut = totalSelectedForFlower >= availableFlowerQuantity;
-                          const canAddMore = !isColorSoldOut && !isFlowerSoldOut && totalFlowers < maxFlowers;
-                          
-                          const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-                            const value = e.target.value;
-                            setFlowerInputValues(prev => ({
-                              ...prev,
-                              [flower.id]: {
-                                ...(prev[flower.id] || {}),
-                                [color.id]: value
-                              }
-                            }));
-                            
-                            if (value === '' || value === '0') {
-                              if (count > 0) {
-                                adjustFlowerColor(flower.id, color.id, -count);
-                              }
-                              return;
-                            }
-                            const numValue = parseInt(value);
-                            if (!isNaN(numValue) && numValue >= 0) {
-                              const diff = numValue - count;
-                              if (diff !== 0) {
-                                if (totalFlowers + diff <= maxFlowers) {
-                                  adjustFlowerColor(flower.id, color.id, diff);
-                                } else {
-                                  toast.error(`Maximum ${maxFlowers} flowers`, { icon: "🌸", closeButton: true });
-                                  setFlowerInputValues(prev => ({
-                                    ...prev,
-                                    [flower.id]: {
-                                      ...(prev[flower.id] || {}),
-                                      [color.id]: count.toString()
-                                    }
-                                  }));
-                                }
-                              }
-                            }
-                          };
-
-                          const handleQuickQuantity = (qty: number) => {
-                            const diff = qty - count;
-                            if (totalFlowers + diff <= maxFlowers) {
-                              adjustFlowerColor(flower.id, color.id, diff);
-                            } else {
-                              toast.error(`Maximum ${maxFlowers} flowers`, { icon: "🌸", closeButton: true });
-                            }
-                          };
-
-                          return (
-                            <div key={color.id} className="flex flex-col gap-1.5 sm:gap-2">
-                              <div className="flex justify-between items-center gap-2">
-                                <div className="flex items-center gap-2">
-                                  <span className="text-xs sm:text-sm font-luxury font-medium text-gray-700 uppercase tracking-wide">{color.name}</span>
-                                  {availableColorQuantity > 0 && (
-                                    <span className="text-[10px] text-gray-500">({availableColorQuantity} available)</span>
-                                  )}
-                                  {availableColorQuantity === 0 && (
-                                    <span className="text-[10px] text-red-500 font-medium">(Sold Out)</span>
-                                  )}
-                                </div>
-                                <div className="flex items-center gap-1.5 sm:gap-2">
-                                  <motion.button 
-                                    onClick={() => adjustFlowerColor(flower.id, color.id, -1)}
-                                    className="w-8 h-8 sm:w-9 sm:h-9 rounded-full border-2 border-[#C79E48]/30 bg-white flex items-center justify-center hover:bg-[#C79E48]/10 transition-all shadow-sm"
-                                    disabled={count === 0}
-                                    whileHover={count > 0 ? { scale: 1.1, borderColor: '#C79E48' } : {}}
-                                    whileTap={count > 0 ? { scale: 0.95 } : {}}
-                                  >
-                                    <Minus className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#C79E48]" strokeWidth={2.5} />
-                                  </motion.button>
-                                  <input
-                                    type="number"
-                                    min="0"
-                                    max={maxFlowers}
-                                    value={inputValue}
-                                    onChange={handleInputChange}
-                                    onBlur={() => {
-                                      if (inputValue === '' || parseInt(inputValue) < 0 || isNaN(parseInt(inputValue))) {
-                                        setFlowerInputValues(prev => ({
-                                          ...prev,
-                                          [flower.id]: {
-                                            ...(prev[flower.id] || {}),
-                                            [color.id]: count.toString()
-                                          }
-                                        }));
-                                      }
-                                    }}
-                                    className="w-14 sm:w-16 h-8 sm:h-9 text-center text-xs sm:text-sm font-luxury font-semibold text-[#C79E48] border-2 border-[#C79E48]/20 rounded-lg focus:border-[#C79E48] focus:ring-2 focus:ring-[#C79E48]/20 outline-none transition-all"
-                                    style={{ 
-                                      backgroundColor: count > 0 ? 'rgba(199, 158, 72, 0.05)' : 'white'
-                                    }}
-                                  />
-                                  <motion.button 
-                                    onClick={() => {
-                                      adjustFlowerColor(flower.id, color.id, 1);
-                                      if (totalFlowers + 1 === maxFlowers) {
-                                        scrollToSection(extrasRef);
-                                      }
-                                    }}
-                                    className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center transition-all shadow-md ${
-                                      canAddMore
-                                        ? 'bg-gradient-to-br from-[#C79E48] to-[#b08d45] text-white hover:shadow-lg'
-                                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                    }`}
-                                    disabled={!canAddMore}
-                                    whileHover={canAddMore ? { scale: 1.1, boxShadow: '0 4px 12px rgba(199, 158, 72, 0.4)' } : {}}
-                                    whileTap={canAddMore ? { scale: 0.95 } : {}}
-                                    title={isColorSoldOut ? `Only ${availableColorQuantity} available` : isFlowerSoldOut ? `Only ${availableFlowerQuantity} available for this flower` : ''}
-                                  >
-                                    <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" strokeWidth={2.5} />
-                                  </motion.button>
-                                </div>
-                              </div>
-                              <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-                                {quickQuantities.map((qty) => (
-                                  <motion.button
-                                    key={qty}
-                                    onClick={() => handleQuickQuantity(qty)}
-                                    className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg border-2 text-[10px] sm:text-xs font-luxury font-medium transition-all ${
-                                      count === qty
-                                        ? 'bg-[#C79E48] text-white border-[#C79E48] shadow-md'
-                                        : 'bg-white text-[#C79E48] border-[#C79E48]/30 hover:border-[#C79E48] hover:bg-[#C79E48]/5'
-                                    }`}
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
-                                  >
-                                    {qty}
-                                  </motion.button>
-                                ))}
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  );
-                })}
-                  </div>
-                </>
-              )}
-            </CustomizeSection>
-
-            {/* Step 6: Accessories & Extras */}
-            <CustomizeSection title="Final Touches" isActive={totalFlowers > 0} ref={extrasRef}>
-              <div className="flex flex-col gap-4 sm:gap-6">
-                <div>
-                  <h3 className="font-bold mb-3 sm:mb-4 text-gray-700 text-sm sm:text-base">Add Accessories</h3>
-                  {loadingAccessories ? (
-                    <div className="flex items-center justify-center py-8">
-                      <RefreshCw className="w-6 h-6 text-[#C79E48] animate-spin" />
-                    </div>
-                  ) : accessories.length === 0 ? (
-                    <p className="text-gray-500 text-sm text-center py-4">No accessories available at the moment.</p>
-                  ) : (
-                    <div className="grid grid-cols-2 gap-3 sm:gap-4">
-                      {accessories.map((acc) => {
-                        const IconComponent = acc.icon || PackageIcon;
-                        const isSelected = selectedAccessories.includes(acc.id);
-                        
-                        return (
-                          <button
-                            key={acc.id}
-                            onClick={() => toggleAccessory(acc.id)}
-                            className={`p-3 sm:p-4 rounded-lg sm:rounded-xl border-2 flex items-center gap-2 sm:gap-3 transition-all ${
-                              isSelected ? 'border-[#C79E48] bg-[#C79E48]/5' : 'border-gray-100'
-                            }`}
-                          >
-                            {acc.image_url ? (
-                              <img
-                                src={encodeImageUrl(acc.image_url)}
-                                alt={acc.name}
-                                className={`w-8 h-8 sm:w-10 sm:h-10 object-cover rounded ${
-                                  isSelected ? 'ring-2 ring-[#C79E48]' : ''
-                                }`}
-                                onError={(e) => {
-                                  // Hide image and show icon fallback
-                                  const target = e.target as HTMLImageElement;
-                                  target.style.display = 'none';
-                                  const fallback = target.parentElement?.querySelector('.icon-fallback') as HTMLElement;
-                                  if (fallback) {
-                                    fallback.style.display = 'block';
-                                  }
-                                }}
-                              />
-                            ) : null}
-                            <IconComponent
-                              className={`w-4 h-4 sm:w-5 sm:h-5 icon-fallback ${isSelected ? 'text-[#C79E48]' : 'text-gray-400'}`}
-                              style={{ display: acc.image_url ? 'none' : 'block' }}
-                            />
-                            <div className="text-left flex-1">
-                              <p className="font-bold text-xs sm:text-sm">{acc.name}</p>
-                              <p className="text-[10px] sm:text-xs text-gray-500">+${acc.price}</p>
-                            </div>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-
-                <div className="p-3 sm:p-4 rounded-lg sm:rounded-xl border border-[#C79E48]/20 bg-[#fffbf5]">
-                  <label className="flex items-center justify-between cursor-pointer">
-                    <div className="flex items-center gap-2 sm:gap-3">
-                      <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-[#C79E48]" />
-                      <span className="font-bold text-gray-700 text-sm sm:text-base">Add Glitter on Petals</span>
-                    </div>
-                    <div 
-                      onClick={() => setWithGlitter(!withGlitter)}
-                      className={`w-10 h-5 sm:w-12 sm:h-6 rounded-full relative transition-colors ${withGlitter ? 'bg-[#C79E48]' : 'bg-gray-200'}`}
-                    >
-                      <div className={`absolute top-0.5 sm:top-1 w-4 h-4 bg-white rounded-full shadow-md transition-all ${withGlitter ? 'left-5 sm:left-7' : 'left-0.5 sm:left-1'}`} />
-                    </div>
-                  </label>
-                </div>
-
-                <div>
-                  <label className="block font-bold text-gray-700 mb-2 text-sm sm:text-base">Personal Note</label>
-                  <textarea
-                    value={note}
-                    onChange={(e) => setNote(e.target.value)}
-                    className="w-full p-3 sm:p-4 rounded-lg sm:rounded-xl border border-gray-200 focus:border-[#C79E48] focus:ring-1 focus:ring-[#C79E48] outline-none resize-none text-sm sm:text-base"
-                    placeholder="Write a sweet message..."
-                    rows={3}
-                  />
-                </div>
-              </div>
-            </CustomizeSection>
 
           </div>
 
@@ -1223,7 +655,7 @@ const Customize: React.FC = () => {
 
                 <button
                   onClick={generateBouquetImage}
-                  disabled={isGenerating || totalFlowers === 0}
+                  disabled={isGenerating || !selectedPackage || !selectedSize}
                   className="w-full py-2.5 sm:py-3 md:py-4 bg-[#C79E48] text-white font-bold rounded-lg sm:rounded-xl shadow-lg hover:bg-[#b08d45] disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 mb-3 sm:mb-4 text-xs sm:text-sm md:text-base touch-target min-h-[44px]"
                 >
                   <Wand2 className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -1240,14 +672,6 @@ const Customize: React.FC = () => {
                     <span>Size Upgrade</span>
                     <span>+${selectedSize?.id !== 'custom' ? selectedSize?.price || 0 : 0}</span>
                   </div>
-                  <div className="flex justify-between text-xs sm:text-sm text-gray-600">
-                    <span>Flowers ({totalFlowers})</span>
-                    <span>+${flowerCost}</span>
-                  </div>
-                  <div className="flex justify-between text-xs sm:text-sm text-gray-600">
-                    <span>Accessories</span>
-                    <span>+${accessoriesCost}</span>
-                  </div>
                   
                   <div className="flex justify-between text-lg sm:text-xl md:text-2xl font-bold text-[#C79E48] pt-3 sm:pt-4 border-t border-dashed border-[#C79E48]/20">
                     <span>Total</span>
@@ -1257,7 +681,7 @@ const Customize: React.FC = () => {
 
                 <button
                   onClick={handleAddToCart}
-                  disabled={totalFlowers === 0}
+                  disabled={!selectedPackage || !selectedSize}
                   className="w-full mt-3 sm:mt-4 md:mt-6 py-2.5 sm:py-3 md:py-4 bg-black text-white font-bold rounded-lg sm:rounded-xl shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-xs sm:text-sm md:text-base touch-target min-h-[44px]"
                 >
                   <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5" />

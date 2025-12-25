@@ -286,7 +286,7 @@ const UltraNavigation = () => {
                 </div>
                 
                 {/* Brand Name - Clean Luxury Text - Responsive */}
-                <div className="ml-1 sm:ml-1.5 hidden xs:block">
+                <div className="ml-1 sm:ml-1.5 block">
                   <h1 
                     className="font-luxury text-xs xs:text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold text-foreground whitespace-nowrap"
                   >
@@ -654,8 +654,8 @@ const UltraNavigation = () => {
                 className="lg:hidden fixed inset-0 top-[var(--nav-height,4rem)] sm:top-[var(--nav-height,5rem)] bg-background/98 backdrop-blur-xl shadow-luxury z-[100] overflow-y-auto"
               style={{ 
                 backgroundColor: 'rgba(229, 228, 226, 0.98)',
-                paddingTop: isMobile ? 'env(safe-area-inset-top, 1rem)' : undefined,
-                paddingBottom: isMobile ? 'env(safe-area-inset-bottom, 2rem)' : undefined,
+                paddingTop: isMobile ? 'env(safe-area-inset-top, 0.5rem)' : undefined,
+                paddingBottom: isMobile ? 'env(safe-area-inset-bottom, 1rem)' : undefined,
                 WebkitOverflowScrolling: 'touch',
               }}
               initial={{ opacity: 0, y: -20 }}
@@ -664,7 +664,7 @@ const UltraNavigation = () => {
               transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
             >
               {/* Close Button */}
-              <div className="sticky top-0 z-10 flex justify-end p-4 sm:p-6 bg-background/98 backdrop-blur-sm">
+              <div className="sticky top-0 z-10 flex justify-end p-2 sm:p-4 bg-background/98 backdrop-blur-sm">
                 <Button
                   variant="ghost"
                   size="icon"
@@ -681,7 +681,7 @@ const UltraNavigation = () => {
                 </Button>
               </div>
               
-              <div className="px-4 sm:px-6 py-6 sm:py-8 space-y-3 sm:space-y-4">
+              <div className="px-4 sm:px-6 py-2 sm:py-4 space-y-2 sm:space-y-3">
                 {navigationItems.map((item, index) => {
                   const isActive = location.pathname === item.path;
                   return (
@@ -710,8 +710,8 @@ const UltraNavigation = () => {
                         style={{
                           WebkitTapHighlightColor: 'transparent',
                           touchAction: 'manipulation',
-                          padding: isMobile ? '1rem 1.25rem' : undefined,
-                          minHeight: '56px',
+                          padding: isMobile ? '0.75rem 1rem' : undefined,
+                          minHeight: '48px',
                         }}
                       >
                         {/* Active Gold Background */}
@@ -796,8 +796,8 @@ const UltraNavigation = () => {
                     style={{
                       WebkitTapHighlightColor: 'transparent',
                       touchAction: 'manipulation',
-                      padding: isMobile ? '1rem 1.25rem' : undefined,
-                      minHeight: '56px',
+                      padding: isMobile ? '0.75rem 1rem' : undefined,
+                      minHeight: '48px',
                     }}
                   >
                     {location.pathname === "/favorites" && (
@@ -857,7 +857,7 @@ const UltraNavigation = () => {
                     delay: (navigationItems.length + 1) * 0.1, 
                     duration: 0.6 
                   }}
-                  className="pt-4 border-t border-primary/20 mt-4"
+                  className="pt-3 border-t border-primary/20 mt-3"
                 >
                   <div className="flex items-center justify-center gap-4 sm:gap-3">
                     {/* WhatsApp - Touch-Friendly */}
