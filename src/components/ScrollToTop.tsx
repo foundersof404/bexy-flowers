@@ -20,11 +20,29 @@ const ScrollToTop = () => {
       window.scrollTo({ top: 0, left: 0, behavior: "auto" });
       document.documentElement.scrollTop = 0;
       document.body.scrollTop = 0;
+      
+      // Also reset scroll position for any scrollable containers
+      const scrollableElements = document.querySelectorAll('[data-scroll-container]');
+      scrollableElements.forEach((el) => {
+        if (el instanceof HTMLElement) {
+          el.scrollTop = 0;
+        }
+      });
     };
-    // Run now and again on next frame to beat layout/animations
+    
+    // Run immediately
     reset();
-    const id = requestAnimationFrame(reset);
-    return () => cancelAnimationFrame(id);
+    
+    // Run again on next frame to beat layout/animations
+    const rafId = requestAnimationFrame(reset);
+    
+    // Also run after a short delay to ensure it sticks
+    const timeoutId = setTimeout(reset, 50);
+    
+    return () => {
+      cancelAnimationFrame(rafId);
+      clearTimeout(timeoutId);
+    };
   }, [pathname, search, hash]);
 
   return null;
