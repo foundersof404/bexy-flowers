@@ -36,14 +36,6 @@ interface BoxColor {
   gradient: string;
 }
 
-interface Size {
-  id: string;
-  name: string;
-  capacity: number;
-  price: number;
-  description: string;
-}
-
 interface WrapColor {
   id: string;
   name: string;
@@ -70,22 +62,6 @@ const boxColors: BoxColor[] = [
   { id: "blue", name: "Blue", color: "#87CEEB", gradient: "linear-gradient(135deg, #87CEEB 0%, #4682B4 100%)" },
   { id: "red", name: "Red", color: "#DC143C", gradient: "linear-gradient(135deg, #DC143C 0%, #B22222 100%)" }
 ];
-
-const boxSizes: Size[] = [
-  { id: "small", name: "Small", capacity: 15, price: 50, description: "~15 flowers" },
-  { id: "medium", name: "Medium", capacity: 25, price: 85, description: "~25 flowers" },
-  { id: "large", name: "Large", capacity: 35, price: 120, description: "~35 flowers" },
-  { id: "custom", name: "Custom", capacity: 0, price: 0, description: "Choose quantity" }
-];
-
-const wrapSizes: Size[] = [
-  { id: "small", name: "Small", capacity: 10, price: 40, description: "~10 flowers" },
-  { id: "medium", name: "Medium", capacity: 20, price: 70, description: "~20 flowers" },
-  { id: "large", name: "Large", capacity: 30, price: 110, description: "~30 flowers" },
-  { id: "custom", name: "Custom", capacity: 0, price: 0, description: "Choose quantity" }
-];
-
-// Flowers will be loaded from Supabase
 
 const wrapColors: WrapColor[] = [
   { id: "white", name: "Pure White", color: "#FFFFFF", gradient: "linear-gradient(135deg, #FFFFFF 0%, #F5F5F5 100%)" },
@@ -163,9 +139,7 @@ const Customize: React.FC = () => {
   const [selectedPackage, setSelectedPackage] = useState<Package | null>(null);
   const [selectedBoxShape, setSelectedBoxShape] = useState<BoxShape | null>(null);
   const [selectedBoxColor, setSelectedBoxColor] = useState<BoxColor | null>(null);
-  const [selectedSize, setSelectedSize] = useState<Size | null>(null);
   const [selectedWrapColor, setSelectedWrapColor] = useState<WrapColor | null>(null);
-  const [customQty, setCustomQty] = useState(25);
   const [note, setNote] = useState("");
   const [celebrating, setCelebrating] = useState(false);
   const [withGlitter, setWithGlitter] = useState(false);
@@ -182,7 +156,6 @@ const Customize: React.FC = () => {
   const shapeRef = useRef<HTMLDivElement>(null);
   const boxColorRef = useRef<HTMLDivElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
-  const boxSizeRef = useRef<HTMLDivElement>(null);
 
   // Scroll helper
   const scrollToSection = (ref: React.RefObject<HTMLDivElement>) => {
@@ -199,7 +172,6 @@ const Customize: React.FC = () => {
       setSelectedBoxShape(null);
       setSelectedBoxColor(null);
       setSelectedWrapColor(null);
-      setSelectedSize(null);
     }
 
     if (pkg.type === "box") {
@@ -216,26 +188,18 @@ const Customize: React.FC = () => {
 
   const handleBoxColorSelect = (color: BoxColor) => {
     setSelectedBoxColor(color);
-    scrollToSection(boxSizeRef);
   };
 
   const handleWrapColorSelect = (color: WrapColor) => {
     setSelectedWrapColor(color);
-    // Don't scroll yet, waiting for size
-  };
-
-  const handleSizeSelect = (size: Size) => {
-    setSelectedSize(size);
   };
 
   // Calculate Price
-  const totalPrice = (selectedPackage?.price || 0) + 
-                     (selectedSize?.id === "custom" ? 0 : selectedSize?.price || 0);
+  const totalPrice = selectedPackage?.price || 0;
 
   const steps = [
     { id: 'presentation', label: 'Presentation', detail: selectedPackage ? selectedPackage.name : 'Choose style', complete: !!selectedPackage },
     { id: 'details', label: selectedPackage?.type === 'box' ? 'Box Details' : 'Wrap Details', detail: selectedPackage?.type === 'box' ? (selectedBoxColor ? selectedBoxColor.name : 'Shape & color') : (selectedWrapColor ? selectedWrapColor.name : 'Wrap color'), complete: selectedPackage?.type === 'box' ? !!selectedBoxColor : !!selectedWrapColor },
-    { id: 'size', label: 'Size', detail: selectedSize ? selectedSize.name : 'Pick size', complete: !!selectedSize },
     { id: 'preview', label: 'Preview', detail: generatedImage ? 'Ready' : 'Generate look', complete: !!generatedImage }
   ];
 
@@ -252,10 +216,9 @@ const Customize: React.FC = () => {
       let settingPrompt = "";
       
       if (selectedPackage?.type === "box") {
-        const sizeDesc = selectedSize?.id === 'small' ? "small" : selectedSize?.id === 'large' ? "large" : "medium-sized";
         const colorName = selectedBoxColor?.name || "black";
         
-        packagingPrompt = `A ${sizeDesc} ${colorName} ${selectedBoxShape?.name || "rectangular"} box with the text "Bexy Flowers" written in gold letters on the front. The box has an elegant, luxurious appearance.`;
+        packagingPrompt = `A ${colorName} ${selectedBoxShape?.name || "round"} box with the text "Bexy Flowers" written in gold letters on the front. The box has an elegant, luxurious appearance.`;
         settingPrompt = `The box sits on a light grey stone ledge outdoors. Sunlight creates soft highlights. Background is blurred green garden foliage.`;
       } else {
         const colorName = selectedWrapColor?.name || "white";
@@ -289,8 +252,8 @@ const Customize: React.FC = () => {
 
   const handleAddToCart = () => {
     const packageDetails = selectedPackage?.type === "box" 
-      ? `${selectedPackage.name} - ${selectedBoxShape?.name || ""} ${selectedBoxColor?.name || ""} - ${selectedSize?.name || ""}`
-      : `${selectedPackage?.name || ""} - ${selectedWrapColor?.name || ""} - ${selectedSize?.name || ""}`;
+      ? `${selectedPackage.name} - ${selectedBoxShape?.name || ""} ${selectedBoxColor?.name || ""}`
+      : `${selectedPackage?.name || ""} - ${selectedWrapColor?.name || ""}`;
 
     addToCart({
       id: `custom-${Date.now()}`,
@@ -524,36 +487,6 @@ const Customize: React.FC = () => {
                   {selectedBoxColor && <p className="mt-3 sm:mt-4 text-[#C79E48] font-bold text-sm sm:text-base">{selectedBoxColor.name} Selected</p>}
                 </CustomizeSection>
 
-                <CustomizeSection title="4. Choose Size" isActive={!!selectedBoxColor} ref={boxSizeRef}>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                    {boxSizes.map((size) => (
-                      <button
-                        key={size.id}
-                        onClick={() => handleSizeSelect(size)}
-                        className={`p-4 sm:p-5 md:p-6 rounded-lg sm:rounded-xl border-2 text-left transition-all ${
-                          selectedSize?.id === size.id ? 'border-[#C79E48] bg-[#C79E48]/5' : 'border-gray-100'
-                        }`}
-                      >
-                        <div className="flex justify-between items-center mb-1.5 sm:mb-2">
-                          <span className="font-bold text-base sm:text-lg">{size.name}</span>
-                          <span className="text-[#C79E48] font-bold text-sm sm:text-base">{size.id !== 'custom' ? `$${size.price}` : 'Custom'}</span>
-                        </div>
-                        <p className="text-xs sm:text-sm text-gray-500">{size.description}</p>
-                        {size.id === 'custom' && selectedSize?.id === 'custom' && (
-                          <input
-                            type="number"
-                            min="5"
-                            value={customQty}
-                            onChange={(e) => setCustomQty(parseInt(e.target.value) || 5)}
-                            onClick={(e) => e.stopPropagation()}
-                            className="mt-2 w-full p-2 text-sm border rounded-lg"
-                            placeholder="Enter quantity"
-                          />
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                </CustomizeSection>
               </>
             )}
 
@@ -572,38 +505,6 @@ const Customize: React.FC = () => {
                           style={{ background: color.gradient }}
                           title={color.name}
                         />
-                      ))}
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <h3 className="font-bold mb-3 sm:mb-4 text-gray-700 text-sm sm:text-base">Select Bouquet Size</h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                      {wrapSizes.map((size) => (
-                        <button
-                          key={size.id}
-                          onClick={() => handleSizeSelect(size)}
-                          className={`p-3 sm:p-4 rounded-lg sm:rounded-xl border-2 text-left transition-all ${
-                            selectedSize?.id === size.id ? 'border-[#C79E48] bg-[#C79E48]/5' : 'border-gray-100'
-                          }`}
-                        >
-                          <div className="flex justify-between items-center">
-                            <span className="font-bold text-sm sm:text-base">{size.name}</span>
-                            <span className="text-[#C79E48] text-sm sm:text-base">{size.id !== 'custom' ? `$${size.price}` : ''}</span>
-                          </div>
-                          <p className="text-xs text-gray-500 mt-1">{size.description}</p>
-                          {size.id === 'custom' && selectedSize?.id === 'custom' && (
-                          <input
-                            type="number"
-                            min="5"
-                            value={customQty}
-                            onChange={(e) => setCustomQty(parseInt(e.target.value) || 5)}
-                            onClick={(e) => e.stopPropagation()}
-                            className="mt-2 w-full p-2 text-sm border rounded-lg"
-                            placeholder="Qty"
-                          />
-                        )}
-                        </button>
                       ))}
                     </div>
                   </div>
@@ -655,7 +556,7 @@ const Customize: React.FC = () => {
 
                 <button
                   onClick={generateBouquetImage}
-                  disabled={isGenerating || !selectedPackage || !selectedSize}
+                  disabled={isGenerating || !selectedPackage || (selectedPackage?.type === 'box' ? !selectedBoxColor : !selectedWrapColor)}
                   className="w-full py-2.5 sm:py-3 md:py-4 bg-[#C79E48] text-white font-bold rounded-lg sm:rounded-xl shadow-lg hover:bg-[#b08d45] disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 mb-3 sm:mb-4 text-xs sm:text-sm md:text-base touch-target min-h-[44px]"
                 >
                   <Wand2 className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -665,12 +566,8 @@ const Customize: React.FC = () => {
                 {/* Summary & Total */}
                 <div className="border-t border-gray-100 pt-3 sm:pt-4 md:pt-6 flex flex-col gap-2 sm:gap-3">
                   <div className="flex justify-between text-xs sm:text-sm text-gray-600">
-                    <span>Base Price</span>
+                    <span>Price</span>
                     <span>${selectedPackage?.price || 0}</span>
-                  </div>
-                  <div className="flex justify-between text-xs sm:text-sm text-gray-600">
-                    <span>Size Upgrade</span>
-                    <span>+${selectedSize?.id !== 'custom' ? selectedSize?.price || 0 : 0}</span>
                   </div>
                   
                   <div className="flex justify-between text-lg sm:text-xl md:text-2xl font-bold text-[#C79E48] pt-3 sm:pt-4 border-t border-dashed border-[#C79E48]/20">
@@ -681,7 +578,7 @@ const Customize: React.FC = () => {
 
                 <button
                   onClick={handleAddToCart}
-                  disabled={!selectedPackage || !selectedSize}
+                  disabled={!selectedPackage || (selectedPackage?.type === 'box' ? !selectedBoxColor : !selectedWrapColor)}
                   className="w-full mt-3 sm:mt-4 md:mt-6 py-2.5 sm:py-3 md:py-4 bg-black text-white font-bold rounded-lg sm:rounded-xl shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-xs sm:text-sm md:text-base touch-target min-h-[44px]"
                 >
                   <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5" />
