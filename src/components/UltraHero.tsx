@@ -20,8 +20,8 @@ const UltraHero = () => {
   const controls = useAnimation();
   const isMobile = useIsMobile();
   const shouldReduceMotion = useReducedMotion();
-  
-  const prefersReducedMotion = useMemo(() => 
+
+  const prefersReducedMotion = useMemo(() =>
     typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches,
     []
   );
@@ -32,13 +32,13 @@ const UltraHero = () => {
     const subtitle = subtitleRef.current;
     const button = buttonRef.current;
     if (hero && title && subtitle && button) {
-      
+
       // Skip heavy animations on mobile or reduced motion
       if (isMobile || prefersReducedMotion) {
         gsap.set([title, subtitle, button], { y: 0, opacity: 1 });
         return;
       }
-      
+
       // Set initial states (no animations, just instant display for better scroll perf)
       gsap.set([title, subtitle, button], { y: 0, opacity: 1 });
     }
@@ -49,19 +49,18 @@ const UltraHero = () => {
   }, [isMobile, prefersReducedMotion]);
 
   return (
-    <section 
+    <section
       ref={heroRef}
-      className={`relative flex items-center justify-center overflow-hidden perspective-1000 text-center ${
-        isMobile ? '-mt-20 md:bg-transparent md:pt-16 md:sm:pt-8' : 'pt-16 sm:pt-8 mt-[-80px]'
-      }`}
-      style={{ 
+      className={`relative flex items-center justify-center overflow-hidden perspective-1000 text-center ${isMobile ? '-mt-20 md:bg-transparent md:pt-16 md:sm:pt-8' : 'pt-16 sm:pt-8 mt-[-80px]'
+        }`}
+      style={{
         minHeight: isMobile ? '100dvh' : 'clamp(650px, 100vh, 900px)',
         height: isMobile ? 'auto' : 'clamp(650px, 100vh, 900px)',
         padding: isMobile ? '5rem 1.4rem' : '6rem 2rem'
       }}
     >
       {/* Background Image with 3D Parallax */}
-      <div 
+      <div
         className={`absolute inset-0 z-0 ${isMobile ? '' : ''}`}
         style={{
           top: isMobile ? 0 : 0,
@@ -99,29 +98,29 @@ const UltraHero = () => {
           loading="eager"
           decoding="async"
         />
-        <div 
+        <div
           className={`absolute inset-0 ${isMobile ? '' : 'bg-gradient-to-b from-background/90 via-background/70 to-background/90'}`}
           style={
             isMobile
               ? {
-                  background: 'linear-gradient(180deg, rgba(8,8,8,0.15) 0%, rgba(255,255,255,0.1) 45%, rgba(255,255,255,0.85) 100%)',
-                  pointerEvents: 'none'
-                }
+                background: 'linear-gradient(180deg, rgba(8,8,8,0.15) 0%, rgba(255,255,255,0.1) 45%, rgba(255,255,255,0.85) 100%)',
+                pointerEvents: 'none'
+              }
               : {
-                  pointerEvents: 'none'
-                }
+                pointerEvents: 'none'
+              }
           }
         />
       </div>
 
 
-      
+
 
       {/* Background Overlays - Mobile */}
       {isMobile && (
         <>
           {/* Soft translucent overlay */}
-          <div 
+          <div
             className="absolute inset-0 z-10"
             style={{
               background: 'linear-gradient(180deg, rgba(255,255,255,0.2) 5%, rgba(255,255,250,0.4) 55%, rgba(255,255,255,0.6) 100%)',
@@ -129,7 +128,7 @@ const UltraHero = () => {
             }}
           />
           {/* Gold dust subtle particle effect */}
-          <div 
+          <div
             className="absolute inset-0 z-10"
             style={{
               backgroundImage: `
@@ -153,161 +152,168 @@ const UltraHero = () => {
       />
 
       {/* Modern Hero Content */}
-      <div className={`relative z-20 max-w-7xl mx-auto w-full ${
-        isMobile ? 'px-4 sm:px-6 h-full flex items-center justify-center py-0' : 'px-4 xs:px-5 sm:px-6 lg:px-8'
-      }`}>
+      <div className={`relative z-20 max-w-7xl mx-auto w-full ${isMobile ? 'px-4 sm:px-6 h-full flex items-center justify-center py-0' : 'px-4 xs:px-5 sm:px-6 lg:px-8'
+        }`}>
         <div className={`${isMobile ? 'w-full max-w-[860px]' : 'grid lg:grid-cols-2'} ${isMobile ? '' : 'gap-6 sm:gap-8 lg:gap-10 xl:gap-12'} items-center ${isMobile ? 'h-full py-0' : ''}`} style={!isMobile ? { minHeight: 'clamp(500px, 60vh, 700px)' } : undefined}>
-          
+
           {/* Content Container */}
           <div className={`${isMobile ? 'w-full text-center space-y-4 mt-2 mx-auto max-w-[100vw] overflow-x-hidden' : 'space-y-4 sm:space-y-6 lg:space-y-8 text-center lg:text-left'}`}>
             {/* Brand Badge - Mobile - Removed */}
-             <motion.div
-               ref={titleRef}
-               className="overflow-hidden"
-               initial={{ opacity: 0, x: shouldReduceMotion || isMobile ? 0 : -100, scale: shouldReduceMotion || isMobile ? 1 : 0.9 }}
-               animate={{ opacity: 1, x: 0, scale: 1 }}
-               transition={{ 
-                 duration: shouldReduceMotion || isMobile ? 0 : 1.5, 
-                 delay: shouldReduceMotion || isMobile ? 0 : 0.2,
-                 type: shouldReduceMotion || isMobile ? "tween" : "spring",
-                 stiffness: shouldReduceMotion || isMobile ? undefined : 60,
-                 damping: shouldReduceMotion || isMobile ? undefined : 15
-               }}
-               style={{ willChange: shouldReduceMotion || isMobile ? "auto" : "transform, opacity" }}
-             >
-               <motion.h1 
+            <motion.div
+              ref={titleRef}
+              className="overflow-hidden"
+              initial={{ opacity: 0, x: shouldReduceMotion || isMobile ? 0 : -100, scale: shouldReduceMotion || isMobile ? 1 : 0.9 }}
+              animate={{ opacity: 1, x: 0, scale: 1 }}
+              transition={{
+                duration: shouldReduceMotion || isMobile ? 0 : 1.5,
+                delay: shouldReduceMotion || isMobile ? 0 : 0.2,
+                type: shouldReduceMotion || isMobile ? "tween" : "spring",
+                stiffness: shouldReduceMotion || isMobile ? undefined : 60,
+                damping: shouldReduceMotion || isMobile ? undefined : 15
+              }}
+              style={{ willChange: shouldReduceMotion || isMobile ? "auto" : "transform, opacity" }}
+            >
+              <motion.h1
                 className={`${isMobile ? 'font-luxury text-[clamp(1.6rem,7vw,2.6rem)]' : 'font-luxury text-3xl md:text-4xl lg:text-5xl xl:text-6xl'} font-bold mb-3 text-slate-800 relative`}
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: shouldReduceMotion || isMobile ? 0 : 0.8, delay: shouldReduceMotion || isMobile ? 0 : 0.4 }}
-                style={{ 
+                style={{
                   filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.08))',
                   letterSpacing: '0.02em',
                   lineHeight: '1.2'
                 }}
               >
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2, duration: 0.8 }}
+                  className="font-luxury text-sm xs:text-base tracking-[0.3em] font-semibold text-primary mb-2 sm:mb-4 uppercase"
+                >
+                  Bexy Flowers
+                </motion.div>
                 Elegant Florals for Every Occasion
               </motion.h1>
 
-                   {/* Gold Arc - Mobile Only */}
-                   {isMobile && (
-                     <motion.div
-                       className="block w-[320px] h-[32px] mx-auto mt-1 mb-8 max-w-full"
-                       style={{ transformOrigin: 'center' }}
-                       initial={{ opacity: 0, y: 6, scaleX: 0.95 }}
-                       animate={{ opacity: 1, y: 0, scaleX: 1 }}
-                       transition={{ duration: 0.8, delay: 0.6 }}
-                     >
-                       <svg 
-                         width="100%" 
-                         height="100%" 
-                         viewBox="0 0 320 32" 
-                         fill="none" 
-                         xmlns="http://www.w3.org/2000/svg"
-                         className="mx-auto"
-                         style={{ filter: 'drop-shadow(0 2px 8px rgba(185,136,57,0.3))' }}
-                       >
-                         {/* Main elegant brush stroke arc */}
-                         <path 
-                           d="M20 22 Q80 8, 160 6 T300 22" 
-                           stroke="url(#goldGradient)" 
-                           strokeWidth="3" 
-                           fill="none"
-                           strokeLinecap="round"
-                           strokeLinejoin="round"
-                           opacity="0.95"
-                           />
-                         {/* Subtle secondary stroke for depth */}
-                         <path 
-                           d="M25 24 Q85 10, 160 8 T295 24" 
-                           stroke="#d4a574" 
-                           strokeWidth="1.5" 
-                           fill="none"
-                           strokeLinecap="round"
-                           strokeLinejoin="round"
-                           opacity="0.5"
-                           />
-                         {/* Accent highlights */}
-                         <path 
-                           d="M30 23 Q90 11, 160 9 T290 23" 
-                           stroke="#f0d9b5" 
-                           strokeWidth="0.8" 
-                           fill="none"
-                           strokeLinecap="round"
-                           strokeLinejoin="round"
-                           opacity="0.3"
-                           />
-                         
-                         {/* Decorative Gold Flowers Along Arc */}
-                         {/* Left flower */}
-                         <g transform="translate(60, 12)" opacity="0.8">
-                           <circle cx="0" cy="0" r="1.5" fill="#d4a574"/>
-                           <circle cx="-2" cy="0" r="1.2" fill="#b98839"/>
-                           <circle cx="2" cy="0" r="1.2" fill="#b98839"/>
-                           <circle cx="0" cy="-2" r="1.2" fill="#b98839"/>
-                           <circle cx="0" cy="2" r="1.2" fill="#b98839"/>
-                           <circle cx="-1.4" cy="-1.4" r="0.8" fill="#f0d9b5"/>
-                           <circle cx="1.4" cy="-1.4" r="0.8" fill="#f0d9b5"/>
-                           <circle cx="-1.4" cy="1.4" r="0.8" fill="#f0d9b5"/>
-                           <circle cx="1.4" cy="1.4" r="0.8" fill="#f0d9b5"/>
-                         </g>
-                         
-                         {/* Center flower (larger) */}
-                         <g transform="translate(160, 6)" opacity="0.9">
-                           <circle cx="0" cy="0" r="2" fill="#d4a574"/>
-                           <circle cx="-2.5" cy="0" r="1.5" fill="#b98839"/>
-                           <circle cx="2.5" cy="0" r="1.5" fill="#b98839"/>
-                           <circle cx="0" cy="-2.5" r="1.5" fill="#b98839"/>
-                           <circle cx="0" cy="2.5" r="1.5" fill="#b98839"/>
-                           <circle cx="-1.8" cy="-1.8" r="1" fill="#f0d9b5"/>
-                           <circle cx="1.8" cy="-1.8" r="1" fill="#f0d9b5"/>
-                           <circle cx="-1.8" cy="1.8" r="1" fill="#f0d9b5"/>
-                           <circle cx="1.8" cy="1.8" r="1" fill="#f0d9b5"/>
-                         </g>
-                         
-                         {/* Right flower */}
-                         <g transform="translate(260, 12)" opacity="0.8">
-                           <circle cx="0" cy="0" r="1.5" fill="#d4a574"/>
-                           <circle cx="-2" cy="0" r="1.2" fill="#b98839"/>
-                           <circle cx="2" cy="0" r="1.2" fill="#b98839"/>
-                           <circle cx="0" cy="-2" r="1.2" fill="#b98839"/>
-                           <circle cx="0" cy="2" r="1.2" fill="#b98839"/>
-                           <circle cx="-1.4" cy="-1.4" r="0.8" fill="#f0d9b5"/>
-                           <circle cx="1.4" cy="-1.4" r="0.8" fill="#f0d9b5"/>
-                           <circle cx="-1.4" cy="1.4" r="0.8" fill="#f0d9b5"/>
-                           <circle cx="1.4" cy="1.4" r="0.8" fill="#f0d9b5"/>
-                         </g>
-                         
-                         {/* Small accent flowers */}
-                         <g transform="translate(110, 9)" opacity="0.6">
-                           <circle cx="0" cy="0" r="1" fill="#d4a574"/>
-                           <circle cx="-1.2" cy="0" r="0.7" fill="#b98839"/>
-                           <circle cx="1.2" cy="0" r="0.7" fill="#b98839"/>
-                           <circle cx="0" cy="-1.2" r="0.7" fill="#b98839"/>
-                           <circle cx="0" cy="1.2" r="0.7" fill="#b98839"/>
-                         </g>
-                         
-                         {/* Small accent flowers - Right */}
-                         <g transform="translate(210, 9)" opacity="0.6">
-                           <circle cx="0" cy="0" r="1" fill="#d4a574"/>
-                           <circle cx="-1.2" cy="0" r="0.7" fill="#b98839"/>
-                           <circle cx="1.2" cy="0" r="0.7" fill="#b98839"/>
-                           <circle cx="0" cy="-1.2" r="0.7" fill="#b98839"/>
-                           <circle cx="0" cy="1.2" r="0.7" fill="#b98839"/>
-                         </g>
-                         
-                         <defs>
-                           <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                             <stop offset="0%" stopColor="#b98839" stopOpacity="0.6" />
-                             <stop offset="50%" stopColor="#d4a574" stopOpacity="0.95" />
-                             <stop offset="100%" stopColor="#b98839" stopOpacity="0.6" />
-                           </linearGradient>
-                         </defs>
-                       </svg>
-                     </motion.div>
-                   )}
-               
-               {/* Mobile CTA Button - Before subtitle */}
+              {/* Gold Arc - Mobile Only */}
+              {isMobile && (
+                <motion.div
+                  className="block w-[320px] h-[32px] mx-auto mt-1 mb-8 max-w-full"
+                  style={{ transformOrigin: 'center' }}
+                  initial={{ opacity: 0, y: 6, scaleX: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scaleX: 1 }}
+                  transition={{ duration: 0.8, delay: 0.6 }}
+                >
+                  <svg
+                    width="100%"
+                    height="100%"
+                    viewBox="0 0 320 32"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="mx-auto"
+                    style={{ filter: 'drop-shadow(0 2px 8px rgba(185,136,57,0.3))' }}
+                  >
+                    {/* Main elegant brush stroke arc */}
+                    <path
+                      d="M20 22 Q80 8, 160 6 T300 22"
+                      stroke="url(#goldGradient)"
+                      strokeWidth="3"
+                      fill="none"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      opacity="0.95"
+                    />
+                    {/* Subtle secondary stroke for depth */}
+                    <path
+                      d="M25 24 Q85 10, 160 8 T295 24"
+                      stroke="#d4a574"
+                      strokeWidth="1.5"
+                      fill="none"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      opacity="0.5"
+                    />
+                    {/* Accent highlights */}
+                    <path
+                      d="M30 23 Q90 11, 160 9 T290 23"
+                      stroke="#f0d9b5"
+                      strokeWidth="0.8"
+                      fill="none"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      opacity="0.3"
+                    />
+
+                    {/* Decorative Gold Flowers Along Arc */}
+                    {/* Left flower */}
+                    <g transform="translate(60, 12)" opacity="0.8">
+                      <circle cx="0" cy="0" r="1.5" fill="#d4a574" />
+                      <circle cx="-2" cy="0" r="1.2" fill="#b98839" />
+                      <circle cx="2" cy="0" r="1.2" fill="#b98839" />
+                      <circle cx="0" cy="-2" r="1.2" fill="#b98839" />
+                      <circle cx="0" cy="2" r="1.2" fill="#b98839" />
+                      <circle cx="-1.4" cy="-1.4" r="0.8" fill="#f0d9b5" />
+                      <circle cx="1.4" cy="-1.4" r="0.8" fill="#f0d9b5" />
+                      <circle cx="-1.4" cy="1.4" r="0.8" fill="#f0d9b5" />
+                      <circle cx="1.4" cy="1.4" r="0.8" fill="#f0d9b5" />
+                    </g>
+
+                    {/* Center flower (larger) */}
+                    <g transform="translate(160, 6)" opacity="0.9">
+                      <circle cx="0" cy="0" r="2" fill="#d4a574" />
+                      <circle cx="-2.5" cy="0" r="1.5" fill="#b98839" />
+                      <circle cx="2.5" cy="0" r="1.5" fill="#b98839" />
+                      <circle cx="0" cy="-2.5" r="1.5" fill="#b98839" />
+                      <circle cx="0" cy="2.5" r="1.5" fill="#b98839" />
+                      <circle cx="-1.8" cy="-1.8" r="1" fill="#f0d9b5" />
+                      <circle cx="1.8" cy="-1.8" r="1" fill="#f0d9b5" />
+                      <circle cx="-1.8" cy="1.8" r="1" fill="#f0d9b5" />
+                      <circle cx="1.8" cy="1.8" r="1" fill="#f0d9b5" />
+                    </g>
+
+                    {/* Right flower */}
+                    <g transform="translate(260, 12)" opacity="0.8">
+                      <circle cx="0" cy="0" r="1.5" fill="#d4a574" />
+                      <circle cx="-2" cy="0" r="1.2" fill="#b98839" />
+                      <circle cx="2" cy="0" r="1.2" fill="#b98839" />
+                      <circle cx="0" cy="-2" r="1.2" fill="#b98839" />
+                      <circle cx="0" cy="2" r="1.2" fill="#b98839" />
+                      <circle cx="-1.4" cy="-1.4" r="0.8" fill="#f0d9b5" />
+                      <circle cx="1.4" cy="-1.4" r="0.8" fill="#f0d9b5" />
+                      <circle cx="-1.4" cy="1.4" r="0.8" fill="#f0d9b5" />
+                      <circle cx="1.4" cy="1.4" r="0.8" fill="#f0d9b5" />
+                    </g>
+
+                    {/* Small accent flowers */}
+                    <g transform="translate(110, 9)" opacity="0.6">
+                      <circle cx="0" cy="0" r="1" fill="#d4a574" />
+                      <circle cx="-1.2" cy="0" r="0.7" fill="#b98839" />
+                      <circle cx="1.2" cy="0" r="0.7" fill="#b98839" />
+                      <circle cx="0" cy="-1.2" r="0.7" fill="#b98839" />
+                      <circle cx="0" cy="1.2" r="0.7" fill="#b98839" />
+                    </g>
+
+                    {/* Small accent flowers - Right */}
+                    <g transform="translate(210, 9)" opacity="0.6">
+                      <circle cx="0" cy="0" r="1" fill="#d4a574" />
+                      <circle cx="-1.2" cy="0" r="0.7" fill="#b98839" />
+                      <circle cx="1.2" cy="0" r="0.7" fill="#b98839" />
+                      <circle cx="0" cy="-1.2" r="0.7" fill="#b98839" />
+                      <circle cx="0" cy="1.2" r="0.7" fill="#b98839" />
+                    </g>
+
+                    <defs>
+                      <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stopColor="#b98839" stopOpacity="0.6" />
+                        <stop offset="50%" stopColor="#d4a574" stopOpacity="0.95" />
+                        <stop offset="100%" stopColor="#b98839" stopOpacity="0.6" />
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                </motion.div>
+              )}
+
+              {/* Mobile CTA Button - Before subtitle */}
               {isMobile && (
                 <motion.button
                   type="button"
@@ -342,33 +348,32 @@ const UltraHero = () => {
                   Free consultation • No obligation
                 </motion.p>
               )}
-               
-               {/* Subtitle with elegant reveal */}
-               <motion.div
-                 className={`relative overflow-hidden ${isMobile ? '' : ''}`}
-                 initial={{ opacity: 0, y: shouldReduceMotion || isMobile ? 0 : 30 }}
-                 animate={{ opacity: 1, y: 0 }}
-                 transition={{ duration: shouldReduceMotion || isMobile ? 0 : 1, delay: shouldReduceMotion || isMobile ? 0 : 0.8 }}
-                 style={{ willChange: shouldReduceMotion || isMobile ? "auto" : "transform, opacity" }}
-               >
-                <motion.p 
-                  className={`${isMobile ? 'text-[1.05rem] text-gray-600 font-light max-w-[62ch] mx-auto mb-6' : 'text-sm xs:text-base sm:text-lg'} font-light tracking-wide ${isMobile ? '' : 'mb-2 px-2 sm:px-0'} ${
-                    isMobile 
-                      ? 'font-luxury' 
+
+              {/* Subtitle with elegant reveal */}
+              <motion.div
+                className={`relative overflow-hidden ${isMobile ? '' : ''}`}
+                initial={{ opacity: 0, y: shouldReduceMotion || isMobile ? 0 : 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: shouldReduceMotion || isMobile ? 0 : 1, delay: shouldReduceMotion || isMobile ? 0 : 0.8 }}
+                style={{ willChange: shouldReduceMotion || isMobile ? "auto" : "transform, opacity" }}
+              >
+                <motion.p
+                  className={`${isMobile ? 'text-[1.05rem] text-gray-600 font-light max-w-[62ch] mx-auto mb-6' : 'text-sm xs:text-base sm:text-lg'} font-light tracking-wide ${isMobile ? '' : 'mb-2 px-2 sm:px-0'} ${isMobile
+                      ? 'font-luxury'
                       : 'font-luxury text-primary/100'
-                  }`}
-                   initial={{ opacity: shouldReduceMotion || isMobile ? 1 : 0.5, x: shouldReduceMotion || isMobile ? 0 : -50 }}
-                   animate={{ opacity: 1, x: 0 }}
-                   transition={{ duration: shouldReduceMotion || isMobile ? 0 : 1.2, delay: shouldReduceMotion || isMobile ? 0 : 1, ease: "easeOut" }}
-                   style={{ willChange: shouldReduceMotion || isMobile ? "auto" : "transform, opacity" }}
+                    }`}
+                  initial={{ opacity: shouldReduceMotion || isMobile ? 1 : 0.5, x: shouldReduceMotion || isMobile ? 0 : -50 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: shouldReduceMotion || isMobile ? 0 : 1.2, delay: shouldReduceMotion || isMobile ? 0 : 1, ease: "easeOut" }}
+                  style={{ willChange: shouldReduceMotion || isMobile ? "auto" : "transform, opacity" }}
                 >
-                  <span 
+                  <span
                     className={`inline-block ${isMobile ? 'text-slate-800 font-medium drop-shadow-sm' : 'text-slate-800 font-medium drop-shadow-md'}`}
-                    style={{ 
+                    style={{
                       fontSize: isMobile ? 'clamp(0.95rem, 3.5vw, 1.15rem)' : undefined,
                       lineHeight: isMobile ? '1.6' : '1.5',
-                      textShadow: isMobile 
-                        ? '0 1px 2px rgba(255,255,255,0.8), 0 2px 4px rgba(0,0,0,0.15)' 
+                      textShadow: isMobile
+                        ? '0 1px 2px rgba(255,255,255,0.8), 0 2px 4px rgba(0,0,0,0.15)'
                         : '0 1px 3px rgba(255,255,255,0.9), 0 2px 8px rgba(0,0,0,0.2)',
                       background: isMobile ? undefined : 'linear-gradient(135deg, rgba(255,255,255,0.6), rgba(229,228,226,0.4))',
                       padding: isMobile ? '0.25rem 0.5rem' : '0.5rem 1rem',
@@ -378,60 +383,60 @@ const UltraHero = () => {
                   >
                     Crafting timeless beauty through refined floral artistry
                   </span>
-                   
-                   {/* Decorative line - hidden on mobile */}
-                   {!isMobile && (
-                     <motion.div
-                       className="absolute -bottom-1 left-0 h-px bg-gradient-to-r from-primary/50 to-transparent"
-                       initial={{ width: 0 }}
-                       animate={{ width: "60%" }}
-                       transition={{ duration: 1.5, delay: 1.8, ease: "easeOut" }}
-                     />
-                   )}
-                 </motion.p>
-               </motion.div>
-               
-               {/* Mobile CTA Button - After subtitle - REMOVED from here */}
-               
-               {/* Description with typewriter effect - Hidden on mobile */}
-               {!isMobile && (
-                 <motion.div
-                   className="relative overflow-hidden"
-                   initial={{ opacity: 0, y: 30 }}
-                   animate={{ opacity: 1, y: 0 }}
-                   transition={{ duration: 1, delay: 1.2 }}
-                   style={{ willChange: "transform, opacity" }}
-                 >
-                   <motion.p 
-                     className="font-body text-xs xs:text-sm sm:text-base text-muted-foreground leading-relaxed max-w-2xl relative px-2 sm:px-0"
-                     initial={{ opacity: 0 }}
-                     animate={{ opacity: 1 }}
-                     transition={{ duration: 0.5, delay: 1.4 }}
-                     style={{ willChange: "opacity" }}
-                   >
-                     <motion.span
-                       className="inline-block"
-                       initial={{ opacity: 0 }}
-                       animate={{ opacity: 1 }}
-                       transition={{ duration: 0.1, delay: 1.6 }}
-                     >
-                       From intimate weddings to grand celebrations, we create bespoke arrangements that capture life's most precious moments with unparalleled elegance.
-                     </motion.span>
-                     
+
+                  {/* Decorative line - hidden on mobile */}
+                  {!isMobile && (
+                    <motion.div
+                      className="absolute -bottom-1 left-0 h-px bg-gradient-to-r from-primary/50 to-transparent"
+                      initial={{ width: 0 }}
+                      animate={{ width: "60%" }}
+                      transition={{ duration: 1.5, delay: 1.8, ease: "easeOut" }}
+                    />
+                  )}
+                </motion.p>
+              </motion.div>
+
+              {/* Mobile CTA Button - After subtitle - REMOVED from here */}
+
+              {/* Description with typewriter effect - Hidden on mobile */}
+              {!isMobile && (
+                <motion.div
+                  className="relative overflow-hidden"
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 1, delay: 1.2 }}
+                  style={{ willChange: "transform, opacity" }}
+                >
+                  <motion.p
+                    className="font-body text-xs xs:text-sm sm:text-base text-muted-foreground leading-relaxed max-w-2xl relative px-2 sm:px-0"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.5, delay: 1.4 }}
+                    style={{ willChange: "opacity" }}
+                  >
+                    <motion.span
+                      className="inline-block"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.1, delay: 1.6 }}
+                    >
+                      From intimate weddings to grand celebrations, we create bespoke arrangements that capture life's most precious moments with unparalleled elegance.
+                    </motion.span>
+
                     {/* Removed typing cursor */}
-                     
-                     {/* Background highlight */}
-                     <motion.div
-                       className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-yellow-400/5 rounded-lg"
-                       initial={{ scaleX: 0, opacity: 0 }}
-                       animate={{ scaleX: 1, opacity: 1 }}
-                       transition={{ duration: 2, delay: 2, ease: "easeOut" }}
-                       style={{ transformOrigin: "left" }}
-                     />
-                   </motion.p>
-                 </motion.div>
-               )}
-             </motion.div>
+
+                    {/* Background highlight */}
+                    <motion.div
+                      className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-yellow-400/5 rounded-lg"
+                      initial={{ scaleX: 0, opacity: 0 }}
+                      animate={{ scaleX: 1, opacity: 1 }}
+                      transition={{ duration: 2, delay: 2, ease: "easeOut" }}
+                      style={{ transformOrigin: "left" }}
+                    />
+                  </motion.p>
+                </motion.div>
+              )}
+            </motion.div>
 
 
             {/* Action Buttons - Desktop */}
@@ -441,8 +446,8 @@ const UltraHero = () => {
                 className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start"
                 initial={{ opacity: 0, y: 30, scale: 0.9 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={{ 
-                  duration: 1, 
+                transition={{
+                  duration: 1,
                   delay: 0.6,
                   type: "spring",
                   stiffness: 100,
@@ -451,7 +456,7 @@ const UltraHero = () => {
                 style={{ willChange: "transform, opacity" }}
               >
                 <motion.div
-                  whileHover={{ 
+                  whileHover={{
                     scale: 1.05,
                     y: -2,
                     transition: { duration: 0.3 }
@@ -485,9 +490,9 @@ const UltraHero = () => {
                     />
                   </Button>
                 </motion.div>
-              
+
                 <motion.div
-                  whileHover={{ 
+                  whileHover={{
                     scale: 1.05,
                     y: -2,
                     transition: { duration: 0.3 }
@@ -535,143 +540,143 @@ const UltraHero = () => {
               </motion.p>
             )}
 
-             {/* Statistics with Enhanced Animations - Hidden on mobile */}
-             {!isMobile && (
-               <motion.div
-                 className="grid grid-cols-3 gap-2 xs:gap-3 sm:gap-4 lg:gap-6 xl:gap-8 pt-4 sm:pt-6 lg:pt-8"
-               initial={{ opacity: 0, y: shouldReduceMotion || isMobile ? 0 : 50, scale: shouldReduceMotion || isMobile ? 1 : 0.9 }}
-               animate={{ opacity: 1, y: 0, scale: 1 }}
-               transition={{ 
-                 duration: shouldReduceMotion || isMobile ? 0 : 1.2, 
-                 delay: shouldReduceMotion || isMobile ? 0 : 1.8,
-                 type: shouldReduceMotion || isMobile ? "tween" : "spring",
-                 stiffness: shouldReduceMotion || isMobile ? undefined : 60,
-                 damping: shouldReduceMotion || isMobile ? undefined : 15
-               }}
-               style={{ willChange: shouldReduceMotion || isMobile ? "auto" : "transform, opacity" }}
-             >
-               {[
-                 { number: "1+", label: "Years of Excellence", color: "#c6a151" },
-                 { number: "100+", label: "Premium Varieties", color: "#ffd700" },
-                 { number: "98%", label: "Client Satisfaction", color: "#e4b55c" }
-               ].map((stat, index) => (
-                  <motion.div 
-                   key={index}
-                   className="text-center group cursor-pointer relative"
-                   initial={{ opacity: 0, y: shouldReduceMotion || isMobile ? 0 : 30, rotateX: shouldReduceMotion || isMobile ? 0 : -45 }}
-                   animate={{ opacity: 1, y: 0, rotateX: 0 }}
-                   transition={{ 
-                     duration: shouldReduceMotion || isMobile ? 0 : 0.8, 
-                     delay: shouldReduceMotion || isMobile ? 0 : 2 + index * 0.3,
-                     type: shouldReduceMotion || isMobile ? "tween" : "spring",
-                     stiffness: shouldReduceMotion || isMobile ? undefined : 100,
-                     damping: shouldReduceMotion || isMobile ? undefined : 15
-                   }}
-                   whileHover={isMobile ? {} : { 
-                     scale: 1.08,
-                     y: -8,
-                     rotateY: 5,
-                     transition: { duration: 0.4, ease: "easeOut" }
-                   }}
-                   style={{ willChange: shouldReduceMotion || isMobile ? "auto" : "transform, opacity" }}
-                 >
-                   {/* Background glow effect */}
-                   <motion.div
-                     className="absolute inset-0 bg-gradient-radial from-primary/10 via-transparent to-transparent rounded-2xl blur-xl"
-                     initial={{ scale: 0, opacity: 0 }}
-                     animate={{ scale: 1, opacity: 1 }}
-                     transition={{ duration: 1, delay: 2.5 + index * 0.3 }}
-                     whileHover={{
-                       scale: 1.2,
-                       opacity: 0.3,
-                       transition: { duration: 0.3 }
-                     }}
-                   />
-                   
-                   {/* Number with counting animation */}
-                   <motion.div 
-                     className="font-luxury text-xl xs:text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground relative z-10"
-                     initial={{ scale: shouldReduceMotion || isMobile ? 1 : 0.5, opacity: shouldReduceMotion || isMobile ? 1 : 0 }}
-                     animate={{ scale: 1, opacity: 1 }}
-                     transition={{ 
-                       duration: shouldReduceMotion || isMobile ? 0 : 0.8, 
-                       delay: shouldReduceMotion || isMobile ? 0 : 2.2 + index * 0.3,
-                       type: shouldReduceMotion || isMobile ? "tween" : "spring",
-                       stiffness: shouldReduceMotion || isMobile ? undefined : 200,
-                       damping: shouldReduceMotion || isMobile ? undefined : 15
-                     }}
-                     whileHover={isMobile ? {} : { 
-                       color: stat.color,
-                       scale: 1.1,
-                       textShadow: `0 0 20px ${stat.color}40`,
-                       transition: { duration: 0.3 }
-                     }}
-                     style={{ willChange: shouldReduceMotion || isMobile ? "auto" : "transform, opacity" }}
-                   >
-                     <motion.span
-                       initial={{ opacity: 0, y: 20 }}
-                       animate={{ opacity: 1, y: 0 }}
-                       transition={{ duration: 0.6, delay: 2.4 + index * 0.3 }}
-                     >
-                       {stat.number}
-                     </motion.span>
-                     
-                     {/* Animated underline with color */}
-                     <motion.div
-                       className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 h-0.5 rounded-full"
-                       style={{ backgroundColor: stat.color }}
-                       initial={{ width: 0, opacity: 0 }}
-                       animate={{ width: "80%", opacity: 1 }}
-                       transition={{ duration: 1, delay: 2.8 + index * 0.3, ease: "easeOut" }}
-                       whileHover={{
-                         width: "100%",
-                         boxShadow: `0 0 10px ${stat.color}60`,
-                         transition: { duration: 0.3 }
-                       }}
-                     />
-                   </motion.div>
-                   
-                   {/* Label with typewriter effect */}
-                   <motion.div 
-                     className="font-body text-xs xs:text-sm text-muted-foreground mt-1 sm:mt-2 relative z-10"
-                     initial={{ opacity: shouldReduceMotion || isMobile ? 1 : 0, y: shouldReduceMotion || isMobile ? 0 : 10 }}
-                     animate={{ opacity: 1, y: 0 }}
-                     transition={{ duration: shouldReduceMotion || isMobile ? 0 : 0.6, delay: shouldReduceMotion || isMobile ? 0 : 2.6 + index * 0.3 }}
-                     whileHover={isMobile ? {} : { 
-                       color: stat.color,
-                       scale: 1.05,
-                       transition: { duration: 0.3 }
-                     }}
-                     style={{ willChange: shouldReduceMotion || isMobile ? "auto" : "transform, opacity" }}
-                   >
-                     <motion.span
-                       className="inline-block"
-                       initial={{ opacity: 0 }}
-                       animate={{ opacity: 1 }}
-                       transition={{ duration: 0.1, delay: 2.8 + index * 0.3 }}
-                     >
-                       {stat.label}
-                     </motion.span>
-                     
-                     {/* Decorative dot */}
-                     <motion.div
-                       className="absolute -right-2 top-1/2 transform -translate-y-1/2 w-1 h-1 rounded-full"
-                       style={{ backgroundColor: stat.color }}
-                       initial={{ scale: 0, opacity: 0 }}
-                       animate={{ scale: 1, opacity: 1 }}
-                       transition={{ duration: 0.4, delay: 3 + index * 0.3 }}
-                       whileHover={{
-                         scale: 1.5,
-                         boxShadow: `0 0 8px ${stat.color}80`,
-                         transition: { duration: 0.3 }
-                       }}
-                     />
-                   </motion.div>
-                   
-                 </motion.div>
-               ))}
-             </motion.div>
-             )}
+            {/* Statistics with Enhanced Animations - Hidden on mobile */}
+            {!isMobile && (
+              <motion.div
+                className="grid grid-cols-3 gap-2 xs:gap-3 sm:gap-4 lg:gap-6 xl:gap-8 pt-4 sm:pt-6 lg:pt-8"
+                initial={{ opacity: 0, y: shouldReduceMotion || isMobile ? 0 : 50, scale: shouldReduceMotion || isMobile ? 1 : 0.9 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{
+                  duration: shouldReduceMotion || isMobile ? 0 : 1.2,
+                  delay: shouldReduceMotion || isMobile ? 0 : 1.8,
+                  type: shouldReduceMotion || isMobile ? "tween" : "spring",
+                  stiffness: shouldReduceMotion || isMobile ? undefined : 60,
+                  damping: shouldReduceMotion || isMobile ? undefined : 15
+                }}
+                style={{ willChange: shouldReduceMotion || isMobile ? "auto" : "transform, opacity" }}
+              >
+                {[
+                  { number: "1+", label: "Years of Excellence", color: "#c6a151" },
+                  { number: "100+", label: "Premium Varieties", color: "#ffd700" },
+                  { number: "98%", label: "Client Satisfaction", color: "#e4b55c" }
+                ].map((stat, index) => (
+                  <motion.div
+                    key={index}
+                    className="text-center group cursor-pointer relative"
+                    initial={{ opacity: 0, y: shouldReduceMotion || isMobile ? 0 : 30, rotateX: shouldReduceMotion || isMobile ? 0 : -45 }}
+                    animate={{ opacity: 1, y: 0, rotateX: 0 }}
+                    transition={{
+                      duration: shouldReduceMotion || isMobile ? 0 : 0.8,
+                      delay: shouldReduceMotion || isMobile ? 0 : 2 + index * 0.3,
+                      type: shouldReduceMotion || isMobile ? "tween" : "spring",
+                      stiffness: shouldReduceMotion || isMobile ? undefined : 100,
+                      damping: shouldReduceMotion || isMobile ? undefined : 15
+                    }}
+                    whileHover={isMobile ? {} : {
+                      scale: 1.08,
+                      y: -8,
+                      rotateY: 5,
+                      transition: { duration: 0.4, ease: "easeOut" }
+                    }}
+                    style={{ willChange: shouldReduceMotion || isMobile ? "auto" : "transform, opacity" }}
+                  >
+                    {/* Background glow effect */}
+                    <motion.div
+                      className="absolute inset-0 bg-gradient-radial from-primary/10 via-transparent to-transparent rounded-2xl blur-xl"
+                      initial={{ scale: 0, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ duration: 1, delay: 2.5 + index * 0.3 }}
+                      whileHover={{
+                        scale: 1.2,
+                        opacity: 0.3,
+                        transition: { duration: 0.3 }
+                      }}
+                    />
+
+                    {/* Number with counting animation */}
+                    <motion.div
+                      className="font-luxury text-xl xs:text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground relative z-10"
+                      initial={{ scale: shouldReduceMotion || isMobile ? 1 : 0.5, opacity: shouldReduceMotion || isMobile ? 1 : 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{
+                        duration: shouldReduceMotion || isMobile ? 0 : 0.8,
+                        delay: shouldReduceMotion || isMobile ? 0 : 2.2 + index * 0.3,
+                        type: shouldReduceMotion || isMobile ? "tween" : "spring",
+                        stiffness: shouldReduceMotion || isMobile ? undefined : 200,
+                        damping: shouldReduceMotion || isMobile ? undefined : 15
+                      }}
+                      whileHover={isMobile ? {} : {
+                        color: stat.color,
+                        scale: 1.1,
+                        textShadow: `0 0 20px ${stat.color}40`,
+                        transition: { duration: 0.3 }
+                      }}
+                      style={{ willChange: shouldReduceMotion || isMobile ? "auto" : "transform, opacity" }}
+                    >
+                      <motion.span
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6, delay: 2.4 + index * 0.3 }}
+                      >
+                        {stat.number}
+                      </motion.span>
+
+                      {/* Animated underline with color */}
+                      <motion.div
+                        className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 h-0.5 rounded-full"
+                        style={{ backgroundColor: stat.color }}
+                        initial={{ width: 0, opacity: 0 }}
+                        animate={{ width: "80%", opacity: 1 }}
+                        transition={{ duration: 1, delay: 2.8 + index * 0.3, ease: "easeOut" }}
+                        whileHover={{
+                          width: "100%",
+                          boxShadow: `0 0 10px ${stat.color}60`,
+                          transition: { duration: 0.3 }
+                        }}
+                      />
+                    </motion.div>
+
+                    {/* Label with typewriter effect */}
+                    <motion.div
+                      className="font-body text-xs xs:text-sm text-muted-foreground mt-1 sm:mt-2 relative z-10"
+                      initial={{ opacity: shouldReduceMotion || isMobile ? 1 : 0, y: shouldReduceMotion || isMobile ? 0 : 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: shouldReduceMotion || isMobile ? 0 : 0.6, delay: shouldReduceMotion || isMobile ? 0 : 2.6 + index * 0.3 }}
+                      whileHover={isMobile ? {} : {
+                        color: stat.color,
+                        scale: 1.05,
+                        transition: { duration: 0.3 }
+                      }}
+                      style={{ willChange: shouldReduceMotion || isMobile ? "auto" : "transform, opacity" }}
+                    >
+                      <motion.span
+                        className="inline-block"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.1, delay: 2.8 + index * 0.3 }}
+                      >
+                        {stat.label}
+                      </motion.span>
+
+                      {/* Decorative dot */}
+                      <motion.div
+                        className="absolute -right-2 top-1/2 transform -translate-y-1/2 w-1 h-1 rounded-full"
+                        style={{ backgroundColor: stat.color }}
+                        initial={{ scale: 0, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ duration: 0.4, delay: 3 + index * 0.3 }}
+                        whileHover={{
+                          scale: 1.5,
+                          boxShadow: `0 0 8px ${stat.color}80`,
+                          transition: { duration: 0.3 }
+                        }}
+                      />
+                    </motion.div>
+
+                  </motion.div>
+                ))}
+              </motion.div>
+            )}
           </div>
 
           {/* Right Content - Hidden on mobile if single column */}
@@ -679,18 +684,18 @@ const UltraHero = () => {
             {/* Flower Image with Clean Transitions */}
             <motion.div
               className="relative"
-              initial={{ 
-                opacity: shouldReduceMotion ? 1 : 0, 
-                x: shouldReduceMotion ? 0 : 300, 
+              initial={{
+                opacity: shouldReduceMotion ? 1 : 0,
+                x: shouldReduceMotion ? 0 : 300,
                 scale: shouldReduceMotion ? 1 : 0.8
               }}
-              animate={{ 
-                opacity: 1, 
-                x: 0, 
+              animate={{
+                opacity: 1,
+                x: 0,
                 scale: 1
               }}
-              transition={{ 
-                duration: shouldReduceMotion ? 0 : 1.5, 
+              transition={{
+                duration: shouldReduceMotion ? 0 : 1.5,
                 delay: shouldReduceMotion ? 0 : 0.3,
                 ease: [0.25, 0.46, 0.45, 0.94]
               }}
@@ -698,7 +703,7 @@ const UltraHero = () => {
             >
               <div className="relative w-full perspective-1000" style={{ transformStyle: "preserve-3d", willChange: "transform", height: 'clamp(320px, 40vh, 500px)' }}>
                 {/* Subtle glow effect */}
-                <motion.div 
+                <motion.div
                   className="absolute inset-0 bg-gradient-radial from-primary/10 via-primary/5 to-transparent rounded-full blur-3xl scale-110"
                   animate={{
                     scale: [1.1, 1.2, 1.1],
@@ -710,22 +715,22 @@ const UltraHero = () => {
                     ease: "easeInOut"
                   }}
                 />
-                
+
                 {/* Main flower image */}
                 <motion.img
                   src="/assets/flower1.webp"
                   alt="Elegant flower for every single occasion"
                   className="relative w-full h-full object-contain z-10 ml-4 md:ml-6 lg:ml-8"
-                  initial={{ 
+                  initial={{
                     filter: shouldReduceMotion ? "drop-shadow(0 20px 40px rgba(0,0,0,0.5))" : "blur(8px) brightness(0.9) drop-shadow(0 0 15px rgba(0,0,0,0.6)) drop-shadow(0 0 25px rgba(0,0,0,0.4))",
                     scale: shouldReduceMotion ? 1 : 0.95
                   }}
-                  animate={{ 
+                  animate={{
                     filter: "drop-shadow(0 20px 40px rgba(0,0,0,0.5))",
                     scale: 1
                   }}
-                  transition={{ 
-                    duration: shouldReduceMotion ? 0 : 1.2, 
+                  transition={{
+                    duration: shouldReduceMotion ? 0 : 1.2,
                     delay: shouldReduceMotion ? 0 : 0.5,
                     ease: "easeOut"
                   }}
@@ -737,7 +742,7 @@ const UltraHero = () => {
                     willChange: shouldReduceMotion ? "auto" : "transform, filter"
                   }}
                 />
-                
+
               </div>
             </motion.div>
 
@@ -746,8 +751,8 @@ const UltraHero = () => {
               className="absolute -right-12 md:-right-16 lg:-right-24 top-8 space-y-4 lg:space-y-6 hidden xl:block"
               initial={{ opacity: 0, x: shouldReduceMotion ? 0 : 50, scale: shouldReduceMotion ? 1 : 0.9 }}
               animate={{ opacity: 1, x: 0, scale: 1 }}
-              transition={{ 
-                duration: shouldReduceMotion ? 0 : 1, 
+              transition={{
+                duration: shouldReduceMotion ? 0 : 1,
                 delay: shouldReduceMotion ? 0 : 0.5,
                 type: shouldReduceMotion ? "tween" : "spring",
                 stiffness: shouldReduceMotion ? undefined : 80,
@@ -756,43 +761,43 @@ const UltraHero = () => {
               style={{ willChange: shouldReduceMotion ? "auto" : "transform, opacity" }}
             >
               {[
-                { 
-                  icon: "M12 2L15.09 8.26L22 9L17 14L18.18 21L12 17.27L5.82 21L7 14L2 9L8.91 8.26L12 2Z", 
+                {
+                  icon: "M12 2L15.09 8.26L22 9L17 14L18.18 21L12 17.27L5.82 21L7 14L2 9L8.91 8.26L12 2Z",
                   title: "Wedding Arrangements",
                   link: "/wedding-events"
                 },
-                { 
-                  icon: "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z", 
+                {
+                  icon: "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z",
                   title: "Custom Bouquets",
                   link: "/customize"
                 },
-                { 
-                  icon: "M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zm-7-7c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm0 1c1.93 0 3.5 1.57 3.5 3.5V17h-7v-.5c0-1.93 1.57-3.5 3.5-3.5z", 
+                {
+                  icon: "M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zm-7-7c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm0 1c1.93 0 3.5 1.57 3.5 3.5V17h-7v-.5c0-1.93 1.57-3.5 3.5-3.5z",
                   title: "Event Decor",
                   link: "/wedding-events"
                 }
               ].map((service, index) => (
-                <motion.div 
+                <motion.div
                   key={index}
                   className="relative group cursor-pointer"
                   initial={{ opacity: 0, x: 30, y: 20 }}
                   animate={{ opacity: 1, x: 0, y: 0 }}
-                  transition={{ 
-                    duration: 0.8, 
+                  transition={{
+                    duration: 0.8,
                     delay: 0.7 + index * 0.2,
                     type: "spring",
                     stiffness: 100,
                     damping: 15
                   }}
-                  whileHover={{ 
-                    y: -8, 
+                  whileHover={{
+                    y: -8,
                     scale: 1.05,
                     transition: { duration: 0.3, ease: "easeOut" }
                   }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => navigate(service.link)}
                 >
-                  <motion.div 
+                  <motion.div
                     className="bg-white/15 backdrop-blur-xl border border-white/30 rounded-2xl p-4 pr-6 shadow-2xl hover:shadow-[0_30px_60px_rgba(198,161,81,0.25)] hover:bg-white/25 hover:border-[rgba(198,161,81,0.5)] transition-all duration-500 relative overflow-hidden"
                     whileHover={{
                       borderColor: "rgba(198,161,81,0.6)",
@@ -800,7 +805,7 @@ const UltraHero = () => {
                     }}
                   >
                     <div className="flex items-center gap-3 relative z-10">
-                      <motion.div 
+                      <motion.div
                         className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center shadow-lg"
                         whileHover={{
                           scale: 1.1,
@@ -809,9 +814,9 @@ const UltraHero = () => {
                           transition: { duration: 0.3 }
                         }}
                       >
-                        <motion.svg 
-                          className="w-5 h-5 text-white drop-shadow-lg" 
-                          fill="currentColor" 
+                        <motion.svg
+                          className="w-5 h-5 text-white drop-shadow-lg"
+                          fill="currentColor"
                           viewBox="0 0 24 24"
                           whileHover={{
                             scale: 1.1,
@@ -819,10 +824,10 @@ const UltraHero = () => {
                             transition: { duration: 0.3 }
                           }}
                         >
-                          <path d={service.icon}/>
+                          <path d={service.icon} />
                         </motion.svg>
                       </motion.div>
-                      <motion.span 
+                      <motion.span
                         className="font-body font-semibold text-white drop-shadow-lg"
                         whileHover={{
                           color: "#c6a151",
@@ -832,7 +837,7 @@ const UltraHero = () => {
                         {service.title}
                       </motion.span>
                     </div>
-                    
+
                     {/* Animated background gradient */}
                     <motion.div
                       className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-yellow-400/5 opacity-0 group-hover:opacity-100"
@@ -910,14 +915,14 @@ const UltraHero = () => {
               <motion.div
                 className="absolute left-1/2 top-3 w-1.5 h-1.5 bg-black rounded-full"
                 style={{ transform: 'translateX(-50%)' }}
-                animate={{ 
+                animate={{
                   y: [0, 14, 0],
                   opacity: [1, 0, 1]
                 }}
-                transition={{ 
-                  duration: 1.6, 
-                  repeat: Infinity, 
-                  ease: "easeInOut" 
+                transition={{
+                  duration: 1.6,
+                  repeat: Infinity,
+                  ease: "easeInOut"
                 }}
               />
             </div>
