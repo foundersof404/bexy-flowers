@@ -22,19 +22,19 @@ const GOLD_HEX = "#c79e48";
 
 // Event flowers images - automatically rotating (use .webp optimized versions)
 const eventFlowersImages = [
-  "/assets/wedding % events/events/IMG-20251126-WA0018.webp",
-  "/assets/wedding % events/events/IMG-20251126-WA0020.webp",
-  "/assets/wedding % events/events/IMG-20251126-WA0022.webp",
-  "/assets/wedding % events/events/IMG-20251126-WA0023.webp",
-  "/assets/wedding % events/events/IMG-20251126-WA0024.webp",
-  "/assets/wedding % events/events/WhatsApp Image 2025-11-26 at 03.14.12_6dbd359d.webp",
+  "/assets/wedding-events/events/IMG-20251126-WA0018.webp",
+  "/assets/wedding-events/events/IMG-20251126-WA0020.webp",
+  "/assets/wedding-events/events/IMG-20251126-WA0022.webp",
+  "/assets/wedding-events/events/IMG-20251126-WA0023.webp",
+  "/assets/wedding-events/events/IMG-20251126-WA0024.webp",
+  "/assets/wedding-events/events/WhatsApp Image 2025-11-26 at 03.14.12_6dbd359d.webp",
 ];
 
 // Wedding flowers images - automatically rotating (use .webp optimized versions)
 const weddingFlowersImages = [
-  "/assets/wedding % events/wedding/IMG_1784.webp",
-  "/assets/wedding % events/wedding/IMG-20251126-WA0019.webp",
-  "/assets/wedding % events/wedding/IMG-20251126-WA0021.webp",
+  "/assets/wedding-events/wedding/IMG_1784.webp",
+  "/assets/wedding-events/wedding/IMG-20251126-WA0019.webp",
+  "/assets/wedding-events/wedding/IMG-20251126-WA0021.webp",
 ];
 
 const WeddingHero = () => {
@@ -276,7 +276,7 @@ const ServiceSection = ({
     // Preload all images for smooth transitions (no blank moments)
     imageArray.forEach((imgSrc) => {
       const img = new Image();
-      img.src = imgSrc;
+      img.src = encodeImageUrl(imgSrc);
     });
     
     const interval = setInterval(() => {
@@ -496,7 +496,7 @@ const ServiceSection = ({
                 imageArray.map((img, idx) => (
                   <motion.img
                     key={idx}
-                    src={img}
+                    src={encodeImageUrl(img)}
                     alt={title}
                     className="absolute inset-0 w-full h-full object-cover"
                     initial={{ opacity: idx === 0 ? 1 : 0 }}
@@ -1311,7 +1311,7 @@ const ImageModal = ({
         }}
       >
         <motion.img
-          src={encodeImageUrl(images[selectedImage])}
+          src={images[selectedImage]}
           alt={`Wedding decoration ${selectedImage + 1}`}
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -1376,7 +1376,20 @@ const ImageGallery = () => {
       try {
         setLoadingImages(true);
         const creations = await getActiveWeddingCreations();
-        const imageUrls = creations.map(creation => encodeImageUrl(creation.image_url));
+        console.log('Loaded wedding creations:', creations.length, creations);
+        
+        // Filter out empty/null/undefined image URLs and encode valid ones
+        const imageUrls = creations
+          .map(creation => creation.image_url)
+          .filter((url): url is string => Boolean(url && url.trim()))
+          .map(url => {
+            const encoded = encodeImageUrl(url);
+            console.log('Encoding wedding image URL:', url, '->', encoded);
+            return encoded;
+          })
+          .filter(url => url.trim() !== ''); // Filter out any empty strings after encoding
+        
+        console.log('Final wedding image URLs:', imageUrls.length, imageUrls);
         setWeddingImages(imageUrls);
       } catch (error) {
         console.error('Failed to load wedding images:', error);
@@ -1408,6 +1421,7 @@ const ImageGallery = () => {
               trigger: item,
               start: "top 85%",
               toggleActions: "play none none none",
+              refreshPriority: -1, // Lower priority for better performance
             },
           }
         );
@@ -1509,9 +1523,16 @@ const ImageGallery = () => {
                   >
                     <div className="relative rounded-3xl overflow-hidden shadow-2xl aspect-[4/5] cursor-pointer">
               <img
-                src={encodeImageUrl(image)}
+                src={image}
                 alt={`Wedding decoration ${index + 1}`}
                         className="w-full h-full object-cover"
+                onError={(e) => {
+                  console.error('Failed to load wedding carousel image:', image, e);
+                  (e.target as HTMLImageElement).style.display = 'none';
+                }}
+                onLoad={() => {
+                  console.log('Successfully loaded wedding carousel image:', image);
+                }}
               />
               </div>
                   </div>
@@ -1660,9 +1681,16 @@ const ImageGallery = () => {
                 }}
               >
                 <img
-                  src={encodeImageUrl(image)}
+                  src={image}
                   alt={`Wedding decoration ${index + 1}`}
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  onError={(e) => {
+                    console.error('Failed to load wedding image:', image, e);
+                    (e.target as HTMLImageElement).style.display = 'none';
+                  }}
+                  onLoad={() => {
+                    console.log('Successfully loaded wedding image:', image);
+                  }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 <div className="absolute bottom-0 left-0 right-0 p-4 transform translate-y-full group-hover:translate-y-0 transition-transform duration-500">

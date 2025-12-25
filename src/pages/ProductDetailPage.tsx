@@ -15,10 +15,12 @@ import {
   Eye
 } from 'lucide-react';
 import { useCartWithToast } from '@/hooks/useCartWithToast';
+import { useFavorites } from '@/contexts/FavoritesContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import UltraNavigation from '@/components/UltraNavigation';
 import BackToTop from '@/components/BackToTop';
 import { generatedBouquets } from '@/data/generatedBouquets';
+import { getCollectionProduct } from '@/lib/api/collection-products';
 import type { Bouquet } from '@/types/bouquet';
 import { encodeImageUrl } from '@/lib/imageUtils';
 
@@ -100,7 +102,7 @@ const allCategories = [
     id: 1,
     name: "WEDDINGS",
     description: "Architectural bridal arrangements",
-    image: "/assets/wedding % events/wedding/IMG-20251126-WA0021.webp",
+    image: "/assets/wedding-events/wedding/IMG-20251126-WA0021.webp",
     gradient: "from-rose-200/20 via-amber-100/30 to-yellow-200/20",
     color: "from-rose-400/80 to-amber-300/90",
     filterValue: "wedding-percent-events"
@@ -145,7 +147,7 @@ const allCategories = [
     id: 6,
     name: "CORPORATE",
     description: "Professional luxury designs",
-    image: "/assets/wedding % events/events/IMG-20251126-WA0022.webp",
+    image: "/assets/wedding-events/events/IMG-20251126-WA0022.webp",
     gradient: "from-slate-200/20 via-gray-100/30 to-zinc-200/20",
     color: "from-slate-400/80 to-gray-300/90",
     filterValue: "wedding-percent-events"
@@ -179,10 +181,33 @@ const allCategories = [
   }
 ];
 
-// Function to get random 4 categories
-const getRandomCategories = (): typeof allCategories => {
-  const shuffled = [...allCategories].sort(() => Math.random() - 0.5);
-  return shuffled.slice(0, 4);
+// Function to get random 4 categories (with seed for consistency during same product view)
+const getRandomCategories = (seed?: string): typeof allCategories => {
+  // Use a seeded random if seed is provided to ensure same product shows same categories
+  // But different products will get different seeds
+  let array = [...allCategories];
+  
+  if (seed) {
+    // Simple seeded shuffle based on seed string
+    let hash = 0;
+    for (let i = 0; i < seed.length; i++) {
+      const char = seed.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // Convert to 32bit integer
+    }
+    
+    // Use hash to create consistent shuffling
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.abs(hash) % (i + 1);
+      [array[i], array[j]] = [array[j], array[i]];
+      hash = hash >>> 1; // Shift hash for next iteration
+    }
+  } else {
+    // Pure random shuffle
+    array.sort(() => Math.random() - 0.5);
+  }
+  
+  return array.slice(0, 4);
 };
 
 // Animation variants for page transitions
@@ -547,26 +572,35 @@ const ProductDetailPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { addToCart } = useCartWithToast();
+  const { isFavorite, toggleFavorite } = useFavorites();
   const isMobile = useIsMobile();
 
-  // Get random 4 categories on component mount
-  const [displayCategories] = useState(() => getRandomCategories());
+  // Get random 4 categories that update when product changes
+  const [displayCategories, setDisplayCategories] = useState(() => getRandomCategories());
 
-  // Get product data from route state or create mock data
-  const productData: ProductData = location.state?.product || {
-    id: id || 'ember-rose-symphony',
-    title: 'Ember Rose Symphony',
-    price: 125.00,
-    description: 'A passionate arrangement of crimson Grand Prix roses and rich burgundy snapdragons, accented with delicate seeded eucalyptus. Each stem is carefully selected to create a dramatic, textural masterpiece that speaks of timeless romance and devotion. Handcrafted by our artisans in Sidon.',
-    imageUrl: bouquet1,
-    images: [
-      bouquet1,
-      bouquet2,
-      bouquet3
-    ],
-    category: 'Premium Bouquets',
-    inStock: true
-  };
+  // State for product data
+  const [productData, setProductData] = useState<ProductData>(() => {
+    // Use state if available
+    if (location.state?.product) {
+      return location.state.product;
+    }
+    // Fallback to mock data
+    return {
+      id: id || 'ember-rose-symphony',
+      title: 'Ember Rose Symphony',
+      price: 125.00,
+      description: 'A passionate arrangement of crimson Grand Prix roses and rich burgundy snapdragons, accented with delicate seeded eucalyptus. Each stem is carefully selected to create a dramatic, textural masterpiece that speaks of timeless romance and devotion. Handcrafted by our artisans in Sidon.',
+      imageUrl: bouquet1,
+      images: [
+        bouquet1,
+        bouquet2,
+        bouquet3
+      ],
+      category: 'Premium Bouquets',
+      inStock: true
+    };
+  });
+  const [isLoadingProduct, setIsLoadingProduct] = useState(false);
 
   // Local state management
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -618,14 +652,67 @@ const ProductDetailPage = () => {
 
   const recommendedBouquets = getRecommendations();
 
+  // Fetch product from Supabase if no state is passed
+  useEffect(() => {
+    const fetchProduct = async () => {
+      // If we have state, use it
+      if (location.state?.product) {
+        setProductData(location.state.product);
+        return;
+      }
+
+      // If we have an ID, try to fetch from Supabase
+      if (id) {
+        setIsLoadingProduct(true);
+        try {
+          const product = await getCollectionProduct(id);
+          if (product) {
+            setProductData({
+              id: product.id,
+              title: product.title,
+              price: product.price,
+              description: product.description || '',
+              imageUrl: encodeImageUrl(product.image_urls?.[0] || ''),
+              images: product.image_urls?.map(url => encodeImageUrl(url)) || [encodeImageUrl(product.image_urls?.[0] || '')],
+              category: product.category || product.display_category || 'Premium Bouquets',
+              inStock: product.is_active !== false
+            });
+          }
+        } catch (error) {
+          console.error('Error fetching product:', error);
+          // Keep fallback data
+        } finally {
+          setIsLoadingProduct(false);
+        }
+      }
+    };
+
+    fetchProduct();
+  }, [id, location.state]);
+
+  // Update categories when product changes (different categories for each product)
+  useEffect(() => {
+    // Get new random categories whenever the product ID changes
+    // Use product ID as seed to ensure same product shows same categories (but different from other products)
+    const productIdForSeed = id || productData.id || String(Date.now());
+    const newCategories = getRandomCategories(productIdForSeed);
+    setDisplayCategories(newCategories);
+  }, [id, productData.id]);
+
   // Ensure page always loads from the top and is scrollable on mobile
   useEffect(() => {
-    // Reset scroll position on mount
-    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
-    document.documentElement.scrollTop = 0;
-    document.body.scrollTop = 0;
+    // Reset scroll position on mount and when product changes
+    const resetScroll = () => {
+      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    };
 
-    // Ensure body is scrollable on mobile - use setTimeout to override any other styles
+    resetScroll();
+    const timeoutId = setTimeout(resetScroll, 100);
+    const rafId = requestAnimationFrame(resetScroll);
+
+    // Ensure body is scrollable on mobile
     const restoreScroll = () => {
       document.body.style.overflow = '';
       document.body.style.position = '';
@@ -633,43 +720,44 @@ const ProductDetailPage = () => {
       document.body.style.height = '';
       document.body.style.top = '';
 
-      // Ensure html is scrollable
       document.documentElement.style.overflow = '';
       document.documentElement.style.height = '';
       document.documentElement.style.position = '';
     };
 
-    // Immediate restore
     restoreScroll();
-
-    // Also restore after a short delay to override any conflicting styles
-    const timeoutId = setTimeout(restoreScroll, 100);
+    const restoreTimeoutId = setTimeout(restoreScroll, 100);
 
     return () => {
       clearTimeout(timeoutId);
-      // Cleanup: ensure scroll is restored
+      clearTimeout(restoreTimeoutId);
+      cancelAnimationFrame(rafId);
       restoreScroll();
     };
-  }, []);
+  }, [productData.id]);
 
-  // Handle add to cart
+  // Handle add to cart - includes quantity
   const handleAddToCart = async () => {
     if (isLoading) return;
 
     setIsLoading(true);
 
-    // Create cart item
-    const cartItem = {
+    // Create cart items for the quantity selected
+    const cartItems = Array.from({ length: quantity }, () => ({
       id: productData.id,
       title: productData.title,
       price: currentPrice,
       image: productData.imageUrl,
       size: selectedSizeOption?.name || 'Standard',
       personalNote: personalNote.trim()
-    };
+    }));
 
     try {
-      await addToCart(cartItem);
+      // Add all items to cart
+      for (const item of cartItems) {
+        await addToCart(item);
+      }
+      
       setIsAddedToCart(true);
 
       // Reset after 2.5 seconds
@@ -681,6 +769,21 @@ const ProductDetailPage = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Handle favorite toggle
+  const handleToggleFavorite = () => {
+    toggleFavorite({
+      id: productData.id,
+      title: productData.title,
+      name: productData.title,
+      price: productData.price,
+      image: productData.imageUrl,
+      imageUrl: productData.imageUrl,
+      description: productData.description,
+      category: productData.category || 'Premium Bouquets',
+      featured: false
+    });
   };
 
   // Handle checkout
@@ -832,13 +935,29 @@ const ProductDetailPage = () => {
               <motion.button
                 className="w-full py-4 bg-gradient-to-r from-amber-500 to-amber-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center space-x-2"
                 onClick={handleAddToCart}
-                disabled={isLoading}
+                disabled={isLoading || isLoadingProduct}
                 variants={buttonVariants}
                 whileHover="hover"
                 whileTap="tap"
               >
                 <ShoppingCart className="w-5 h-5" />
-                <span>{isLoading ? 'Adding...' : 'Add to Cart'}</span>
+                <span>{isLoading || isLoadingProduct ? 'Loading...' : 'Add to Cart'}</span>
+              </motion.button>
+
+              {/* Favorite Button */}
+              <motion.button
+                className={`w-full py-3 border-2 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center space-x-2 ${
+                  isFavorite(productData.id)
+                    ? 'bg-pink-50 border-pink-300 text-pink-600'
+                    : 'bg-white border-amber-200 text-slate-700 hover:border-amber-300'
+                }`}
+                onClick={handleToggleFavorite}
+                variants={buttonVariants}
+                whileHover="hover"
+                whileTap="tap"
+              >
+                <Heart className={`w-5 h-5 ${isFavorite(productData.id) ? 'fill-pink-600' : ''}`} />
+                <span>{isFavorite(productData.id) ? 'Remove from Favorites' : 'Add to Favorites'}</span>
               </motion.button>
             </div>
 

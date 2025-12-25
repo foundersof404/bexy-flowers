@@ -11,6 +11,7 @@ import { ThemeProvider } from "@/hooks/useTheme";
 import { CartProvider } from "@/contexts/CartContext";
 import { FavoritesProvider } from "@/contexts/FavoritesContext";
 import { FlyingHeartProvider } from "@/contexts/FlyingHeartContext";
+import { RouteStateProvider } from "@/contexts/RouteStateContext";
 import GlobalCartWrapper from "@/components/GlobalCartWrapper";
 
 // ⚡ PERFORMANCE OPTIMIZATION: Route-based code splitting
@@ -35,7 +36,19 @@ const AdminFlowers = lazy(() => import("./pages/admin/AdminFlowers"));
 const AdminLuxuryBoxes = lazy(() => import("./pages/admin/AdminLuxuryBoxes"));
 const AdminWeddingCreations = lazy(() => import("./pages/admin/AdminWeddingCreations"));
 
-const queryClient = new QueryClient();
+// ⚡ PERFORMANCE OPTIMIZATION: Enhanced QueryClient with better caching
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes - data is fresh for 5 minutes
+      gcTime: 10 * 60 * 1000, // 10 minutes - keep unused data for 10 minutes (formerly cacheTime)
+      refetchOnWindowFocus: false, // Don't refetch on window focus for better performance
+      refetchOnMount: false, // Use cached data if available
+      retry: 1, // Reduce retries for faster error handling
+      retryDelay: 1000, // Shorter retry delay
+    },
+  },
+});
 
 const App = () => {
   // Initialize smooth scrolling
@@ -52,34 +65,36 @@ const App = () => {
                 <Toaster />
                 <Sonner />
                 <BrowserRouter>
-                  <ScrollToTop />
-                  <Suspense fallback={<RouteLoader />}>
-                    <Routes>
-                      <Route path="/" element={<Index />} />
-                      <Route path="/collection" element={<Collection />} />
-                      <Route path="/product/:id" element={<ProductDetailPage />} />
-                      <Route path="/checkout" element={<Checkout />} />
-                      <Route path="/about" element={<AboutPage />} />
-                      <Route path="/customize" element={<Customize />} />
-                      <Route path="/wedding-and-events" element={<WeddingAndEvents />} />
-                      <Route path="/favorites" element={<Favorites />} />
-                      <Route path="/cart" element={<CartPage />} />
-                      <Route path="/cart-test" element={<CartTest />} />
-                      {/* Admin Routes */}
-                      <Route path="/admin/login" element={<AdminLogin />} />
-                      <Route path="/admin/dashboard" element={<AdminDashboard />} />
-                      <Route path="/admin/products" element={<AdminProducts />} />
-                      <Route path="/admin/products/:id" element={<AdminProducts />} />
-                      <Route path="/admin/products/new" element={<AdminProducts />} />
-                      <Route path="/admin/signature-collection" element={<AdminSignatureCollection />} />
-                      <Route path="/admin/accessories" element={<AdminAccessories />} />
-                      <Route path="/admin/flowers" element={<AdminFlowers />} />
-                      <Route path="/admin/boxes" element={<AdminLuxuryBoxes />} />
-                      <Route path="/admin/wedding-creations" element={<AdminWeddingCreations />} />
-                      {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                      <Route path="*" element={<NotFound />} />
-                    </Routes>
-                  </Suspense>
+                  <RouteStateProvider>
+                    <ScrollToTop />
+                    <Suspense fallback={<RouteLoader />}>
+                      <Routes>
+                        <Route path="/" element={<Index />} />
+                        <Route path="/collection" element={<Collection />} />
+                        <Route path="/product/:id" element={<ProductDetailPage />} />
+                        <Route path="/checkout" element={<Checkout />} />
+                        <Route path="/about" element={<AboutPage />} />
+                        <Route path="/customize" element={<Customize />} />
+                        <Route path="/wedding-and-events" element={<WeddingAndEvents />} />
+                        <Route path="/favorites" element={<Favorites />} />
+                        <Route path="/cart" element={<CartPage />} />
+                        <Route path="/cart-test" element={<CartTest />} />
+                        {/* Admin Routes */}
+                        <Route path="/admin/login" element={<AdminLogin />} />
+                        <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                        <Route path="/admin/products" element={<AdminProducts />} />
+                        <Route path="/admin/products/:id" element={<AdminProducts />} />
+                        <Route path="/admin/products/new" element={<AdminProducts />} />
+                        <Route path="/admin/signature-collection" element={<AdminSignatureCollection />} />
+                        <Route path="/admin/accessories" element={<AdminAccessories />} />
+                        <Route path="/admin/flowers" element={<AdminFlowers />} />
+                        <Route path="/admin/boxes" element={<AdminLuxuryBoxes />} />
+                        <Route path="/admin/wedding-creations" element={<AdminWeddingCreations />} />
+                        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                        <Route path="*" element={<NotFound />} />
+                      </Routes>
+                    </Suspense>
+                  </RouteStateProvider>
                 </BrowserRouter>
               </FlyingHeartProvider>
             </FavoritesProvider>

@@ -30,7 +30,7 @@ const SIGNATURE_BOUQUETS: SignatureBouquet[] = [
     id: 2,
     name: "Wedding Serenity",
     price: "$349",
-    image: "/assets/wedding % events/IMG_1673.webp",
+    image: "/assets/wedding-events/IMG_1673.webp",
     description: "Pure elegant arrangement for special moments"
   },
   {
@@ -44,7 +44,7 @@ const SIGNATURE_BOUQUETS: SignatureBouquet[] = [
     id: 4,
     name: "Event Grandeur",
     price: "$289",
-    image: "/assets/wedding % events/events/IMG-20251126-WA0024.webp",
+    image: "/assets/wedding-events/events/IMG-20251126-WA0024.webp",
     description: "Spectacular floral design for grand events"
   },
   {
