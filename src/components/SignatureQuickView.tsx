@@ -303,12 +303,13 @@ const SignatureQuickView = ({ open, item, onClose }: SignatureQuickViewProps) =>
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
+            style={{ touchAction: 'none' }}
           />
 
           {/* Modal Container */}
           <motion.div
             ref={dialogRef}
-            className="relative z-10 w-full max-w-7xl h-[95vh] bg-white rounded-2xl shadow-2xl overflow-hidden"
+            className="relative z-10 w-full max-w-7xl max-h-[95vh] sm:h-[95vh] bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col"
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -316,6 +317,7 @@ const SignatureQuickView = ({ open, item, onClose }: SignatureQuickViewProps) =>
             onClick={(e) => e.stopPropagation()}
             style={{
               fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+              touchAction: 'pan-y',
             }}
           >
             {/* Close Button - Absolute positioned */}
@@ -329,9 +331,9 @@ const SignatureQuickView = ({ open, item, onClose }: SignatureQuickViewProps) =>
             </motion.button>
 
             {/* Main Content Grid */}
-            <div className="h-full grid grid-cols-1 lg:grid-cols-2">
+            <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-2 overflow-hidden">
               {/* LEFT: Image Gallery */}
-              <div className="relative bg-gradient-to-br from-slate-50 via-white to-slate-50 flex items-center justify-center p-6 lg:p-10">
+              <div className="relative bg-gradient-to-br from-slate-50 via-white to-slate-50 flex items-center justify-center p-4 sm:p-6 lg:p-10 overflow-hidden">
                 {productData.images.length > 0 && !imageError ? (
                   <div className="relative w-full max-w-2xl">
                     {/* Main Image */}
@@ -404,7 +406,7 @@ const SignatureQuickView = ({ open, item, onClose }: SignatureQuickViewProps) =>
               </div>
 
               {/* RIGHT: Product Details (Scrollable) */}
-              <div className="flex flex-col h-full overflow-hidden">
+              <div className="flex flex-col h-full min-h-0 overflow-hidden">
                 {/* Header Section - Fixed */}
                 <div className="flex-shrink-0 px-6 lg:px-10 pt-8 pb-6 border-b border-slate-200 bg-white">
                   <div className="flex items-center gap-3 mb-4">
@@ -453,14 +455,13 @@ const SignatureQuickView = ({ open, item, onClose }: SignatureQuickViewProps) =>
 
                 {/* Scrollable Content Area */}
                 <div 
-                  className="modal-scrollable-content flex-1 overflow-y-auto px-6 lg:px-10 py-6 space-y-8 custom-scrollbar"
+                  className="modal-scrollable-content flex-1 overflow-y-auto px-4 sm:px-6 lg:px-10 py-4 sm:py-6 space-y-6 sm:space-y-8 custom-scrollbar"
                   style={{ 
                     overscrollBehavior: 'contain',
                     WebkitOverflowScrolling: 'touch',
-                    touchAction: 'pan-y'
+                    touchAction: 'pan-y',
+                    willChange: 'scroll-position',
                   }}
-                  onWheel={(e) => e.stopPropagation()}
-                  onTouchMove={(e) => e.stopPropagation()}
                 >
                   {/* Size Selection */}
                   <section>

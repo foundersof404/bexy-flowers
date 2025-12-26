@@ -145,7 +145,7 @@ const Collection = () => {
   }, []);
 
   return (
-    <div ref={containerRef} className="relative min-h-screen bg-background overflow-hidden">
+    <div ref={containerRef} className="relative min-h-screen bg-background" style={{ touchAction: 'pan-y' }}>
       {/* Ultra Navigation */}
       <UltraNavigation />
       
