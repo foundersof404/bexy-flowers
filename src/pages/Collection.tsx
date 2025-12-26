@@ -46,6 +46,8 @@ const Collection = () => {
           category: product.category || '',
           displayCategory: product.display_category || '',
           featured: product.featured || false,
+          is_out_of_stock: product.is_out_of_stock || false,
+          discount_percentage: product.discount_percentage || null,
         }));
         
         setBouquets(transformedBouquets);

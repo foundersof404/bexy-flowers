@@ -7,6 +7,8 @@ export interface Bouquet {
   category: string;
   displayCategory?: string;
   featured?: boolean;
+  is_out_of_stock?: boolean;
+  discount_percentage?: number | null;
 }
 export interface Flower {
   id: string;
