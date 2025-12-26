@@ -51,7 +51,7 @@ const UltraHero = () => {
   return (
     <section
       ref={heroRef}
-      className={`relative flex items-center justify-center overflow-hidden perspective-1000 text-center ${isMobile ? '-mt-20 md:bg-transparent md:pt-16 md:sm:pt-8' : 'pt-16 sm:pt-8 mt-[-80px]'
+      className={`relative flex items-center justify-center overflow-hidden perspective-1000 text-center ${isMobile ? '-mt-20 md:bg-transparent md:pt-16 md:sm:pt-8' : 'pt-24 sm:pt-32 md:pt-40 lg:pt-48 mt-[-80px]'
         }`}
       style={{
         minHeight: isMobile ? '100dvh' : 'clamp(650px, 100vh, 900px)',
@@ -157,7 +157,10 @@ const UltraHero = () => {
         <div className={`${isMobile ? 'w-full max-w-[860px]' : 'grid lg:grid-cols-2'} ${isMobile ? '' : 'gap-6 sm:gap-8 lg:gap-10 xl:gap-12'} items-center ${isMobile ? 'h-full py-0' : ''}`} style={!isMobile ? { minHeight: 'clamp(500px, 60vh, 700px)' } : undefined}>
 
           {/* Content Container */}
-          <div className={`${isMobile ? 'w-full text-center space-y-4 mt-2 mx-auto max-w-[100vw] overflow-x-hidden' : 'space-y-4 sm:space-y-6 lg:space-y-8 text-center lg:text-left'}`}>
+          <div 
+            className={`${isMobile ? 'w-full text-center space-y-4 mt-2 mx-auto max-w-[100vw] overflow-x-hidden' : 'space-y-4 sm:space-y-6 lg:space-y-8 text-center lg:text-left pt-8 sm:pt-12 md:pt-16 lg:pt-20'}`}
+            style={!isMobile ? { transform: 'translateX(-50px)' } : undefined}
+          >
             {/* Brand Badge - Mobile - Removed */}
             <motion.div
               ref={titleRef}
@@ -188,7 +191,7 @@ const UltraHero = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2, duration: 0.8 }}
-                  className="font-luxury text-sm xs:text-base tracking-[0.3em] font-semibold text-primary mb-2 sm:mb-4 uppercase"
+                  className="font-luxury text-sm xs:text-base tracking-[0.3em] font-semibold text-primary mb-2 sm:mb-4 uppercase md:hidden"
                 >
                   Bexy Flowers
                 </motion.div>
@@ -420,7 +423,7 @@ const UltraHero = () => {
                       animate={{ opacity: 1 }}
                       transition={{ duration: 0.1, delay: 1.6 }}
                     >
-                      From intimate weddings to grand celebrations, we create bespoke arrangements that capture life's most precious moments with unparalleled elegance.
+                      From intimate weddings to grand celebrations, we design bespoke floral arrangements that elevate life's most meaningful moments.
                     </motion.span>
 
                     {/* Removed typing cursor */}
@@ -480,7 +483,7 @@ const UltraHero = () => {
                       initial={{ opacity: 1 }}
                       whileHover={{ opacity: 0.9 }}
                     >
-                      Start Project
+                      Start Exploring
                     </motion.span>
                     <motion.div
                       className="absolute inset-0 bg-gradient-to-r from-yellow-400/20 to-transparent opacity-0 group-hover:opacity-100"
@@ -504,10 +507,11 @@ const UltraHero = () => {
                     variant="outline"
                     className="font-body text-sm xs:text-base sm:text-lg px-5 xs:px-6 sm:px-8 py-2.5 xs:py-3 sm:py-4 border-2 border-slate-300/50 text-slate-600 hover:border-primary/60 hover:bg-primary/5 hover:text-primary transition-all duration-300 rounded-full backdrop-blur-sm relative overflow-hidden group touch-target min-h-[44px] sm:min-h-[auto] w-full sm:w-auto"
                     onClick={() => {
-                      const el = document.querySelector('[data-section="custom-bouquet"]');
-                      if (el) {
-                        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                      }
+                      // Open WhatsApp
+                      const whatsappNumber = '96176104882';
+                      const message = encodeURIComponent("Hi! I'm interested in learning more about your floral services.");
+                      const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${message}`;
+                      window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
                     }}
                   >
                     <motion.span
@@ -701,7 +705,7 @@ const UltraHero = () => {
               }}
               style={{ willChange: shouldReduceMotion ? "auto" : "transform, opacity" }}
             >
-              <div className="relative w-full perspective-1000" style={{ transformStyle: "preserve-3d", willChange: "transform", height: 'clamp(320px, 40vh, 500px)' }}>
+              <div className="relative w-full perspective-1000" style={{ transformStyle: "preserve-3d", willChange: "transform", height: 'clamp(360px, 50vh, 650px)' }}>
                 {/* Subtle glow effect */}
                 <motion.div
                   className="absolute inset-0 bg-gradient-radial from-primary/10 via-primary/5 to-transparent rounded-full blur-3xl scale-110"
@@ -723,11 +727,11 @@ const UltraHero = () => {
                   className="relative w-full h-full object-contain z-10 ml-4 md:ml-6 lg:ml-8"
                   initial={{
                     filter: shouldReduceMotion ? "drop-shadow(0 20px 40px rgba(0,0,0,0.5))" : "blur(8px) brightness(0.9) drop-shadow(0 0 15px rgba(0,0,0,0.6)) drop-shadow(0 0 25px rgba(0,0,0,0.4))",
-                    scale: shouldReduceMotion ? 1 : 0.95
+                    scale: shouldReduceMotion ? 1.2 : 1.15
                   }}
                   animate={{
                     filter: "drop-shadow(0 20px 40px rgba(0,0,0,0.5))",
-                    scale: 1
+                    scale: 1.2
                   }}
                   transition={{
                     duration: shouldReduceMotion ? 0 : 1.2,

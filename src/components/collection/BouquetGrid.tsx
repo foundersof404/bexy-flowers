@@ -121,21 +121,51 @@ const BouquetCard = memo(({
             />
           </motion.div>
 
-          {/* Featured Badge */}
-          {bouquet.featured && (
+          {/* Badges Container - Top Left */}
+          <div className="absolute top-2 left-2 md:top-4 md:left-4 flex flex-col gap-1.5 md:gap-2 z-20">
+            {/* Out of Stock Badge - Priority Display */}
+            {bouquet.is_out_of_stock && (
+              <span 
+                className="px-2 py-1 md:px-3 md:py-1.5 rounded-lg text-[10px] md:text-xs font-bold tracking-wide text-white shadow-lg bg-red-600 border-2 border-white/50"
+              >
+                OUT OF STOCK
+              </span>
+            )}
+            
+            {/* In Stock Badge - Always visible when not out of stock */}
+            {!bouquet.is_out_of_stock && (
+              <span 
+                className="px-2 py-1 md:px-3 md:py-1.5 rounded-lg text-[10px] md:text-xs font-bold tracking-wide text-white shadow-lg bg-green-600 border-2 border-white/50"
+              >
+                IN STOCK
+              </span>
+            )}
+
+            {/* Featured Badge */}
+            {bouquet.featured && !bouquet.is_out_of_stock && (
+              <span 
+                className="px-2 py-1 md:px-3 md:py-1.5 rounded-lg text-[10px] md:text-xs font-bold tracking-wide text-white shadow-lg flex items-center gap-1 border-2 border-white/50"
+                style={{
+                  background: 'linear-gradient(90deg, #CFA340 0%, #EDD59E 100%)'
+                }}
+              >
+                <span className="text-xs md:text-sm">👑</span> FEATURED
+              </span>
+            )}
+          </div>
+
+          {/* Discount Badge - Top Right */}
+          {bouquet.discount_percentage && bouquet.discount_percentage > 0 && (
             <span 
-              className="absolute top-2 left-2 md:top-4 md:left-4 px-2 py-0.5 md:px-3 md:py-[2px] rounded-full text-[9px] md:text-[10px] font-semibold tracking-wide text-white shadow-sm flex items-center gap-0.5 md:gap-1"
-              style={{
-                background: 'linear-gradient(90deg, #CFA340 0%, #EDD59E 100%)'
-              }}
+              className="absolute top-2 right-2 md:top-4 md:right-4 px-2 py-1 md:px-3 md:py-1.5 rounded-lg text-[10px] md:text-xs font-bold tracking-wide text-white shadow-lg bg-red-500 border-2 border-white/50 z-20"
             >
-              <span className="text-[10px] md:text-xs">👑</span> FEATURED
+              {bouquet.discount_percentage}% OFF
             </span>
           )}
 
           {/* Floating Action Buttons */}
           <motion.div 
-            className="absolute top-2 right-2 md:top-4 md:right-4 flex gap-1.5 md:gap-2 z-20"
+            className={`absolute ${bouquet.discount_percentage && bouquet.discount_percentage > 0 ? 'top-12 md:top-16' : 'top-2 md:top-4'} right-2 md:right-4 flex gap-1.5 md:gap-2 z-20`}
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.4, delay: index * 0.05 + 0.2 }}
@@ -290,20 +320,39 @@ const BouquetCard = memo(({
               transition={{ duration: 0.4, delay: index * 0.05 + 0.45 }}
             >
               <div>
-                <motion.span 
-                  className="text-xl md:text-2xl lg:text-3xl font-bold"
-                  style={{
-                    backgroundImage: 'linear-gradient(90deg, #B7893C 0%, #E7D4A8 100%)',
-                    backgroundClip: 'text',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    color: 'transparent'
-                  }}
-                  transition={{ duration: 0.2 }}
-                >
-                  ${bouquet.price}
-                </motion.span>
-                <span className="text-gray-500 text-xs md:text-sm ml-1">USD</span>
+                {bouquet.discount_percentage && bouquet.discount_percentage > 0 ? (
+                  <>
+                    <div className="flex items-baseline gap-2">
+                      <span className="line-through text-gray-400 text-sm md:text-base">
+                        ${bouquet.price.toFixed(2)}
+                      </span>
+                      <motion.span 
+                        className="text-xl md:text-2xl lg:text-3xl font-bold text-red-600"
+                        transition={{ duration: 0.2 }}
+                      >
+                        ${(bouquet.price * (1 - bouquet.discount_percentage / 100)).toFixed(2)}
+                      </motion.span>
+                    </div>
+                    <span className="text-gray-500 text-xs md:text-sm">USD</span>
+                  </>
+                ) : (
+                  <>
+                    <motion.span 
+                      className="text-xl md:text-2xl lg:text-3xl font-bold"
+                      style={{
+                        backgroundImage: 'linear-gradient(90deg, #B7893C 0%, #E7D4A8 100%)',
+                        backgroundClip: 'text',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                        color: 'transparent'
+                      }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      ${bouquet.price.toFixed(2)}
+                    </motion.span>
+                    <span className="text-gray-500 text-xs md:text-sm ml-1">USD</span>
+                  </>
+                )}
               </div>
             </motion.div>
 
@@ -311,21 +360,33 @@ const BouquetCard = memo(({
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: index * 0.05 + 0.5 }}
-              className="w-full h-9 md:h-10 lg:h-12 rounded-lg md:rounded-xl font-semibold text-white flex items-center justify-center gap-1.5 md:gap-2 relative overflow-hidden transition-all duration-200 text-xs md:text-sm lg:text-base"
+              className={`w-full h-9 md:h-10 lg:h-12 rounded-lg md:rounded-xl font-semibold text-white flex items-center justify-center gap-1.5 md:gap-2 relative overflow-hidden transition-all duration-200 text-xs md:text-sm lg:text-base ${
+                bouquet.is_out_of_stock ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
               style={{
-                background: 'linear-gradient(90deg, #B88A44 0%, #F6E3B5 100%)',
-                boxShadow: '0 4px 12px rgba(184, 138, 68, 0.3)'
+                background: bouquet.is_out_of_stock 
+                  ? 'linear-gradient(90deg, #9CA3AF 0%, #D1D5DB 100%)'
+                  : 'linear-gradient(90deg, #B88A44 0%, #F6E3B5 100%)',
+                boxShadow: bouquet.is_out_of_stock 
+                  ? '0 4px 12px rgba(156, 163, 175, 0.3)'
+                  : '0 4px 12px rgba(184, 138, 68, 0.3)'
               }}
-              whileHover={{ scale: 1.02, boxShadow: '0 6px 16px rgba(184, 138, 68, 0.4)' }}
-              whileTap={{ scale: 0.98 }}
+              whileHover={bouquet.is_out_of_stock ? {} : { scale: 1.02, boxShadow: '0 6px 16px rgba(184, 138, 68, 0.4)' }}
+              whileTap={bouquet.is_out_of_stock ? {} : { scale: 0.98 }}
+              disabled={bouquet.is_out_of_stock}
               onClick={(e) => {
                 e.stopPropagation();
-                addToCart({
-                  id: parseInt(bouquet.id),
-                  title: bouquet.name,
-                  price: bouquet.price,
-                  image: bouquet.image
-                });
+                if (!bouquet.is_out_of_stock) {
+                  const finalPrice = bouquet.discount_percentage && bouquet.discount_percentage > 0
+                    ? bouquet.price * (1 - bouquet.discount_percentage / 100)
+                    : bouquet.price;
+                  addToCart({
+                    id: parseInt(bouquet.id),
+                    title: bouquet.name,
+                    price: finalPrice,
+                    image: bouquet.image
+                  });
+                }
               }}
             >
               <div 
@@ -336,7 +397,9 @@ const BouquetCard = memo(({
               />
               
               <ShoppingCart className="w-3.5 h-3.5 md:w-4 md:h-4 relative z-10" strokeWidth={2} />
-              <span className="relative z-10">Add to Cart</span>
+              <span className="relative z-10">
+                {bouquet.is_out_of_stock ? 'Out of Stock' : 'Add to Cart'}
+              </span>
             </motion.button>
           </div>
         </motion.div>

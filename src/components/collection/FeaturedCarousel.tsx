@@ -5,6 +5,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { EffectCoverflow, Pagination, Navigation, Autoplay } from "swiper/modules";
 import { ChevronLeft, ChevronRight, ShoppingCart, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { OptimizedImage } from "@/components/OptimizedImage";
 import { useImagePreloader } from "@/hooks/useImagePreloader";
 import type { Bouquet } from "@/pages/Collection";
@@ -122,8 +123,27 @@ export const FeaturedCarousel = ({ bouquets, onBouquetClick }: FeaturedCarouselP
                       {/* Overlay */}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                       
+                      {/* Stock & Discount Badges */}
+                      <div className="absolute top-3 left-3 flex flex-col gap-2 z-10">
+                        {bouquet.is_out_of_stock && (
+                          <Badge className="bg-red-600 text-white text-xs sm:text-sm px-2 py-1 font-bold border-2 border-white/50 shadow-lg">
+                            OUT OF STOCK
+                          </Badge>
+                        )}
+                        {!bouquet.is_out_of_stock && (
+                          <Badge className="bg-green-600 text-white text-xs sm:text-sm px-2 py-1 font-bold border-2 border-white/50 shadow-lg">
+                            IN STOCK
+                          </Badge>
+                        )}
+                        {bouquet.discount_percentage && bouquet.discount_percentage > 0 && (
+                          <Badge className="bg-red-500 text-white text-xs sm:text-sm px-2 py-1 font-bold border-2 border-white/50 shadow-lg">
+                            {bouquet.discount_percentage}% OFF
+                          </Badge>
+                        )}
+                      </div>
+
                       {/* Action Buttons */}
-                      <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-3 group-hover:translate-x-0">
+                      <div className={`absolute ${bouquet.discount_percentage && bouquet.discount_percentage > 0 ? 'top-20' : 'top-3'} right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-3 group-hover:translate-x-0 z-10`}>
                         <Button
                           size="icon"
                           variant="secondary"
@@ -138,11 +158,18 @@ export const FeaturedCarousel = ({ bouquets, onBouquetClick }: FeaturedCarouselP
                         <Button
                           size="icon"
                           variant="secondary"
-                          className="w-8 h-8 bg-[#C79E48] hover:bg-[#8B6F3A] text-white"
+                          className={`w-8 h-8 text-white ${
+                            bouquet.is_out_of_stock 
+                              ? 'bg-gray-400 hover:bg-gray-400 cursor-not-allowed' 
+                              : 'bg-[#C79E48] hover:bg-[#8B6F3A]'
+                          }`}
                           onClick={(e) => {
                             e.stopPropagation();
-                            // Add to cart logic
+                            if (!bouquet.is_out_of_stock) {
+                              // Add to cart logic
+                            }
                           }}
+                          disabled={bouquet.is_out_of_stock}
                         >
                           <ShoppingCart className="w-3 h-3" />
                         </Button>
@@ -157,11 +184,21 @@ export const FeaturedCarousel = ({ bouquets, onBouquetClick }: FeaturedCarouselP
                       <p className="text-sm text-muted-foreground mb-3 line-clamp-2 font-body">
                         {bouquet.description}
                       </p>
-                      <div className="flex items-center justify-between">
-                        <span className="text-xl font-luxury text-[#C79E48]">
-                          ${bouquet.price}
-                        </span>
-                        <div className="w-6 h-px bg-[#C79E48]" />
+                      <div className="flex flex-col gap-1">
+                        {bouquet.discount_percentage && bouquet.discount_percentage > 0 ? (
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm line-through text-gray-400">
+                              ${bouquet.price.toFixed(2)}
+                            </span>
+                            <span className="text-xl font-luxury text-red-600">
+                              ${(bouquet.price * (1 - bouquet.discount_percentage / 100)).toFixed(2)}
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="text-xl font-luxury text-[#C79E48]">
+                            ${bouquet.price.toFixed(2)}
+                          </span>
+                        )}
                       </div>
                     </div>
                     

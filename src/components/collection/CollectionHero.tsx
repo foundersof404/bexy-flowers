@@ -146,21 +146,22 @@ const CollectionHeroComponent = () => {
           </motion.p>
 
           <motion.h1 
-            className="font-luxury text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold mb-6 text-slate-900 relative"
-            initial={{ opacity: 0, y: 20 }}
+            className="font-luxury text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-8xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 bg-clip-text text-transparent relative px-2"
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.8 }}
             style={{
-              filter: 'drop-shadow(0 6px 18px rgba(0,0,0,0.15))',
-              letterSpacing: '0.04em'
+              filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))',
+              letterSpacing: '0.05em'
             }}
           >
             Our Complete Collection
+            {/* Animated Gold Underline */}
             <motion.div 
-              className="absolute -bottom-3 left-1/2 transform -translate-x-1/2 h-[6px] w-48 rounded-full bg-gradient-to-r from-[#C79E48] via-[#dcbf7b] to-[#f9e7bb]"
+              className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 h-1 bg-gradient-to-r from-amber-400 to-yellow-500 rounded-full"
               initial={{ width: 0 }}
-              animate={{ width: 192 }}
-              transition={{ delay: 0.6, duration: 1.1, ease: "easeOut" }}
+              animate={{ width: '200px' }}
+              transition={{ delay: 0.8, duration: 1.2, ease: "easeOut" }}
             />
           </motion.h1>
 

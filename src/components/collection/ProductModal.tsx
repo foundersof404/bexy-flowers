@@ -154,10 +154,14 @@ export const ProductModal = ({ bouquet, onClose }: ProductModalProps) => {
     
     // Add to cart logic
     const numericPrice = typeof bouquet.price === 'string' ? parseFloat(bouquet.price.replace('$','')) : bouquet.price;
+    const finalPrice = bouquet.discount_percentage && bouquet.discount_percentage > 0
+      ? numericPrice * (1 - bouquet.discount_percentage / 100)
+      : numericPrice;
+    
     addToCart({
       id: typeof bouquet.id === 'string' ? parseInt(bouquet.id) : bouquet.id,
       title: bouquet.name,
-      price: numericPrice,
+      price: finalPrice,
       image: bouquet.image
     });
   };
@@ -250,10 +254,32 @@ export const ProductModal = ({ bouquet, onClose }: ProductModalProps) => {
             <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/10 to-transparent" />
             
             {/* Floating Elements - Responsive Positioning */}
-            <div className="absolute top-3 left-3 sm:top-4 sm:left-4 md:top-6 md:left-6">
-              {bouquet.featured && (
+            <div className="absolute top-3 left-3 sm:top-4 sm:left-4 md:top-6 md:left-6 flex flex-col gap-2 z-20">
+              {/* Out of Stock Badge - Priority */}
+              {bouquet.is_out_of_stock && (
+                <Badge className="bg-red-600 text-white text-xs sm:text-sm px-3 py-1.5 font-bold border-2 border-white/50 shadow-lg">
+                  OUT OF STOCK
+                </Badge>
+              )}
+              
+              {/* In Stock Badge */}
+              {!bouquet.is_out_of_stock && (
+                <Badge className="bg-green-600 text-white text-xs sm:text-sm px-3 py-1.5 font-bold border-2 border-white/50 shadow-lg">
+                  IN STOCK
+                </Badge>
+              )}
+
+              {/* Featured Badge */}
+              {bouquet.featured && !bouquet.is_out_of_stock && (
                 <Badge className="bg-primary text-primary-foreground text-xs sm:text-sm px-2 py-1">
                   Featured
+                </Badge>
+              )}
+
+              {/* Discount Badge */}
+              {bouquet.discount_percentage && bouquet.discount_percentage > 0 && (
+                <Badge className="bg-red-500 text-white text-xs sm:text-sm px-3 py-1.5 font-bold border-2 border-white/50 shadow-lg">
+                  {bouquet.discount_percentage}% OFF
                 </Badge>
               )}
             </div>
@@ -308,12 +334,45 @@ export const ProductModal = ({ bouquet, onClose }: ProductModalProps) => {
                 >
                   {bouquet.name}
                 </motion.h1>
-                <motion.p 
-                  className="text-3xl sm:text-4xl font-luxury text-primary leading-tight"
-                  layoutId={`bouquet-price-${bouquet.id}`}
-                >
-                  ${bouquet.price}
-                </motion.p>
+                
+                {/* Price Display with Discount */}
+                <div className="flex items-baseline gap-2 sm:gap-3">
+                  {bouquet.discount_percentage && bouquet.discount_percentage > 0 ? (
+                    <>
+                      <motion.span 
+                        className="text-xl sm:text-2xl font-luxury text-gray-400 line-through"
+                        layoutId={`bouquet-price-original-${bouquet.id}`}
+                      >
+                        ${bouquet.price.toFixed(2)}
+                      </motion.span>
+                      <motion.p 
+                        className="text-3xl sm:text-4xl font-luxury text-red-600 leading-tight"
+                        layoutId={`bouquet-price-${bouquet.id}`}
+                      >
+                        ${(bouquet.price * (1 - bouquet.discount_percentage / 100)).toFixed(2)}
+                      </motion.p>
+                      <Badge className="bg-red-500 text-white text-sm sm:text-base px-2 py-1">
+                        {bouquet.discount_percentage}% OFF
+                      </Badge>
+                    </>
+                  ) : (
+                    <motion.p 
+                      className="text-3xl sm:text-4xl font-luxury text-primary leading-tight"
+                      layoutId={`bouquet-price-${bouquet.id}`}
+                    >
+                      ${bouquet.price.toFixed(2)}
+                    </motion.p>
+                  )}
+                </div>
+
+                {/* Stock Status Alert */}
+                {bouquet.is_out_of_stock && (
+                  <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+                    <p className="text-sm text-red-800 font-medium">
+                      ⚠️ This product is currently out of stock
+                    </p>
+                  </div>
+                )}
               </div>
 
               {/* Description - Responsive Text */}
@@ -351,8 +410,13 @@ export const ProductModal = ({ bouquet, onClose }: ProductModalProps) => {
               {/* Actions - Stack on Mobile, Side-by-Side on Desktop */}
               <div className={`flex ${isMobile ? 'flex-col gap-3' : 'gap-4'} pt-2 sm:pt-4`}>
                 <Button
-                  className="add-to-cart-btn flex-1 bg-primary hover:bg-primary-dark text-primary-foreground h-14 sm:h-12 text-base sm:text-lg font-medium touch-target active:scale-95 transition-transform"
+                  className={`add-to-cart-btn flex-1 h-14 sm:h-12 text-base sm:text-lg font-medium touch-target active:scale-95 transition-transform ${
+                    bouquet.is_out_of_stock 
+                      ? 'bg-gray-400 hover:bg-gray-400 cursor-not-allowed text-white' 
+                      : 'bg-primary hover:bg-primary-dark text-primary-foreground'
+                  }`}
                   onClick={handleAddToCart}
+                  disabled={bouquet.is_out_of_stock}
                   style={{
                     WebkitTapHighlightColor: 'transparent',
                     touchAction: 'manipulation',
@@ -360,7 +424,7 @@ export const ProductModal = ({ bouquet, onClose }: ProductModalProps) => {
                   }}
                 >
                   <ShoppingCart className="w-5 h-5 mr-2" />
-                  Add to Cart
+                  {bouquet.is_out_of_stock ? 'Out of Stock' : 'Add to Cart'}
                 </Button>
                 
                 <Button
