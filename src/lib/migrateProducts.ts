@@ -16,7 +16,7 @@ type Bouquet = {
   image: string;
   description?: string;
   category: string;
-  displayCategory: string;
+  displayCategory?: string;
   featured?: boolean;
 };
 
@@ -69,7 +69,7 @@ export async function migrateProductsToSupabase(bouquets: Bouquet[]): Promise<{
         description: bouquet.description || '',
         price: bouquet.price,
         category: bouquet.category,
-        display_category: bouquet.displayCategory,
+        display_category: bouquet.displayCategory || bouquet.category, // Use category as fallback
         featured: bouquet.featured || false,
         tags: [bouquet.category], // Use category as initial tag
         image_urls: [normalizedImage], // Use normalized image path

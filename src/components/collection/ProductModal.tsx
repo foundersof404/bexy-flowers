@@ -30,13 +30,18 @@ export const ProductModal = ({ bouquet, onClose }: ProductModalProps) => {
   const [isDragging, setIsDragging] = useState(false);
 
   useEffect(() => {
-    // Prevent body scroll
-    document.body.style.overflow = "hidden";
+    const scrollY = window.scrollY;
     
-    // Mobile-specific: Prevent background scroll on iOS
+    // Better scroll lock for mobile - avoid fixed position to prevent white screen
     if (isMobile) {
-      document.body.style.position = "fixed";
-      document.body.style.width = "100%";
+      // On mobile, just prevent overflow - don't use fixed position
+      document.body.style.overflow = "hidden";
+      document.documentElement.style.overflow = "hidden";
+      // Store scroll position
+      document.body.setAttribute('data-scroll-y', scrollY.toString());
+    } else {
+      // Desktop: use overflow hidden
+      document.body.style.overflow = "hidden";
     }
     
     // Modal entrance animation (simplified on mobile for performance)
@@ -78,10 +83,19 @@ export const ProductModal = ({ bouquet, onClose }: ProductModalProps) => {
     }
 
     return () => {
+      // Restore scroll
       document.body.style.overflow = "unset";
+      document.documentElement.style.overflow = "unset";
+      
+      // Restore scroll position on mobile
       if (isMobile) {
-        document.body.style.position = "";
-        document.body.style.width = "";
+        const savedScrollY = document.body.getAttribute('data-scroll-y');
+        if (savedScrollY) {
+          requestAnimationFrame(() => {
+            window.scrollTo(0, parseInt(savedScrollY, 10));
+            document.body.removeAttribute('data-scroll-y');
+          });
+        }
       }
     };
   }, [isMobile]);
@@ -192,6 +206,7 @@ export const ProductModal = ({ bouquet, onClose }: ProductModalProps) => {
           // Ensure backdrop respects safe areas
           top: isMobile ? 'env(safe-area-inset-top)' : 0,
           bottom: isMobile ? 'env(safe-area-inset-bottom)' : 0,
+          touchAction: 'none',
         }}
       />
 
@@ -231,7 +246,7 @@ export const ProductModal = ({ bouquet, onClose }: ProductModalProps) => {
         </Button>
 
         {/* Mobile Layout: Stacked | Desktop Layout: Side-by-Side */}
-        <div className={`flex ${isMobile ? 'flex-col' : 'lg:grid lg:grid-cols-2'} gap-0 h-full max-h-[95vh] sm:max-h-[90vh]`}>
+        <div className={`flex flex-1 min-h-0 ${isMobile ? 'flex-col' : 'lg:grid lg:grid-cols-2'} gap-0 h-full max-h-[95vh] sm:max-h-[90vh] overflow-hidden`}>
           {/* Image Section - Responsive Height */}
           <div 
             ref={imageRef}
