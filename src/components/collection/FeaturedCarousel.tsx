@@ -81,6 +81,12 @@ export const FeaturedCarousel = ({ bouquets, onBouquetClick }: FeaturedCarouselP
               modifier: 1,
               slideShadows: true,
             }}
+            autoplay={{
+              delay: 3000,
+              disableOnInteraction: false,
+              pauseOnMouseEnter: true,
+            }}
+            loop={bouquets.length > 3}
             pagination={{
               clickable: true,
               dynamicBullets: true,
