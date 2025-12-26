@@ -132,24 +132,12 @@ const UltraNavigation = () => {
   const menuRef = useRef<HTMLDivElement>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
   const { getTotalItems } = useCart();
   const { getTotalFavorites } = useFavorites();
   const cartItems = getTotalItems();
   const favoritesCount = getTotalFavorites();
   const isMobile = useIsMobile();
   const shouldReduceMotion = useReducedMotion();
-
-  // Handle scroll for blur effect
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollY = window.scrollY;
-      setIsScrolled(scrollY > 10);
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   // ⚡ PERFORMANCE: Preload CartDashboard on hover for instant opening
   const preloadCartDashboard = () => {
@@ -257,12 +245,14 @@ const UltraNavigation = () => {
         <>
           <nav
             ref={navRef}
-            className={`ultra-navigation fixed top-0 left-0 right-0 z-[100] ${isScrolled ? 'backdrop-blur-xl bg-background/80' : 'backdrop-blur-md bg-background/60'} shadow-luxury transition-all duration-300`}
+            className="ultra-navigation fixed top-0 left-0 right-0 z-[100] backdrop-blur-xl shadow-luxury"
             style={{
-              transition: 'background-color 0.3s ease, backdrop-filter 0.3s ease',
-              pointerEvents: 'auto',
+              backgroundColor: 'transparent', // Make header transparent
+              transition: 'none', // Remove transition to prevent black flash
+              pointerEvents: 'auto', // Ensure navigation is clickable
               position: 'fixed',
               width: '100%',
+              // Removed will-change as it causes performance issues with scroll
             }}
           >
         <div className="max-w-7xl mx-auto px-3 xs:px-4 sm:px-6 py-2 xs:py-3 sm:py-4" style={{ paddingTop: isMobile ? 'env(safe-area-inset-top, 0.5rem)' : undefined }}>
