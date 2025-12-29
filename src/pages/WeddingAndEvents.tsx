@@ -121,12 +121,12 @@ const WeddingHero = () => {
   }, []);
 
   return (
-    <section ref={heroRef} className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-b from-[#fafafa] to-white" style={{ marginTop: '-12.3rem', paddingTop: '50' }}>
+    <section ref={heroRef} className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-b from-[#fafafa] to-white" style={{ marginTop: '0', paddingTop: '12rem' }}>
       {/* Hero Image */}
       <div
         ref={imageRef}
         className="absolute inset-0 w-full h-full"
-        style={{ top: '12rem', height: 'calc(100% - 12rem)' }}
+        style={{ top: '0', height: '100%' }}
       >
         <img
           src={heroWeddingImage}
@@ -138,7 +138,7 @@ const WeddingHero = () => {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 md:py-16 text-center" style={{ marginTop: '12rem', transform: 'scale(0.85)' }}>
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 md:py-16 text-center" style={{ marginTop: '0', transform: 'scale(0.85)' }}>
         <div ref={textRef} className="space-y-3 sm:space-y-4 md:space-y-6">
           <motion.div
             initial={{ opacity: 0 }}
@@ -1866,12 +1866,13 @@ const WeddingAndEvents = () => {
       const isMobileDevice = window.innerWidth <= 1024;
 
       // Set semi-transparent background - more visible on mobile
-      const initialOpacity = isMobileDevice ? 0.7 : 0.3;
-      const scrolledOpacity = isMobileDevice ? 0.9 : 0.5;
+      const initialOpacity = isMobileDevice ? 0.85 : 0.6;
+      const scrolledOpacity = isMobileDevice ? 0.95 : 0.8;
 
       nav.style.backgroundColor = `rgba(0, 0, 0, ${initialOpacity})`;
       nav.style.backdropFilter = 'blur(10px)';
       nav.style.transition = 'background-color 0.3s ease';
+      nav.style.zIndex = '100'; // Ensure nav is above everything
 
       // Update on scroll - keep semi-transparent but more opaque when scrolled
       const handleScroll = () => {
