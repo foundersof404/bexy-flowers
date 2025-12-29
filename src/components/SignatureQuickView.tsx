@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { useCartWithToast } from '@/hooks/useCartWithToast';
 import { Link } from 'react-router-dom';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 // ==================== TYPES ====================
 export interface QuickViewItem {
@@ -80,6 +81,7 @@ const DEFAULT_CATEGORY = 'Signature Collection';
 const SignatureQuickView = ({ open, item, onClose }: SignatureQuickViewProps) => {
   const { addToCart } = useCartWithToast();
   const dialogRef = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile();
 
   // ==================== STATE ====================
   const [selectedSize, setSelectedSize] = useState<string>('medium');
@@ -141,30 +143,29 @@ const SignatureQuickView = ({ open, item, onClose }: SignatureQuickViewProps) =>
     if (!open) return;
 
     const scrollY = window.scrollY;
-    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
     
-    // Store original styles
-    const originalBodyOverflow = document.body.style.overflow;
-    const originalBodyPosition = document.body.style.position;
-    const originalBodyTop = document.body.style.top;
-    const originalBodyWidth = document.body.style.width;
-    const originalBodyPaddingRight = document.body.style.paddingRight;
-    const originalHtmlOverflow = document.documentElement.style.overflow;
-    
-    // Lock background scroll completely
-    document.body.style.overflow = 'hidden';
-    document.body.style.position = 'fixed';
-    document.body.style.top = `-${scrollY}px`;
-    document.body.style.width = '100%';
-    document.body.style.paddingRight = `${scrollbarWidth}px`;
-    document.documentElement.style.overflow = 'hidden';
+    // Better scroll lock for mobile - avoid fixed position to prevent white screen
+    if (isMobile) {
+      // On mobile, just prevent overflow - don't use fixed position
+      document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden';
+      // Store scroll position
+      document.body.setAttribute('data-scroll-y', scrollY.toString());
+    } else {
+      // Desktop: use overflow hidden with scrollbar compensation
+      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+      document.body.style.overflow = 'hidden';
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
+      document.documentElement.style.overflow = 'hidden';
+    }
 
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
     };
     
-    // Prevent wheel events on background
+    // Prevent wheel events on background (desktop only)
     const preventBackgroundScroll = (e: WheelEvent) => {
+      if (isMobile) return;
       const target = e.target as HTMLElement;
       // Only prevent if not inside the scrollable content
       if (!target.closest('.modal-scrollable-content')) {
@@ -173,23 +174,35 @@ const SignatureQuickView = ({ open, item, onClose }: SignatureQuickViewProps) =>
     };
 
     document.addEventListener('keydown', handleEscape);
-    document.addEventListener('wheel', preventBackgroundScroll, { passive: false });
+    if (!isMobile) {
+      document.addEventListener('wheel', preventBackgroundScroll, { passive: false });
+    }
 
     return () => {
       document.removeEventListener('keydown', handleEscape);
-      document.removeEventListener('wheel', preventBackgroundScroll);
+      if (!isMobile) {
+        document.removeEventListener('wheel', preventBackgroundScroll);
+      }
       
-      // Restore original styles
-      document.body.style.overflow = originalBodyOverflow;
-      document.body.style.position = originalBodyPosition;
-      document.body.style.top = originalBodyTop;
-      document.body.style.width = originalBodyWidth;
-      document.body.style.paddingRight = originalBodyPaddingRight;
-      document.documentElement.style.overflow = originalHtmlOverflow;
+      // Restore scroll
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
       
-      window.scrollTo(0, scrollY);
+      if (isMobile) {
+        // Restore scroll position on mobile
+        const savedScrollY = document.body.getAttribute('data-scroll-y');
+        if (savedScrollY) {
+          requestAnimationFrame(() => {
+            window.scrollTo(0, parseInt(savedScrollY, 10));
+            document.body.removeAttribute('data-scroll-y');
+          });
+        }
+      } else {
+        // Desktop: restore padding
+        document.body.style.paddingRight = '';
+      }
     };
-  }, [open, onClose]);
+  }, [open, onClose, isMobile]);
 
   useEffect(() => {
     if (open && item) {
@@ -303,7 +316,7 @@ const SignatureQuickView = ({ open, item, onClose }: SignatureQuickViewProps) =>
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            style={{ touchAction: 'none' }}
+            style={{ touchAction: isMobile ? 'pan-y' : 'none' }}
           />
 
           {/* Modal Container */}

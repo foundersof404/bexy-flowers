@@ -1,0 +1,15 @@
+{
+  "model_id": "runwayml/stable-diffusion-v1-5",
+  "training_images_dir": "/content/drive/MyDrive/bexy_flowers_training/patch_1_boxes",
+  "captions_file": "/content/drive/MyDrive/bexy_flowers_training/patch_1_boxes/captions.json",
+  "output_dir": "/content/fine_tuned_model_boxes",
+  "lora_rank": 4,
+  "learning_rate": 0.0001,
+  "num_epochs": 100,
+  "batch_size": 1,
+  "gradient_accumulation_steps": 4,
+  "save_every": 10,
+  "resolution": 512,
+  "device": "cuda",
+  "image_prefix": "box_"
+}
