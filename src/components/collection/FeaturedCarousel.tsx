@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { OptimizedImage } from "@/components/OptimizedImage";
 import { useImagePreloader } from "@/hooks/useImagePreloader";
-import type { Bouquet } from "@/pages/Collection";
+import type { Bouquet } from "@/types/bouquet";
 
 // Import Swiper styles
 import "swiper/css";

@@ -1,16 +1,15 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Box, Gift, ShoppingCart, Check, Circle, Wand2, RefreshCw, Heart } from "lucide-react";
+import { Box, Gift, Check, CheckCircle2, Wand2, Plus, Minus, X, Info, ChevronRight, Palette, ShoppingCart } from "lucide-react";
 import UltraNavigation from "@/components/UltraNavigation";
-import Footer from "@/components/Footer";
-import BackToTop from "@/components/BackToTop";
 import { useCart } from "@/contexts/CartContext";
 import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
 import heroBouquetMain from "@/assets/bouquet-4.jpg";
-import heroBouquetAccent from "@/assets/bouquet-5.jpg";
-import { encodeImageUrl } from "@/lib/imageUtils";
+import { flowers, flowerFamilies, EnhancedFlower } from "@/data/flowers";
+import { generateBouquetImage as generateImage } from "@/lib/api/imageGeneration";
 
+// --- Types ---
 const GOLD = "rgb(199, 158, 72)";
 
 interface Package {
@@ -18,597 +17,563 @@ interface Package {
   name: string;
   type: "box" | "wrap";
   icon: any;
-  price: number;
+  basePrice: number;
   description: string;
 }
 
-interface BoxShape {
+interface Size {
   id: string;
   name: string;
-  icon: any;
+  priceMultiplier: number;
   description: string;
 }
 
-interface BoxColor {
+interface ColorOption {
   id: string;
   name: string;
-  color: string;
+  hex: string;
   gradient: string;
 }
 
-interface WrapColor {
-  id: string;
-  name: string;
-  color: string;
-  gradient: string;
+interface SelectedFlower {
+  flower: EnhancedFlower;
+  quantity: number;
 }
 
+// --- Data ---
 const packages: Package[] = [
-  { id: "box", name: "Luxury Box", type: "box", icon: Box, price: 25, description: "Premium box with elegant finish" },
-  { id: "wrap", name: "Paper Wrap", type: "wrap", icon: Gift, price: 15, description: "Beautiful hand-wrapped with ribbon" }
+  { id: "box", name: "Luxury Box", type: "box", icon: Box, basePrice: 20, description: "Premium rigid box" },
+  { id: "wrap", name: "Signature Wrap", type: "wrap", icon: Gift, basePrice: 15, description: "Elegant paper wrapping" }
 ];
 
-const boxShapes: BoxShape[] = [
-  { id: "small-round", name: "Small Round", icon: Circle, description: "Small round shape" },
-  { id: "circle", name: "Round", icon: Circle, description: "Classic round shape" },
-  { id: "heart", name: "Heart", icon: Heart, description: "Romantic heart-shaped" }
+const sizes: Size[] = [
+  { id: "small", name: "Small", priceMultiplier: 1.0, description: "Perfect for a sweet gesture" },
+  { id: "medium", name: "Medium", priceMultiplier: 1.5, description: "Our most popular size" },
+  { id: "large", name: "Large", priceMultiplier: 2.0, description: "A grand statement" }
 ];
 
-const boxColors: BoxColor[] = [
-  { id: "white", name: "White", color: "#FFFFFF", gradient: "linear-gradient(135deg, #FFFFFF 0%, #F5F5F5 100%)" },
-  { id: "black", name: "Black", color: "#1a1a1a", gradient: "linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)" },
-  { id: "gold", name: "Gold", color: GOLD, gradient: `linear-gradient(135deg, ${GOLD} 0%, #D4A85A 100%)` },
-  { id: "pink", name: "Pink", color: "#FFB6C1", gradient: "linear-gradient(135deg, #FFB6C1 0%, #FFC0CB 100%)" },
-  { id: "blue", name: "Blue", color: "#87CEEB", gradient: "linear-gradient(135deg, #87CEEB 0%, #4682B4 100%)" },
-  { id: "red", name: "Red", color: "#DC143C", gradient: "linear-gradient(135deg, #DC143C 0%, #B22222 100%)" }
+const colors: ColorOption[] = [
+  { id: "black", name: "Black", hex: "#000000", gradient: "linear-gradient(135deg, #2a2a2a 0%, #000000 100%)" },
+  { id: "white", name: "White", hex: "#FFFFFF", gradient: "linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%)" },
+  { id: "gold", name: "Gold", hex: GOLD, gradient: `linear-gradient(135deg, ${GOLD} 0%, #a88b45 100%)` },
+  { id: "pink", name: "Pink", hex: "#FFC0CB", gradient: "linear-gradient(135deg, #ffd1dc 0%, #ffb6c1 100%)" },
+  { id: "blue", name: "Blue", hex: "#87CEEB", gradient: "linear-gradient(135deg, #87ceeb 0%, #5f9ea0 100%)" },
+  { id: "red", name: "Red", hex: "#DC143C", gradient: "linear-gradient(135deg, #dc143c 0%, #8b0000 100%)" }
 ];
 
-const wrapColors: WrapColor[] = [
-  { id: "white", name: "Pure White", color: "#FFFFFF", gradient: "linear-gradient(135deg, #FFFFFF 0%, #F5F5F5 100%)" },
-  { id: "cream", name: "Cream", color: "#FFF8DC", gradient: "linear-gradient(135deg, #FFF8DC 0%, #F5E6D3 100%)" },
-  { id: "pink", name: "Blush Pink", color: "#FFB6C1", gradient: "linear-gradient(135deg, #FFB6C1 0%, #FFC0CB 100%)" },
-  { id: "gold", name: "Gold", color: GOLD, gradient: `linear-gradient(135deg, ${GOLD} 0%, #D4A85A 100%)` },
-  { id: "sage", name: "Sage", color: "#9CAF88", gradient: "linear-gradient(135deg, #9CAF88 0%, #B5C99A 100%)" },
-  { id: "lavender", name: "Lavender", color: "#E6E6FA", gradient: "linear-gradient(135deg, #E6E6FA 0%, #D8BFD8 100%)" }
-];
+// --- Components ---
 
-// Accessories will be loaded from Supabase
-
-// Simple floating petal component
-const FloatingPetal = ({ delay }: { delay: number }) => (
-  <motion.div
-    initial={{ y: -100, x: Math.random() * window.innerWidth, opacity: 0, rotate: 0 }}
-    animate={{
-      y: window.innerHeight + 100,
-      x: Math.random() * window.innerWidth,
-      opacity: [0, 0.3, 0.2, 0],
-      rotate: 360
-    }}
-    transition={{
-      duration: 20 + Math.random() * 10,
-      delay,
-      repeat: Infinity,
-      ease: "linear"
-    }}
-    className="absolute pointer-events-none"
-    style={{
-      width: "15px",
-      height: "15px",
-      background: `radial-gradient(circle, ${GOLD}40 0%, transparent 70%)`,
-      borderRadius: "50%",
-      filter: "blur(2px)"
-    }}
-  />
-);
-
-// Section Component for layout
-const CustomizeSection = React.forwardRef<HTMLDivElement, { title: string; children: React.ReactNode; isActive: boolean }>(({ title, children, isActive }, ref) => (
-  <motion.div
-    ref={ref}
-    initial={{ opacity: 0, y: 50 }}
-    animate={isActive ? { opacity: 1, y: 0, height: 'auto' } : { opacity: 0.5, y: 0, height: 'auto' }}
-    className={`relative group bg-white/90 backdrop-blur-sm rounded-2xl sm:rounded-3xl p-[1px] mb-4 sm:mb-6 md:mb-8 transition-all duration-500 ${isActive ? 'shadow-[0_35px_120px_rgba(0,0,0,0.08)]' : 'shadow-none'} ${isActive ? 'pointer-events-auto' : 'pointer-events-none'}`}
-    style={{
-      border: '1px solid rgba(199, 158, 72, 0.15)',
-      overflow: 'hidden'
-    }}
-  >
-    <div className={`relative rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 border ${isActive ? 'border-white/40 bg-white' : 'border-transparent bg-white/70'} transition-all`}>
-      <motion.div
-        className="absolute inset-0 opacity-0 group-hover:opacity-100 pointer-events-none"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: isActive ? [0.2, 0.4, 0.2] : 0 }}
-        transition={{ duration: 6, repeat: Infinity }}
-        style={{
-          background: 'linear-gradient(135deg, rgba(199,158,72,0.08), rgba(255,255,255,0))'
-        }}
-      />
-      <div className={`relative z-10 ${isActive ? '' : 'opacity-70'}`}>
-        <h2 className="text-xl sm:text-2xl md:text-3xl font-luxury font-bold mb-4 sm:mb-6 text-[#C79E48] border-b border-[#C79E48]/10 pb-3 sm:pb-4 flex items-center gap-2 sm:gap-3">
-          {title}
-          {!isActive && <Check className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-green-500 ml-auto" />}
-        </h2>
-        {children}
-      </div>
+const StepHeader = ({ number, title, isActive, isCompleted }: { number: number, title: string, isActive: boolean, isCompleted: boolean }) => (
+  <div className={`flex items-center gap-3 mb-6 ${isActive ? 'opacity-100' : 'opacity-60'}`}>
+    <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm transition-colors ${isCompleted ? 'bg-green-500 text-white' : isActive ? 'bg-[#C79E48] text-white' : 'bg-gray-200 text-gray-500'
+      }`}>
+      {isCompleted ? <Check className="w-5 h-5" /> : number}
     </div>
-  </motion.div>
-));
+    <h3 className={`text-xl font-luxury font-bold ${isActive ? 'text-gray-900' : 'text-gray-400'}`}>{title}</h3>
+  </div>
+);
 
 const Customize: React.FC = () => {
   const isMobile = useIsMobile();
-  const [selectedPackage, setSelectedPackage] = useState<Package | null>(null);
-  const [selectedBoxShape, setSelectedBoxShape] = useState<BoxShape | null>(null);
-  const [selectedBoxColor, setSelectedBoxColor] = useState<BoxColor | null>(null);
-  const [selectedWrapColor, setSelectedWrapColor] = useState<WrapColor | null>(null);
-  const [note, setNote] = useState("");
-  const [celebrating, setCelebrating] = useState(false);
-  const [withGlitter, setWithGlitter] = useState(false);
-  const [generatedImage, setGeneratedImage] = useState<string | null>(null);
-  const [generatedImageUrl, setGeneratedImageUrl] = useState<string | null>(null);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [showPreview, setShowPreview] = useState(false);
-  const [aiRefinementText, setAiRefinementText] = useState("");
-  const [showRefinement, setShowRefinement] = useState(false);
   const { addToCart } = useCart();
 
-  // Refs for scrolling
-  const packageRef = useRef<HTMLDivElement>(null);
-  const shapeRef = useRef<HTMLDivElement>(null);
-  const boxColorRef = useRef<HTMLDivElement>(null);
-  const wrapRef = useRef<HTMLDivElement>(null);
+  // State
+  const [selectedPackage, setSelectedPackage] = useState<Package | null>(null);
+  const [selectedSize, setSelectedSize] = useState<Size | null>(null);
+  const [selectedColor, setSelectedColor] = useState<ColorOption | null>(null);
 
-  // Scroll helper
-  const scrollToSection = (ref: React.RefObject<HTMLDivElement>) => {
-    setTimeout(() => {
-      ref.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }, 300);
-  };
+  const [flowerMode, setFlowerMode] = useState<"specific" | "mix" | null>(null);
+  const [selectedFamily, setSelectedFamily] = useState<string | null>(null);
+
+  const [selectedFlowers, setSelectedFlowers] = useState<Record<string, SelectedFlower>>({});
+
+  const [generatedImage, setGeneratedImage] = useState<string | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  // Computed
+  const step1Complete = !!selectedPackage;
+  const step2Complete = !!selectedSize && !!selectedColor;
+  const step3Complete = Object.keys(selectedFlowers).length > 0;
+
+  const currentStep = !step1Complete ? 1 : !step2Complete ? 2 : 3;
+
+  // Refs for auto-scroll
+  const step2Ref = useRef<HTMLDivElement>(null);
+  const step3Ref = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll logic
+  useEffect(() => {
+    if (step1Complete && !step2Complete) {
+      setTimeout(() => step2Ref.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
+    } else if (step2Complete && !flowerMode) {
+      setTimeout(() => step3Ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+    }
+  }, [step1Complete, step2Complete, flowerMode]);
+
+  // Pricing
+  const basePrice = (selectedPackage?.basePrice || 0) * (selectedSize?.priceMultiplier || 1);
+  const flowerPrice = Object.values(selectedFlowers).reduce((acc, curr) => acc + (curr.flower.price * curr.quantity), 0);
+  const totalPrice = basePrice + flowerPrice;
 
   // Handlers
-  const handlePackageSelect = (pkg: Package) => {
-    setSelectedPackage(pkg);
-    // Reset downstream choices if type changes
-    if (selectedPackage && selectedPackage.type !== pkg.type) {
-      setSelectedBoxShape(null);
-      setSelectedBoxColor(null);
-      setSelectedWrapColor(null);
-    }
-
-    if (pkg.type === "box") {
-      scrollToSection(shapeRef);
-    } else {
-      scrollToSection(wrapRef);
-    }
+  const handleAddFlower = (flower: EnhancedFlower) => {
+    setSelectedFlowers(prev => ({
+      ...prev,
+      [flower.id]: {
+        flower,
+        quantity: (prev[flower.id]?.quantity || 0) + 1
+      }
+    }));
   };
 
-  const handleShapeSelect = (shape: BoxShape) => {
-    setSelectedBoxShape(shape);
-    scrollToSection(boxColorRef);
+  const handleRemoveFlower = (flowerId: string) => {
+    setSelectedFlowers(prev => {
+      const next = { ...prev };
+      if (next[flowerId].quantity > 1) {
+        next[flowerId].quantity -= 1;
+      } else {
+        delete next[flowerId];
+      }
+      return next;
+    });
   };
 
-  const handleBoxColorSelect = (color: BoxColor) => {
-    setSelectedBoxColor(color);
+  const handleAddToCart = () => {
+    const desc = `${selectedSize?.name} ${selectedColor?.name} ${selectedPackage?.name} with ${Object.values(selectedFlowers).map(f => `${f.quantity} ${f.flower.name}`).join(', ')}`;
+
+    addToCart({
+      id: `custom-${Date.now()}`,
+      title: "Custom Bouquet",
+      price: totalPrice,
+      image: generatedImage || Object.values(selectedFlowers)[0]?.flower.imageUrl || heroBouquetMain,
+      description: desc,
+      personalNote: ""
+    });
+    toast.success("Added to cart!");
   };
 
-  const handleWrapColorSelect = (color: WrapColor) => {
-    setSelectedWrapColor(color);
-  };
-
-  // Calculate Price
-  const totalPrice = selectedPackage?.price || 0;
-
-  const steps = [
-    { id: 'presentation', label: 'Presentation', detail: selectedPackage ? selectedPackage.name : 'Choose style', complete: !!selectedPackage },
-    { id: 'details', label: selectedPackage?.type === 'box' ? 'Box Details' : 'Wrap Details', detail: selectedPackage?.type === 'box' ? (selectedBoxColor ? selectedBoxColor.name : 'Shape & color') : (selectedWrapColor ? selectedWrapColor.name : 'Wrap color'), complete: selectedPackage?.type === 'box' ? !!selectedBoxColor : !!selectedWrapColor },
-    { id: 'preview', label: 'Preview', detail: generatedImage ? 'Ready' : 'Generate look', complete: !!generatedImage }
-  ];
-
-  const completedSteps = steps.filter(step => step.complete).length;
-  const progressPercent = Math.round((completedSteps / steps.length) * 100);
-
-
-  // --- AI Generation Logic ---
+  // --- AI Generation Logic (Uses Pollinations API) ---
   const generateBouquetImage = async () => {
+    console.log('[Customize] Generate button clicked');
     setIsGenerating(true);
+    setGeneratedImage(null); // Clear previous to show loading state
+
     try {
-      // Packaging & Setting Description
-      let packagingPrompt = "";
-      let settingPrompt = "";
-      
+      console.log('[Customize] Building prompt...');
+      // Build simple, concise flower description
+      const flowerDescriptions: string[] = [];
+      Object.values(selectedFlowers).forEach(({ flower, quantity }) => {
+        flowerDescriptions.push(`${quantity} ${flower.colorName} ${flower.family}`);
+      });
+
+      const flowersText = flowerDescriptions.length > 0
+        ? flowerDescriptions.join(', ')
+        : 'roses';
+
+      const colorName = selectedColor?.name || "white";
+      const sizeName = selectedSize?.name || "medium";
+
+      // Build SIMPLE prompt (avoid 500 errors from Pollinations)
+      let fullPrompt = "";
+
       if (selectedPackage?.type === "box") {
-        const colorName = selectedBoxColor?.name || "black";
-        
-        packagingPrompt = `A ${colorName} ${selectedBoxShape?.name || "round"} box with the text "Bexy Flowers" written in gold letters on the front. The box has an elegant, luxurious appearance.`;
-        settingPrompt = `The box sits on a light grey stone ledge outdoors. Sunlight creates soft highlights. Background is blurred green garden foliage.`;
+        // Simple box description
+        fullPrompt = `${sizeName} ${colorName} flower box filled with ${flowersText}`;
       } else {
-        const colorName = selectedWrapColor?.name || "white";
-        packagingPrompt = `A beautiful bouquet wrapped in ${colorName} paper with "Bexy Flowers" printed on it. Elegant wrapping style.`;
-        settingPrompt = `Indoors against a plain white background with soft studio lighting.`;
+        // Simple bouquet description
+        fullPrompt = `${sizeName} bouquet with ${flowersText} wrapped in ${colorName} paper`;
       }
 
-      // Combined Prompt
-      const fullPrompt = `Professional photography of ${packagingPrompt} ${settingPrompt} High resolution, photorealistic, 8k, sharp focus. ${aiRefinementText}`;
+      console.log('[Customize] Simple Prompt:', fullPrompt);
+      console.log('[Customize] Calling generateImage...');
 
-      // Use Pollinations AI
-      const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(fullPrompt)}?width=1024&height=1024&nologo=true&seed=${Date.now()}&model=flux`;
-      
-      const response = await fetch(url);
-      if (response.ok) {
-        const blob = await response.blob();
-        setGeneratedImage(URL.createObjectURL(blob));
-        setGeneratedImageUrl(url);
-        toast.success("Preview ready!", { closeButton: true });
-      } else {
-        throw new Error("Generation failed");
-      }
+      // Generate using Pollinations API with reduced resolution
+      const result = await generateImage(fullPrompt, {
+        width: 512,
+        height: 512,
+      });
 
+      console.log('[Customize] Result:', result);
+      console.log('[Customize] Image URL:', result.imageUrl);
+
+      setGeneratedImage(result.imageUrl);
+
+      toast.success("Generating preview...", {
+        icon: <Wand2 className="w-4 h-4 text-[#C79E48]" />,
+        description: "Loading image from AI"
+      });
     } catch (error) {
-      console.error("Error generating image:", error);
-      toast.error("Generation failed, please try again.", { closeButton: true });
-    } finally {
+      console.error("[Customize] AI Error:", error);
+      toast.error("Could not generate preview. Please try again.");
       setIsGenerating(false);
     }
   };
 
-  const handleAddToCart = () => {
-    const packageDetails = selectedPackage?.type === "box" 
-      ? `${selectedPackage.name} - ${selectedBoxShape?.name || ""} ${selectedBoxColor?.name || ""}`
-      : `${selectedPackage?.name || ""} - ${selectedWrapColor?.name || ""}`;
-
-    addToCart({
-      id: `custom-${Date.now()}`,
-      title: "Custom Box",
-      price: totalPrice,
-      image: generatedImageUrl || generatedImage || "/src/assets/bouquet-1.jpg",
-      description: packageDetails,
-      personalNote: note
-    });
-    setCelebrating(true);
-    setTimeout(() => setCelebrating(false), 2000);
-    toast.success("Added to cart!", { closeButton: true });
-  };
+  // Filtered Flowers
+  const availableFlowers = flowerMode === "specific" && selectedFamily
+    ? flowers.filter(f => f.family === selectedFamily)
+    : flowers;
 
   return (
-    <div className="min-h-screen bg-white relative overflow-x-hidden">
+    <div className="min-h-screen bg-gray-50 font-body">
       <UltraNavigation />
 
-      {/* Ambient Gold Ribbons */}
-      <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
-        {[...Array(3)].map((_, idx) => (
-          <motion.div
-            key={`ribbon-${idx}`}
-            initial={{ opacity: 0.2, rotate: 0, y: 0 }}
-            animate={{ 
-              opacity: [0.1, 0.3, 0.15], 
-              rotate: idx % 2 === 0 ? [0, 5, -5, 0] : [0, -6, 6, 0],
-              y: [-30, 20, -40]
-            }}
-            transition={{ duration: 18 + idx * 4, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute w-[55vw] h-[55vw] bg-gradient-to-br from-[#c9a14e1f] via-[#f9efe3] to-transparent blur-3xl"
-            style={{
-              top: idx === 0 ? '-10%' : idx === 1 ? '30%' : '60%',
-              left: idx === 0 ? '-15%' : idx === 1 ? '40%' : '65%'
-            }}
-          />
-        ))}
-      </div>
-      
-      {/* Floating Background */}
-      <div className="fixed inset-0 pointer-events-none z-0 opacity-30">
-        {[...Array(15)].map((_, i) => (
-          <FloatingPetal key={i} delay={i * 2} />
-        ))}
+      {/* Hero Header */}
+      <div className="pt-32 pb-12 px-6 bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto text-center">
+          <h1 className="text-4xl md:text-6xl font-luxury font-bold text-gray-900 mb-4">Design Your Masterpiece</h1>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">Create a truly unique arrangement. Choose your style, colors, and blooms to craft the perfect gift.</p>
+        </div>
       </div>
 
-      {/* Header */}
-      <div className={`relative ${isMobile ? 'pt-20 sm:pt-24' : 'pt-24 sm:pt-28 md:pt-32'} pb-8 sm:pb-12 md:pb-16 lg:pb-20 px-4 sm:px-6 overflow-hidden`}>
-        <motion.div
-          className="absolute inset-0"
-          initial={{ scale: 1.08, opacity: 0 }}
-          animate={{ scale: 1, opacity: 0.65 }}
-          transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
-        >
-          <img
-            src={heroBouquetMain}
-            alt="Customization hero background"
-            className="w-full h-full object-cover"
-            loading="eager"
-          />
-        </motion.div>
-        <div className="absolute inset-0 bg-gradient-to-b from-white/95 via-white/85 to-white/95" />
+      <div className="max-w-[1600px] mx-auto p-4 md:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8 relative items-start">
 
-        <motion.div
-          className="relative z-10 text-center px-2"
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-        >
-          {/* Luxury Typography with Gold Accent */}
-          <motion.h1 
-            className="font-luxury text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl 2xl:text-8xl font-bold mb-3 sm:mb-4 md:mb-6 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 bg-clip-text text-transparent relative px-2"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            style={{
-              filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))',
-              letterSpacing: '0.05em'
-            }}
-          >
-            Design Your Masterpiece
-            {/* Animated Gold Underline */}
-            <motion.div 
-              className="absolute -bottom-1 sm:-bottom-2 left-1/2 transform -translate-x-1/2 h-0.5 sm:h-1 bg-gradient-to-r from-[#C79E48] to-[#D4A85A] rounded-full"
-              initial={{ width: 0 }}
-              animate={{ width: 'clamp(120px, 30vw, 200px)' }}
-              transition={{ duration: 1.2, delay: 0.8, ease: "easeOut" }}
-            />
-          </motion.h1>
+        {/* Left Column: Form Steps */}
+        <div className="lg:col-span-7 space-y-8">
 
-          {/* Enhanced Decorative Elements */}
-          <div className="relative mb-4 sm:mb-6">
-            <div className="w-24 sm:w-32 md:w-40 h-0.5 bg-gradient-to-r from-transparent via-[#C79E48]/60 to-transparent mx-auto" />
-            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-2 h-2 sm:w-3 sm:h-3 bg-[#C79E48] rotate-45 shadow-lg shadow-[#C79E48]/50" />
-          </div>
+          {/* Step 1: Presentation */}
+          <section className={`bg-white rounded-3xl p-6 md:p-8 shadow-sm transition-all duration-500 border ${currentStep === 1 ? 'border-[#C79E48] ring-4 ring-[#C79E48]/5' : 'border-transparent'}`}>
+            <StepHeader number={1} title="Choose Presentation" isActive={currentStep >= 1} isCompleted={step1Complete} />
 
-          <motion.p 
-            className="font-body text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed font-light px-4"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-          >
-            Customize every detail of your perfect bouquet, from the box and wrap to the last glittering petal.
-          </motion.p>
-        </motion.div>
-      </div>
+            <div className="grid grid-cols-2 gap-4">
+              {packages.map(pkg => (
+                <button
+                  key={pkg.id}
+                  onClick={() => setSelectedPackage(pkg)}
+                  className={`relative p-6 rounded-2xl border-2 text-left transition-all group hover:border-[#C79E48]/50 ${selectedPackage?.id === pkg.id ? 'border-[#C79E48] bg-[#C79E48]/5' : 'border-gray-100 bg-gray-50'}`}
+                >
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-4 transition-colors ${selectedPackage?.id === pkg.id ? 'bg-[#C79E48] text-white' : 'bg-white text-gray-400 group-hover:text-[#C79E48]'}`}>
+                    <pkg.icon className="w-6 h-6" />
+                  </div>
+                  <h4 className="font-bold text-lg text-gray-900">{pkg.name}</h4>
+                  <p className="text-sm text-gray-500 mt-1">{pkg.description}</p>
 
-      {/* Animated Step Timeline */}
-      <div className="relative z-10 -mt-4 sm:-mt-6 md:-mt-8 pb-8 sm:pb-12 md:pb-16 px-4 sm:px-6">
-        <motion.div 
-          className="max-w-6xl mx-auto bg-white/80 backdrop-blur-md border border-[#C79E48]/15 rounded-xl sm:rounded-2xl md:rounded-3xl p-3 sm:p-4 md:p-6 lg:p-8 shadow-[0_25px_80px_rgba(0,0,0,0.08)]"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-        >
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 sm:gap-3 md:gap-4 mb-3 sm:mb-4 md:mb-6">
-            <div>
-              <p className="text-xs sm:text-sm uppercase tracking-[0.2em] sm:tracking-[0.3em] text-slate-400">Creative journey</p>
-              <p className="text-lg sm:text-xl md:text-2xl font-luxury font-semibold text-slate-800">You're {progressPercent}% ready</p>
-            </div>
-            <div className="text-left md:text-right">
-              <p className="text-xs sm:text-sm text-slate-500">Completed steps</p>
-              <p className="text-base sm:text-lg font-semibold text-[#C79E48]">{completedSteps} / {steps.length}</p>
-            </div>
-          </div>
-
-          <div className="relative mb-8">
-            <div className="h-2 bg-slate-100 rounded-full" />
-            <motion.div 
-              className="absolute top-0 left-0 h-2 bg-gradient-to-r from-[#C79E48] via-[#d7b46d] to-[#f5d7a0] rounded-full"
-              initial={{ width: 0 }}
-              animate={{ width: `${progressPercent}%` }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
-              style={{ boxShadow: '0 4px 14px rgba(199, 158, 72, 0.35)' }}
-            />
-            <div className="absolute inset-0 flex justify-between">
-              {steps.map((step) => (
-                <div key={step.id} className="relative flex-1 flex justify-center">
-                  <motion.span 
-                    className={`w-4 h-4 rounded-full border-2 ${step.complete ? 'bg-[#C79E48] border-[#C79E48]' : 'bg-white border-slate-200'} transition-colors`}
-                    animate={step.complete ? { scale: [1, 1.15, 1], boxShadow: ['0 0 0 rgba(199,158,72,0)', '0 0 12px rgba(199,158,72,0.45)', '0 0 0 rgba(199,158,72,0)'] } : {}}
-                    transition={{ duration: 1.6, repeat: step.complete ? Infinity : 0 }}
-                  />
-                </div>
+                  {selectedPackage?.id === pkg.id && (
+                    <motion.div layoutId="check1" className="absolute top-4 right-4">
+                      <CheckCircle2 className="w-6 h-6 text-[#C79E48]" />
+                    </motion.div>
+                  )}
+                </button>
               ))}
             </div>
-          </div>
+          </section>
 
-          {/* Step Names Grid - Hidden on Mobile */}
-          <div className={`grid md:grid-cols-6 gap-4 ${isMobile ? 'hidden' : ''}`}>
-            {steps.map((step, idx) => (
-              <motion.div 
-                key={step.id}
-                className={`rounded-2xl border p-4 text-center transition-all ${step.complete ? 'border-[#C79E48]/70 bg-[#fff8eb]' : 'border-slate-100 bg-white/70'}`}
-                whileHover={{ y: -4 }}
+          {/* Step 2: Details (Size & Color) */}
+          <AnimatePresence>
+            {step1Complete && (
+              <motion.section
+                ref={step2Ref}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, height: 0 }}
+                className={`bg-white rounded-3xl p-6 md:p-8 shadow-sm transition-all duration-500 border ${currentStep === 2 ? 'border-[#C79E48] ring-4 ring-[#C79E48]/5' : 'border-transparent'}`}
               >
-                <div className="text-sm uppercase tracking-wide text-slate-400 mb-1">Step {idx + 1}</div>
-                <div className={`font-semibold ${step.complete ? 'text-[#C79E48]' : 'text-slate-600'}`}>{step.label}</div>
-                <div className="text-xs text-slate-500 mt-2">{step.detail}</div>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
-      </div>
+                <StepHeader number={2} title={`Customize Your ${selectedPackage?.name}`} isActive={currentStep >= 2} isCompleted={step2Complete} />
 
-      <div className="max-w-[1600px] mx-auto px-3 sm:px-4 md:px-6 pb-8 sm:pb-12 md:pb-16 lg:pb-20 relative z-10">
-        <div className="grid lg:grid-cols-12 gap-4 sm:gap-6 md:gap-8 lg:gap-10 items-start">
-          
-          {/* Left Column: Customization Steps */}
-          <div className="lg:col-span-7 flex flex-col gap-4 sm:gap-6 md:gap-8">
-            
-            {/* Step 1: Package */}
-            <CustomizeSection title="1. Choose Presentation" isActive={true} ref={packageRef}>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-                {packages.map((pkg) => (
-                  <button
-                    key={pkg.id}
-                    onClick={() => handlePackageSelect(pkg)}
-                    className={`p-4 sm:p-6 rounded-xl sm:rounded-2xl border-2 transition-all flex flex-col items-center text-center gap-3 sm:gap-4 hover:scale-[1.02] ${
-                      selectedPackage?.id === pkg.id 
-                        ? 'border-[#C79E48] bg-[#C79E48]/5 shadow-lg' 
-                        : 'border-gray-100 hover:border-[#C79E48]/50'
-                    }`}
-                  >
-                    <div className={`w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center ${selectedPackage?.id === pkg.id ? 'bg-[#C79E48] text-white' : 'bg-gray-100 text-gray-400'}`}>
-                      <pkg.icon className="w-6 h-6 sm:w-8 sm:h-8" />
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-base sm:text-lg">{pkg.name}</h3>
-                      <p className="text-xs sm:text-sm text-gray-500">{pkg.description}</p>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </CustomizeSection>
-
-            {/* Step 2: Box Specifics */}
-            {selectedPackage?.type === "box" && (
-              <>
-                <CustomizeSection title="2. Select Box Shape" isActive={!!selectedPackage} ref={shapeRef}>
-                  <div className="grid grid-cols-3 sm:grid-cols-5 gap-3 sm:gap-4">
-                    {boxShapes.map((shape) => (
-                      <button
-                        key={shape.id}
-                        onClick={() => handleShapeSelect(shape)}
-                        className={`p-3 sm:p-4 rounded-lg sm:rounded-xl border-2 transition-all flex flex-col items-center gap-1.5 sm:gap-2 ${
-                          selectedBoxShape?.id === shape.id ? 'border-[#C79E48] bg-[#C79E48]/5' : 'border-gray-100'
-                        }`}
-                      >
-                        <div className={`p-1.5 sm:p-2 rounded-full ${selectedBoxShape?.id === shape.id ? 'bg-[#C79E48] text-white' : 'bg-gray-100'}`}>
-                          <shape.icon className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
-                        </div>
-                        <span className="text-xs sm:text-sm font-medium">{shape.name}</span>
-                      </button>
-                    ))}
-                  </div>
-                </CustomizeSection>
-
-                <CustomizeSection title="3. Select Box Color" isActive={!!selectedBoxShape} ref={boxColorRef}>
-                  <div className="flex flex-wrap gap-3 sm:gap-4">
-                    {boxColors.map((color) => (
-                      <button
-                        key={color.id}
-                        onClick={() => handleBoxColorSelect(color)}
-                        className={`w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full border-3 sm:border-4 shadow-sm transition-transform hover:scale-110 ${selectedBoxColor?.id === color.id ? 'border-[#C79E48] ring-2 ring-[#C79E48] ring-offset-1 sm:ring-offset-2' : 'border-white'}`}
-                        style={{ background: color.gradient }}
-                        title={color.name}
-                      />
-                    ))}
-                  </div>
-                  {selectedBoxColor && <p className="mt-3 sm:mt-4 text-[#C79E48] font-bold text-sm sm:text-base">{selectedBoxColor.name} Selected</p>}
-                </CustomizeSection>
-
-              </>
-            )}
-
-            {/* Step 2: Wrap Specifics */}
-            {selectedPackage?.type === "wrap" && (
-              <CustomizeSection title="2. Wrap Details" isActive={!!selectedPackage} ref={wrapRef}>
-                <div className="space-y-6 sm:space-y-8">
+                <div className="space-y-8">
+                  {/* Size Selector */}
                   <div>
-                    <h3 className="font-bold mb-3 sm:mb-4 text-gray-700 text-sm sm:text-base">Select Wrap Color</h3>
-                    <div className="flex flex-wrap gap-3 sm:gap-4">
-                      {wrapColors.map((color) => (
+                    <h4 className="text-sm font-bold uppercase tracking-wider text-gray-400 mb-4">Select Size</h4>
+                    <div className="grid grid-cols-3 gap-4">
+                      {sizes.map(size => (
+                        <button
+                          key={size.id}
+                          onClick={() => setSelectedSize(size)}
+                          className={`p-4 rounded-xl border-2 transition-all text-center ${selectedSize?.id === size.id ? 'border-[#C79E48] bg-[#C79E48]/5' : 'border-gray-100 hover:border-gray-200'}`}
+                        >
+                          <div className="font-bold text-gray-900">{size.name}</div>
+                          <div className="text-xs text-gray-500 mt-1">{size.description}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Color Selector */}
+                  <div>
+                    <h4 className="text-sm font-bold uppercase tracking-wider text-gray-400 mb-4">Select Color</h4>
+                    <div className="flex flex-wrap gap-4">
+                      {colors.map(color => (
                         <button
                           key={color.id}
-                          onClick={() => handleWrapColorSelect(color)}
-                          className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full border-3 sm:border-4 shadow-sm transition-transform hover:scale-110 ${selectedWrapColor?.id === color.id ? 'border-[#C79E48] ring-2 ring-[#C79E48] ring-offset-1 sm:ring-offset-2' : 'border-white'}`}
+                          onClick={() => setSelectedColor(color)}
+                          className={`group relative w-14 h-14 rounded-full border-4 transition-all ${selectedColor?.id === color.id ? 'border-[#C79E48] scale-110' : 'border-transparent hover:scale-105'}`}
                           style={{ background: color.gradient }}
                           title={color.name}
-                        />
+                        >
+                          {selectedColor?.id === color.id && (
+                            <motion.div
+                              initial={{ scale: 0 }}
+                              animate={{ scale: 1 }}
+                              className="absolute inset-0 flex items-center justify-center text-white mix-blend-difference"
+                            >
+                              <Check className="w-6 h-6" />
+                            </motion.div>
+                          )}
+                          <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap text-gray-600">
+                            {color.name}
+                          </span>
+                        </button>
                       ))}
                     </div>
                   </div>
                 </div>
-              </CustomizeSection>
+              </motion.section>
             )}
+          </AnimatePresence>
 
+          {/* Step 3: Flowers */}
+          <AnimatePresence>
+            {step2Complete && (
+              <motion.section
+                ref={step3Ref}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className={`bg-white rounded-3xl p-6 md:p-8 shadow-sm transition-all duration-500 border ${currentStep === 3 ? 'border-[#C79E48] ring-4 ring-[#C79E48]/5' : 'border-transparent'}`}
+              >
+                <StepHeader number={3} title="Select Flowers" isActive={currentStep === 3} isCompleted={step3Complete} />
 
-          </div>
+                {/* Mode Selection */}
+                {!flowerMode ? (
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <button
+                      onClick={() => setFlowerMode("specific")}
+                      className="group p-8 rounded-2xl border-2 border-gray-100 hover:border-[#C79E48] hover:bg-[#C79E48]/5 transition-all text-left"
+                    >
+                      <div className="w-16 h-16 bg-red-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <span className="text-4xl">🌹</span>
+                      </div>
+                      <h3 className="text-xl font-bold text-gray-900 mb-2">Specific Variety</h3>
+                      <p className="text-gray-500 text-sm">Choose a single flower type (like Roses) and select your perfect color.</p>
+                    </button>
 
-          {/* Right Column: Preview & Cart - Sticky */}
-          <div className="lg:col-span-5 mt-6 lg:mt-0">
-            <div className="lg:sticky lg:top-20 xl:top-24 flex flex-col gap-4 sm:gap-6">
-              
-              {/* AI Preview Card */}
-              <div className="bg-white rounded-xl sm:rounded-2xl md:rounded-3xl p-3 sm:p-4 md:p-6 shadow-2xl border border-[#C79E48]/20">
-                <div className="flex items-center justify-between mb-3 sm:mb-4 md:mb-6">
-                  <h3 className="text-lg sm:text-xl md:text-2xl font-luxury font-bold text-[#C79E48]">Your Design</h3>
-                  <Wand2 className="w-5 h-5 sm:w-6 sm:h-6 text-[#C79E48]" />
-                </div>
-
-                <div className="aspect-square rounded-lg sm:rounded-xl md:rounded-2xl bg-gray-50 mb-3 sm:mb-4 md:mb-6 overflow-hidden relative group">
-                  {generatedImage ? (
-                    <>
-                      <img src={generatedImage} alt="Preview" className="w-full h-full object-cover" />
-                      <button 
-                        onClick={() => setGeneratedImage(null)}
-                        className="absolute top-2 right-2 sm:top-4 sm:right-4 bg-white/90 p-1.5 sm:p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
-                      </button>
-                    </>
-                  ) : (
-                    <div className="w-full h-full flex flex-col items-center justify-center text-center p-4 sm:p-8">
-                      <Wand2 className="w-8 h-8 sm:w-12 sm:h-12 text-gray-300 mb-3 sm:mb-4" />
-                      <p className="text-gray-500 text-xs sm:text-sm">
-                        Complete your selection to generate an AI preview of your bouquet.
-                      </p>
-                    </div>
-                  )}
-                  
-                  {isGenerating && (
-                    <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center z-10">
-                      <RefreshCw className="w-8 h-8 sm:w-10 sm:h-10 text-[#C79E48] animate-spin mb-3 sm:mb-4" />
-                      <p className="font-bold text-[#C79E48] text-sm sm:text-base">Generating Magic...</p>
-                    </div>
-                  )}
-                </div>
-
-                <button
-                  onClick={generateBouquetImage}
-                  disabled={isGenerating || !selectedPackage || (selectedPackage?.type === 'box' ? !selectedBoxColor : !selectedWrapColor)}
-                  className="w-full py-2.5 sm:py-3 md:py-4 bg-[#C79E48] text-white font-bold rounded-lg sm:rounded-xl shadow-lg hover:bg-[#b08d45] disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 mb-3 sm:mb-4 text-xs sm:text-sm md:text-base touch-target min-h-[44px]"
-                >
-                  <Wand2 className="w-4 h-4 sm:w-5 sm:h-5" />
-                  {generatedImage ? "Regenerate Preview" : "Generate Preview"}
-                </button>
-
-                {/* Summary & Total */}
-                <div className="border-t border-gray-100 pt-3 sm:pt-4 md:pt-6 flex flex-col gap-2 sm:gap-3">
-                  <div className="flex justify-between text-xs sm:text-sm text-gray-600">
-                    <span>Price</span>
-                    <span>${selectedPackage?.price || 0}</span>
+                    <button
+                      onClick={() => setFlowerMode("mix")}
+                      className="group p-8 rounded-2xl border-2 border-gray-100 hover:border-[#C79E48] hover:bg-[#C79E48]/5 transition-all text-left"
+                    >
+                      <div className="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <span className="text-4xl">💐</span>
+                      </div>
+                      <h3 className="text-xl font-bold text-gray-900 mb-2">Mix & Match</h3>
+                      <p className="text-gray-500 text-sm">Create a vibrant unique bouquet by mixing any of our available flowers.</p>
+                    </button>
                   </div>
-                  
-                  <div className="flex justify-between text-lg sm:text-xl md:text-2xl font-bold text-[#C79E48] pt-3 sm:pt-4 border-t border-dashed border-[#C79E48]/20">
-                    <span>Total</span>
-                    <span>${totalPrice.toFixed(2)}</span>
+                ) : (
+                  <div className="space-y-6">
+                    <div className="flex items-center justify-between">
+                      <button
+                        onClick={() => { setFlowerMode(null); setSelectedFamily(null); }}
+                        className="text-sm text-gray-500 hover:text-[#C79E48] flex items-center gap-1 font-medium"
+                      >
+                        ← Back to modes
+                      </button>
+                      <div className="text-sm font-bold text-[#C79E48] uppercase tracking-wider">
+                        {flowerMode === "specific" ? "Single Variety" : "Mixed Bouquet"}
+                      </div>
+                    </div>
+
+                    {/* Specific Mode: Family Selection */}
+                    {flowerMode === "specific" && !selectedFamily && (
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                        {flowerFamilies.map(fam => (
+                          <button
+                            key={fam.id}
+                            onClick={() => setSelectedFamily(fam.id)}
+                            className="p-4 rounded-xl border border-gray-100 hover:border-[#C79E48] hover:shadow-md transition-all flex flex-col items-center gap-2 group bg-white"
+                          >
+                            <span className="text-3xl group-hover:scale-110 transition-transform">{fam.icon}</span>
+                            <span className="font-medium text-sm text-gray-700">{fam.name}</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Flower Selection Grid */}
+                    {(flowerMode === "mix" || (flowerMode === "specific" && selectedFamily)) && (
+                      <div className="space-y-6">
+                        {flowerMode === "specific" && (
+                          <div className="flex items-center gap-2 mb-4">
+                            <span className="text-2xl">{flowerFamilies.find(f => f.id === selectedFamily)?.icon}</span>
+                            <h3 className="text-xl font-bold">{flowerFamilies.find(f => f.id === selectedFamily)?.name} collection</h3>
+                            <button onClick={() => setSelectedFamily(null)} className="text-xs bg-gray-100 px-2 py-1 rounded ml-2 hover:bg-gray-200">Change Type</button>
+                          </div>
+                        )}
+
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                          {availableFlowers.map(flower => {
+                            const qty = selectedFlowers[flower.id]?.quantity || 0;
+                            return (
+                              <div key={flower.id} className={`relative p-3 rounded-xl border-2 transition-all ${qty > 0 ? 'border-[#C79E48] bg-[#C79E48]/5' : 'border-gray-100 bg-white hover:border-[#C79E48]/30'}`}>
+                                <div className="aspect-square rounded-lg bg-gray-50 mb-3 overflow-hidden relative">
+                                  <img
+                                    src={flower.imageUrl}
+                                    alt={flower.name}
+                                    className="w-full h-full object-cover"
+                                    onError={(e) => (e.target as HTMLImageElement).src = 'https://placehold.co/400x400/png?text=Flower'}
+                                  />
+                                  {qty > 0 && (
+                                    <div className="absolute top-2 right-2 w-6 h-6 bg-[#C79E48] text-white rounded-full flex items-center justify-center text-xs font-bold shadow-lg">
+                                      {qty}
+                                    </div>
+                                  )}
+                                </div>
+
+                                <div className="text-center mb-3">
+                                  <div className="font-bold text-gray-900 text-sm">{flower.name}</div>
+                                  <div className="text-[#C79E48] font-bold text-xs">${flower.price.toFixed(2)}</div>
+                                </div>
+
+                                <div className="flex items-center gap-2 justify-center">
+                                  {qty > 0 ? (
+                                    <>
+                                      <button onClick={() => handleRemoveFlower(flower.id)} className="w-8 h-8 rounded-full bg-white border border-gray-200 flex items-center justify-center hover:bg-red-50 hover:text-red-500 hover:border-red-200 transition-colors">
+                                        <Minus className="w-4 h-4" />
+                                      </button>
+                                      <span className="font-bold w-4 text-center">{qty}</span>
+                                      <button onClick={() => handleAddFlower(flower)} className="w-8 h-8 rounded-full bg-[#C79E48] text-white flex items-center justify-center hover:bg-[#a6823a] transition-colors">
+                                        <Plus className="w-4 h-4" />
+                                      </button>
+                                    </>
+                                  ) : (
+                                    <button onClick={() => handleAddFlower(flower)} className="w-full py-2 bg-gray-100 hover:bg-[#C79E48] hover:text-white rounded-lg text-sm font-medium transition-colors">
+                                      Add
+                                    </button>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </motion.section>
+            )}
+          </AnimatePresence>
+
+        </div>
+
+        {/* Right Column: Sticky Preview - Restored Original Style */}
+        <div className="lg:col-span-5 relative h-full">
+          <div className="sticky top-24 space-y-6">
+            <div className="bg-white rounded-2xl shadow-2xl p-6 border border-[#C79E48]/20 relative overflow-hidden">
+              {/* Decorative Background for Card */}
+              <div className="absolute top-0 right-0 w-32 h-32 bg-[#C79E48]/5 rounded-bl-full -z-0" />
+
+              <div className="relative z-10">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-2xl font-luxury font-bold text-[#C79E48] flex items-center gap-2">
+                    <Wand2 className="w-6 h-6" />
+                    Your Design
+                  </h3>
+                  <div className="bg-[#C79E48]/10 text-[#C79E48] px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
+                    {step3Complete ? 'Ready' : 'Drafting'}
+                  </div>
+                </div>
+
+                {/* Preview Image Area */}
+                <div className="aspect-square rounded-xl bg-gray-50 mb-6 overflow-hidden relative shadow-inner border border-gray-100 group">
+                  <AnimatePresence mode="wait">
+                    {generatedImage ? (
+                      <motion.img
+                        key={generatedImage}
+                        initial={{ opacity: 0, scale: 1.1 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0 }}
+                        src={generatedImage}
+                        alt="AI Generated Preview"
+                        className="w-full h-full object-cover"
+                        onLoad={() => {
+                          console.log('[Customize] Image loaded successfully');
+                          setIsGenerating(false);
+                        }}
+                        onError={(e) => {
+                          console.error('[Customize] Image failed to load');
+                          console.error('[Customize] Image src was:', e.currentTarget.src);
+                          // Option B: Fallback to placeholder
+                          e.currentTarget.src = heroBouquetMain;
+                          toast.info("Using placeholder. AI service may be temporarily unavailable.");
+                          setIsGenerating(false);
+                        }}
+                      />
+                    ) : (
+                      <motion.div
+                        key="placeholder"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="w-full h-full flex flex-col items-center justify-center text-gray-300"
+                      >
+                        <Wand2 className="w-16 h-16 mb-4 opacity-20" />
+                        <p className="text-sm font-medium opacity-60">AI Preview Area</p>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
+                  {/* Loading Overlay */}
+                  {isGenerating && (
+                    <div className="absolute inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-20">
+                      <div className="text-center text-white">
+                        <div className="w-10 h-10 border-4 border-white border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+                        <p className="font-bold tracking-wider text-sm">DESIGNING...</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-2 mb-6">
+                  <button
+                    onClick={generateBouquetImage}
+                    disabled={!step3Complete || isGenerating}
+                    className="flex-1 bg-gray-900 text-white py-3 rounded-xl font-bold text-sm shadow-lg hover:bg-gray-800 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                  >
+                    <Wand2 className="w-4 h-4 text-[#C79E48]" />
+                    {generatedImage ? "Regenerate" : "Generate Preview"}
+                  </button>
+                </div>
+
+                {/* Summary Details */}
+                <div className="bg-gray-50 rounded-xl p-4 space-y-3 mb-6 border border-gray-100">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-500">Base</span>
+                    <span className="font-medium text-gray-900">{selectedPackage?.name || '-'}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-500">Size & Color</span>
+                    <span className="font-medium text-gray-900">
+                      {selectedSize?.name || '-'} / {selectedColor?.name || '-'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-500">Flowers</span>
+                    <span className="font-medium text-gray-900 text-right">
+                      {Object.values(selectedFlowers).length > 0
+                        ? Object.values(selectedFlowers).map(f => `${f.quantity}x ${f.flower.name}`).join(', ')
+                        : '-'}
+                    </span>
+                  </div>
+                  <div className="pt-2 border-t border-gray-200 mt-2">
+                    <div className="flex justify-between text-base font-bold text-[#C79E48]">
+                      <span>Total</span>
+                      <span>${totalPrice.toFixed(2)}</span>
+                    </div>
                   </div>
                 </div>
 
                 <button
                   onClick={handleAddToCart}
-                  disabled={!selectedPackage || (selectedPackage?.type === 'box' ? !selectedBoxColor : !selectedWrapColor)}
-                  className="w-full mt-3 sm:mt-4 md:mt-6 py-2.5 sm:py-3 md:py-4 bg-black text-white font-bold rounded-lg sm:rounded-xl shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-xs sm:text-sm md:text-base touch-target min-h-[44px]"
+                  disabled={!step3Complete}
+                  className="w-full bg-[#C79E48] text-white py-4 rounded-xl font-bold text-lg hover:bg-[#b08d45] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_10px_40px_rgba(199,158,72,0.3)] flex items-center justify-center gap-2 transform active:scale-95"
                 >
-                  <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <ShoppingCart className="w-5 h-5" />
                   Add to Cart
                 </button>
               </div>
-
             </div>
           </div>
-
         </div>
+
       </div>
-      
-      {celebrating && (
-        <div className="fixed inset-0 pointer-events-none z-50 flex items-center justify-center">
-           {/* Celebration Overlay logic could go here */}
-           <div className="absolute inset-0 bg-black/20" />
-           <motion.div 
-             initial={{ scale: 0 }} 
-             animate={{ scale: 1 }} 
-             className="bg-white p-8 rounded-3xl shadow-2xl text-center z-10"
-           >
-             <Check className="w-16 h-16 text-green-500 mx-auto mb-4" />
-             <h2 className="text-2xl font-bold">Added to Cart!</h2>
-           </motion.div>
-        </div>
-      )}
-
-      <Footer />
-      <BackToTop />
     </div>
   );
 };
