@@ -235,16 +235,16 @@ const WeddingHero = () => {
   );
 };
 
-const ServiceSection = ({ 
-  title, 
-  description, 
-  image, 
+const ServiceSection = ({
+  title,
+  description,
+  image,
   images, // New prop for multiple images (carousel)
   index,
-  features 
-}: { 
-  title: string; 
-  description: string; 
+  features
+}: {
+  title: string;
+  description: string;
   image?: string; // Optional now
   images?: string[]; // Array of images for slideshow
   index: number;
@@ -255,37 +255,37 @@ const ServiceSection = ({
   const imageRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
-  
+
   // Use images array if provided, otherwise fall back to single image
   const imageArray = images || (image ? [image] : []);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  
+
   // Debug: Log image array to console
   useEffect(() => {
     if (imageArray.length === 0) {
       console.warn(`ServiceSection "${title}": No images provided`);
     }
   }, [imageArray, title]);
-  
+
   // Auto-rotate images every 4 seconds if multiple images provided
   // Seamless loop - no blank/blink between transitions
   // Preload all images to ensure smooth transitions
   useEffect(() => {
     if (imageArray.length <= 1) return;
-    
+
     // Preload all images for smooth transitions (no blank moments)
     imageArray.forEach((imgSrc) => {
       const img = new Image();
       img.src = encodeImageUrl(imgSrc);
     });
-    
+
     const interval = setInterval(() => {
       setCurrentImageIndex((prev) => {
         const next = (prev + 1) % imageArray.length;
         return next;
       });
     }, 4000); // 4 seconds between transitions
-    
+
     return () => clearInterval(interval);
   }, [imageArray]);
 
@@ -349,14 +349,14 @@ const ServiceSection = ({
 
   // Modern mobile card layout
   if (isMobile) {
-  return (
+    return (
       <section
         ref={sectionRef}
         className={`relative py-8 overflow-visible ${index % 2 === 0 ? 'bg-white' : 'bg-gradient-to-b from-white to-[#fafafa]'}`}
       >
         <div className="max-w-7xl mx-auto px-4">
           {/* Modern Card Design for Mobile */}
-    <motion.div
+          <motion.div
             ref={cardRef}
             className="relative"
             initial={{ opacity: 0, y: 50, scale: 0.95 }}
@@ -376,16 +376,16 @@ const ServiceSection = ({
                       alt={title}
                       className="absolute inset-0 w-full h-full object-cover"
                       initial={{ opacity: idx === 0 ? 1 : 0 }}
-      animate={{
+                      animate={{
                         opacity: idx === currentImageIndex ? 1 : 0,
                         scale: idx === currentImageIndex ? 1 : 1.05
-      }}
-      transition={{
-                        duration: 1.2, 
+                      }}
+                      transition={{
+                        duration: 1.2,
                         ease: [0.4, 0, 0.2, 1], // Smooth easing for seamless transition
                         opacity: { duration: 1.2 } // Longer fade for smoother loop
                       }}
-      style={{
+                      style={{
                         position: 'absolute',
                         top: 0,
                         left: 0,
@@ -450,7 +450,7 @@ const ServiceSection = ({
                   className="w-full rounded-full border-2 px-6 py-5 text-sm font-semibold mt-4"
                   style={{
                     borderColor: GOLD_COLOR,
-        color: GOLD_COLOR,
+                    color: GOLD_COLOR,
                   }}
                   onClick={() => {
                     const contactEl = document.getElementById('contact-section');
@@ -500,14 +500,14 @@ const ServiceSection = ({
                     alt={title}
                     className="absolute inset-0 w-full h-full object-cover"
                     initial={{ opacity: idx === 0 ? 1 : 0 }}
-      animate={{
+                    animate={{
                       opacity: idx === currentImageIndex ? 1 : 0,
                       scale: idx === currentImageIndex ? 1 : 1.05
-      }}
-      transition={{
-                      duration: 1.5, 
+                    }}
+                    transition={{
+                      duration: 1.5,
                       ease: [0.25, 0.1, 0.25, 1], // Smooth cubic bezier for seamless crossfade
-                      opacity: { 
+                      opacity: {
                         duration: 1.5,
                         ease: [0.25, 0.1, 0.25, 1] // Overlapping fade for seamless loop
                       }
@@ -544,14 +544,14 @@ const ServiceSection = ({
                 borderRadius: '50%',
               }}
             />
-      </div>
+          </div>
 
           {/* Content */}
           <div
             ref={contentRef}
             className={`${isEven ? 'order-2' : 'order-1'} space-y-4 sm:space-y-6`}
-        >
-          <motion.div
+          >
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -570,9 +570,9 @@ const ServiceSection = ({
                 className="w-16 sm:w-20 h-0.5 sm:h-1 mb-4 sm:mb-6"
                 style={{ background: `linear-gradient(to right, ${GOLD_COLOR}, transparent)` }}
               />
-    </motion.div>
+            </motion.div>
 
-          <motion.p
+            <motion.p
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -580,7 +580,7 @@ const ServiceSection = ({
               className="text-base md:text-lg lg:text-xl text-gray-700 leading-relaxed"
             >
               {description}
-          </motion.p>
+            </motion.p>
 
             {features && features.length > 0 && (
               <motion.ul
@@ -643,8 +643,8 @@ const ServiceSection = ({
                 Learn More
                 <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
-        </motion.div>
-      </div>
+            </motion.div>
+          </div>
         </div>
       </div>
     </section>
@@ -652,9 +652,9 @@ const ServiceSection = ({
 };
 
 // Consultation Scheduling Modal Component
-const ConsultationModal = ({ isOpen, onClose, onConfirm }: { 
-  isOpen: boolean; 
-  onClose: () => void; 
+const ConsultationModal = ({ isOpen, onClose, onConfirm }: {
+  isOpen: boolean;
+  onClose: () => void;
   onConfirm: (date: string, time: string) => void;
 }) => {
   const [selectedDate, setSelectedDate] = useState('');
@@ -663,7 +663,7 @@ const ConsultationModal = ({ isOpen, onClose, onConfirm }: {
 
   // Get today's date in YYYY-MM-DD format for min date
   const today = new Date().toISOString().split('T')[0];
-  
+
   // Generate time slots (9 AM to 6 PM, every hour)
   const timeSlots = Array.from({ length: 10 }, (_, i) => {
     const hour = 9 + i;
@@ -687,15 +687,15 @@ const ConsultationModal = ({ isOpen, onClose, onConfirm }: {
   if (!isOpen) return null;
 
   return createPortal(
-        <motion.div
+    <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       className="fixed inset-0 z-[99999] flex items-center justify-center p-4"
       style={{ backgroundColor: 'rgba(0, 0, 0, 0.7)' }}
       onClick={onClose}
-        >
-          <motion.div
+    >
+      <motion.div
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
@@ -753,11 +753,10 @@ const ConsultationModal = ({ isOpen, onClose, onConfirm }: {
                 <button
                   key={time}
                   onClick={() => setSelectedTime(time)}
-                  className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                    selectedTime === time
+                  className={`px-4 py-2 rounded-lg font-medium transition-all ${selectedTime === time
                       ? 'text-white'
                       : 'text-gray-700 border-2 border-gray-200 hover:border-gray-300'
-                  }`}
+                    }`}
                   style={{
                     backgroundColor: selectedTime === time ? GOLD_COLOR : 'transparent',
                     borderColor: selectedTime === time ? GOLD_COLOR : undefined
@@ -767,18 +766,18 @@ const ConsultationModal = ({ isOpen, onClose, onConfirm }: {
                 </button>
               ))}
             </div>
-      </div>
+          </div>
 
           {/* Selected Date & Time Display */}
           {selectedDate && selectedTime && (
             <div className="p-4 rounded-lg" style={{ backgroundColor: `${GOLD_COLOR}10` }}>
               <p className="text-sm text-gray-600 mb-1">Selected:</p>
               <p className="font-semibold" style={{ color: GOLD_COLOR }}>
-                {new Date(selectedDate).toLocaleDateString('en-US', { 
-                  weekday: 'long', 
-                  year: 'numeric', 
-                  month: 'long', 
-                  day: 'numeric' 
+                {new Date(selectedDate).toLocaleDateString('en-US', {
+                  weekday: 'long',
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
                 })} at {selectedTime}
               </p>
             </div>
@@ -798,7 +797,7 @@ const ConsultationModal = ({ isOpen, onClose, onConfirm }: {
               onClick={handleSubmit}
               disabled={!selectedDate || !selectedTime || isSubmitting}
               className="flex-1 text-white"
-              style={{ 
+              style={{
                 backgroundColor: (!selectedDate || !selectedTime) ? '#d1d5db' : GOLD_COLOR,
                 cursor: (!selectedDate || !selectedTime) ? 'not-allowed' : 'pointer'
               }}
@@ -821,16 +820,16 @@ const PackageSection = () => {
   const CONSULTATION_PHONE = "96176104882";
 
   const handleConsultationConfirm = (date: string, time: string) => {
-    const formattedDate = new Date(date).toLocaleDateString('en-US', { 
-      weekday: 'long', 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
+    const formattedDate = new Date(date).toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
     });
-    
+
     const message = `Hello! I would like to schedule a consultation for:\n\n📅 Date: ${formattedDate}\n⏰ Time: ${time}\n\nPlease confirm if this time works for you. Thank you!`;
     const whatsappUrl = `https://wa.me/${CONSULTATION_PHONE}?text=${encodeURIComponent(message)}`;
-    
+
     window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
   };
 
@@ -875,7 +874,7 @@ const PackageSection = () => {
 
     return () => ctx.revert();
   }, [isMobile]);
-  
+
   const packageFeatures = [
     {
       icon: Flower2,
@@ -921,205 +920,199 @@ const PackageSection = () => {
 
   // Modern mobile package section
   if (isMobile) {
-  return (
-    <>
-      <section ref={sectionRef} className="relative py-12 bg-gradient-to-b from-[#fafafa] to-white overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4">
-        <motion.div
-            className="text-center mb-8"
-            initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-        >
-            <div className="inline-flex items-center gap-2 mb-4">
-              <Sparkles className="w-4 h-4" style={{ color: GOLD_COLOR }} />
-              <span className="text-xs font-semibold tracking-[0.2em] uppercase" style={{ color: GOLD_COLOR }}>
-                Our Standard Package
-              </span>
-              <Sparkles className="w-4 h-4" style={{ color: GOLD_COLOR }} />
-            </div>
-            <h2 className="text-3xl font-serif font-bold mb-3" style={{ color: '#1a1a1a' }}>
-              Complete Wedding Experience
-            </h2>
-            <p className="text-sm text-gray-600 max-w-3xl mx-auto">
-              Everything you need for your perfect day
-            </p>
-          </motion.div>
-
-          {/* Modern Card Design */}
-                <motion.div
-            ref={cardRef}
-            className="relative bg-white rounded-3xl shadow-2xl overflow-hidden border border-[rgba(199,158,72,0.15)]"
-            initial={{ opacity: 0, y: 50, scale: 0.95 }}
-            whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6 }}
-                >
-            {/* Price Header - Prominent */}
-            <div className="relative bg-gradient-to-br from-[rgba(199,158,72,0.1)] to-transparent p-6 text-center border-b border-[rgba(199,158,72,0.1)]">
-              <div className="mb-3">
-                <span className="text-5xl font-bold font-serif" style={{ color: GOLD_COLOR }}>
-                  $3,200
-                  </span>
+    return (
+      <>
+        <section ref={sectionRef} className="relative py-12 bg-gradient-to-b from-[#fafafa] to-white overflow-hidden">
+          <div className="max-w-7xl mx-auto px-4">
+            <motion.div
+              className="text-center mb-8"
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+            >
+              <div className="inline-flex items-center gap-2 mb-4">
+                <Sparkles className="w-4 h-4" style={{ color: GOLD_COLOR }} />
+                <span className="text-xs font-semibold tracking-[0.2em] uppercase" style={{ color: GOLD_COLOR }}>
+                  Our Standard Package
+                </span>
+                <Sparkles className="w-4 h-4" style={{ color: GOLD_COLOR }} />
               </div>
-              <p className="text-xs text-gray-600">
-                Complete package • Customizable
+              <h2 className="text-3xl font-serif font-bold mb-3" style={{ color: '#1a1a1a' }}>
+                Complete Wedding Experience
+              </h2>
+              <p className="text-sm text-gray-600 max-w-3xl mx-auto">
+                Everything you need for your perfect day
               </p>
-            </div>
+            </motion.div>
 
-            <div className="p-6 space-y-6">
-              {/* Features in scrollable horizontal cards */}
-              <div className="overflow-x-auto pb-2 -mx-6 px-6 scrollbar-hide">
-                <div className="flex gap-4" style={{ width: 'max-content' }}>
-                  {packageFeatures.map((feature, index) => {
-                    const Icon = feature.icon;
-                    return (
-                      <div
-                        key={index}
-                        className="feature-card flex-shrink-0 w-[280px] bg-gradient-to-br from-white to-[rgba(199,158,72,0.02)] rounded-2xl p-4 border border-[rgba(199,158,72,0.15)]"
-                      >
-                        <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3" style={{ backgroundColor: `${GOLD_COLOR}15` }}>
-                          <Icon className="w-5 h-5" style={{ color: GOLD_COLOR }} />
-                        </div>
-                        <h3 className="font-serif font-semibold text-sm mb-1" style={{ color: '#1a1a1a' }}>
-                          {feature.title}
-                        </h3>
-                        <p className="text-xs text-gray-600 leading-relaxed">
-                          {feature.description}
-                        </p>
-                      </div>
-                    );
-                  })}
+            {/* Modern Card Design */}
+            <motion.div
+              ref={cardRef}
+              className="relative bg-white rounded-3xl shadow-2xl overflow-hidden border border-[rgba(199,158,72,0.15)]"
+              initial={{ opacity: 0, y: 50, scale: 0.95 }}
+              whileInView={{ opacity: 1, y: 0, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+            >
+              {/* Price Header - Prominent */}
+              <div className="relative bg-gradient-to-br from-[rgba(199,158,72,0.1)] to-transparent p-6 text-center border-b border-[rgba(199,158,72,0.1)]">
+                <div className="mb-3">
+                  <span className="text-5xl font-bold font-serif" style={{ color: GOLD_COLOR }}>
+                    $3,200
+                  </span>
                 </div>
-              </div>
-
-              {/* Description */}
-              <div className="pt-4 border-t border-gray-100">
-                <p className="text-xs text-gray-600 leading-relaxed mb-3">
-                  Our Standard Package offers a complete floral and décor experience designed to make your wedding day elegant and unforgettable.
-                </p>
-                <p className="text-xs font-semibold" style={{ color: GOLD_COLOR }}>
-                  ✨ The package can be customized upon request
+                <p className="text-xs text-gray-600">
+                  Complete package • Customizable
                 </p>
               </div>
 
-              {/* CTA Button */}
-              <Button
-                size="lg"
-                className="w-full rounded-full border-0 px-6 py-5 text-sm font-semibold shadow-xl"
-                style={{
-                  background: `linear-gradient(135deg, ${GOLD_COLOR} 0%, rgba(199, 158, 72, 0.9) 100%)`,
-                  color: 'white',
-                }}
-                onClick={() => {
-                  const contactEl = document.getElementById('contact-section');
-                  if (contactEl) {
-                    contactEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                  }
-                }}
-              >
-                <Calendar className="w-4 h-4 mr-2" />
-                Reserve a Meeting
-              </Button>
-            </div>
-          </motion.div>
-        </div>
-      </section>
-      <ConsultationModal
-        isOpen={isConsultationModalOpen}
-        onClose={() => setIsConsultationModalOpen(false)}
-        onConfirm={handleConsultationConfirm}
-      />
-    </>
+              <div className="p-6 space-y-6">
+                {/* Features in scrollable horizontal cards */}
+                <div className="overflow-x-auto pb-2 -mx-6 px-6 scrollbar-hide">
+                  <div className="flex gap-4" style={{ width: 'max-content' }}>
+                    {packageFeatures.map((feature, index) => {
+                      const Icon = feature.icon;
+                      return (
+                        <div
+                          key={index}
+                          className="feature-card flex-shrink-0 w-[280px] bg-gradient-to-br from-white to-[rgba(199,158,72,0.02)] rounded-2xl p-4 border border-[rgba(199,158,72,0.15)]"
+                        >
+                          <h3 className="font-serif font-semibold text-sm mb-1" style={{ color: '#1a1a1a' }}>
+                            {feature.title}
+                          </h3>
+                          <p className="text-xs text-gray-600 leading-relaxed">
+                            {feature.description}
+                          </p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Description */}
+                <div className="pt-4 border-t border-gray-100">
+                  <p className="text-xs text-gray-600 leading-relaxed mb-3">
+                    Our Standard Package offers a complete floral and décor experience designed to make your wedding day elegant and unforgettable.
+                  </p>
+                  <p className="text-xs font-semibold" style={{ color: GOLD_COLOR }}>
+                    ✨ The package can be customized upon request
+                  </p>
+                </div>
+
+                {/* CTA Button */}
+                <Button
+                  size="lg"
+                  className="w-full rounded-full border-0 px-6 py-5 text-sm font-semibold shadow-xl"
+                  style={{
+                    background: `linear-gradient(135deg, ${GOLD_COLOR} 0%, rgba(199, 158, 72, 0.9) 100%)`,
+                    color: 'white',
+                  }}
+                  onClick={() => {
+                    const contactEl = document.getElementById('contact-section');
+                    if (contactEl) {
+                      contactEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                  }}
+                >
+                  <Calendar className="w-4 h-4 mr-2" />
+                  Reserve a Meeting
+                </Button>
+              </div>
+            </motion.div>
+          </div>
+        </section>
+        <ConsultationModal
+          isOpen={isConsultationModalOpen}
+          onClose={() => setIsConsultationModalOpen(false)}
+          onConfirm={handleConsultationConfirm}
+        />
+      </>
     );
   }
 
   // Desktop layout
   return (
     <>
-    <section ref={sectionRef} className="relative py-12 sm:py-16 md:py-24 lg:py-32 bg-gradient-to-b from-[#fafafa] to-white overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <motion.div
-          className="text-center mb-8 sm:mb-12 md:mb-16"
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-        >
-          <div className="inline-flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
-            <Sparkles className="w-5 h-5" style={{ color: GOLD_COLOR }} />
-            <span className="text-sm font-semibold tracking-[0.3em] uppercase" style={{ color: GOLD_COLOR }}>
-              Our Standard Package
-                  </span>
-            <Sparkles className="w-5 h-5" style={{ color: GOLD_COLOR }} />
-          </div>
-          <h2
-            className="font-luxury text-6xl md:text-8xl font-bold mb-6 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 bg-clip-text text-transparent relative"
-            style={{
-              filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))',
-              letterSpacing: '0.05em'
-            }}
+      <section ref={sectionRef} className="relative py-12 sm:py-16 md:py-24 lg:py-32 bg-gradient-to-b from-[#fafafa] to-white overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            className="text-center mb-8 sm:mb-12 md:mb-16"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
           >
-            COMPLETE WEDDING EXPERIENCE
-          </h2>
-          <p className="text-base md:text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto px-2">
-            Everything you need for your perfect day, beautifully arranged
-          </p>
-                </motion.div>
+            <div className="inline-flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+              <Sparkles className="w-5 h-5" style={{ color: GOLD_COLOR }} />
+              <span className="text-sm font-semibold tracking-[0.3em] uppercase" style={{ color: GOLD_COLOR }}>
+                Our Standard Package
+              </span>
+              <Sparkles className="w-5 h-5" style={{ color: GOLD_COLOR }} />
+            </div>
+            <h2
+              className="font-luxury text-6xl md:text-8xl font-bold mb-6 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 bg-clip-text text-transparent relative"
+              style={{
+                filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))',
+                letterSpacing: '0.05em'
+              }}
+            >
+              COMPLETE WEDDING EXPERIENCE
+            </h2>
+            <p className="text-base md:text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto px-2">
+              Everything you need for your perfect day, beautifully arranged
+            </p>
+          </motion.div>
 
-        <div ref={cardRef} className="relative bg-white rounded-2xl sm:rounded-3xl shadow-xl sm:shadow-2xl overflow-hidden border border-[rgba(199,158,72,0.15)]">
-          <div className="absolute inset-0 bg-gradient-to-br from-[rgba(199,158,72,0.03)] via-transparent to-[rgba(199,158,72,0.03)]" />
-          
-          <div className="relative p-4 sm:p-6 md:p-8 lg:p-12 xl:p-16">
-            {/* Price Header */}
-            <div className="text-center mb-8 sm:mb-10 md:mb-12">
-              <div className="mb-4 sm:mb-6">
-                <span className={`${isMobile ? 'text-4xl sm:text-5xl md:text-6xl' : 'text-6xl md:text-7xl lg:text-8xl'} font-bold font-serif`} style={{ color: GOLD_COLOR }}>
-                  $3,200
-                </span>
-              </div>
-              <p className={`${isMobile ? 'text-sm sm:text-base' : 'text-base md:text-lg lg:text-xl'} text-gray-600 max-w-3xl mx-auto leading-relaxed px-2`}>
-                Our Standard Package offers a complete floral and décor experience designed to make your wedding day elegant and unforgettable. This package includes full arrangements from Bexy Flowers – from ceremony to reception – ensuring every detail is beautifully styled and cohesive.
-                <br className="mt-2 sm:mt-4" />
+          <div ref={cardRef} className="relative bg-white rounded-2xl sm:rounded-3xl shadow-xl sm:shadow-2xl overflow-hidden border border-[rgba(199,158,72,0.15)]">
+            <div className="absolute inset-0 bg-gradient-to-br from-[rgba(199,158,72,0.03)] via-transparent to-[rgba(199,158,72,0.03)]" />
+
+            <div className="relative p-4 sm:p-6 md:p-8 lg:p-12 xl:p-16">
+              {/* Price Header */}
+              <div className="text-center mb-8 sm:mb-10 md:mb-12">
+                <div className="mb-4 sm:mb-6">
+                  <span className={`${isMobile ? 'text-4xl sm:text-5xl md:text-6xl' : 'text-6xl md:text-7xl lg:text-8xl'} font-bold font-serif`} style={{ color: GOLD_COLOR }}>
+                    $3,200
+                  </span>
+                </div>
+                <p className={`${isMobile ? 'text-sm sm:text-base' : 'text-base md:text-lg lg:text-xl'} text-gray-600 max-w-3xl mx-auto leading-relaxed px-2`}>
+                  Our Standard Package offers a complete floral and décor experience designed to make your wedding day elegant and unforgettable. This package includes full arrangements from Bexy Flowers – from ceremony to reception – ensuring every detail is beautifully styled and cohesive.
+                  <br className="mt-2 sm:mt-4" />
                   <span className="font-semibold" style={{ color: GOLD_COLOR }}>
                     The package can be customized upon request
                   </span>
-              </p>
+                </p>
               </div>
 
               {/* Features Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8 sm:mb-10 md:mb-12">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8 sm:mb-10 md:mb-12">
                 {packageFeatures.map((feature, index) => {
                   const Icon = feature.icon;
                   return (
-                  <div
+                    <div
                       key={index}
-                    className="feature-card relative bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-[rgba(199,158,72,0.15)] hover:border-[rgba(199,158,72,0.4)] transition-all duration-300 hover:shadow-xl group"
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-br from-[rgba(199,158,72,0.03)] to-transparent rounded-xl sm:rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                      
+                      className="feature-card relative bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-[rgba(199,158,72,0.15)] hover:border-[rgba(199,158,72,0.4)] transition-all duration-300 hover:shadow-xl group"
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-br from-[rgba(199,158,72,0.03)] to-transparent rounded-xl sm:rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
                       <div className="relative z-10">
-                      <div className={`${isMobile ? 'w-10 h-10' : 'w-12 h-12'} rounded-xl flex items-center justify-center mb-3 sm:mb-4 group-hover:scale-110 transition-transform duration-300`} style={{ backgroundColor: `${GOLD_COLOR}15` }}>
-                        <Icon className={`${isMobile ? 'w-5 h-5' : 'w-6 h-6'}`} style={{ color: GOLD_COLOR }} />
-                        </div>
-                      <h3 className={`font-serif font-semibold ${isMobile ? 'text-base' : 'text-lg'} mb-2`} style={{ color: '#1a1a1a' }}>
+                        <h3 className={`font-serif font-semibold ${isMobile ? 'text-base' : 'text-lg'} mb-2`} style={{ color: '#1a1a1a' }}>
                           {feature.title}
                         </h3>
-                      <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-gray-600 leading-relaxed`}>
+                        <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-gray-600 leading-relaxed`}>
                           {feature.description}
                         </p>
                       </div>
-                  </div>
+                    </div>
                   );
                 })}
               </div>
 
               {/* CTA Button */}
-            <div className="text-center">
+              <div className="text-center">
                 <Button
                   size="lg"
-                className={`${isMobile ? 'text-sm sm:text-base px-6 sm:px-8 py-5 sm:py-6' : 'text-lg px-12 py-7'} font-semibold rounded-full shadow-2xl hover:shadow-3xl transition-all duration-300 relative overflow-hidden group w-full sm:w-auto`}
+                  className={`${isMobile ? 'text-sm sm:text-base px-6 sm:px-8 py-5 sm:py-6' : 'text-lg px-12 py-7'} font-semibold rounded-full shadow-2xl hover:shadow-3xl transition-all duration-300 relative overflow-hidden group w-full sm:w-auto`}
                   style={{
                     background: `linear-gradient(135deg, ${GOLD_COLOR} 0%, rgba(199, 158, 72, 0.9) 100%)`,
                     color: 'white',
@@ -1132,45 +1125,45 @@ const PackageSection = () => {
                   }}
                 >
                   <motion.span
-                  className="relative z-10 flex items-center justify-center gap-2 sm:gap-3"
-                  whileHover={isMobile ? {} : { scale: 1.05 }}
+                    className="relative z-10 flex items-center justify-center gap-2 sm:gap-3"
+                    whileHover={isMobile ? {} : { scale: 1.05 }}
                   >
-                  <Calendar className={`${isMobile ? 'w-4 h-4' : 'w-5 h-5'}`} />
-                  <span className={isMobile ? 'hidden sm:inline' : ''}>Contact Us Now to Reserve a Meeting</span>
-                  <span className={isMobile ? 'sm:hidden' : 'hidden'}>Reserve a Meeting</span>
+                    <Calendar className={`${isMobile ? 'w-4 h-4' : 'w-5 h-5'}`} />
+                    <span className={isMobile ? 'hidden sm:inline' : ''}>Contact Us Now to Reserve a Meeting</span>
+                    <span className={isMobile ? 'sm:hidden' : 'hidden'}>Reserve a Meeting</span>
                   </motion.span>
-                {!isMobile && (
-                  <motion.div
-                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-                    initial={{ x: '-100%' }}
-                    whileHover={{ x: '100%' }}
-                    transition={{ duration: 0.6 }}
-                  />
-                )}
+                  {!isMobile && (
+                    <motion.div
+                      className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                      initial={{ x: '-100%' }}
+                      whileHover={{ x: '100%' }}
+                      transition={{ duration: 0.6 }}
+                    />
+                  )}
                 </Button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </section>
-    <ConsultationModal
-      isOpen={isConsultationModalOpen}
-      onClose={() => setIsConsultationModalOpen(false)}
-      onConfirm={handleConsultationConfirm}
-    />
+      </section>
+      <ConsultationModal
+        isOpen={isConsultationModalOpen}
+        onClose={() => setIsConsultationModalOpen(false)}
+        onConfirm={handleConsultationConfirm}
+      />
     </>
   );
 };
 
 // Shared Image Modal Component - Works for both mobile and desktop
-const ImageModal = ({ 
-  selectedImage, 
-  onClose, 
-  images, 
-  isMobile 
-}: { 
-  selectedImage: number | null; 
-  onClose: () => void; 
+const ImageModal = ({
+  selectedImage,
+  onClose,
+  images,
+  isMobile
+}: {
+  selectedImage: number | null;
+  onClose: () => void;
   images: string[];
   isMobile: boolean;
 }) => {
@@ -1186,7 +1179,7 @@ const ImageModal = ({
   const modalContent = (
     <motion.div
       className="fixed inset-0 bg-black flex items-center justify-center modal-background"
-      style={{ 
+      style={{
         position: 'fixed',
         top: 0,
         left: 0,
@@ -1277,7 +1270,7 @@ const ImageModal = ({
           viewBox="0 0 24 24"
           stroke="currentColor"
           strokeWidth={isMobile ? 3 : 4}
-          style={{ 
+          style={{
             pointerEvents: 'none',
             color: 'white',
             filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))',
@@ -1377,7 +1370,7 @@ const ImageGallery = () => {
         setLoadingImages(true);
         const creations = await getActiveWeddingCreations();
         console.log('Loaded wedding creations:', creations.length, creations);
-        
+
         // Filter out empty/null/undefined image URLs and encode valid ones
         const imageUrls = creations
           .map(creation => creation.image_url)
@@ -1388,7 +1381,7 @@ const ImageGallery = () => {
             return encoded;
           })
           .filter(url => url.trim() !== ''); // Filter out any empty strings after encoding
-        
+
         console.log('Final wedding image URLs:', imageUrls.length, imageUrls);
         setWeddingImages(imageUrls);
       } catch (error) {
@@ -1440,7 +1433,7 @@ const ImageGallery = () => {
       document.body.style.top = `-${scrollY}px`;
       document.body.style.width = '100%';
       document.body.style.overflow = 'hidden';
-      
+
       return () => {
         // Restore scroll position when modal closes
         document.body.style.position = '';
@@ -1481,20 +1474,20 @@ const ImageGallery = () => {
       <>
         <section ref={sectionRef} className="relative py-12 bg-white overflow-hidden">
           <div className="max-w-7xl mx-auto px-4">
-        <motion.div
+            <motion.div
               className="text-center mb-8"
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-        >
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+            >
               <h2 className="text-3xl font-serif font-bold mb-3" style={{ color: '#1a1a1a' }}>
-            Our Wedding Creations
-          </h2>
+                Our Wedding Creations
+              </h2>
               <p className="text-sm text-gray-600 max-w-2xl mx-auto">
                 Swipe to explore our stunning arrangements
-          </p>
-        </motion.div>
+              </p>
+            </motion.div>
 
             {/* Swipeable Carousel */}
             <div className="relative">
@@ -1505,9 +1498,9 @@ const ImageGallery = () => {
                 onTouchMove={handleTouchMove}
                 onTouchEnd={handleTouchEnd}
               >
-          {weddingImages.map((image, index) => (
+                {weddingImages.map((image, index) => (
                   <div
-              key={index}
+                    key={index}
                     className="min-w-full px-2"
                     onClick={(e) => {
                       e.preventDefault();
@@ -1522,22 +1515,22 @@ const ImageGallery = () => {
                     style={{ touchAction: 'manipulation' }}
                   >
                     <div className="relative rounded-3xl overflow-hidden shadow-2xl aspect-[4/5] cursor-pointer">
-              <img
-                src={image}
-                alt={`Wedding decoration ${index + 1}`}
+                      <img
+                        src={image}
+                        alt={`Wedding decoration ${index + 1}`}
                         className="w-full h-full object-cover"
-                onError={(e) => {
-                  console.error('Failed to load wedding carousel image:', image, e);
-                  (e.target as HTMLImageElement).style.display = 'none';
-                }}
-                onLoad={() => {
-                  console.log('Successfully loaded wedding carousel image:', image);
-                }}
-              />
-              </div>
+                        onError={(e) => {
+                          console.error('Failed to load wedding carousel image:', image, e);
+                          (e.target as HTMLImageElement).style.display = 'none';
+                        }}
+                        onLoad={() => {
+                          console.log('Successfully loaded wedding carousel image:', image);
+                        }}
+                      />
+                    </div>
                   </div>
-          ))}
-        </div>
+                ))}
+              </div>
 
               {/* Dots indicator */}
               <div className="flex justify-center gap-2 mt-6">
@@ -1545,14 +1538,13 @@ const ImageGallery = () => {
                   <button
                     key={index}
                     onClick={() => setCurrentIndex(index)}
-                    className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                      index === currentIndex
+                    className={`w-2 h-2 rounded-full transition-all duration-300 ${index === currentIndex
                         ? 'w-8 bg-[rgb(199,158,72)]'
                         : 'bg-gray-300'
-                    }`}
+                      }`}
                   />
                 ))}
-      </div>
+              </div>
 
               {/* Navigation arrows */}
               {currentIndex > 0 && (
@@ -1564,12 +1556,12 @@ const ImageGallery = () => {
                 </button>
               )}
               {currentIndex < weddingImages.length - 1 && (
-          <button
+                <button
                   onClick={() => setCurrentIndex(currentIndex + 1)}
                   className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 shadow-lg flex items-center justify-center z-10"
-          >
+                >
                   <ArrowRight className="w-5 h-5" style={{ color: GOLD_COLOR }} />
-          </button>
+                </button>
               )}
             </div>
 
@@ -1580,9 +1572,8 @@ const ImageGallery = () => {
                 {weddingImages.slice(0, 4).map((image, index) => (
                   <div
                     key={index}
-                    className={`aspect-square rounded-xl overflow-hidden cursor-pointer border-2 transition-all ${
-                      currentIndex === index ? 'border-[rgb(199,158,72)] scale-105' : 'border-transparent'
-                    }`}
+                    className={`aspect-square rounded-xl overflow-hidden cursor-pointer border-2 transition-all ${currentIndex === index ? 'border-[rgb(199,158,72)] scale-105' : 'border-transparent'
+                      }`}
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
@@ -1606,7 +1597,7 @@ const ImageGallery = () => {
               </div>
             </div>
           </div>
-    </section>
+        </section>
 
         {/* Image Modal for Mobile */}
         <ImageModal
@@ -1655,7 +1646,7 @@ const ImageGallery = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
           >
-            <h2 
+            <h2
               className="font-luxury text-6xl md:text-8xl font-bold mb-3 sm:mb-4 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 bg-clip-text text-transparent relative uppercase"
               style={{
                 filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))',
@@ -1721,16 +1712,16 @@ const ContactSection = () => {
   const CONSULTATION_PHONE = "96176104882";
 
   const handleConsultationConfirm = (date: string, time: string) => {
-    const formattedDate = new Date(date).toLocaleDateString('en-US', { 
-      weekday: 'long', 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
+    const formattedDate = new Date(date).toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
     });
-    
+
     const message = `Hello! I would like to schedule a consultation for:\n\n📅 Date: ${formattedDate}\n⏰ Time: ${time}\n\nPlease confirm if this time works for you. Thank you!`;
     const whatsappUrl = `https://wa.me/${CONSULTATION_PHONE}?text=${encodeURIComponent(message)}`;
-    
+
     window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
   };
 
@@ -1759,104 +1750,104 @@ const ContactSection = () => {
 
   return (
     <>
-    <section
-      ref={sectionRef}
-      id="contact-section"
-      className="relative py-12 sm:py-16 md:py-24 lg:py-32 bg-gradient-to-b from-white via-[#fafafa] to-white overflow-hidden"
-    >
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.div
-          ref={cardRef}
-          className="bg-white rounded-2xl sm:rounded-3xl shadow-xl sm:shadow-2xl p-6 sm:p-8 md:p-12 border border-[rgba(199,158,72,0.2)] relative overflow-hidden"
-        >
-          {/* Background decorative elements */}
-          <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-[rgba(199,158,72,0.05)] to-transparent rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-          <div className="absolute bottom-0 left-0 w-64 h-64 bg-gradient-to-tl from-[rgba(199,158,72,0.05)] to-transparent rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
+      <section
+        ref={sectionRef}
+        id="contact-section"
+        className="relative py-12 sm:py-16 md:py-24 lg:py-32 bg-gradient-to-b from-white via-[#fafafa] to-white overflow-hidden"
+      >
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            ref={cardRef}
+            className="bg-white rounded-2xl sm:rounded-3xl shadow-xl sm:shadow-2xl p-6 sm:p-8 md:p-12 border border-[rgba(199,158,72,0.2)] relative overflow-hidden"
+          >
+            {/* Background decorative elements */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-[rgba(199,158,72,0.05)] to-transparent rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+            <div className="absolute bottom-0 left-0 w-64 h-64 bg-gradient-to-tl from-[rgba(199,158,72,0.05)] to-transparent rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
 
-          <div className="relative z-10">
-            <div className="text-center mb-6 sm:mb-8">
-            <motion.div
-                className={`inline-flex items-center justify-center ${isMobile ? 'w-16 h-16' : 'w-20 h-20'} rounded-full mb-4 sm:mb-6 mx-auto`}
-              style={{ backgroundColor: `${GOLD_COLOR}15` }}
-              animate={{ rotate: [0, 360] }}
-              transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-            >
-                <Calendar className={`${isMobile ? 'w-8 h-8' : 'w-10 h-10'}`} style={{ color: GOLD_COLOR }} />
-            </motion.div>
+            <div className="relative z-10">
+              <div className="text-center mb-6 sm:mb-8">
+                <motion.div
+                  className={`inline-flex items-center justify-center ${isMobile ? 'w-16 h-16' : 'w-20 h-20'} rounded-full mb-4 sm:mb-6 mx-auto`}
+                  style={{ backgroundColor: `${GOLD_COLOR}15` }}
+                  animate={{ rotate: [0, 360] }}
+                  transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                >
+                  <Calendar className={`${isMobile ? 'w-8 h-8' : 'w-10 h-10'}`} style={{ color: GOLD_COLOR }} />
+                </motion.div>
 
-              <h2 
-                className={`${isMobile ? 'text-4xl sm:text-5xl' : 'text-5xl md:text-7xl lg:text-8xl'} font-luxury font-bold mb-3 sm:mb-4 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 bg-clip-text text-transparent relative uppercase`}
-                style={{
-                  filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))',
-                  letterSpacing: '0.05em'
-                }}
-              >
-              READY TO BEGIN YOUR JOURNEY?
-            </h2>
-              <p className={`${isMobile ? 'text-sm sm:text-base' : 'text-base md:text-lg lg:text-xl'} text-gray-600 mb-6 sm:mb-8`}>
-              Let's discuss how we can make your special day unforgettable
-            </p>
-          </div>
+                <h2
+                  className={`${isMobile ? 'text-4xl sm:text-5xl' : 'text-5xl md:text-7xl lg:text-8xl'} font-luxury font-bold mb-3 sm:mb-4 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 bg-clip-text text-transparent relative uppercase`}
+                  style={{
+                    filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))',
+                    letterSpacing: '0.05em'
+                  }}
+                >
+                  READY TO BEGIN YOUR JOURNEY?
+                </h2>
+                <p className={`${isMobile ? 'text-sm sm:text-base' : 'text-base md:text-lg lg:text-xl'} text-gray-600 mb-6 sm:mb-8`}>
+                  Let's discuss how we can make your special day unforgettable
+                </p>
+              </div>
 
-            <div className="space-y-3 sm:space-y-4">
-            <motion.div
-                whileHover={isMobile ? {} : { scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <Button
-                size="lg"
-                  className={`w-full ${isMobile ? 'text-sm sm:text-base px-6 py-5' : 'text-lg px-8 py-7'} font-semibold rounded-full shadow-xl hover:shadow-2xl transition-all duration-300`}
-                style={{
-                  background: `linear-gradient(135deg, ${GOLD_COLOR} 0%, rgba(199, 158, 72, 0.9) 100%)`,
-                  color: 'white',
-                }}
-                onClick={() => setIsConsultationModalOpen(true)}
-              >
-                  <span className="flex items-center justify-center gap-2 sm:gap-3">
-                    <Calendar className={`${isMobile ? 'w-4 h-4' : 'w-5 h-5'}`} />
-                  Schedule a Consultation
-                </span>
-              </Button>
-            </motion.div>
+              <div className="space-y-3 sm:space-y-4">
+                <motion.div
+                  whileHover={isMobile ? {} : { scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <Button
+                    size="lg"
+                    className={`w-full ${isMobile ? 'text-sm sm:text-base px-6 py-5' : 'text-lg px-8 py-7'} font-semibold rounded-full shadow-xl hover:shadow-2xl transition-all duration-300`}
+                    style={{
+                      background: `linear-gradient(135deg, ${GOLD_COLOR} 0%, rgba(199, 158, 72, 0.9) 100%)`,
+                      color: 'white',
+                    }}
+                    onClick={() => setIsConsultationModalOpen(true)}
+                  >
+                    <span className="flex items-center justify-center gap-2 sm:gap-3">
+                      <Calendar className={`${isMobile ? 'w-4 h-4' : 'w-5 h-5'}`} />
+                      Schedule a Consultation
+                    </span>
+                  </Button>
+                </motion.div>
 
-            <motion.div
-                whileHover={isMobile ? {} : { scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <Button
-                size="lg"
-                variant="outline"
-                  className={`w-full ${isMobile ? 'text-sm sm:text-base px-6 py-5' : 'text-lg px-8 py-7'} font-semibold rounded-full border-2 transition-all duration-300`}
-                style={{
-                  borderColor: GOLD_COLOR,
-                  color: GOLD_COLOR,
-                }}
-                onClick={() => {
-                  const message = "Hi! I'm interested in your Wedding Package. Could you please provide more information?";
-                  window.open(`https://wa.me/${CONSULTATION_PHONE}?text=${encodeURIComponent(message)}`, '_blank');
-                }}
-              >
-                  <span className="flex items-center justify-center gap-2 sm:gap-3">
-                  💬 Contact via WhatsApp
-                </span>
-              </Button>
-            </motion.div>
-          </div>
+                <motion.div
+                  whileHover={isMobile ? {} : { scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className={`w-full ${isMobile ? 'text-sm sm:text-base px-6 py-5' : 'text-lg px-8 py-7'} font-semibold rounded-full border-2 transition-all duration-300`}
+                    style={{
+                      borderColor: GOLD_COLOR,
+                      color: GOLD_COLOR,
+                    }}
+                    onClick={() => {
+                      const message = "Hi! I'm interested in your Wedding Package. Could you please provide more information?";
+                      window.open(`https://wa.me/${CONSULTATION_PHONE}?text=${encodeURIComponent(message)}`, '_blank');
+                    }}
+                  >
+                    <span className="flex items-center justify-center gap-2 sm:gap-3">
+                      💬 Contact via WhatsApp
+                    </span>
+                  </Button>
+                </motion.div>
+              </div>
 
-            <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-gray-200 text-center">
-              <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-gray-500`}>
-              We respond to all inquiries within 24 hours
-            </p>
+              <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-gray-200 text-center">
+                <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-gray-500`}>
+                  We respond to all inquiries within 24 hours
+                </p>
+              </div>
             </div>
-          </div>
-        </motion.div>
-      </div>
-    </section>
-    <ConsultationModal
-      isOpen={isConsultationModalOpen}
-      onClose={() => setIsConsultationModalOpen(false)}
-      onConfirm={handleConsultationConfirm}
-    />
+          </motion.div>
+        </div>
+      </section>
+      <ConsultationModal
+        isOpen={isConsultationModalOpen}
+        onClose={() => setIsConsultationModalOpen(false)}
+        onConfirm={handleConsultationConfirm}
+      />
     </>
   );
 };
@@ -1867,17 +1858,17 @@ const WeddingAndEvents = () => {
   useEffect(() => {
     // Add class to body to identify wedding page
     document.body.classList.add('wedding-page');
-    
+
     // Make navigation semi-transparent with white text for wedding page
     const nav = document.querySelector('.ultra-navigation') as HTMLElement;
     if (nav) {
       // Check if mobile
       const isMobileDevice = window.innerWidth <= 1024;
-      
+
       // Set semi-transparent background - more visible on mobile
       const initialOpacity = isMobileDevice ? 0.7 : 0.3;
       const scrolledOpacity = isMobileDevice ? 0.9 : 0.5;
-      
+
       nav.style.backgroundColor = `rgba(0, 0, 0, ${initialOpacity})`;
       nav.style.backdropFilter = 'blur(10px)';
       nav.style.transition = 'background-color 0.3s ease';
@@ -1885,14 +1876,14 @@ const WeddingAndEvents = () => {
       // Update on scroll - keep semi-transparent but more opaque when scrolled
       const handleScroll = () => {
         const scrolled = window.scrollY > 50;
-        nav.style.backgroundColor = scrolled 
-          ? `rgba(0, 0, 0, ${scrolledOpacity})` 
+        nav.style.backgroundColor = scrolled
+          ? `rgba(0, 0, 0, ${scrolledOpacity})`
           : `rgba(0, 0, 0, ${initialOpacity})`;
       };
 
       window.addEventListener('scroll', handleScroll, { passive: true });
       handleScroll(); // Initial call
-      
+
       return () => {
         window.removeEventListener('scroll', handleScroll);
         document.body.classList.remove('wedding-page');
