@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, lazy, Suspense } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { gsap } from 'gsap';
@@ -647,31 +648,38 @@ const UltraNavigation = () => {
               </div>
             </div>
 
-            {/* Mobile Menu - Full-Screen Overlay */}
-            <AnimatePresence>
-              {isMenuOpen && (
-                <>
+            {/* Mobile Menu - Full-Screen Overlay - Rendered via Portal */}
+            {createPortal(
+              <AnimatePresence>
+                {isMenuOpen && (
+                  <>
                   {/* Backdrop - Full Screen on Mobile */}
                   <motion.div
-                    className="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-md z-[99]"
+                    className="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-md"
+                    style={{
+                      zIndex: 99999,
+                      top: 'env(safe-area-inset-top, 0)',
+                      bottom: 'env(safe-area-inset-bottom, 0)',
+                    }}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.3 }}
                     onClick={() => setIsMenuOpen(false)}
-                    style={{
-                      top: 'env(safe-area-inset-top, 0)',
-                      bottom: 'env(safe-area-inset-bottom, 0)',
-                    }}
                   />
                   <motion.div
                     ref={menuRef}
-                    className="lg:hidden fixed inset-0 top-[var(--nav-height,4rem)] sm:top-[var(--nav-height,5rem)] bg-background/98 backdrop-blur-xl shadow-luxury z-[100] overflow-y-auto"
+                    className="lg:hidden fixed inset-0 bg-background/98 backdrop-blur-xl shadow-luxury overflow-y-auto"
                     style={{
+                      zIndex: 100000,
                       backgroundColor: 'rgba(229, 228, 226, 0.98)',
-                      paddingTop: isMobile ? 'env(safe-area-inset-top, 0.5rem)' : undefined,
+                      paddingTop: isMobile ? `calc(var(--nav-height, 4rem) + env(safe-area-inset-top, 0.5rem))` : `calc(var(--nav-height, 5rem) + env(safe-area-inset-top, 0.5rem))`,
                       paddingBottom: isMobile ? 'env(safe-area-inset-bottom, 1rem)' : undefined,
                       WebkitOverflowScrolling: 'touch',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
                     }}
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -940,9 +948,11 @@ const UltraNavigation = () => {
                       </motion.div>
                     </div>
                   </motion.div>
-                </>
-              )}
-            </AnimatePresence>
+                  </>
+                )}
+              </AnimatePresence>,
+              document.body
+            )}
           </nav>
 
           {/* Spacer for fixed navigation */}
