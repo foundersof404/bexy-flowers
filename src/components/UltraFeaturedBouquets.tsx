@@ -4,10 +4,11 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ShoppingCart, Heart, Eye, Crown, ArrowUpRight } from 'lucide-react';
 import { useCartWithToast } from '@/hooks/useCartWithToast';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import SignatureQuickView from './SignatureQuickView';
-import { getActiveSignatureCollections } from '@/lib/api/signature-collection';
+import { useSignatureCollection } from '@/hooks/useSignatureCollection';
 import { encodeImageUrl } from '@/lib/imageUtils';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -15,61 +16,38 @@ gsap.registerPlugin(ScrollTrigger);
 const UltraFeaturedBouquets = () => {
   const navigate = useNavigate();
   const { addToCart } = useCartWithToast();
+  const isMobile = useIsMobile();
   const sectionRef = useRef<HTMLElement>(null);
   const cardsRef = useRef<HTMLDivElement[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
   const [selectedBouquet, setSelectedBouquet] = useState<any>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAutoScroll, setIsAutoScroll] = useState(true);
-  const [bouquets, setBouquets] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
 
-  // Fetch signature collection from Supabase
-  useEffect(() => {
-    const loadSignatureCollection = async () => {
-      try {
-        setLoading(true);
-        const data = await getActiveSignatureCollections();
-        
-        // Transform to match existing interface
-        // Filter out items without valid images
-        console.log('Loaded signature collections:', data.length, data);
-        
-        const formattedBouquets = data
-          .map((item) => {
-            const imageUrl = item.product?.image_urls?.[0];
-            // Only include items with valid image URLs
-            if (!imageUrl || !imageUrl.trim()) {
-              console.warn('Skipping item without image URL:', item.product?.title, item.product?.image_urls);
-              return null;
-            }
-            const encodedImage = encodeImageUrl(imageUrl);
-            console.log('Encoding signature image URL:', imageUrl, '->', encodedImage);
-            return {
-              id: item.product?.id || '',
-              name: item.product?.title || '',
-              price: `$${item.product?.price || 0}`,
-              image: encodedImage,
-              description: item.product?.description || '',
-              // Include full product data for modal
-              productData: item.product,
-            };
-          })
-          .filter((bouquet): bouquet is NonNullable<typeof bouquet> => bouquet !== null);
-        
-        console.log('Final signature bouquets:', formattedBouquets.length, formattedBouquets);
-        setBouquets(formattedBouquets);
-      } catch (error) {
-        console.error('Error loading signature collection:', error);
-        // Fallback to empty array on error
-        setBouquets([]);
-      } finally {
-        setLoading(false);
-      }
+  // Use React Query hook for optimized data fetching
+  const { data: signatureCollections, isLoading: loading } = useSignatureCollection();
+
+  // Transform signature collections to bouquets format
+  const bouquets = signatureCollections?.map((item) => {
+    const imageUrl = item.product?.image_urls?.[0];
+    if (!imageUrl || !imageUrl.trim()) return null;
+
+    return {
+      id: item.product?.id || '',
+      name: item.product?.title || '',
+      price: item.product?.price || 0,
+      image: encodeImageUrl(imageUrl),
+      description: item.product?.description || '',
+      category: item.product?.category || '',
+      displayCategory: item.product?.display_category || '',
+      featured: item.product?.featured || false,
+      is_out_of_stock: item.product?.is_out_of_stock || false,
+      discount_percentage: item.product?.discount_percentage || null,
+      signature_order: item.display_order,
+      signature_id: item.id,
     };
+  }).filter(Boolean) || [];
 
-    loadSignatureCollection();
-  }, []);
 
   // Setup GSAP animations when bouquets are loaded
   useEffect(() => {

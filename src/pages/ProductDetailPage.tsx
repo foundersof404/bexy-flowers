@@ -20,7 +20,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import UltraNavigation from '@/components/UltraNavigation';
 import BackToTop from '@/components/BackToTop';
 import { generatedBouquets } from '@/data/generatedBouquets';
-import { getCollectionProduct } from '@/lib/api/collection-products';
+import { useCollectionProduct } from '@/hooks/useCollectionProducts';
 import type { Bouquet } from '@/types/bouquet';
 import { encodeImageUrl } from '@/lib/imageUtils';
 
@@ -578,29 +578,34 @@ const ProductDetailPage = () => {
   // Get random 4 categories that update when product changes
   const [displayCategories, setDisplayCategories] = useState(() => getRandomCategories());
 
-  // State for product data
-  const [productData, setProductData] = useState<ProductData>(() => {
-    // Use state if available
-    if (location.state?.product) {
-      return location.state.product;
-    }
-    // Fallback to mock data
-    return {
-      id: id || 'ember-rose-symphony',
-      title: 'Ember Rose Symphony',
-      price: 125.00,
-      description: 'A passionate arrangement of crimson Grand Prix roses and rich burgundy snapdragons, accented with delicate seeded eucalyptus. Each stem is carefully selected to create a dramatic, textural masterpiece that speaks of timeless romance and devotion. Handcrafted by our artisans in Sidon.',
-      imageUrl: bouquet1,
-      images: [
-        bouquet1,
-        bouquet2,
-        bouquet3
-      ],
-      category: 'Premium Bouquets',
-      inStock: true
-    };
-  });
-  const [isLoadingProduct, setIsLoadingProduct] = useState(false);
+  // Fetch product data using React Query
+  const { data: product, isLoading: isLoadingProduct, error } = useCollectionProduct(id);
+
+  // Transform product data to match component interface
+  const productData: ProductData = product ? {
+    id: product.id,
+    title: product.title,
+    price: product.price,
+    description: product.description || '',
+    imageUrl: encodeImageUrl(product.image_urls?.[0] || ''),
+    images: product.image_urls?.map(url => encodeImageUrl(url)) || [],
+    category: product.display_category || product.category || '',
+    inStock: !product.is_out_of_stock
+  } : {
+    // Fallback to mock data if no product found
+    id: id || 'ember-rose-symphony',
+    title: 'Ember Rose Symphony',
+    price: 125.00,
+    description: 'A passionate arrangement of crimson Grand Prix roses and rich burgundy snapdragons, accented with delicate seeded eucalyptus. Each stem is carefully selected to create a dramatic, textural masterpiece that speaks of timeless romance and devotion. Handcrafted by our artisans in Sidon.',
+    imageUrl: bouquet1,
+    images: [
+      bouquet1,
+      bouquet2,
+      bouquet3
+    ],
+    category: 'Premium Bouquets',
+    inStock: true
+  };
 
   // Local state management
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -699,42 +704,6 @@ const ProductDetailPage = () => {
     setDisplayCategories(newCategories);
   }, [id, productData.id]);
 
-  // Ensure page always loads from the top and is scrollable on mobile
-  useEffect(() => {
-    // Reset scroll position on mount and when product changes
-    const resetScroll = () => {
-      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
-      document.documentElement.scrollTop = 0;
-      document.body.scrollTop = 0;
-    };
-
-    resetScroll();
-    const timeoutId = setTimeout(resetScroll, 100);
-    const rafId = requestAnimationFrame(resetScroll);
-
-    // Ensure body is scrollable on mobile
-    const restoreScroll = () => {
-      document.body.style.overflow = '';
-      document.body.style.position = '';
-      document.body.style.width = '';
-      document.body.style.height = '';
-      document.body.style.top = '';
-
-      document.documentElement.style.overflow = '';
-      document.documentElement.style.height = '';
-      document.documentElement.style.position = '';
-    };
-
-    restoreScroll();
-    const restoreTimeoutId = setTimeout(restoreScroll, 100);
-
-    return () => {
-      clearTimeout(timeoutId);
-      clearTimeout(restoreTimeoutId);
-      cancelAnimationFrame(rafId);
-      restoreScroll();
-    };
-  }, [productData.id]);
 
   // Handle add to cart - includes quantity
   const handleAddToCart = async () => {

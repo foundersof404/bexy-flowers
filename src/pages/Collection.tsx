@@ -13,8 +13,10 @@ import BackToTop from "@/components/BackToTop";
 import LazySection from "@/components/LazySection";
 import type { Bouquet } from "@/types/bouquet";
 import { generatedCategories } from "@/data/generatedBouquets";
-import { getCollectionProducts } from "@/lib/api/collection-products";
 import { encodeImageUrl } from "@/lib/imageUtils";
+import { useCollectionProducts } from "@/hooks/useCollectionProducts";
+import { useNavigationPredictor } from "@/hooks/useNavigationPredictor";
+import { useEnhancedRoutePrefetch } from "@/hooks/useEnhancedRoutePrefetch";
 
 const DEFAULT_CATEGORY_ID =
   generatedCategories.find((cat) => cat.id === "red-roses")?.id ||
@@ -24,43 +26,33 @@ const DEFAULT_CATEGORY_ID =
 const Collection = () => {
   const [selectedCategory, setSelectedCategory] = useState(DEFAULT_CATEGORY_ID);
   const [selectedBouquet, setSelectedBouquet] = useState<Bouquet | null>(null);
-  const [bouquets, setBouquets] = useState<Bouquet[]>([]);
-  const [loading, setLoading] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
 
-  // Fetch products from Supabase
-  useEffect(() => {
-    const loadProducts = async () => {
-      try {
-        setLoading(true);
-        const products = await getCollectionProducts({ isActive: true });
-        
-        // Transform to match Bouquet interface
-        const transformedBouquets: Bouquet[] = products.map((product) => ({
-          id: product.id,
-          name: product.title,
-          price: product.price,
-          image: encodeImageUrl(product.image_urls?.[0] || ''),
-          description: product.description || '',
-          category: product.category || '',
-          displayCategory: product.display_category || '',
-          featured: product.featured || false,
-          is_out_of_stock: product.is_out_of_stock || false,
-          discount_percentage: product.discount_percentage || null,
-        }));
-        
-        setBouquets(transformedBouquets);
-      } catch (error) {
-        console.error('Error loading products:', error);
-        setBouquets([]);
-      } finally {
-        setLoading(false);
-      }
-    };
+  // Initialize navigation predictor and enhanced prefetching
+  useNavigationPredictor();
+  const { setupIntersectionObserver } = useEnhancedRoutePrefetch();
 
-    loadProducts();
-  }, []);
+  // Fetch products using React Query - optimized with caching and pre-loading
+  const { data: products, isLoading: loading, error } = useCollectionProducts({ isActive: true });
+
+  // Transform products to match Bouquet interface
+  const bouquets: Bouquet[] = useMemo(() => {
+    if (!products) return [];
+
+    return products.map((product) => ({
+      id: product.id,
+      name: product.title,
+      price: product.price,
+      image: encodeImageUrl(product.image_urls?.[0] || ''),
+      description: product.description || '',
+      category: product.category || '',
+      displayCategory: product.display_category || '',
+      featured: product.featured || false,
+      is_out_of_stock: product.is_out_of_stock || false,
+      discount_percentage: product.discount_percentage || null,
+    }));
+  }, [products]);
 
   useEffect(() => {
     // Ensure page loads at the very top on navigation
@@ -97,11 +89,6 @@ const Collection = () => {
     return bouquets.filter((b) => b.category === selectedCategory);
   }, [selectedCategory, bouquets]);
 
-  useEffect(() => {
-    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
-    document.documentElement.scrollTop = 0;
-    document.body.scrollTop = 0;
-  }, []);
 
   // Memoize featured bouquets calculation
   const featuredBouquets = useMemo(

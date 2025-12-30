@@ -10,7 +10,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import heroWeddingImage from "@/assets/heroWedding.jpg";
-import { getActiveWeddingCreations } from "@/lib/api/wedding-creations";
+import { useWeddingCreations } from "@/hooks/useWeddingCreations";
 import { encodeImageUrl } from "@/lib/imageUtils";
 
 gsap.registerPlugin(ScrollTrigger);

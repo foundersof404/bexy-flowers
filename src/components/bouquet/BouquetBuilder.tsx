@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { BouquetBuilderProps, BouquetState, SelectedFlower, Flower, PreDesignedBouquet } from '@/types/bouquet';
-import { flowers, preDesignedBouquets } from '@/data/flowers';
+import { flowers } from '@/data/flowers';
+import { generatedBouquets } from '@/data/generatedBouquets';
 import BouquetCanvas from './BouquetCanvas';
 import FlowerSelector from './FlowerSelector';
 import SummaryPanel from './SummaryPanel';
@@ -291,7 +292,7 @@ const BouquetBuilder: React.FC<BouquetBuilderProps> = ({
 
               <TabsContent value="premade" className="mt-6">
                 <PreDesignedBouquets
-                  bouquets={preDesignedBouquets}
+                  bouquets={generatedBouquets}
                   onBouquetSelect={handlePreDesignedSelect}
                 />
               </TabsContent>

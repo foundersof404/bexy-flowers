@@ -36,14 +36,16 @@ import { useToast } from "@/hooks/use-toast";
 import { generatedCategories } from "@/data/generatedBouquets";
 import { ImageUpload } from "@/components/admin/ImageUpload";
 import {
-  getCollectionProducts,
-  getCollectionProduct,
-  createCollectionProduct,
-  updateCollectionProduct,
-  deleteCollectionProduct,
-  getAllTags,
-} from "@/lib/api/collection-products";
-import { getSignatureCollections } from "@/lib/api/signature-collection";
+  useCollectionProducts,
+  useCollectionProduct,
+  useCreateCollectionProduct,
+  useUpdateCollectionProduct,
+  useDeleteCollectionProduct,
+  useCollectionTags,
+} from "@/hooks/useCollectionProducts";
+import {
+  useSignatureCollection,
+} from "@/hooks/useSignatureCollection";
 import { migrateProductsToSupabase } from "@/lib/migrateProducts";
 import { encodeImageUrl } from "@/lib/imageUtils";
 
@@ -56,12 +58,20 @@ const AdminProducts = () => {
   const isEditing = id && id !== "new";
   const isCreating = id === "new";
 
-  // State management
-  const [products, setProducts] = useState<any[]>([]);
-  const [signatureProducts, setSignatureProducts] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  // React Query hooks for data management
+  const { data: products = [], isLoading: loadingProducts } = useCollectionProducts();
+  const { data: signatureProducts = [], isLoading: loadingSignature } = useSignatureCollection();
+  const { data: allTags = [] } = useCollectionTags();
+  const { data: selectedProductData } = useCollectionProduct(id && id !== "new" ? id : undefined);
+
+  // Mutation hooks
+  const createProductMutation = useCreateCollectionProduct();
+  const updateProductMutation = useUpdateCollectionProduct();
+  const deleteProductMutation = useDeleteCollectionProduct();
+
   const [saving, setSaving] = useState(false);
   const [migrating, setMigrating] = useState(false);
+  const loading = loadingProducts || loadingSignature;
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -88,7 +98,6 @@ const AdminProducts = () => {
   });
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [imagesToDelete, setImagesToDelete] = useState<string[]>([]);
-  const [allTags, setAllTags] = useState<string[]>([]);
   const [newTag, setNewTag] = useState("");
 
   useEffect(() => {
@@ -97,13 +106,25 @@ const AdminProducts = () => {
       navigate("/admin/login");
       return;
     }
-
-    loadData();
   }, [navigate]);
 
   useEffect(() => {
-    if (isEditing && id) {
-      loadProduct(id);
+    if (isEditing && selectedProductData) {
+      setFormData({
+        title: selectedProductData.title || "",
+        description: selectedProductData.description || "",
+        price: selectedProductData.price || 0,
+        category: selectedProductData.category || "",
+        display_category: selectedProductData.display_category || "",
+        featured: selectedProductData.featured || false,
+        tags: selectedProductData.tags || [],
+        image_urls: selectedProductData.image_urls || [],
+        is_active: selectedProductData.is_active !== false,
+        is_out_of_stock: selectedProductData.is_out_of_stock || false,
+        discount_percentage: selectedProductData.discount_percentage || null,
+      });
+      setSelectedProduct(selectedProductData);
+      setShowProductForm(true);
     } else if (isCreating) {
       setFormData({
         title: "",
@@ -120,77 +141,9 @@ const AdminProducts = () => {
       });
       setShowProductForm(true);
     }
-  }, [id, isEditing, isCreating]);
+  }, [id, isEditing, isCreating, selectedProductData]);
 
-  const loadData = async () => {
-    try {
-      setLoading(true);
-      const [productsData, tagsData, signatureData] = await Promise.all([
-        getCollectionProducts(),
-        getAllTags(),
-        getSignatureCollections(),
-      ]);
-      setProducts(productsData);
-      setAllTags(tagsData);
-      
-      // Extract products from signature collection
-      const sigProducts = signatureData
-        .filter(item => item.product)
-        .map(item => ({
-          ...item.product!,
-          signature_order: item.display_order,
-          signature_id: item.id,
-        }))
-        .sort((a, b) => a.signature_order - b.signature_order);
-      
-      setSignatureProducts(sigProducts);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to load data",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  const loadProduct = async (productId: string) => {
-    try {
-      const product = await getCollectionProduct(productId);
-      if (product) {
-        setSelectedProduct(product);
-        setFormData({
-          title: product.title,
-          description: product.description || "",
-          price: product.price,
-          category: product.category || "",
-          display_category: product.display_category || "",
-          featured: product.featured,
-          tags: product.tags || [],
-          image_urls: product.image_urls || [],
-          is_active: product.is_active,
-          is_out_of_stock: product.is_out_of_stock || false,
-          discount_percentage: product.discount_percentage || null,
-        });
-        setShowProductForm(true);
-      } else {
-        toast({
-          title: "Error",
-          description: "Product not found",
-          variant: "destructive",
-        });
-        navigate("/admin/products");
-      }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to load product",
-        variant: "destructive",
-      });
-      navigate("/admin/products");
-    }
-  };
 
   // Filter products (exclude signature collection products from main list)
   const signatureProductIds = new Set(signatureProducts.map(p => p.id));
@@ -230,18 +183,21 @@ const AdminProducts = () => {
       setSaving(true);
 
       if (isEditing && selectedProduct) {
-        await updateCollectionProduct(
-          selectedProduct.id,
-          formData,
-          imageFiles,
-          imagesToDelete
-        );
+        await updateProductMutation.mutateAsync({
+          id: selectedProduct.id,
+          updates: formData,
+          newImages: imageFiles,
+          imagesToDelete,
+        });
         toast({
           title: "Product Updated",
           description: `${formData.title} has been updated successfully.`,
         });
       } else {
-        await createCollectionProduct(formData, imageFiles);
+        await createProductMutation.mutateAsync({
+          product: formData,
+          images: imageFiles,
+        });
         toast({
           title: "Product Created",
           description: `${formData.title} has been created successfully.`,
@@ -253,7 +209,6 @@ const AdminProducts = () => {
       setImageFiles([]);
       setImagesToDelete([]);
       navigate("/admin/products");
-      await loadData();
     } catch (error) {
       toast({
         title: "Error",
@@ -268,13 +223,12 @@ const AdminProducts = () => {
   // Handle product delete
   const handleDelete = async (product: any) => {
     try {
-      await deleteCollectionProduct(product.id);
+      await deleteProductMutation.mutateAsync(product.id);
       toast({
         title: "Product Deleted",
         description: `${product.title} has been deleted.`,
       });
       setDeleteDialog({ open: false, product: null });
-      await loadData();
     } catch (error) {
       toast({
         title: "Error",
