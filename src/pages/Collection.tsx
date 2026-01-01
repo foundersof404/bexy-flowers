@@ -36,11 +36,6 @@ const getDefaultCategoryId = (): string => {
 
 const DEFAULT_CATEGORY_ID: string = getDefaultCategoryId();
 
-const DEFAULT_CATEGORY_ID =
-  generatedCategories.find((cat) => cat.id === "red-roses")?.id ||
-  generatedCategories.find((cat) => cat.id !== "all")?.id ||
-  "all";
-
 const Collection = () => {
   const [selectedCategory, setSelectedCategory] = useState(DEFAULT_CATEGORY_ID);
   const [selectedBouquet, setSelectedBouquet] = useState<Bouquet | null>(null);
