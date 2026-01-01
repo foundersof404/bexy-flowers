@@ -45,15 +45,21 @@ export const AI_CONFIG = {
       enabled: true,
       // WORKAROUND: Use IMG tag approach (bypasses CORS)
       // Pollinations blocks fetch() but allows <img> tags
-      baseUrl: 'https://image.pollinations.ai/prompt',
-      apiKey: '', 
+      // NEW API ENDPOINT (as of 2025)
+      // Documentation: https://gen.pollinations.ai
+      // Format: https://gen.pollinations.ai/image/{prompt}?key=YOUR_API_KEY
+      baseUrl: 'https://gen.pollinations.ai/image', // New API gateway endpoint
+      apiKey: 'pk_uI3dAtamrhnXMCUr', // Publishable API key for priority access
       params: {
         nologo: true,
         enhance: true,
-        model: 'flux',
+        model: 'turbo', // Using turbo model (flux is being deprecated/removed)
+        // Alternative models: 'sdxl', 'dreamshaper', 'realistic', 'anime'
         seed: -1,
         width: 1024,
         height: 1024,
+        noinit: true, // Skip initialization screen
+        private: true, // Keep generations private
       }
     },
     
@@ -155,16 +161,36 @@ export function getLoadingMessage(elapsedSeconds: number): string {
 export function buildPollinationsUrl(prompt: string, width: number, height: number, negative?: string): string {
   const config = AI_CONFIG.apis.pollinations;
   
-  // Build query parameters
+  // NEW API FORMAT: https://gen.pollinations.ai/image/{prompt}?key=API_KEY&model=turbo&width=512&height=512
+  // Documentation: https://gen.pollinations.ai
+  // Authentication: Use ?key=YOUR_API_KEY query parameter (works with IMG tag)
+  
+  // Build query parameters for new API
   const params = new URLSearchParams({
-    width: width.toString(),
-    height: height.toString(),
-    nologo: 'true',
-    enhance: 'true',
-    model: config.params.model || 'flux',
+    model: config.params.model || 'turbo',
   });
   
+  // Add dimensions if specified (new API may support these)
+  if (width) {
+    params.append('width', width.toString());
+  }
+  if (height) {
+    params.append('height', height.toString());
+  }
+  
+  // Add API key as query parameter (required for new API)
+  // Format: ?key=pk_... (publishable key works in query param)
+  if (config.apiKey) {
+    params.append('key', config.apiKey);
+  }
+  
+  // Note: New API may not support all old parameters like:
+  // - nologo, enhance, noinit, private, negative
+  // These are kept commented out for now
+  
   const encodedPrompt = encodeURIComponent(prompt);
+  
+  // New API format: /image/{prompt}?params
   return `${config.baseUrl}/${encodedPrompt}?${params.toString()}`;
 }
 

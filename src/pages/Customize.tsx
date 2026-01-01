@@ -234,6 +234,7 @@ const Customize: React.FC = () => {
       }
 
       setGeneratedImage(result.imageUrl);
+      setIsGenerating(false); // Reset generating state on success
       console.log('[Customize] New image set successfully');
 
       // Success toast with source info
@@ -252,9 +253,16 @@ const Customize: React.FC = () => {
       // Show detailed error
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       
+      // Check if it's a Pollinations API issue
+      const isPollinationsError = errorMessage.includes('Pollinations API') || 
+                                   errorMessage.includes('WE HAVE MOVED') ||
+                                   errorMessage.includes('enter.pollinations.ai');
+      
       toast.error("Could not generate preview", {
-        description: "AI services are busy. Try simpler selections or try again in a moment.",
-        duration: 5000,
+        description: isPollinationsError 
+          ? "Pollinations API has changed. Please try again later or contact support."
+          : "AI services are busy. Try simpler selections or try again in a moment.",
+        duration: 8000,
       });
       
       setIsGenerating(false);

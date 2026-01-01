@@ -51,6 +51,121 @@ function cleanPrompt(prompt: string): string {
 }
 
 /**
+ * Detect error pages by analyzing image content
+ * Error pages typically have:
+ * - Pixelated/retro style (low color variance)
+ * - Brown/beige color scheme
+ * - QR codes (high contrast square patterns)
+ * - Specific dimensions/aspect ratios
+ * - Dark green backgrounds (new error pages)
+ */
+async function detectErrorPage(img: HTMLImageElement): Promise<boolean> {
+    try {
+        // Create canvas to analyze image - use larger sample for better detection
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.min(img.width, 400); // Larger sample for better detection
+        canvas.height = Math.min(img.height, 400);
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return false;
+        
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imageData.data;
+        
+        // Analyze color distribution
+        let brownCount = 0;
+        let darkGreenCount = 0; // New error pages have dark green
+        let pixelatedScore = 0;
+        let lowVarianceCount = 0;
+        let totalPixels = canvas.width * canvas.height;
+        let sampledPixels = 0;
+        
+        // Sample more pixels for better detection
+        for (let i = 0; i < data.length; i += 8) { // Sample every 2nd pixel (RGBA = 4 bytes)
+            sampledPixels++;
+            const r = data[i];
+            const g = data[i + 1];
+            const b = data[i + 2];
+            
+            // Check for brown/beige colors (typical of old error pages)
+            // Brown: R > G, G > B, but not too dark
+            if (r > 80 && r > g && g > b && r - g < 60 && g - b < 40) {
+                brownCount++;
+            }
+            
+            // Check for dark green colors (new error pages have dark green background)
+            // Dark green: G > R, G > B, but dark overall
+            if (g > r && g > b && r < 100 && b < 100 && g < 150) {
+                darkGreenCount++;
+            }
+            
+            // Check for pixelated style (low color variance in nearby pixels)
+            if (i + 8 < data.length) {
+                const r2 = data[i + 8];
+                const g2 = data[i + 9];
+                const b2 = data[i + 10];
+                const variance = Math.abs(r - r2) + Math.abs(g - g2) + Math.abs(b - b2);
+                if (variance < 25) { // Low variance = pixelated
+                    pixelatedScore++;
+                }
+                if (variance < 15) { // Very low variance
+                    lowVarianceCount++;
+                }
+            }
+        }
+        
+        const brownRatio = brownCount / sampledPixels;
+        const darkGreenRatio = darkGreenCount / sampledPixels;
+        const pixelatedRatio = pixelatedScore / sampledPixels;
+        const lowVarianceRatio = lowVarianceCount / sampledPixels;
+        
+        // Error pages typically have:
+        // - High brown ratio (>10%) OR high dark green ratio (>15%)
+        // - High pixelated score (>15%)
+        // - Very low variance in many areas (>10%)
+        // - Specific aspect ratios (often square-ish: 1040x1024 is suspicious)
+        
+        // Check for suspicious dimensions (error pages are often square-ish)
+        const aspectRatio = img.width / img.height;
+        const isSquareish = aspectRatio > 0.95 && aspectRatio < 1.05;
+        // ONLY flag the exact known error page dimensions
+        const isSuspiciousSize = (img.width === 1040 && img.height === 1024);
+        
+        // LESS AGGRESSIVE detection - AI images can have smooth areas and brown tones
+        // Only flag if we have BOTH error colors AND suspicious dimensions
+        // OR if we have EXTREME pixelation (>50%) with error colors
+        const hasErrorColors = brownRatio > 0.15 || darkGreenRatio > 0.20; // Increased thresholds
+        const hasExtremePixelation = pixelatedRatio > 0.50 || lowVarianceRatio > 0.40; // Much higher thresholds
+        const hasModeratePixelation = pixelatedRatio > 0.25 || lowVarianceRatio > 0.20;
+        const hasSuspiciousDimensions = isSquareish && isSuspiciousSize;
+        
+        // Only flag as error page if:
+        // 1. Has suspicious dimensions (1040x1024) AND (error colors OR moderate pixelation)
+        // 2. Has extreme pixelation (>50%) AND error colors (very unlikely for real images)
+        // This prevents false positives on legitimate AI-generated images
+        const isLikelyErrorPage = (hasSuspiciousDimensions && (hasErrorColors || hasModeratePixelation)) ||
+                                   (hasExtremePixelation && hasErrorColors);
+        
+        if (isLikelyErrorPage) {
+            console.warn(`[ImageGen] ⚠️ Error page detected:`, {
+                brown: `${(brownRatio * 100).toFixed(1)}%`,
+                darkGreen: `${(darkGreenRatio * 100).toFixed(1)}%`,
+                pixelated: `${(pixelatedRatio * 100).toFixed(1)}%`,
+                lowVariance: `${(lowVarianceRatio * 100).toFixed(1)}%`,
+                dimensions: `${img.width}x${img.height}`,
+                aspectRatio: aspectRatio.toFixed(2)
+            });
+        }
+        
+        return isLikelyErrorPage;
+    } catch (error) {
+        console.warn('[ImageGen] Error during error page detection:', error);
+        // If detection fails, don't block - let it through
+        return false;
+    }
+}
+
+/**
  * Generate image using Pollinations API (Primary method)
  */
 async function generateWithPollinations(
@@ -74,26 +189,152 @@ async function generateWithPollinations(
     // Build negative prompt for better quality (exclude unwanted elements)
     const negativePrompt = "leaves, stems, green foliage, wilted, blurry, low quality, dark, messy";
     
-    // Build URL using config helper
-    const pollinationsUrl = buildPollinationsUrl(cleanedPrompt, width, height, negativePrompt);
+    // NEW POLLINATIONS API (2025)
+    // Documentation: https://gen.pollinations.ai
+    // Endpoint: https://gen.pollinations.ai/image/{prompt}?key=API_KEY&model=turbo&width=512&height=512
+    // Authentication: Use ?key=YOUR_API_KEY query parameter (works with IMG tag, no CORS issues)
+    const endpointVariations = [
+        {
+            baseUrl: 'https://gen.pollinations.ai/image', // New API gateway
+            useEnhance: false, // New API format - simplified parameters
+            useNoinit: false,
+            usePrivate: false,
+        },
+    ];
+    
+    // Log API key usage if available
+    const apiKey = AI_CONFIG.apis.pollinations.apiKey;
+    if (apiKey) {
+        console.log('[ImageGen] 🔑 Using Pollinations API key for priority access');
+        console.log('[ImageGen] API Key:', apiKey.substring(0, 10) + '...');
+    } else {
+        console.log('[ImageGen] ⚠️ No API key configured - using free tier');
+    }
     
     console.log('[ImageGen] Pollinations attempt with enhanced prompt');
-    console.log('[ImageGen] URL length:', pollinationsUrl.length);
     
-    // Pollinations doesn't use Authorization headers in browser (CORS blocked)
-    // Their free tier works without API keys from browsers
-    const headers: Record<string, string> = {
-        'Accept': 'image/*',
-    };
+    // Try each endpoint variation until one works
+    let lastError: Error | null = null;
+    for (let i = 0; i < endpointVariations.length; i++) {
+        const variation = endpointVariations[i];
+        try {
+            // Build URL with this variation's parameters
+            const pollinationsUrl = buildPollinationsUrlWithVariation(
+                cleanedPrompt, 
+                width, 
+                height, 
+                negativePrompt,
+                variation
+            );
+            
+            console.log(`[ImageGen] Trying variation ${i + 1}/${endpointVariations.length}: ${variation.baseUrl}`);
+            console.log('[ImageGen] URL:', pollinationsUrl.substring(0, 150) + '...');
+            
+            const result = await tryLoadImageFromUrl(pollinationsUrl);
+            
+            // CRITICAL: Hardcoded check for known error page dimensions FIRST
+            // The "WE HAVE MOVED" error page is exactly 1040x1024 with size ~2.1MB
+            if (result.img.width === 1040 && result.img.height === 1024) {
+                // Check file size - error pages at this resolution are typically 2-2.5MB
+                const sizeKB = result.blob.size / 1024;
+                if (sizeKB > 2000 && sizeKB < 2500) {
+                    console.warn(`[ImageGen] ⚠️ ERROR PAGE DETECTED: Exact error page dimensions (1040x1024) and size (${sizeKB.toFixed(1)}KB)`);
+                    console.warn(`[ImageGen] ⚠️ This is the "WE HAVE MOVED" error page - rejecting and trying next variation...`);
+                    lastError = new Error('Error page detected - "WE HAVE MOVED" page (1040x1024)');
+                    continue; // Try next variation
+                }
+            }
+            
+            // Content-based detection (LESS AGGRESSIVE - only flags obvious error pages)
+            // Only reject if dimensions match known error page AND content analysis confirms it
+            // For other dimensions, be lenient to avoid false positives on legitimate AI images
+            const isErrorPage = await detectErrorPage(result.img);
+            if (isErrorPage) {
+                // Only reject if we have the exact error page dimensions
+                // Otherwise, it might be a false positive (AI images can have smooth areas)
+                if (result.img.width === 1040 && result.img.height === 1024) {
+                    console.warn(`[ImageGen] ⚠️ Error page detected by content analysis AND dimensions match`);
+                    console.warn(`[ImageGen] ⚠️ Rejecting and trying next variation...`);
+                    lastError = new Error('Error page detected - "WE HAVE MOVED" or similar');
+                    continue; // Try next variation
+                } else {
+                    // Different dimensions - likely a false positive, allow it through
+                    console.warn(`[ImageGen] ⚠️ Content analysis flagged possible error page, but dimensions (${result.img.width}x${result.img.height}) don't match known error page`);
+                    console.warn(`[ImageGen] ⚠️ Allowing image through - likely a false positive`);
+                }
+            }
+            
+            // Success! Return the blob
+            return await processValidImage(result.img, result.blob);
+            
+        } catch (error) {
+            console.warn(`[ImageGen] ⚠️ Variation ${i + 1} failed:`, error);
+            lastError = error as Error;
+            continue; // Try next variation
+        }
+    }
     
-    console.log('[ImageGen] 🌸 Using Pollinations AI with IMG tag workaround (CORS bypass)');
+    // All variations failed - Pollinations API appears to be down or changed
+    const errorMessage = 'Pollinations API is currently unavailable. The service has moved to a new system. ' +
+        'Please visit https://enter.pollinations.ai to sign up for the new API, or try again later.';
+    console.error('[ImageGen] ❌ All Pollinations variations failed');
+    console.error('[ImageGen] 💡 Suggestion: The API may require authentication through the new system');
+    throw new Error(errorMessage);
+}
+
+/**
+ * Build Pollinations URL with specific variation parameters
+ */
+function buildPollinationsUrlWithVariation(
+    prompt: string,
+    width: number,
+    height: number,
+    negative: string | undefined,
+    variation: { baseUrl: string; useEnhance: boolean; useNoinit: boolean; usePrivate: boolean }
+): string {
+    const config = AI_CONFIG.apis.pollinations;
     
-    // WORKAROUND: Use Image() instead of fetch() to bypass CORS
-    // Pollinations blocks fetch() but allows <img> tags
-    const img = new Image();
-    img.crossOrigin = 'anonymous'; // Try to enable CORS
+    // NEW API FORMAT: https://gen.pollinations.ai/image/{prompt}?key=API_KEY&model=turbo&width=512&height=512
+    // Documentation: https://gen.pollinations.ai
+    // Authentication: Use ?key=YOUR_API_KEY (publishable keys work in query param)
     
-    const imageLoadPromise = new Promise<Blob>((resolve, reject) => {
+    // Build query parameters for new API (simplified - new API may not support all old params)
+    const params = new URLSearchParams({
+        model: config.params.model || 'turbo',
+    });
+    
+    // Add dimensions if specified
+    if (width) {
+        params.append('width', width.toString());
+    }
+    if (height) {
+        params.append('height', height.toString());
+    }
+    
+    // CRITICAL: Add API key as query parameter (required for new API)
+    // Format: ?key=pk_... (publishable key works in query param)
+    if (config.apiKey) {
+        params.append('key', config.apiKey);
+    }
+    
+    // Note: New API may not support old parameters like:
+    // - nologo, enhance, noinit, private, negative
+    // These are omitted for now to ensure compatibility with new API
+    
+    const encodedPrompt = encodeURIComponent(prompt);
+    
+    // New API format: /image/{prompt}?key=API_KEY&model=turbo&width=512&height=512
+    return `${variation.baseUrl}/${encodedPrompt}?${params.toString()}`;
+}
+
+/**
+ * Helper to load image from URL
+ */
+function tryLoadImageFromUrl(url: string): Promise<{ img: HTMLImageElement; blob: Blob }> {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        
         const timeout = setTimeout(() => {
             reject(new Error('Image load timeout after 45 seconds'));
         }, AI_CONFIG.retry.requestTimeout);
@@ -114,7 +355,7 @@ async function generateWithPollinations(
                 
                 canvas.toBlob((blob) => {
                     if (blob) {
-                        resolve(blob);
+                        resolve({ img, blob });
                     } else {
                         reject(new Error('Failed to convert canvas to blob'));
                     }
@@ -129,10 +370,14 @@ async function generateWithPollinations(
             reject(new Error('Failed to load image from Pollinations'));
         };
         
-        img.src = pollinationsUrl;
+        img.src = url;
     });
-    
-    const blob = await imageLoadPromise;
+}
+
+/**
+ * Process and validate a loaded image
+ */
+async function processValidImage(img: HTMLImageElement, blob: Blob): Promise<GenerationResult> {
     // Validate blob size
     const minSize = AI_CONFIG.validation.minImageSize;
     if (blob.size < minSize) {
@@ -140,7 +385,7 @@ async function generateWithPollinations(
         throw new Error(`Received error page or invalid image (size: ${(blob.size / 1024).toFixed(1)}KB)`);
     }
     
-    // Validate dimensions (img is already loaded)
+    // Validate dimensions
     const minWidth = AI_CONFIG.validation.minWidth;
     const minHeight = AI_CONFIG.validation.minHeight;
     
@@ -156,8 +401,8 @@ async function generateWithPollinations(
     
     console.log('[ImageGen] ✅ Pollinations successful, blob URL:', localUrl);
     
-    // Return the blob URL - component will handle cleanup on unmount
     return { imageUrl: localUrl, source: 'pollinations' };
+    
 }
 
 /**
