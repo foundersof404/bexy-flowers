@@ -440,7 +440,7 @@ const AdminSignatureCollection = () => {
                   ) : (
                     availableProductsFiltered.map((product) => (
                       <SelectItem key={product.id} value={product.id}>
-                        {product.title} - ${product.price.toFixed(2)}
+                        {product.title} - ${(product.price || 0).toFixed(2)}
                       </SelectItem>
                     ))
                   )}

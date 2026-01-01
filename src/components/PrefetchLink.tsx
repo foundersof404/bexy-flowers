@@ -1,5 +1,5 @@
 import React from 'react';
-import { useRoutePrefetch } from '@/hooks/useRoutePrefetch';
+import { useEnhancedRoutePrefetch } from '@/hooks/useEnhancedRoutePrefetch';
 import { useRouteState } from '@/contexts/RouteStateContext';
 import type { ReactNode, MouseEvent } from 'react';
 
@@ -28,7 +28,7 @@ export const PrefetchLink: React.FC<PrefetchLinkProps> = ({
   replace = false,
   preserveScroll = false,
 }) => {
-  const { handlePrefetch, cancelPrefetch, navigate } = useRoutePrefetch();
+  const { handlePrefetch, cancelPrefetch, navigate } = useEnhancedRoutePrefetch();
   const { navigateWithState } = useRouteState();
 
   const handleClick = (e: MouseEvent<HTMLAnchorElement>) => {
