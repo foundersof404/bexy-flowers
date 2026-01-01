@@ -90,6 +90,16 @@ const Customize: React.FC = () => {
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
 
+  // Cleanup blob URLs on unmount to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      if (generatedImage && generatedImage.startsWith('blob:')) {
+        console.log('[Customize] Cleaning up blob URL on unmount');
+        URL.revokeObjectURL(generatedImage);
+      }
+    };
+  }, [generatedImage]);
+
   // Computed
   const step1Complete = !!selectedPackage;
   const step2Complete = !!selectedSize && !!selectedColor;
@@ -152,59 +162,101 @@ const Customize: React.FC = () => {
     toast.success("Added to cart!");
   };
 
-  // --- AI Generation Logic (Uses Pollinations API) ---
+  // --- AI Generation Logic (Uses Multiple Free APIs with Fallback) ---
   const generateBouquetImage = async () => {
     console.log('[Customize] Generate button clicked');
     setIsGenerating(true);
     setGeneratedImage(null); // Clear previous to show loading state
 
     try {
-      console.log('[Customize] Building prompt...');
-      // Build simple, concise flower description
+      console.log('[Customize] Building enhanced prompt...');
+      
+      // Build detailed flower description
       const flowerDescriptions: string[] = [];
+      let totalFlowerCount = 0;
+      
       Object.values(selectedFlowers).forEach(({ flower, quantity }) => {
+        totalFlowerCount += quantity;
         flowerDescriptions.push(`${quantity} ${flower.colorName} ${flower.family}`);
       });
 
       const flowersText = flowerDescriptions.length > 0
-        ? flowerDescriptions.join(', ')
-        : 'roses';
+        ? flowerDescriptions.join(' and ')
+        : 'mixed roses';
 
-      const colorName = selectedColor?.name || "white";
-      const sizeName = selectedSize?.name || "medium";
+      const colorName = selectedColor?.name.toLowerCase() || "white";
+      const sizeName = selectedSize?.name.toLowerCase() || "medium";
+      const packageType = selectedPackage?.type || "box";
 
-      // Build SIMPLE prompt (avoid 500 errors from Pollinations)
+      // Build DETAILED prompt for better AI results
       let fullPrompt = "";
 
-      if (selectedPackage?.type === "box") {
-        // Simple box description
-        fullPrompt = `${sizeName} ${colorName} flower box filled with ${flowersText}`;
+      if (packageType === "box") {
+        // Luxury box description with specific details
+        fullPrompt = `A luxury ${colorName} gift box filled with a beautiful flower bouquet. ` +
+                     `The bouquet contains ${flowersText}, expertly arranged. ` +
+                     `${sizeName.charAt(0).toUpperCase() + sizeName.slice(1)} size arrangement. ` +
+                     `View from above showing the ${colorName} box and flowers inside. ` +
+                     `Premium floral gift, elegant presentation, Bexy Flowers style`;
       } else {
-        // Simple bouquet description
-        fullPrompt = `${sizeName} bouquet with ${flowersText} wrapped in ${colorName} paper`;
+        // Elegant wrap description with specific details
+        fullPrompt = `A ${sizeName} elegant flower bouquet with ${flowersText}, ` +
+                     `beautifully wrapped in ${colorName} decorative paper with ribbon. ` +
+                     `Professional florist arrangement, fresh flowers, ` +
+                     `front view, standing upright, premium quality, Bexy Flowers signature style`;
       }
 
-      console.log('[Customize] Simple Prompt:', fullPrompt);
-      console.log('[Customize] Calling generateImage...');
+      console.log('[Customize] Enhanced Prompt:', fullPrompt);
+      console.log('[Customize] Flower count:', totalFlowerCount);
+      
+      // Show initial toast
+      toast.loading("Generating your bouquet preview...", {
+        icon: <Wand2 className="w-4 h-4 text-[#C79E48] animate-pulse" />,
+        description: "This may take 5-10 seconds",
+        id: 'generating-toast'
+      });
 
-      // Generate using Pollinations API with reduced resolution
+      // Generate using AI with smart fallback
       const result = await generateImage(fullPrompt, {
         width: 512,
         height: 512,
+        enhancePrompt: true, // Enable automatic prompt enhancement
       });
 
-      console.log('[Customize] Result:', result);
+      console.log('[Customize] Generation successful!');
+      console.log('[Customize] Source:', result.source);
       console.log('[Customize] Image URL:', result.imageUrl);
 
-      setGeneratedImage(result.imageUrl);
+      // Clean up old blob URL before setting new one
+      if (generatedImage && generatedImage.startsWith('blob:')) {
+        console.log('[Customize] Cleaning up old blob URL');
+        URL.revokeObjectURL(generatedImage);
+      }
 
-      toast.success("Generating preview...", {
+      setGeneratedImage(result.imageUrl);
+      console.log('[Customize] New image set successfully');
+
+      // Success toast with source info
+      toast.success("Preview generated!", {
         icon: <Wand2 className="w-4 h-4 text-[#C79E48]" />,
-        description: "Loading image from AI"
+        description: `Using ${result.source === 'pollinations' ? 'Pollinations AI' : 'HuggingFace AI'}`,
+        id: 'generating-toast'
       });
+      
     } catch (error) {
       console.error("[Customize] AI Error:", error);
-      toast.error("Could not generate preview. Please try again.");
+      
+      // Dismiss loading toast
+      toast.dismiss('generating-toast');
+      
+      // Show detailed error
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      
+      toast.error("Could not generate preview", {
+        description: "AI services are busy. Try simpler selections or try again in a moment.",
+        duration: 5000,
+      });
+      
       setIsGenerating(false);
     }
   };
@@ -477,9 +529,10 @@ const Customize: React.FC = () => {
                     {generatedImage ? (
                       <motion.img
                         key={generatedImage}
-                        initial={{ opacity: 0, scale: 1.1 }}
+                        initial={{ opacity: 0, scale: 1.05 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        transition={{ duration: 0.3 }}
                         src={generatedImage}
                         alt="AI Generated Preview"
                         className="w-full h-full object-cover"
@@ -490,7 +543,7 @@ const Customize: React.FC = () => {
                         onError={(e) => {
                           console.error('[Customize] Image failed to load');
                           console.error('[Customize] Image src was:', e.currentTarget.src);
-                          // Option B: Fallback to placeholder
+                          // Fallback to placeholder
                           e.currentTarget.src = heroBouquetMain;
                           toast.info("Using placeholder. AI service may be temporarily unavailable.");
                           setIsGenerating(false);
@@ -501,22 +554,58 @@ const Customize: React.FC = () => {
                         key="placeholder"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        className="w-full h-full flex flex-col items-center justify-center text-gray-300"
+                        className="w-full h-full flex flex-col items-center justify-center text-gray-300 p-8 text-center"
                       >
                         <Wand2 className="w-16 h-16 mb-4 opacity-20" />
-                        <p className="text-sm font-medium opacity-60">AI Preview Area</p>
+                        <p className="text-sm font-medium opacity-60 mb-2">AI Preview Area</p>
+                        <p className="text-xs opacity-40">
+                          {step3Complete 
+                            ? "Click 'Generate Preview' to see your design" 
+                            : "Complete all steps to generate preview"}
+                        </p>
                       </motion.div>
                     )}
                   </AnimatePresence>
 
-                  {/* Loading Overlay */}
+                  {/* Enhanced Loading Overlay */}
                   {isGenerating && (
-                    <div className="absolute inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-20">
-                      <div className="text-center text-white">
-                        <div className="w-10 h-10 border-4 border-white border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-                        <p className="font-bold tracking-wider text-sm">DESIGNING...</p>
+                    <motion.div 
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="absolute inset-0 bg-gradient-to-br from-black/60 to-black/40 backdrop-blur-sm flex items-center justify-center z-20"
+                    >
+                      <div className="text-center text-white px-6">
+                        {/* Animated spinner */}
+                        <div className="relative w-16 h-16 mx-auto mb-4">
+                          <div className="absolute inset-0 border-4 border-[#C79E48]/30 rounded-full" />
+                          <div className="absolute inset-0 border-4 border-[#C79E48] border-t-transparent rounded-full animate-spin" />
+                          <Wand2 className="absolute inset-0 m-auto w-6 h-6 text-[#C79E48] animate-pulse" />
+                        </div>
+                        
+                        <p className="font-bold tracking-wider text-sm mb-2">CREATING YOUR BOUQUET</p>
+                        <p className="text-xs opacity-75">This may take 5-15 seconds...</p>
+                        
+                        {/* Progress dots */}
+                        <div className="flex gap-1 justify-center mt-3">
+                          <motion.div 
+                            className="w-2 h-2 bg-white rounded-full"
+                            animate={{ opacity: [0.3, 1, 0.3] }}
+                            transition={{ duration: 1.5, repeat: Infinity, delay: 0 }}
+                          />
+                          <motion.div 
+                            className="w-2 h-2 bg-white rounded-full"
+                            animate={{ opacity: [0.3, 1, 0.3] }}
+                            transition={{ duration: 1.5, repeat: Infinity, delay: 0.3 }}
+                          />
+                          <motion.div 
+                            className="w-2 h-2 bg-white rounded-full"
+                            animate={{ opacity: [0.3, 1, 0.3] }}
+                            transition={{ duration: 1.5, repeat: Infinity, delay: 0.6 }}
+                          />
+                        </div>
                       </div>
-                    </div>
+                    </motion.div>
                   )}
                 </div>
 
@@ -525,12 +614,35 @@ const Customize: React.FC = () => {
                   <button
                     onClick={generateBouquetImage}
                     disabled={!step3Complete || isGenerating}
-                    className="flex-1 bg-gray-900 text-white py-3 rounded-xl font-bold text-sm shadow-lg hover:bg-gray-800 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                    className="flex-1 bg-gray-900 text-white py-3 rounded-xl font-bold text-sm shadow-lg hover:bg-gray-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 group relative overflow-hidden"
                   >
-                    <Wand2 className="w-4 h-4 text-[#C79E48]" />
-                    {generatedImage ? "Regenerate" : "Generate Preview"}
+                    {/* Shimmer effect */}
+                    <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+                    
+                    <Wand2 className={`w-4 h-4 text-[#C79E48] ${isGenerating ? 'animate-pulse' : ''}`} />
+                    {isGenerating ? "Generating..." : generatedImage ? "Regenerate Preview" : "Generate AI Preview"}
                   </button>
                 </div>
+
+                {/* Info banner about AI */}
+                {!generatedImage && step3Complete && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4"
+                  >
+                    <div className="flex gap-2">
+                      <Info className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                      <div className="text-xs text-blue-800">
+                        <p className="font-semibold mb-1">AI Preview Feature</p>
+                        <p className="text-blue-700">
+                          We use free AI services to generate previews. 
+                          If it fails, try again or adjust your selections.
+                        </p>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
 
                 {/* Summary Details */}
                 <div className="bg-gray-50 rounded-xl p-4 space-y-3 mb-6 border border-gray-100">
