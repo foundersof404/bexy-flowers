@@ -40,3 +40,9 @@ backend/prepare_*.py
 backend/setup_*.py
 backend/server.py
 backend/test_backend.py
+
+# Large model files (exceed GitHub's 100MB limit)
+models/*.safetensors
+models/*.ckpt
+models/*.pt
+models/*.pth
