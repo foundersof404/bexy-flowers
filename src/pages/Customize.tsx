@@ -171,39 +171,65 @@ const Customize: React.FC = () => {
     try {
       console.log('[Customize] Building enhanced prompt...');
       
-      // Build detailed flower description
-      const flowerDescriptions: string[] = [];
+      // Build COMPREHENSIVE flower description with all details
+      const flowerDetails: string[] = [];
+      const flowerBreakdown: string[] = [];
       let totalFlowerCount = 0;
       
       Object.values(selectedFlowers).forEach(({ flower, quantity }) => {
         totalFlowerCount += quantity;
-        flowerDescriptions.push(`${quantity} ${flower.colorName} ${flower.family}`);
+        // Detailed description: quantity, color, type
+        flowerDetails.push(`${quantity} ${flower.colorName} ${flower.family}`);
+        // Breakdown for arrangement description
+        if (quantity > 1) {
+          flowerBreakdown.push(`${quantity} ${flower.colorName} ${flower.family} blooms`);
+        } else {
+          flowerBreakdown.push(`1 ${flower.colorName} ${flower.family} bloom`);
+        }
       });
 
-      const flowersText = flowerDescriptions.length > 0
-        ? flowerDescriptions.join(' and ')
+      const flowersText = flowerDetails.length > 0
+        ? flowerDetails.join(', ')
         : 'mixed roses';
+      
+      const arrangementText = flowerBreakdown.length > 0
+        ? flowerBreakdown.join(', ')
+        : 'mixed flower arrangement';
 
       const colorName = selectedColor?.name.toLowerCase() || "white";
       const sizeName = selectedSize?.name.toLowerCase() || "medium";
       const packageType = selectedPackage?.type || "box";
+      const packageName = selectedPackage?.name || (packageType === "box" ? "Luxury Box" : "Signature Wrap");
 
-      // Build DETAILED prompt for better AI results
+      // Build ULTRA-DETAILED prompt optimized specifically for Pollinations/Flux
+      // Pollinations responds best to: Specific details + Composition + Branding + Quality
       let fullPrompt = "";
 
       if (packageType === "box") {
-        // Luxury box description with specific details
-        fullPrompt = `A luxury ${colorName} gift box filled with a beautiful flower bouquet. ` +
-                     `The bouquet contains ${flowersText}, expertly arranged. ` +
-                     `${sizeName.charAt(0).toUpperCase() + sizeName.slice(1)} size arrangement. ` +
-                     `View from above showing the ${colorName} box and flowers inside. ` +
-                     `Premium floral gift, elegant presentation, Bexy Flowers style`;
+        // ULTRA-DETAILED box prompt optimized for Pollinations/Flux
+        // Pollinations works best with: Specific numbers + Exact colors + Text placement + Multiple brand mentions
+        fullPrompt = `A premium ${colorName} luxury gift box, ${sizeName} size dimensions, ` +
+                     `filled with a stunning flower bouquet containing exactly ${totalFlowerCount} fresh premium flowers: ${flowersText}, ` +
+                     `expertly arranged in a professional ${sizeName} size floral arrangement featuring ${arrangementText}, ` +
+                     `top-down aerial view, bird's eye perspective, camera positioned directly above, ` +
+                     `showing the elegant ${colorName} box with lid fully open revealing the beautiful flowers arranged inside, ` +
+                     `the box lid displays elegant golden text "Bexy Flowers" in elegant script font, clearly visible and readable, ` +
+                     `soft professional studio lighting from above creating gentle natural shadows, ` +
+                     `diffused natural light, premium floral gift presentation, ` +
+                     `Bexy Flowers luxury brand signature, elegant premium quality, ` +
+                     `commercial product photography, white seamless background, isolated on white`;
       } else {
-        // Elegant wrap description with specific details
-        fullPrompt = `A ${sizeName} elegant flower bouquet with ${flowersText}, ` +
-                     `beautifully wrapped in ${colorName} decorative paper with ribbon. ` +
-                     `Professional florist arrangement, fresh flowers, ` +
-                     `front view, standing upright, premium quality, Bexy Flowers signature style`;
+        // ULTRA-DETAILED wrap prompt optimized for Pollinations/Flux
+        // Pollinations works best with: Specific numbers + Exact colors + Text placement + Multiple brand mentions
+        fullPrompt = `A ${sizeName} size elegant flower bouquet, containing exactly ${totalFlowerCount} fresh premium flowers: ${flowersText}, ` +
+                     `beautifully arranged with ${arrangementText} in a professional florist style, ` +
+                     `wrapped elegantly in ${colorName} decorative paper with matching ${colorName} satin ribbon bow, ` +
+                     `the ribbon features a small elegant tag with golden text "Bexy Flowers" clearly visible and readable, ` +
+                     `front view, standing upright, three-quarter angle view, ` +
+                     `professional florist arrangement, fresh premium flowers, ` +
+                     `soft natural studio lighting, diffused light, ` +
+                     `Bexy Flowers signature style, premium quality luxury floral gift, ` +
+                     `commercial product photography, white seamless background, isolated on white`;
       }
 
       console.log('[Customize] Enhanced Prompt:', fullPrompt);
@@ -216,11 +242,12 @@ const Customize: React.FC = () => {
         id: 'generating-toast'
       });
 
-      // Generate using AI with smart fallback
+      // Generate using AI with Flux model (single high-quality generation)
+      // Using 1024x1024 resolution for best quality with Flux
       const result = await generateImage(fullPrompt, {
-        width: 512,
-        height: 512,
-        enhancePrompt: true, // Enable automatic prompt enhancement
+        width: 1024,
+        height: 1024,
+        enhancePrompt: true, // Enable automatic structured prompt enhancement
       });
 
       console.log('[Customize] Generation successful!');

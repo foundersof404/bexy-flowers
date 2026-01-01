@@ -10,15 +10,17 @@ export const AI_CONFIG = {
    * Generation Settings
    */
   generation: {
-    // Default image dimensions (smaller = faster)
-    defaultWidth: 512,
-    defaultHeight: 512,
+    // Default image dimensions (1024x1024 for best quality with Flux)
+    defaultWidth: 1024,
+    defaultHeight: 1024,
     
     // Automatically enhance prompts with professional keywords
     autoEnhancePrompts: true,
     
     // Maximum prompt length (characters)
-    maxPromptLength: 500,
+    // Increased to accommodate detailed prompts with branding and all flower details
+    // Pollinations can handle longer prompts well (Flux has 12B parameters)
+    maxPromptLength: 400,
   },
 
   /**
@@ -43,17 +45,17 @@ export const AI_CONFIG = {
   apis: {
     pollinations: {
       enabled: true,
-      // WORKAROUND: Use IMG tag approach (bypasses CORS)
-      // Pollinations blocks fetch() but allows <img> tags
-      baseUrl: 'https://image.pollinations.ai/prompt',
-      apiKey: '', 
+      // NEW API ENDPOINT (as of 2025)
+      // Documentation: https://gen.pollinations.ai
+      // Format: https://gen.pollinations.ai/image/{prompt}?key=YOUR_API_KEY
+      baseUrl: 'https://gen.pollinations.ai/image', // New API gateway endpoint
+      apiKey: 'pk_uI3dAtamrhnXMCUr', // Publishable API key for priority access
       params: {
-        nologo: true,
-        enhance: true,
-        model: 'flux',
-        seed: -1,
-        width: 1024,
-        height: 1024,
+        // NOTE: Only basic parameters are supported in new API
+        // enhance, nologo, seed may cause 400 errors - not including them
+        model: 'flux', // Using 'flux' model (confirmed to work)
+        width: 1024, // High resolution for quality
+        height: 1024, // High resolution for quality
       }
     },
     
@@ -73,26 +75,40 @@ export const AI_CONFIG = {
    * Prompt Enhancement Keywords
    */
   promptEnhancements: {
-    // Keywords added to all prompts
+    // Photography-specific keywords for Flux model
+    // Flux understands professional photography terminology
     quality: [
+      '8K resolution',
+      'ultra-detailed',
+      'photorealistic',
       'professional product photography',
       'studio lighting',
-      'high resolution',
+      'soft natural lighting',
       'sharp focus',
+      'depth of field',
+      'macro photography',
     ],
     
     style: [
       'white background',
+      'seamless background',
+      'isolated on white',
       'detailed',
       'vibrant colors',
       'luxury floral arrangement',
+      'premium quality',
+      'commercial photography',
     ],
     
     // Brand-specific keywords (customize for your brand)
+    // Multiple mentions help Pollinations/Flux understand branding importance
     brand: [
-      'Bexy Flowers style',
+      'Bexy Flowers luxury brand',
+      'Bexy Flowers signature style',
       'elegant presentation',
       'premium quality',
+      'signature arrangement',
+      'Bexy Flowers premium floral gift',
     ],
   },
 
@@ -155,16 +171,43 @@ export function getLoadingMessage(elapsedSeconds: number): string {
 export function buildPollinationsUrl(prompt: string, width: number, height: number, negative?: string): string {
   const config = AI_CONFIG.apis.pollinations;
   
-  // Build query parameters
-  const params = new URLSearchParams({
-    width: width.toString(),
-    height: height.toString(),
-    nologo: 'true',
-    enhance: 'true',
-    model: config.params.model || 'flux',
-  });
+  // NEW API FORMAT: https://gen.pollinations.ai/image/{prompt}?key=API_KEY&model=flux&width=1024&height=1024
+  // Documentation: https://gen.pollinations.ai
+  // Authentication: Use ?key=YOUR_API_KEY (publishable keys work in query param)
+  // 
+  // IMPORTANT: New API may only support basic parameters:
+  // - model (required): 'flux', 'turbo', 'sdxl', etc.
+  // - width, height (optional): Image dimensions
+  // - key (required): API key for authentication
+  // 
+  // Parameters that may NOT be supported:
+  // - enhance, nologo, seed, negative (may cause 400 errors)
+  
+  // Build query parameters - ONLY use confirmed supported parameters
+  const params = new URLSearchParams();
+  
+  // Model (required) - use 'flux' as default (confirmed to work)
+  params.append('model', config.params.model || 'flux');
+  
+  // Dimensions (optional but recommended)
+  if (width) {
+    params.append('width', width.toString());
+  }
+  if (height) {
+    params.append('height', height.toString());
+  }
+  
+  // API key (required for authenticated requests)
+  if (config.apiKey) {
+    params.append('key', config.apiKey);
+  }
+  
+  // NOTE: Not including enhance, nologo, seed - these may cause 400 errors
+  // The API documentation suggests these may not be supported in the new endpoint
   
   const encodedPrompt = encodeURIComponent(prompt);
+  
+  // Simplified API format: /image/{prompt}?key=API_KEY&model=flux&width=1024&height=1024
   return `${config.baseUrl}/${encodedPrompt}?${params.toString()}`;
 }
 

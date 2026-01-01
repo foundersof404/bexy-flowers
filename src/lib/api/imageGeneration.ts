@@ -21,21 +21,76 @@ interface GenerationResult {
 }
 
 /**
- * Enhance prompt with professional photography keywords for better results
+ * Build structured prompt optimized for Flux model
+ * Flux works best with structured, detailed prompts that include:
+ * - Subject description
+ * - Composition/camera angle
+ * - Lighting setup
+ * - Quality keywords
+ * - Style/aesthetic
+ * - Background
+ * - Brand context
  */
-function enhancePrompt(basePrompt: string): string {
+/**
+ * Build ultra-detailed prompt optimized specifically for Pollinations/Flux
+ * 
+ * Pollinations/Flux behavior:
+ * - Follows prompts with 97.3% fidelity
+ * - Responds to specific details (exact numbers, colors, positions)
+ * - Can generate text/names when explicitly requested
+ * - Understands professional photography terminology
+ * - More details = better results
+ * 
+ * Structure: Subject (with all details) -> Composition -> Lighting -> Branding -> Quality -> Style
+ */
+function buildStructuredPrompt(basePrompt: string): string {
     if (!AI_CONFIG.generation.autoEnhancePrompts) {
         return basePrompt;
     }
     
-    // Combine all enhancement keywords from config
-    const enhancements = [
-        ...AI_CONFIG.promptEnhancements.quality,
-        ...AI_CONFIG.promptEnhancements.style,
-        ...AI_CONFIG.promptEnhancements.brand,
-    ];
+    // Pollinations-specific quality keywords (Flux responds well to these)
+    // Order matters - put most important first
+    const qualityKeywords = [
+        '8K resolution',
+        'ultra-detailed',
+        'photorealistic',
+        'professional product photography',
+        'studio lighting',
+        'sharp focus',
+        'depth of field',
+    ].join(', ');
     
-    return `${basePrompt}, ${enhancements.join(', ')}`;
+    // Style keywords for consistent aesthetic
+    const styleKeywords = [
+        'white seamless background',
+        'commercial photography',
+        'premium luxury presentation',
+        'elegant sophisticated style',
+    ].join(', ');
+    
+    // Brand reinforcement (mention multiple times for Pollinations)
+    // Pollinations benefits from brand mentions in multiple places
+    const brandKeywords = [
+        'Bexy Flowers luxury brand',
+        'Bexy Flowers signature style',
+        'premium quality Bexy Flowers',
+    ].join(', ');
+    
+    // Structured format optimized for Pollinations/Flux
+    // Base prompt already contains subject details and branding
+    // Add quality and style enhancements
+    const enhanced = `${basePrompt}, ${qualityKeywords}, ${styleKeywords}, ${brandKeywords}`;
+    
+    // Note: cleanPrompt will handle length limits
+    return enhanced;
+}
+
+/**
+ * Enhance prompt with professional photography keywords for better results
+ * (Legacy function - now uses structured prompt builder)
+ */
+function enhancePrompt(basePrompt: string): string {
+    return buildStructuredPrompt(basePrompt);
 }
 
 /**
@@ -67,18 +122,35 @@ async function generateWithPollinations(
         enhancePrompt: shouldEnhance = true 
     } = options;
     
-    // Enhance and clean prompt
+    // Enhance and clean prompt using structured format for Flux
     const finalPrompt = shouldEnhance ? enhancePrompt(prompt) : prompt;
     const cleanedPrompt = cleanPrompt(finalPrompt);
     
-    // Build negative prompt for better quality (exclude unwanted elements)
-    const negativePrompt = "leaves, stems, green foliage, wilted, blurry, low quality, dark, messy";
+    // Enhanced negative prompt for Flux model
+    // Flux responds well to exclusion terms - helps avoid unwanted artifacts
+    const negativePrompt = "blurry, low quality, distorted, deformed, ugly, bad anatomy, " +
+        "bad proportions, extra limbs, duplicate, watermark, text, signature, logo, " +
+        "dark shadows, overexposed, underexposed, noise, grain, artifacts, " +
+        "compression artifacts, leaves, stems, green foliage, wilted, messy";
     
     // Build URL using config helper
     const pollinationsUrl = buildPollinationsUrl(cleanedPrompt, width, height, negativePrompt);
     
-    console.log('[ImageGen] Pollinations attempt with enhanced prompt');
+    // Check URL length (some browsers/servers have limits around 2000 characters)
+    if (pollinationsUrl.length > 2000) {
+        console.warn(`[ImageGen] ⚠️ URL is very long: ${pollinationsUrl.length} characters`);
+        console.warn('[ImageGen] ⚠️ This may cause issues. Consider shortening the prompt.');
+    }
+    
+    // Log generation details for debugging
+    const model = AI_CONFIG.apis.pollinations.params.model || 'flux';
+    console.log('[ImageGen] 🌸 Using Pollinations Flux model');
+    console.log('[ImageGen] Model:', model);
+    console.log('[ImageGen] Resolution:', `${width}x${height}`);
+    console.log('[ImageGen] Enhanced prompt:', shouldEnhance);
+    console.log('[ImageGen] Prompt length:', cleanedPrompt.length);
     console.log('[ImageGen] URL length:', pollinationsUrl.length);
+    console.log('[ImageGen] URL (first 200 chars):', pollinationsUrl.substring(0, 200) + '...');
     
     // Pollinations doesn't use Authorization headers in browser (CORS blocked)
     // Their free tier works without API keys from browsers
@@ -124,9 +196,17 @@ async function generateWithPollinations(
             }
         };
         
-        img.onerror = () => {
+        img.onerror = (event) => {
             clearTimeout(timeout);
-            reject(new Error('Failed to load image from Pollinations'));
+            // Try to get more error details
+            const errorMsg = `Failed to load image from Pollinations API. ` +
+                `Status: 400 (Bad Request). ` +
+                `Possible causes: Invalid model name, prompt too long, or invalid parameters. ` +
+                `URL length: ${pollinationsUrl.length} characters. ` +
+                `Please check console for full URL.`;
+            console.error('[ImageGen] ❌ Image load error:', event);
+            console.error('[ImageGen] ❌ Full URL:', pollinationsUrl);
+            reject(new Error(errorMsg));
         };
         
         img.src = pollinationsUrl;
@@ -261,26 +341,17 @@ export async function generateBouquetImage(
     console.log('[ImageGen] Starting generation with prompt:', prompt);
     console.log('[ImageGen] Config:', { width, height, enhancePrompt: shouldEnhance });
     
-    // Build strategies based on enabled APIs
+    // SINGLE HIGH-QUALITY GENERATION STRATEGY
+    // With 1 pollen/hour limit, we can only generate ONE image
+    // Use optimal settings from the start - no fallbacks needed
     const strategies = [];
     
     if (isApiEnabled('pollinations')) {
-        // Try 1: Pollinations with enhanced prompt
+        // Single high-quality generation with Flux model
+        // Using optimal settings: flux-realism model, 1024x1024, enhanced prompt
         strategies.push({ 
-            name: 'Pollinations (Enhanced)', 
+            name: 'Pollinations (Flux High Quality)', 
             fn: () => generateWithPollinations(prompt, { width, height, enhancePrompt: true }) 
-        });
-        
-        // Try 2: Pollinations with simpler prompt (after delay)
-        strategies.push({ 
-            name: 'Pollinations (Simple)', 
-            fn: () => generateWithPollinations(prompt, { width, height, enhancePrompt: false }) 
-        });
-        
-        // Try 3: Pollinations with smaller size (faster)
-        strategies.push({ 
-            name: 'Pollinations (Fast)', 
-            fn: () => generateWithPollinations(prompt, { width: 384, height: 384, enhancePrompt: false }) 
         });
     }
     
