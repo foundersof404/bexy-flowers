@@ -31,20 +31,6 @@ export const useSignatureCollection = (filters?: {
     gcTime: 10 * 60 * 1000,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
-    // Pre-warm individual items for better navigation performance
-    onSuccess: (data) => {
-      if (data && data.length > 0) {
-        const queryClient = useQueryClient();
-        // Pre-load first 3 signature items (most likely to be viewed)
-        data.slice(0, 3).forEach((item) => {
-          queryClient.prefetchQuery({
-            queryKey: signatureQueryKeys.detail(item.id),
-            queryFn: () => getSignatureItem(item.id),
-            staleTime: 5 * 60 * 1000,
-          });
-        });
-      }
-    },
   });
 };
 

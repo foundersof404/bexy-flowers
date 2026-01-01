@@ -64,12 +64,12 @@ const ScrollToTop = () => {
     const timeoutId = setTimeout(() => {
       resetScrollPosition();
     }, 100);
-
+    
     // Additional check after page fully loads
     const loadTimeoutId = setTimeout(() => {
       resetScrollPosition();
     }, 300);
-
+    
     return () => {
       cancelAnimationFrame(rafId);
       clearTimeout(timeoutId);

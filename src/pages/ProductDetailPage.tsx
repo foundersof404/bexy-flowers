@@ -593,19 +593,19 @@ const ProductDetailPage = () => {
     inStock: !product.is_out_of_stock
   } : {
     // Fallback to mock data if no product found
-    id: id || 'ember-rose-symphony',
-    title: 'Ember Rose Symphony',
-    price: 125.00,
-    description: 'A passionate arrangement of crimson Grand Prix roses and rich burgundy snapdragons, accented with delicate seeded eucalyptus. Each stem is carefully selected to create a dramatic, textural masterpiece that speaks of timeless romance and devotion. Handcrafted by our artisans in Sidon.',
-    imageUrl: bouquet1,
-    images: [
-      bouquet1,
-      bouquet2,
-      bouquet3
-    ],
-    category: 'Premium Bouquets',
-    inStock: true
-  };
+      id: id || 'ember-rose-symphony',
+      title: 'Ember Rose Symphony',
+      price: 125.00,
+      description: 'A passionate arrangement of crimson Grand Prix roses and rich burgundy snapdragons, accented with delicate seeded eucalyptus. Each stem is carefully selected to create a dramatic, textural masterpiece that speaks of timeless romance and devotion. Handcrafted by our artisans in Sidon.',
+      imageUrl: bouquet1,
+      images: [
+        bouquet1,
+        bouquet2,
+        bouquet3
+      ],
+      category: 'Premium Bouquets',
+      inStock: true
+    };
 
   // Local state management
   const [currentImageIndex, setCurrentImageIndex] = useState(0);

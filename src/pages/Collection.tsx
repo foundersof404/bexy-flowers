@@ -35,23 +35,23 @@ const Collection = () => {
 
   // Fetch products using React Query - optimized with caching and pre-loading
   const { data: products, isLoading: loading, error } = useCollectionProducts({ isActive: true });
-
+        
   // Transform products to match Bouquet interface
   const bouquets: Bouquet[] = useMemo(() => {
     if (!products) return [];
 
     return products.map((product) => ({
-      id: product.id,
-      name: product.title,
-      price: product.price,
-      image: encodeImageUrl(product.image_urls?.[0] || ''),
-      description: product.description || '',
-      category: product.category || '',
-      displayCategory: product.display_category || '',
-      featured: product.featured || false,
-      is_out_of_stock: product.is_out_of_stock || false,
-      discount_percentage: product.discount_percentage || null,
-    }));
+          id: product.id,
+          name: product.title,
+          price: product.price,
+          image: encodeImageUrl(product.image_urls?.[0] || ''),
+          description: product.description || '',
+          category: product.category || '',
+          displayCategory: product.display_category || '',
+          featured: product.featured || false,
+          is_out_of_stock: product.is_out_of_stock || false,
+          discount_percentage: product.discount_percentage || null,
+        }));
   }, [products]);
 
   useEffect(() => {
