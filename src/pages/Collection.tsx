@@ -18,10 +18,23 @@ import { useCollectionProducts } from "@/hooks/useCollectionProducts";
 import { useNavigationPredictor } from "@/hooks/useNavigationPredictor";
 import { useEnhancedRoutePrefetch } from "@/hooks/useEnhancedRoutePrefetch";
 
-const DEFAULT_CATEGORY_ID =
-  generatedCategories.find((cat) => cat.id === "red-roses")?.id ||
-  generatedCategories.find((cat) => cat.id !== "all")?.id ||
-  "all";
+// Get default category ID - prefer "red-roses", fallback to first non-"all" category, or "all"
+const getDefaultCategoryId = (): string => {
+  if (!generatedCategories || generatedCategories.length === 0) {
+    return "all";
+  }
+  const redRoses = generatedCategories.find((cat) => cat.id === "red-roses");
+  if (redRoses && redRoses.id) {
+    return redRoses.id;
+  }
+  const firstNonAll = generatedCategories.find((cat) => cat.id !== "all");
+  if (firstNonAll && firstNonAll.id) {
+    return firstNonAll.id;
+  }
+  return "all";
+};
+
+const DEFAULT_CATEGORY_ID: string = getDefaultCategoryId();
 
 const DEFAULT_CATEGORY_ID =
   generatedCategories.find((cat) => cat.id === "red-roses")?.id ||
