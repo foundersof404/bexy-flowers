@@ -401,7 +401,6 @@ All colors MUST be HSL. No rounded corners - sharp and architectural.
 
   /* UltraNavigation component specific styling - Fixed on all devices */
   .ultra-navigation {
-    background-color: transparent !important;
     pointer-events: auto !important;
     position: fixed !important;
     top: 0 !important;
