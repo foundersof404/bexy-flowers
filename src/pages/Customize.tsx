@@ -719,6 +719,205 @@ const Customize: React.FC = () => {
             )}
           </AnimatePresence>
 
+          {/* Mobile Preview Card - Visible on mobile only */}
+          <div className="lg:hidden mt-8">
+            <div className="bg-white rounded-2xl shadow-2xl p-6 border border-[#C79E48]/20 relative overflow-hidden">
+              {/* Decorative Background for Card */}
+              <div className="absolute top-0 right-0 w-32 h-32 bg-[#C79E48]/5 rounded-bl-full -z-0" />
+
+              <div className="relative z-10">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-2xl font-luxury font-bold text-[#C79E48] flex items-center gap-2">
+                    <Wand2 className="w-6 h-6" />
+                    Your Design
+                  </h3>
+                  <div className="bg-[#C79E48]/10 text-[#C79E48] px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
+                    {step3Complete ? 'Ready' : 'Drafting'}
+                  </div>
+                </div>
+
+                {/* Preview Image Area */}
+                <div className="aspect-square rounded-xl bg-gray-50 mb-6 overflow-hidden relative shadow-inner border border-gray-100 group">
+                  <AnimatePresence mode="wait">
+                    {generatedImage ? (
+                      <motion.img
+                        key={generatedImage}
+                        initial={{ opacity: 0, scale: 1.05 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        transition={{ duration: 0.3 }}
+                        src={generatedImage}
+                        alt="AI Generated Preview"
+                        className="w-full h-full object-cover"
+                        onLoad={() => {
+                          console.log('[Customize] Image loaded successfully');
+                          setIsGenerating(false);
+                        }}
+                        onError={(e) => {
+                          console.error('[Customize] Image failed to load');
+                          console.error('[Customize] Image src was:', e.currentTarget.src);
+                          // Fallback to placeholder
+                          e.currentTarget.src = heroBouquetMain;
+                          toast.info("Using placeholder. AI service may be temporarily unavailable.");
+                          setIsGenerating(false);
+                        }}
+                      />
+                    ) : (
+                      <motion.div
+                        key="placeholder"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="w-full h-full flex flex-col items-center justify-center text-gray-300 p-8 text-center"
+                      >
+                        <Wand2 className="w-16 h-16 mb-4 opacity-20" />
+                        <p className="text-sm font-medium opacity-60 mb-2">AI Preview Area</p>
+                        <p className="text-xs opacity-40">
+                          {step3Complete 
+                            ? "Click 'Generate Preview' to see your design" 
+                            : "Complete all steps to generate preview"}
+                        </p>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
+                  {/* Enhanced Loading Overlay */}
+                  {isGenerating && (
+                    <motion.div 
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="absolute inset-0 bg-gradient-to-br from-black/60 to-black/40 backdrop-blur-sm flex items-center justify-center z-20"
+                    >
+                      <div className="text-center text-white px-6">
+                        {/* Animated spinner */}
+                        <div className="relative w-16 h-16 mx-auto mb-4">
+                          <div className="absolute inset-0 border-4 border-[#C79E48]/30 rounded-full" />
+                          <div className="absolute inset-0 border-4 border-[#C79E48] border-t-transparent rounded-full animate-spin" />
+                          <Wand2 className="absolute inset-0 m-auto w-6 h-6 text-[#C79E48] animate-pulse" />
+                        </div>
+                        
+                        <p className="font-bold tracking-wider text-sm mb-2">CREATING YOUR BOUQUET</p>
+                        <p className="text-xs opacity-75">This may take 5-15 seconds...</p>
+                        
+                        {/* Progress dots */}
+                        <div className="flex gap-1 justify-center mt-3">
+                          <motion.div 
+                            className="w-2 h-2 bg-white rounded-full"
+                            animate={{ opacity: [0.3, 1, 0.3] }}
+                            transition={{ duration: 1.5, repeat: Infinity, delay: 0 }}
+                          />
+                          <motion.div 
+                            className="w-2 h-2 bg-white rounded-full"
+                            animate={{ opacity: [0.3, 1, 0.3] }}
+                            transition={{ duration: 1.5, repeat: Infinity, delay: 0.3 }}
+                          />
+                          <motion.div 
+                            className="w-2 h-2 bg-white rounded-full"
+                            animate={{ opacity: [0.3, 1, 0.3] }}
+                            transition={{ duration: 1.5, repeat: Infinity, delay: 0.6 }}
+                          />
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-2 mb-6">
+                  <button
+                    onClick={generateBouquetImage}
+                    disabled={!step3Complete || isGenerating}
+                    className="flex-1 bg-gray-900 text-white py-3 rounded-xl font-bold text-sm shadow-lg hover:bg-gray-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 group relative overflow-hidden"
+                  >
+                    {/* Shimmer effect */}
+                    <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+                    
+                    <Wand2 className={`w-4 h-4 text-[#C79E48] ${isGenerating ? 'animate-pulse' : ''}`} />
+                    {isGenerating ? "Generating..." : generatedImage ? "Regenerate Preview" : "Generate AI Preview"}
+                  </button>
+                  {generatedImage && (
+                    <>
+                      <button
+                        onClick={handleDownloadImage}
+                        className="bg-[#C79E48] text-white py-3 px-4 rounded-xl font-bold text-sm shadow-lg hover:bg-[#b08d45] transition-all flex items-center justify-center gap-2"
+                        title="Download image"
+                      >
+                        <Download className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={handleDownloadAndShareWhatsApp}
+                        className="bg-green-600 text-white py-3 px-4 rounded-xl font-bold text-sm shadow-lg hover:bg-green-700 transition-all flex items-center justify-center gap-2"
+                        title="Download and share to WhatsApp"
+                      >
+                        <MessageCircle className="w-4 h-4" />
+                      </button>
+                    </>
+                  )}
+                </div>
+
+                {/* Info banner about AI */}
+                {!generatedImage && step3Complete && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4"
+                  >
+                    <div className="flex gap-2">
+                      <Info className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                      <div className="text-xs text-blue-800">
+                        <p className="font-semibold mb-1">AI Preview Feature</p>
+                        <p className="text-blue-700">
+                          We use free AI services to generate previews. 
+                          If it fails, try again or adjust your selections.
+                        </p>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* Summary Details */}
+                <div className="bg-gray-50 rounded-xl p-4 space-y-3 mb-6 border border-gray-100">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-500">Base</span>
+                    <span className="font-medium text-gray-900">
+                      {selectedPackage?.name || '-'}
+                      {selectedBoxShape && ` (${selectedBoxShape.name})`}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-500">Size & Color</span>
+                    <span className="font-medium text-gray-900">
+                      {selectedSize?.name || '-'} / {selectedColor?.name || '-'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-500">Flowers</span>
+                    <span className="font-medium text-gray-900 text-right">
+                      {Object.values(selectedFlowers).length > 0
+                        ? Object.values(selectedFlowers).map(f => `${f.quantity}x ${f.flower.name}`).join(', ')
+                        : '-'}
+                    </span>
+                  </div>
+                  <div className="pt-2 border-t border-gray-200 mt-2">
+                    <div className="flex justify-between text-base font-bold text-[#C79E48]">
+                      <span>Total</span>
+                      <span>${totalPrice.toFixed(2)}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  onClick={handleAddToCart}
+                  disabled={!step3Complete}
+                  className="w-full bg-[#C79E48] text-white py-4 rounded-xl font-bold text-lg hover:bg-[#b08d45] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_10px_40px_rgba(199,158,72,0.3)] flex items-center justify-center gap-2 transform active:scale-95"
+                >
+                  <ShoppingCart className="w-5 h-5" />
+                  Add to Cart
+                </button>
+              </div>
+            </div>
+          </div>
+
         </div>
 
         {/* Right Column: Fixed Preview Card - Follows User Scroll */}
