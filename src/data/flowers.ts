@@ -24,30 +24,31 @@ export const flowerFamilies = [
 
 export const flowers: EnhancedFlower[] = [
   // Roses (All colors)
-  { id: "rose-red", name: "Red Rose", price: 3.5, family: "roses", colorName: "red", category: "roses", imageUrl: "/assets/flowers/rose-red.png", description: "Classic red rose" },
-  { id: "rose-white", name: "White Rose", price: 3.5, family: "roses", colorName: "white", category: "roses", imageUrl: "/assets/flowers/rose-white.png", description: "Pure white rose" },
-  { id: "rose-pink", name: "Pink Rose", price: 3.5, family: "roses", colorName: "pink", category: "roses", imageUrl: "/assets/flowers/rose-pink.png", description: "Soft pink rose" },
-  { id: "rose-yellow", name: "Yellow Rose", price: 3.5, family: "roses", colorName: "yellow", category: "roses", imageUrl: "/assets/flowers/rose-yellow.png", description: "Bright yellow rose" },
-  { id: "rose-orange", name: "Orange Rose", price: 3.5, family: "roses", colorName: "orange", category: "roses", imageUrl: "/assets/flowers/rose-orange.png", description: "Vibrant orange rose" },
-  { id: "rose-purple", name: "Purple Rose", price: 3.5, family: "roses", colorName: "purple", category: "roses", imageUrl: "/assets/flowers/rose-purple.png", description: "Mystic purple rose" },
+  { id: "rose-red", name: "Red Rose", price: 3.5, family: "roses", colorName: "red", category: "roses", imageUrl: "/assets/custom/roses/red.png", description: "Classic red rose" },
+  { id: "rose-white", name: "White Rose", price: 3.5, family: "roses", colorName: "white", category: "roses", imageUrl: "/assets/custom/roses/white.png", description: "Pure white rose" },
+  { id: "rose-pink", name: "Pink Rose", price: 3.5, family: "roses", colorName: "pink", category: "roses", imageUrl: "/assets/custom/roses/pink.png", description: "Soft pink rose" },
+  { id: "rose-yellow", name: "Yellow Rose", price: 3.5, family: "roses", colorName: "yellow", category: "roses", imageUrl: "/assets/custom/roses/yellow.png", description: "Bright yellow rose" },
+  { id: "rose-blue", name: "Blue Rose", price: 3.5, family: "roses", colorName: "blue", category: "roses", imageUrl: "/assets/custom/roses/blue.png", description: "Elegant blue rose" },
+  { id: "rose-peach", name: "Peach Rose", price: 3.5, family: "roses", colorName: "peach", category: "roses", imageUrl: "/assets/custom/roses/peach.png", description: "Soft peach rose" },
 
   // Tulips (All colors)
-  { id: "tulip-red", name: "Red Tulip", price: 3.0, family: "tulips", colorName: "red", category: "tulips", imageUrl: "/assets/flowers/tulip-red.png", description: "Romantic red tulip" },
-  { id: "tulip-white", name: "White Tulip", price: 3.0, family: "tulips", colorName: "white", category: "tulips", imageUrl: "/assets/flowers/tulip-white.png", description: "Elegant white tulip" },
-  { id: "tulip-pink", name: "Pink Tulip", price: 3.0, family: "tulips", colorName: "pink", category: "tulips", imageUrl: "/assets/flowers/tulip-pink.png", description: "Playful pink tulip" },
-  { id: "tulip-yellow", name: "Yellow Tulip", price: 3.0, family: "tulips", colorName: "yellow", category: "tulips", imageUrl: "/assets/flowers/tulip-yellow.png", description: "Sunny yellow tulip" },
-  { id: "tulip-purple", name: "Purple Tulip", price: 3.0, family: "tulips", colorName: "purple", category: "tulips", imageUrl: "/assets/flowers/tulip-purple.png", description: "Royal purple tulip" },
+  { id: "tulip-red", name: "Red Tulip", price: 3.0, family: "tulips", colorName: "red", category: "tulips", imageUrl: "/assets/custom/tulips/red.png", description: "Romantic red tulip" },
+  { id: "tulip-white", name: "White Tulip", price: 3.0, family: "tulips", colorName: "white", category: "tulips", imageUrl: "/assets/custom/tulips/white.png", description: "Elegant white tulip" },
+  { id: "tulip-pink", name: "Pink Tulip", price: 3.0, family: "tulips", colorName: "pink", category: "tulips", imageUrl: "/assets/custom/tulips/pink.png", description: "Playful pink tulip" },
+  { id: "tulip-yellow", name: "Yellow Tulip", price: 3.0, family: "tulips", colorName: "yellow", category: "tulips", imageUrl: "/assets/custom/tulips/yellow.png", description: "Sunny yellow tulip" },
+  { id: "tulip-blue", name: "Blue Tulip", price: 3.0, family: "tulips", colorName: "blue", category: "tulips", imageUrl: "/assets/custom/tulips/blue.png", description: "Beautiful blue tulip" },
+  { id: "tulip-peach", name: "Peach Tulip", price: 3.0, family: "tulips", colorName: "peach", category: "tulips", imageUrl: "/assets/custom/tulips/peach.png", description: "Soft peach tulip" },
 
   // Peonies (Pink, Fushia, White)
-  { id: "peony-pink", name: "Pink Peony", price: 6.0, family: "peonies", colorName: "pink", category: "seasonal", imageUrl: "/assets/flowers/peony-pink.png", description: "Lush pink peony" },
-  { id: "peony-fushia", name: "Fushia Peony", price: 6.0, family: "peonies", colorName: "fushia", category: "seasonal", imageUrl: "/assets/flowers/peony-fushia.png", description: "Bold fushia peony" },
-  { id: "peony-white", name: "White Peony", price: 6.0, family: "peonies", colorName: "white", category: "seasonal", imageUrl: "/assets/flowers/peony-white.png", description: "Delicate white peony" },
+  { id: "peony-pink", name: "Pink Peony", price: 6.0, family: "peonies", colorName: "pink", category: "seasonal", imageUrl: "/assets/custom/peonies/pink.png", description: "Lush pink peony" },
+  { id: "peony-fushia", name: "Fushia Peony", price: 6.0, family: "peonies", colorName: "fushia", category: "seasonal", imageUrl: "/assets/custom/peonies/fushia.png", description: "Bold fushia peony" },
+  { id: "peony-white", name: "White Peony", price: 6.0, family: "peonies", colorName: "white", category: "seasonal", imageUrl: "/assets/custom/peonies/white.png", description: "Delicate white peony" },
 
   // Chrysanthemum (White, Yellow, Orange, Purple)
-  { id: "chrys-white", name: "White Chrysanthemum", price: 2.5, family: "chrysanthemum", colorName: "white", category: "seasonal", imageUrl: "/assets/flowers/chrys-white.png", description: "Classic white mum" },
-  { id: "chrys-yellow", name: "Yellow Chrysanthemum", price: 2.5, family: "chrysanthemum", colorName: "yellow", category: "seasonal", imageUrl: "/assets/flowers/chrys-yellow.png", description: "Golden yellow mum" },
-  { id: "chrys-orange", name: "Orange Chrysanthemum", price: 2.5, family: "chrysanthemum", colorName: "orange", category: "seasonal", imageUrl: "/assets/flowers/chrys-orange.png", description: "Warm orange mum" },
-  { id: "chrys-purple", name: "Purple Chrysanthemum", price: 2.5, family: "chrysanthemum", colorName: "purple", category: "seasonal", imageUrl: "/assets/flowers/chrys-purple.png", description: "Deep purple mum" },
+  { id: "chrys-white", name: "White Chrysanthemum", price: 2.5, family: "chrysanthemum", colorName: "white", category: "seasonal", imageUrl: "/assets/custom/chrysanthemum/white.png", description: "Classic white mum" },
+  { id: "chrys-yellow", name: "Yellow Chrysanthemum", price: 2.5, family: "chrysanthemum", colorName: "yellow", category: "seasonal", imageUrl: "/assets/custom/chrysanthemum/yellow.png", description: "Golden yellow mum" },
+  { id: "chrys-orange", name: "Orange Chrysanthemum", price: 2.5, family: "chrysanthemum", colorName: "orange", category: "seasonal", imageUrl: "/assets/custom/chrysanthemum/orange.png", description: "Warm orange mum" },
+  { id: "chrys-purple", name: "Purple Chrysanthemum", price: 2.5, family: "chrysanthemum", colorName: "purple", category: "seasonal", imageUrl: "/assets/custom/chrysanthemum/purple.png", description: "Deep purple mum" },
 
   // Gypsum (All colors)
   { id: "gypsum-white", name: "White Gypsum", price: 2.0, family: "gypsum", colorName: "white", category: "wildflowers", imageUrl: "/assets/flowers/gypsum-white.png", description: "Snowy white baby's breath" },

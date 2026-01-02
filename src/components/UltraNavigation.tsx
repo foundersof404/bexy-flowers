@@ -262,15 +262,17 @@ const UltraNavigation = () => {
           <nav
             ref={navRef}
             className={`ultra-navigation fixed top-0 left-0 right-0 z-[100] transition-all duration-300 ${isScrolled
-              ? 'bg-white shadow-luxury' // Solid white for perfect readability
-              : 'backdrop-blur-none bg-transparent'
+              ? 'shadow-luxury'
+              : ''
               }`}
             style={{
               transition: 'all 0.4s ease-in-out',
               pointerEvents: 'auto', // Ensure navigation is clickable
               position: 'fixed',
               width: '100%',
-              WebkitBackdropFilter: isScrolled ? 'blur(20px)' : 'none', // Force iOS blur
+              backgroundColor: isScrolled ? 'rgba(255, 255, 255, 0.85)' : 'rgba(255, 255, 255, 0.05)',
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)', // Force iOS blur
               // Removed will-change as it causes performance issues with scroll
             }}
           >
