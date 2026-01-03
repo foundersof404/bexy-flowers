@@ -250,10 +250,8 @@ async function executeOperation(request: DatabaseRequest): Promise<any> {
 
   const { operation, table, filters, data, select, orderBy, limit, functionName, functionParams } = request;
 
-  // Validate table name
-  if (!isValidTableName(table)) {
-    throw new Error('Invalid table name');
-  }
+  // Note: Table name validation is done before calling this function
+  // This function assumes valid input
 
   try {
     switch (operation) {
@@ -538,6 +536,33 @@ export const handler: Handler = async (
       };
     }
     
+    // Validate operation type
+    const validOperations = ['select', 'insert', 'update', 'delete', 'rpc'];
+    if (!validOperations.includes(request.operation)) {
+      logSecurityEvent('validation_error', 'warning', event.path, ip, {
+        reason: 'Invalid operation',
+        operation: request.operation,
+      });
+      return {
+        statusCode: 400,
+        headers,
+        body: JSON.stringify({ error: `Invalid operation: ${request.operation}. Valid operations: ${validOperations.join(', ')}` }),
+      };
+    }
+    
+    // Validate table name (prevent SQL injection)
+    if (!isValidTableName(request.table)) {
+      logSecurityEvent('validation_error', 'warning', event.path, ip, {
+        reason: 'Invalid table name',
+        table: request.table,
+      });
+      return {
+        statusCode: 400,
+        headers,
+        body: JSON.stringify({ error: 'Invalid table name. Only alphanumeric characters, underscores, and hyphens are allowed.' }),
+      };
+    }
+    
     // Execute operation
     const result = await executeOperation(request);
     
@@ -561,21 +586,30 @@ export const handler: Handler = async (
     const responseTime = Date.now() - startTime;
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     
+    // Determine if this is a validation error (400) or server error (500)
+    const isValidationError = 
+      errorMessage.includes('Invalid') ||
+      errorMessage.includes('Missing required') ||
+      errorMessage.includes('requires') ||
+      errorMessage.includes('Unsupported operation');
+    
+    const statusCode = isValidationError ? 400 : 500;
+    
     // Log error event
-    logSecurityEvent('error', 'error', event.path, ip, {
+    logSecurityEvent(isValidationError ? 'validation_error' : 'error', isValidationError ? 'warning' : 'error', event.path, ip, {
       operation: request?.operation,
       table: request?.table,
       error: errorMessage,
       responseTime,
     });
-    logPerformanceMetric(event.path, responseTime, 500);
+    logPerformanceMetric(event.path, responseTime, statusCode);
     console.error(`[Database API] ❌ Error: ${errorMessage} - ${responseTime}ms`);
     
     return {
-      statusCode: 500,
+      statusCode,
       headers,
       body: JSON.stringify({
-        error: 'Database operation failed',
+        error: isValidationError ? 'Invalid request' : 'Database operation failed',
         message: errorMessage,
       }),
     };
