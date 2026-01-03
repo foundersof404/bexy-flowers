@@ -146,7 +146,10 @@ function getSecurityHeaders(origin: string): Record<string, string> {
 /**
  * Validate table name (prevent SQL injection)
  */
-function isValidTableName(table: string): boolean {
+function isValidTableName(table: string | undefined): boolean {
+  if (!table || typeof table !== 'string') {
+    return false;
+  }
   // Only allow alphanumeric, underscore, and hyphen
   return /^[a-zA-Z0-9_-]+$/.test(table) && table.length < 100;
 }
@@ -522,17 +525,27 @@ export const handler: Handler = async (
     // Parse request body
     request = JSON.parse(event.body || '{}') as DatabaseRequest;
     
-    // Validate request
-    if (!request.operation || !request.table) {
+    // Validate request - check for missing fields
+    if (!request.operation) {
       logSecurityEvent('validation_error', 'warning', event.path, ip, {
-        reason: 'Missing required fields',
-        operation: request.operation,
-        table: request.table,
+        reason: 'Missing required field: operation',
       });
       return {
         statusCode: 400,
         headers,
-        body: JSON.stringify({ error: 'Missing required fields: operation, table' }),
+        body: JSON.stringify({ error: 'Missing required field: operation' }),
+      };
+    }
+    
+    if (!request.table) {
+      logSecurityEvent('validation_error', 'warning', event.path, ip, {
+        reason: 'Missing required field: table',
+        operation: request.operation,
+      });
+      return {
+        statusCode: 400,
+        headers,
+        body: JSON.stringify({ error: 'Missing required field: table' }),
       };
     }
     
