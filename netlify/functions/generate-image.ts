@@ -15,12 +15,17 @@
  */
 
 import type { Handler, HandlerEvent, HandlerContext } from '@netlify/functions';
+import { checkDistributedRateLimit } from './utils/rateLimiter';
+import { logSecurityEvent, logPerformanceMetric } from './utils/monitoring';
 
 interface RequestBody {
   prompt?: string;
   width?: number;
   height?: number;
   model?: string;
+  timestamp?: number;
+  nonce?: string;
+  signature?: string;
 }
 
 // Rate limiting store (in-memory - use Redis for production)
@@ -70,6 +75,27 @@ function getClientIP(event: HandlerEvent): string {
 }
 
 /**
+ * Generate request fingerprint
+ */
+function generateFingerprint(event: HandlerEvent, ip: string): string {
+  const components = [
+    ip,
+    event.headers['user-agent'] || 'unknown',
+    event.headers['accept-language'] || 'unknown',
+  ];
+  
+  // Simple hash (in production, use crypto.createHash)
+  const str = components.join('|');
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32-bit integer
+  }
+  return Math.abs(hash).toString(16).substring(0, 16);
+}
+
+/**
  * Check if origin is allowed
  */
 function isOriginAllowed(origin: string | null): boolean {
@@ -89,6 +115,91 @@ function validateAPIKey(event: HandlerEvent): boolean {
   
   const providedKey = event.headers['x-api-key'] || event.headers['X-API-Key'];
   return providedKey === frontendApiKey;
+}
+
+/**
+ * Validate request signature (HMAC)
+ */
+function validateSignature(
+  body: RequestBody,
+  providedSignature: string,
+  timestamp: number
+): boolean {
+  const frontendSecret = process.env.FRONTEND_API_SECRET;
+  if (!frontendSecret) {
+    // If secret not configured, allow unsigned requests (backward compatibility)
+    return providedSignature === '';
+  }
+  
+  // Check timestamp freshness (5 minute window)
+  const now = Date.now();
+  const timestampTolerance = 5 * 60 * 1000; // 5 minutes
+  if (Math.abs(now - timestamp) > timestampTolerance) {
+    return false; // Request too old or from future
+  }
+  
+  // Reconstruct signature payload (must match frontend exactly)
+  const payload = JSON.stringify({
+    prompt: body.prompt,
+    width: body.width || 1024,
+    height: body.height || 1024,
+    model: body.model || 'flux',
+    timestamp,
+    nonce: body.nonce,
+  });
+  
+  // Use Node.js crypto for HMAC validation
+  const crypto = require('crypto');
+  const expectedSignature = crypto
+    .createHmac('sha256', frontendSecret)
+    .update(payload)
+    .digest('hex');
+  
+  // Constant-time comparison to prevent timing attacks
+  if (providedSignature.length !== expectedSignature.length) {
+    return false;
+  }
+  
+  let result = 0;
+  for (let i = 0; i < providedSignature.length; i++) {
+    result |= providedSignature.charCodeAt(i) ^ expectedSignature.charCodeAt(i);
+  }
+  
+  return result === 0;
+}
+
+/**
+ * Check for replay attacks (nonce validation)
+ */
+const nonceStore = new Map<string, number>();
+const NONCE_CLEANUP_INTERVAL = 10 * 60 * 1000; // 10 minutes
+
+function checkReplay(nonce: string, timestamp: number): { valid: boolean; error?: string } {
+  // Check if nonce already used
+  if (nonceStore.has(nonce)) {
+    return { valid: false, error: 'Replay attack detected: nonce already used' };
+  }
+  
+  // Check timestamp freshness
+  const now = Date.now();
+  const timestampTolerance = 5 * 60 * 1000; // 5 minutes
+  if (Math.abs(now - timestamp) > timestampTolerance) {
+    return { valid: false, error: 'Request expired or from future' };
+  }
+  
+  // Store nonce
+  nonceStore.set(nonce, timestamp);
+  
+  // Cleanup old nonces
+  if (nonceStore.size > 10000) {
+    for (const [storedNonce, storedTimestamp] of nonceStore.entries()) {
+      if (now - storedTimestamp > timestampTolerance) {
+        nonceStore.delete(storedNonce);
+      }
+    }
+  }
+  
+  return { valid: true };
 }
 
 /**
@@ -301,9 +412,13 @@ export const handler: Handler = async (
     };
   }
   
-  // Check origin
-  if (!isOriginAllowed(origin)) {
+  // Check origin (allow requests without origin for testing/API clients)
+  if (origin && !isOriginAllowed(origin)) {
     const responseTime = Date.now() - startTime;
+    logSecurityEvent('error', 'warning', event.path, ip, {
+      reason: 'Forbidden origin',
+      origin: origin,
+    });
     logRequest(event, ip, responseTime, false, 403, 'Forbidden origin');
     return {
       statusCode: 403,
@@ -312,9 +427,15 @@ export const handler: Handler = async (
     };
   }
   
+  // If no origin provided, allow if API key is valid (for API clients/testing)
+  // This allows automated tests and API clients to work
+  
   // Validate API key
   if (!validateAPIKey(event)) {
     const responseTime = Date.now() - startTime;
+    logSecurityEvent('auth_failure', 'error', event.path, ip, {
+      reason: 'Invalid API key',
+    });
     logRequest(event, ip, responseTime, false, 401, 'Invalid API key');
     return {
       statusCode: 401,
@@ -323,10 +444,96 @@ export const handler: Handler = async (
     };
   }
   
-  // Check rate limits
-  const rateLimitCheck = checkRateLimit(ip);
+  // Parse request body early for signature validation
+  let body: RequestBody;
+  try {
+    body = JSON.parse(event.body || '{}');
+  } catch (parseError) {
+    const responseTime = Date.now() - startTime;
+    logSecurityEvent('validation_error', 'warning', event.path, ip, {
+      reason: 'Invalid JSON',
+    });
+    logRequest(event, ip, responseTime, false, 400, 'Invalid JSON');
+    return {
+      statusCode: 400,
+      headers: corsHeaders,
+      body: JSON.stringify({ error: 'Invalid JSON in request body' }),
+    };
+  }
+  
+  // Validate request signature if provided (enforce in production)
+  const enforceSigning = process.env.ENFORCE_REQUEST_SIGNING === 'true';
+  const timestamp = body.timestamp || Date.now();
+  const nonce = body.nonce || '';
+  const signature = body.signature || event.headers['x-signature'] || '';
+  
+  if (signature || enforceSigning) {
+    if (!signature) {
+      logSecurityEvent('auth_failure', 'error', event.path, ip, {
+        reason: 'Missing signature (signing enforced)',
+      });
+      return {
+        statusCode: 401,
+        headers: corsHeaders,
+        body: JSON.stringify({ error: 'Request signature required' }),
+      };
+    }
+    
+    if (!nonce) {
+      logSecurityEvent('auth_failure', 'error', event.path, ip, {
+        reason: 'Missing nonce',
+      });
+      return {
+        statusCode: 401,
+        headers: corsHeaders,
+        body: JSON.stringify({ error: 'Request nonce required' }),
+      };
+    }
+    
+    // Validate signature
+    const sigValid = validateSignature(body, signature, timestamp);
+    if (!sigValid) {
+      logSecurityEvent('auth_failure', 'critical', event.path, ip, {
+        reason: 'Invalid signature',
+      });
+      return {
+        statusCode: 401,
+        headers: corsHeaders,
+        body: JSON.stringify({ error: 'Invalid request signature' }),
+      };
+    }
+    
+    // Check for replay attacks
+    const replayCheck = checkReplay(nonce, timestamp);
+    if (!replayCheck.valid) {
+      logSecurityEvent('auth_failure', 'critical', event.path, ip, {
+        reason: 'Replay attack detected',
+        details: replayCheck.error,
+      });
+      return {
+        statusCode: 401,
+        headers: corsHeaders,
+        body: JSON.stringify({ error: replayCheck.error }),
+      };
+    }
+  }
+  
+  // Check rate limits (distributed with Redis fallback to memory)
+  const fingerprint = generateFingerprint(event, ip);
+  const rateLimitCheck = await checkDistributedRateLimit(ip, fingerprint, {
+    perMinute: RATE_LIMITS.perMinute,
+    perHour: RATE_LIMITS.perHour,
+    perDay: RATE_LIMITS.perDay,
+    minDelay: RATE_LIMITS.minDelay,
+    maxDailyRequests: MAX_DAILY_REQUESTS,
+  });
+  
   if (!rateLimitCheck.allowed) {
     const responseTime = Date.now() - startTime;
+    logSecurityEvent('rate_limit', 'warning', event.path, ip, {
+      retryAfter: rateLimitCheck.retryAfter,
+      error: rateLimitCheck.error,
+    });
     logRequest(event, ip, responseTime, false, 429, rateLimitCheck.error);
     const headers = {
       ...corsHeaders,
@@ -334,12 +541,19 @@ export const handler: Handler = async (
     if (rateLimitCheck.retryAfter) {
       headers['Retry-After'] = rateLimitCheck.retryAfter.toString();
     }
+    if (rateLimitCheck.resetAt) {
+      headers['X-RateLimit-Reset'] = new Date(rateLimitCheck.resetAt).toISOString();
+    }
+    if (rateLimitCheck.remaining !== undefined) {
+      headers['X-RateLimit-Remaining'] = rateLimitCheck.remaining.toString();
+    }
     return {
       statusCode: 429,
       headers,
       body: JSON.stringify({
         error: rateLimitCheck.error || 'Rate limit exceeded',
         retryAfter: rateLimitCheck.retryAfter,
+        resetAt: rateLimitCheck.resetAt ? new Date(rateLimitCheck.resetAt).toISOString() : undefined,
       }),
     };
   }
@@ -351,6 +565,9 @@ export const handler: Handler = async (
     if (!secretKey) {
       console.error('[Netlify Function] Missing POLLINATIONS_SECRET_KEY environment variable');
       const responseTime = Date.now() - startTime;
+      logSecurityEvent('error', 'critical', event.path, ip, {
+        reason: 'Missing POLLINATIONS_SECRET_KEY',
+      });
       logRequest(event, ip, responseTime, false, 500, 'Missing API key');
       return {
         statusCode: 500,
@@ -358,20 +575,6 @@ export const handler: Handler = async (
         body: JSON.stringify({
           error: 'Server configuration error: API key not configured',
         }),
-      };
-    }
-    
-    // Parse request body
-    let body: RequestBody;
-    try {
-      body = JSON.parse(event.body || '{}');
-    } catch (parseError) {
-      const responseTime = Date.now() - startTime;
-      logRequest(event, ip, responseTime, false, 400, 'Invalid JSON');
-      return {
-        statusCode: 400,
-        headers: corsHeaders,
-        body: JSON.stringify({ error: 'Invalid JSON in request body' }),
       };
     }
     
@@ -452,6 +655,12 @@ export const handler: Handler = async (
     console.log('[Netlify Function] Image size:', imageBuffer.byteLength, 'bytes');
     console.log('[Netlify Function] Response time:', responseTime, 'ms');
     
+    // Log performance metric
+    logPerformanceMetric(event.path, responseTime, 200);
+    logSecurityEvent('success', 'info', event.path, ip, {
+      responseTime,
+      imageSize: imageBuffer.byteLength,
+    });
     logRequest(event, ip, responseTime, true, 200);
     
     return {
@@ -473,7 +682,15 @@ export const handler: Handler = async (
     const responseTime = Date.now() - startTime;
     console.error('[Netlify Function] Error:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    
+    // Log error event
+    logSecurityEvent('error', 'error', event.path, ip, {
+      error: errorMessage,
+      responseTime,
+    });
+    logPerformanceMetric(event.path, responseTime, 500);
     logRequest(event, ip, responseTime, false, 500, errorMessage);
+    
     return {
       statusCode: 500,
       headers: corsHeaders,

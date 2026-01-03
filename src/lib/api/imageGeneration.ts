@@ -154,29 +154,25 @@ async function generateWithPollinationsServerless(
             body: JSON.stringify(signedPayload), // Send signed payload
         });
     } catch (fetchError) {
-        // Network error - fall back to direct API
-        console.warn('[ImageGen] ⚠️ Network error calling serverless function - falling back to direct API');
-        console.warn('[ImageGen] ⚠️ Error:', fetchError);
+        // SECURITY: Never fall back to direct API - keys must not be exposed
+        console.error('[ImageGen] ❌ Network error calling serverless function');
         throw new Error('SERVERLESS_UNAVAILABLE');
     }
     
-    // If serverless function is not available (404 - local development), fall back to direct API
+    // If serverless function is not available (404 - local development)
     if (response.status === 404) {
-        console.warn('[ImageGen] ⚠️ Serverless function not available (404) - falling back to direct API');
-        console.warn('[ImageGen] ⚠️ Note: Using publishable key with rate limits. Deploy to Netlify for unlimited limits.');
-        throw new Error('SERVERLESS_UNAVAILABLE'); // Special error to trigger fallback
+        console.error('[ImageGen] ❌ Serverless function not available (404)');
+        console.error('[ImageGen] ❌ Deploy to Netlify for image generation. Local development requires serverless function.');
+        throw new Error('SERVERLESS_UNAVAILABLE');
     }
     
     if (!response.ok) {
         const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-        console.error('[ImageGen] ❌ Serverless function error:', response.status, errorData);
-        // If it's a 500 error (likely missing env var), fall back to direct API
-        if (response.status === 500) {
-            console.warn('[ImageGen] ⚠️ Serverless function returned 500 - likely missing environment variable');
-            console.warn('[ImageGen] ⚠️ Falling back to direct API. Check Netlify environment variables.');
-            throw new Error('SERVERLESS_UNAVAILABLE');
-        }
-        throw new Error(errorData.error || `Serverless function error: ${response.status}`);
+        // SECURITY: Sanitize error messages - never expose keys or internal details
+        const sanitizedError = errorData.error || 'Image generation failed';
+        console.error('[ImageGen] ❌ Serverless function error:', response.status);
+        // Never fall back to direct API - always fail securely
+        throw new Error(sanitizedError);
     }
     
     const result = await response.json();
@@ -245,10 +241,12 @@ async function generateWithPollinations(
         try {
             return await generateWithPollinationsServerless(prompt, options);
         } catch (error) {
-            // If serverless function is not available (local dev), fall back to direct API
+            // SECURITY: Direct API fallback removed - never expose keys in frontend
+            // If serverless function is unavailable, fail gracefully instead of exposing keys
             if (error instanceof Error && error.message === 'SERVERLESS_UNAVAILABLE') {
-                console.log('[ImageGen] 🔄 Serverless function unavailable - using direct API with publishable key');
-                // Continue to direct API call below
+                console.error('[ImageGen] ❌ Serverless function unavailable');
+                console.error('[ImageGen] ❌ Cannot generate image - serverless function required');
+                throw new Error('Image generation service unavailable. Please try again later or contact support if the issue persists.');
             } else {
                 // Re-throw other errors
                 throw error;

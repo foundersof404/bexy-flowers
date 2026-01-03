@@ -1,0 +1,44 @@
+﻿[
+    {
+        "status":  "pass",
+        "timestamp":  "2026-01-04T00:21:24Z",
+        "details":  "HTTP 200",
+        "test":  "health_endpoint"
+    },
+    {
+        "status":  "pass",
+        "timestamp":  "2026-01-04T00:21:25Z",
+        "details":  "CORS headers found",
+        "test":  "cors_headers"
+    },
+    {
+        "status":  "fail",
+        "timestamp":  "2026-01-04T00:21:26Z",
+        "details":  "The remote server returned an error: (403) Forbidden.",
+        "test":  "image_generation_basic"
+    },
+    {
+        "status":  "fail",
+        "timestamp":  "2026-01-04T00:21:27Z",
+        "details":  "The remote server returned an error: (403) Forbidden.",
+        "test":  "auth_missing_key"
+    },
+    {
+        "status":  "fail",
+        "timestamp":  "2026-01-04T00:21:28Z",
+        "details":  "The remote server returned an error: (403) Forbidden.",
+        "test":  "auth_invalid_key"
+    },
+    {
+        "status":  "fail",
+        "timestamp":  "2026-01-04T00:21:30Z",
+        "details":  "The remote server returned an error: (403) Forbidden.",
+        "test":  "dimension_validation"
+    },
+    {
+        "status":  "fail",
+        "timestamp":  "2026-01-04T00:22:04Z",
+        "details":  "The remote server returned an error: (403) Forbidden.",
+        "test":  "error_malformed_json"
+    }
+]

@@ -49,7 +49,8 @@ export const AI_CONFIG = {
       // Documentation: https://gen.pollinations.ai
       // Format: https://gen.pollinations.ai/image/{prompt}?key=YOUR_API_KEY
       baseUrl: 'https://gen.pollinations.ai/image', // New API gateway endpoint
-      apiKey: 'pk_uI3dAtamrhnXMCUr', // Publishable API key for priority access
+      // SECURITY: API key removed from frontend - only used server-side in Netlify function
+      // Never expose keys in frontend code - they are visible in browser DevTools and bundled JS
       // Use serverless function for unlimited rate limits (secret key)
       // Set to true to use Netlify function instead of direct API calls
       // SECURITY: Secret key is only used server-side, never exposed to frontend
@@ -202,10 +203,9 @@ export function buildPollinationsUrl(prompt: string, width: number, height: numb
     params.append('height', height.toString());
   }
   
-  // API key (required for authenticated requests)
-  if (config.apiKey) {
-    params.append('key', config.apiKey);
-  }
+  // SECURITY: API key removed - never expose keys in frontend
+  // Keys are only used server-side in Netlify function
+  // This function is only used for direct API fallback (disabled in production)
   
   // NOTE: Not including enhance, nologo, seed - these may cause 400 errors
   // The API documentation suggests these may not be supported in the new endpoint
