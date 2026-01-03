@@ -131,38 +131,43 @@ async function generateWithPollinationsServerless(
     console.log('[ImageGen] Prompt length:', cleanedPrompt.length);
     
     // Call Netlify serverless function
-    const response = await fetch(serverlessEndpoint, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            prompt: cleanedPrompt,
-            width,
-            height,
-            model,
-        }),
-    });
-    
-    // If serverless function is not available (404 - local development), fall back to direct API
-    if (response.status === 404) {
-        console.warn('[ImageGen] ⚠️ Serverless function not available (404) - falling back to direct API');
-        console.warn('[ImageGen] ⚠️ Note: Using publishable key with rate limits. Deploy to Netlify for unlimited limits.');
-        // Fall back to direct API call with publishable key
-        throw new Error('SERVERLESS_UNAVAILABLE'); // Special error to trigger fallback
+    let response: Response;
+    try {
+        response = await fetch(serverlessEndpoint, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                prompt: cleanedPrompt,
+                width,
+                height,
+                model,
+            }),
+        });
+    } catch (fetchError) {
+        // Network error - fall back to direct API
+        console.warn('[ImageGen] ⚠️ Network error calling serverless function - falling back to direct API');
+        console.warn('[ImageGen] ⚠️ Error:', fetchError);
+        throw new Error('SERVERLESS_UNAVAILABLE');
     }
     
     // If serverless function is not available (404 - local development), fall back to direct API
     if (response.status === 404) {
         console.warn('[ImageGen] ⚠️ Serverless function not available (404) - falling back to direct API');
         console.warn('[ImageGen] ⚠️ Note: Using publishable key with rate limits. Deploy to Netlify for unlimited limits.');
-        // Fall back to direct API call with publishable key
         throw new Error('SERVERLESS_UNAVAILABLE'); // Special error to trigger fallback
     }
     
     if (!response.ok) {
         const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-        console.error('[ImageGen] ❌ Serverless function error:', errorData);
+        console.error('[ImageGen] ❌ Serverless function error:', response.status, errorData);
+        // If it's a 500 error (likely missing env var), fall back to direct API
+        if (response.status === 500) {
+            console.warn('[ImageGen] ⚠️ Serverless function returned 500 - likely missing environment variable');
+            console.warn('[ImageGen] ⚠️ Falling back to direct API. Check Netlify environment variables.');
+            throw new Error('SERVERLESS_UNAVAILABLE');
+        }
         throw new Error(errorData.error || `Serverless function error: ${response.status}`);
     }
     
