@@ -50,6 +50,11 @@ export const AI_CONFIG = {
       // Format: https://gen.pollinations.ai/image/{prompt}?key=YOUR_API_KEY
       baseUrl: 'https://gen.pollinations.ai/image', // New API gateway endpoint
       apiKey: 'pk_uI3dAtamrhnXMCUr', // Publishable API key for priority access
+      // Use serverless function for unlimited rate limits (secret key)
+      // Set to true to use Netlify function instead of direct API calls
+      // SECURITY: Secret key is only used server-side, never exposed to frontend
+      useServerless: true, // Enabled: Uses serverless function with secret key (unlimited rate limits)
+      serverlessEndpoint: '/.netlify/functions/generate-image', // Netlify function endpoint
       params: {
         // NOTE: Only basic parameters are supported in new API
         // enhance, nologo, seed may cause 400 errors - not including them
