@@ -131,19 +131,27 @@ async function generateWithPollinationsServerless(
     console.log('[ImageGen] Prompt length:', cleanedPrompt.length);
     
     // Call Netlify serverless function
+    // SECURITY: Include API key and signed request for authentication
+    const frontendApiKey = import.meta.env.VITE_FRONTEND_API_KEY;
+    
+    // Create signed request payload (prevents replay attacks)
+    const { createSignedRequest } = await import('./requestSigning');
+    const signedPayload = await createSignedRequest({
+        prompt: cleanedPrompt,
+        width,
+        height,
+        model,
+    });
+    
     let response: Response;
     try {
         response = await fetch(serverlessEndpoint, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                ...(frontendApiKey && { 'X-API-Key': frontendApiKey }), // Include API key if configured
             },
-            body: JSON.stringify({
-                prompt: cleanedPrompt,
-                width,
-                height,
-                model,
-            }),
+            body: JSON.stringify(signedPayload), // Send signed payload
         });
     } catch (fetchError) {
         // Network error - fall back to direct API
