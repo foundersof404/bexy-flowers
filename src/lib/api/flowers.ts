@@ -1,4 +1,4 @@
-import { supabase } from '../supabase';
+import { db } from './database-client';
 import { uploadImage, deleteImage, extractPathFromUrl } from '../supabase-storage';
 import type { Database } from '../supabase';
 
@@ -200,16 +200,10 @@ export async function getFlowerColors(flowerId: string): Promise<FlowerColor[]> 
 export async function createFlowerColor(
   color: Omit<FlowerColorInsert, 'id' | 'created_at' | 'updated_at'>
 ): Promise<FlowerColor> {
-  const { data, error } = await supabase
-    .from('flower_colors')
-    .insert(color)
-    .select()
-    .single();
-
-  if (error) {
-    throw new Error(`Failed to create flower color: ${error.message}`);
+  const data = await db.insert<FlowerColor>('flower_colors', color);
+  if (!data) {
+    throw new Error('Failed to create flower color');
   }
-
   return data;
 }
 
@@ -217,31 +211,17 @@ export async function createFlowerColor(
  * Update a flower color
  */
 export async function updateFlowerColor(id: string, updates: FlowerColorUpdate): Promise<FlowerColor> {
-  const { data, error } = await supabase
-    .from('flower_colors')
-    .update(updates)
-    .eq('id', id)
-    .select()
-    .single();
-
-  if (error) {
-    throw new Error(`Failed to update flower color: ${error.message}`);
+  const data = await db.update<FlowerColor>('flower_colors', { id }, updates);
+  if (!data || data.length === 0) {
+    throw new Error('Failed to update flower color');
   }
-
-  return data;
+  return data[0];
 }
 
 /**
  * Delete a flower color
  */
 export async function deleteFlowerColor(id: string): Promise<void> {
-  const { error } = await supabase
-    .from('flower_colors')
-    .delete()
-    .eq('id', id);
-
-  if (error) {
-    throw new Error(`Failed to delete flower color: ${error.message}`);
-  }
+  await db.delete('flower_colors', { id });
 }
 

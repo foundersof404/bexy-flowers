@@ -1,9 +1,11 @@
 /**
- * Visitor Cart API
- * Handles database operations for visitor cart items
+ * Visitor Cart API (Migrated to Database Proxy)
+ * 
+ * SECURITY: Uses backend API proxy instead of direct Supabase access
+ * Database provider (Supabase) is completely hidden from frontend
  */
 
-import { db } from './database-client';
+import { db, isNull } from './database-client';
 import { getVisitorId } from '../visitor';
 import { CartItem } from '@/types/cart';
 
@@ -31,14 +33,16 @@ async function ensureVisitor(): Promise<void> {
   const visitorId = getVisitorId();
   
   try {
-    // Try to call the database function to get or create visitor
+    // Try RPC function first
     try {
       await db.rpc('get_or_create_visitor', {
         p_visitor_id: visitorId
       });
     } catch (rpcError) {
-      // If function doesn't exist, try direct insert/update via database proxy
-      const existing = await db.selectOne('visitors', { visitor_id: visitorId });
+      // If function doesn't exist, try direct insert/update
+      const existing = await db.selectOne<{ id: string }>('visitors', {
+        visitor_id: visitorId
+      });
 
       if (!existing) {
         await db.insert('visitors', {
@@ -47,9 +51,10 @@ async function ensureVisitor(): Promise<void> {
           last_visit_at: new Date().toISOString()
         });
       } else {
-        await db.update('visitors', { visitor_id: visitorId }, {
-          last_visit_at: new Date().toISOString()
-        });
+        await db.update('visitors', 
+          { id: existing.id },
+          { last_visit_at: new Date().toISOString() }
+        );
       }
     }
   } catch (error) {
@@ -65,7 +70,7 @@ function transformCartItem(item: VisitorCartItem): CartItem {
   return {
     id: item.product_id,
     title: item.title,
-    price: Number(item.price),
+    price: item.price,
     image: item.image,
     quantity: item.quantity,
     size: item.size || undefined,
@@ -79,7 +84,7 @@ function transformCartItem(item: VisitorCartItem): CartItem {
 /**
  * Transform CartItem to database format
  */
-function transformToDbFormat(item: CartItem, visitorId: string) {
+function transformToDbFormat(item: CartItem, visitorId: string): Partial<VisitorCartItem> {
   return {
     visitor_id: visitorId,
     product_id: String(item.id),
@@ -96,21 +101,21 @@ function transformToDbFormat(item: CartItem, visitorId: string) {
 }
 
 /**
- * Get all cart items for the current visitor
+ * Get cart items for the current visitor
  */
 export async function getVisitorCart(): Promise<CartItem[]> {
   try {
     await ensureVisitor();
     const visitorId = getVisitorId();
 
-    const data = await db.select<VisitorCartItem>('visitor_carts', {
+    const items = await db.select<VisitorCartItem>('visitor_carts', {
       filters: { visitor_id: visitorId },
       orderBy: { column: 'created_at', ascending: false }
     });
 
-    return (data || []).map(transformCartItem);
+    return items.map(transformCartItem);
   } catch (error) {
-    console.error('Error in getVisitorCart:', error);
+    console.error('Error getting visitor cart:', error);
     return [];
   }
 }
@@ -125,16 +130,16 @@ export async function upsertVisitorCartItem(item: CartItem): Promise<boolean> {
 
     const dbItem = transformToDbFormat(item, visitorId);
 
-    // Check if item exists (handle NULL values properly)
-    const filters: any = {
+    // Build filters for finding existing item
+    const filters: Record<string, any> = {
       visitor_id: visitorId,
-      product_id: String(item.id)
+      product_id: String(item.id),
     };
     
     if (item.size) {
       filters.size = item.size;
     } else {
-      filters.size = null;
+      filters.size = null; // Use isNull helper for null checks
     }
     
     if (item.personalNote) {
@@ -143,11 +148,18 @@ export async function upsertVisitorCartItem(item: CartItem): Promise<boolean> {
       filters.personal_note = null;
     }
     
-    const existing = await db.selectOne<VisitorCartItem>('visitor_carts', filters);
+    // Check if item exists
+    const existing = await db.selectOne<{ id: string; quantity: number }>(
+      'visitor_carts',
+      filters,
+      { select: 'id, quantity' }
+    );
 
     if (existing) {
       // Update existing item
-      await db.update('visitor_carts', { id: existing.id }, {
+      await db.update('visitor_carts',
+        { id: existing.id },
+        {
           quantity: item.quantity,
           price: item.price,
           title: item.title,
@@ -155,7 +167,8 @@ export async function upsertVisitorCartItem(item: CartItem): Promise<boolean> {
           description: item.description || null,
           accessories: item.accessories || null,
           gift_info: item.giftInfo || null,
-      });
+        }
+      );
     } else {
       // Insert new item
       await db.insert('visitor_carts', dbItem);
@@ -177,71 +190,30 @@ export async function removeVisitorCartItem(
   personalNote?: string
 ): Promise<boolean> {
   try {
+    await ensureVisitor();
     const visitorId = getVisitorId();
 
-    const filters: any = {
+    const filters: Record<string, any> = {
       visitor_id: visitorId,
-      product_id: String(productId)
+      product_id: String(productId),
     };
-
-    if (size !== undefined) {
+    
+    if (size) {
       filters.size = size;
     } else {
       filters.size = null;
     }
-
-    if (personalNote !== undefined) {
+    
+    if (personalNote) {
       filters.personal_note = personalNote;
     } else {
       filters.personal_note = null;
     }
 
     await db.delete('visitor_carts', filters);
-
     return true;
   } catch (error) {
-    console.error('Error in removeVisitorCartItem:', error);
-    return false;
-  }
-}
-
-/**
- * Update cart item quantity for the current visitor
- */
-export async function updateVisitorCartItemQuantity(
-  productId: string | number,
-  quantity: number,
-  size?: string,
-  personalNote?: string
-): Promise<boolean> {
-  try {
-    const visitorId = getVisitorId();
-
-    const filters: any = {
-      visitor_id: visitorId,
-      product_id: String(productId)
-    };
-
-    if (size !== undefined && size !== null) {
-      filters.size = size;
-    } else {
-      filters.size = null;
-    }
-
-    if (personalNote !== undefined && personalNote !== null) {
-      filters.personal_note = personalNote;
-    } else {
-      filters.personal_note = null;
-    }
-
-    const existing = await db.selectOne<VisitorCartItem>('visitor_carts', filters);
-    if (existing) {
-      await db.update('visitor_carts', { id: existing.id }, { quantity });
-    }
-
-    return true;
-  } catch (error) {
-    console.error('Error in updateVisitorCartItemQuantity:', error);
+    console.error('Error removing cart item:', error);
     return false;
   }
 }
@@ -251,35 +223,36 @@ export async function updateVisitorCartItemQuantity(
  */
 export async function clearVisitorCart(): Promise<boolean> {
   try {
+    await ensureVisitor();
     const visitorId = getVisitorId();
 
     await db.delete('visitor_carts', { visitor_id: visitorId });
-
     return true;
   } catch (error) {
-    console.error('Error in clearVisitorCart:', error);
+    console.error('Error clearing cart:', error);
     return false;
   }
 }
 
 /**
- * Sync local cart items to database
+ * Sync cart items to database (bulk operation)
  */
 export async function syncCartToDatabase(items: CartItem[]): Promise<void> {
   try {
     await ensureVisitor();
     const visitorId = getVisitorId();
 
-    // Delete all existing items for this visitor
-    await db.delete('visitor_carts', { visitor_id: visitorId });
+    // Clear existing cart
+    await clearVisitorCart();
 
-    // Insert all current items
+    // Insert all items
     if (items.length > 0) {
       const dbItems = items.map(item => transformToDbFormat(item, visitorId));
       await db.insert('visitor_carts', dbItems);
     }
   } catch (error) {
     console.error('Error syncing cart to database:', error);
+    throw error;
   }
 }
 

@@ -1363,12 +1363,15 @@ const ImageGallery = () => {
   const touchStartX = useRef<number | null>(null);
   const touchEndX = useRef<number | null>(null);
 
-  // Load wedding images from Supabase
+  // Load wedding images using React Query hook
+  const weddingCreationsQuery = useWeddingCreations({
+    isActive: true // Only get active wedding creations
+  });
+
+  // Process wedding creations data
   useEffect(() => {
-    const loadWeddingImages = async () => {
-      try {
-        setLoadingImages(true);
-        const creations = await getActiveWeddingCreations();
+    if (weddingCreationsQuery.data) {
+      const creations = weddingCreationsQuery.data;
         console.log('Loaded wedding creations:', creations.length, creations);
 
         // Filter out empty/null/undefined image URLs and encode valid ones
@@ -1384,17 +1387,13 @@ const ImageGallery = () => {
 
         console.log('Final wedding image URLs:', imageUrls.length, imageUrls);
         setWeddingImages(imageUrls);
-      } catch (error) {
-        console.error('Failed to load wedding images:', error);
-        // Fallback to empty array
+    } else if (weddingCreationsQuery.error) {
+      console.error('Failed to load wedding images:', weddingCreationsQuery.error);
         setWeddingImages([]);
-      } finally {
-        setLoadingImages(false);
       }
-    };
 
-    loadWeddingImages();
-  }, []);
+    setLoadingImages(weddingCreationsQuery.isLoading);
+  }, [weddingCreationsQuery.data, weddingCreationsQuery.error, weddingCreationsQuery.isLoading]);
 
   useEffect(() => {
     const ctx = gsap.context(() => {

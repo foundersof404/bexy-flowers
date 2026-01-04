@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
+import { collectionQueryKeys } from '@/hooks/useCollectionProducts';
 import { Button } from '@/components/ui/button';
 import { ShoppingCart, Heart, Eye, Crown, ArrowUpRight } from 'lucide-react';
 import { useCartWithToast } from '@/hooks/useCartWithToast';
@@ -14,7 +16,7 @@ import { encodeImageUrl } from '@/lib/imageUtils';
 gsap.registerPlugin(ScrollTrigger);
 
 const UltraFeaturedBouquets = () => {
-  const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { addToCart } = useCartWithToast();
   const isMobile = useIsMobile();
   const sectionRef = useRef<HTMLElement>(null);
@@ -324,8 +326,30 @@ const UltraFeaturedBouquets = () => {
             ];
             
             return (
-            <motion.div
+            <Link
               key={bouquet.id}
+              to={bouquet.id ? `/product/${bouquet.id}` : '#'}
+              onMouseEnter={() => {
+                if (bouquet.id) {
+                  // Prefetch product data on hover for instant navigation
+                  queryClient.prefetchQuery({
+                    queryKey: collectionQueryKeys.detail(bouquet.id),
+                    queryFn: async () => {
+                      const { getCollectionProduct } = await import('@/lib/api/collection-products');
+                      return getCollectionProduct(bouquet.id);
+                    },
+                    staleTime: 5 * 60 * 1000,
+                  });
+                }
+              }}
+              onClick={(e) => {
+                if (!bouquet.id) {
+                  e.preventDefault();
+                }
+              }}
+              className="block w-full"
+            >
+            <motion.div
               ref={(el) => {
                 if (el) cardsRef.current[index] = el;
               }}
@@ -338,23 +362,6 @@ const UltraFeaturedBouquets = () => {
                 ease: [0.23, 1, 0.32, 1]
               }}
               viewport={{ once: true }}
-              onClick={() => {
-                if (bouquet.id && bouquet.productData) {
-                  navigate(`/product/${bouquet.id}`, {
-                    state: {
-                      product: {
-                        id: bouquet.productData.id,
-                        title: bouquet.productData.title || bouquet.name,
-                        price: bouquet.productData.price || parseFloat(bouquet.price.replace('$', '')) || 0,
-                        description: bouquet.productData.description || bouquet.description,
-                        imageUrl: bouquet.image,
-                        images: bouquet.productData.image_urls || [bouquet.image],
-                        category: bouquet.productData.category || 'Signature Collection'
-                      }
-                    }
-                  });
-                }
-              }}
             >
                  {/* Card structure with fully rounded corners */}
                  <div 
@@ -453,21 +460,7 @@ const UltraFeaturedBouquets = () => {
                       whileTap={{ scale: 0.9 }}
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (bouquet.id && bouquet.productData) {
-                        navigate(`/product/${bouquet.id}`, {
-                          state: {
-                            product: {
-                              id: bouquet.productData.id,
-                              title: bouquet.productData.title || bouquet.name,
-                              price: bouquet.productData.price || parseFloat(bouquet.price.replace('$', '')) || 0,
-                              description: bouquet.productData.description || bouquet.description,
-                              imageUrl: bouquet.image,
-                              images: bouquet.productData.image_urls || [bouquet.image],
-                              category: bouquet.productData.category || 'Signature Collection'
-                            }
-                          }
-                        });
-                      }
+                      // Navigation is handled by the parent Link component
                     }}
                   >
                           <ArrowUpRight color="#fff" size={22} strokeWidth={1.8} />
@@ -543,6 +536,7 @@ const UltraFeaturedBouquets = () => {
                 </div>
               </div>
             </motion.div>
+            </Link>
              );
            })}
             </div>

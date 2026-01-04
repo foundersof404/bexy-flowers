@@ -106,6 +106,126 @@ function cleanPrompt(prompt: string): string {
 }
 
 /**
+ * Generate image using Pollinations API via serverless function (Unlimited rate limits)
+ */
+async function generateWithPollinationsServerless(
+    prompt: string,
+    options: GenerationOptions
+): Promise<GenerationResult> {
+    const { 
+        width = AI_CONFIG.generation.defaultWidth, 
+        height = AI_CONFIG.generation.defaultHeight, 
+        enhancePrompt: shouldEnhance = true 
+    } = options;
+    
+    // Enhance and clean prompt using structured format for Flux
+    const finalPrompt = shouldEnhance ? enhancePrompt(prompt) : prompt;
+    const cleanedPrompt = cleanPrompt(finalPrompt);
+    
+    const model = AI_CONFIG.apis.pollinations.params.model || 'flux';
+    const serverlessEndpoint = AI_CONFIG.apis.pollinations.serverlessEndpoint || '/.netlify/functions/generate-image';
+    
+    console.log('[ImageGen] 🚀 Using Pollinations via serverless function (unlimited rate limits)');
+    console.log('[ImageGen] Model:', model);
+    console.log('[ImageGen] Resolution:', `${width}x${height}`);
+    console.log('[ImageGen] Prompt length:', cleanedPrompt.length);
+    
+    // Call Netlify serverless function
+    // SECURITY: Include API key and signed request for authentication
+    const frontendApiKey = import.meta.env.VITE_FRONTEND_API_KEY;
+    
+    // Create signed request payload (prevents replay attacks)
+    const { createSignedRequest } = await import('./requestSigning');
+    const signedPayload = await createSignedRequest({
+        prompt: cleanedPrompt,
+        width,
+        height,
+        model,
+    });
+    
+    let response: Response;
+    try {
+        response = await fetch(serverlessEndpoint, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                ...(frontendApiKey && { 'X-API-Key': frontendApiKey }), // Include API key if configured
+            },
+            body: JSON.stringify(signedPayload), // Send signed payload
+        });
+    } catch (fetchError) {
+        // SECURITY: Never fall back to direct API - keys must not be exposed
+        console.error('[ImageGen] ❌ Network error calling serverless function');
+        throw new Error('SERVERLESS_UNAVAILABLE');
+    }
+    
+    // If serverless function is not available (404 - local development)
+    if (response.status === 404) {
+        console.error('[ImageGen] ❌ Serverless function not available (404)');
+        console.error('[ImageGen] ❌ Deploy to Netlify for image generation. Local development requires serverless function.');
+        throw new Error('SERVERLESS_UNAVAILABLE');
+    }
+    
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        // SECURITY: Sanitize error messages - never expose keys or internal details
+        const sanitizedError = errorData.error || 'Image generation failed';
+        console.error('[ImageGen] ❌ Serverless function error:', response.status);
+        // Never fall back to direct API - always fail securely
+        throw new Error(sanitizedError);
+    }
+    
+    const result = await response.json();
+    
+    if (!result.success || !result.imageUrl) {
+        throw new Error(result.error || 'Failed to generate image');
+    }
+    
+    // Convert base64 data URL to blob URL
+    const img = new Image();
+    const blobPromise = new Promise<Blob>((resolve, reject) => {
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                reject(new Error('Failed to get canvas context'));
+                return;
+            }
+            ctx.drawImage(img, 0, 0);
+            canvas.toBlob((blob) => {
+                if (blob) {
+                    resolve(blob);
+                } else {
+                    reject(new Error('Failed to convert canvas to blob'));
+                }
+            }, 'image/png');
+        };
+        img.onerror = () => reject(new Error('Failed to load image from data URL'));
+        img.src = result.imageUrl;
+    });
+    
+    const blob = await blobPromise;
+    
+    // Validate blob size
+    const minSize = AI_CONFIG.validation.minImageSize;
+    if (blob.size < minSize) {
+        console.warn(`[ImageGen] ⚠️ Image too small: ${(blob.size / 1024).toFixed(1)}KB`);
+        throw new Error(`Received invalid image (size: ${(blob.size / 1024).toFixed(1)}KB)`);
+    }
+    
+    console.log(`[ImageGen] ✅ Valid image: ${result.width}x${result.height}, ${(blob.size / 1024).toFixed(1)}KB`);
+    
+    // Create blob URL
+    const localUrl = URL.createObjectURL(blob);
+    
+    console.log('[ImageGen] ✅ Pollinations serverless successful, blob URL:', localUrl);
+    
+    return { imageUrl: localUrl, source: 'pollinations' };
+}
+
+/**
  * Generate image using Pollinations API (Primary method)
  */
 async function generateWithPollinations(
@@ -114,6 +234,24 @@ async function generateWithPollinations(
 ): Promise<GenerationResult> {
     if (!isApiEnabled('pollinations')) {
         throw new Error('Pollinations API is disabled in config');
+    }
+    
+    // Check if serverless mode is enabled
+    if (AI_CONFIG.apis.pollinations.useServerless) {
+        try {
+            return await generateWithPollinationsServerless(prompt, options);
+        } catch (error) {
+            // SECURITY: Direct API fallback removed - never expose keys in frontend
+            // If serverless function is unavailable, fail gracefully instead of exposing keys
+            if (error instanceof Error && error.message === 'SERVERLESS_UNAVAILABLE') {
+                console.error('[ImageGen] ❌ Serverless function unavailable');
+                console.error('[ImageGen] ❌ Cannot generate image - serverless function required');
+                throw new Error('Image generation service unavailable. Please try again later or contact support if the issue persists.');
+            } else {
+                // Re-throw other errors
+                throw error;
+            }
+        }
     }
     
     const { 
@@ -144,7 +282,7 @@ async function generateWithPollinations(
     
     // Log generation details for debugging
     const model = AI_CONFIG.apis.pollinations.params.model || 'flux';
-    console.log('[ImageGen] 🌸 Using Pollinations Flux model');
+    console.log('[ImageGen] 🌸 Using Pollinations Flux model (direct API call)');
     console.log('[ImageGen] Model:', model);
     console.log('[ImageGen] Resolution:', `${width}x${height}`);
     console.log('[ImageGen] Enhanced prompt:', shouldEnhance);
@@ -342,7 +480,7 @@ export async function generateBouquetImage(
     console.log('[ImageGen] Config:', { width, height, enhancePrompt: shouldEnhance });
     
     // SINGLE HIGH-QUALITY GENERATION STRATEGY
-    // With 1 pollen/hour limit, we can only generate ONE image
+    // With serverless function + secret key: UNLIMITED rate limits
     // Use optimal settings from the start - no fallbacks needed
     const strategies = [];
     

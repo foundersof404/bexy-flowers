@@ -6,7 +6,9 @@ import { Heart, Eye, ShoppingCart } from "lucide-react";
 import { useCartWithToast } from "@/hooks/useCartWithToast";
 import { useFavorites } from "@/contexts/FavoritesContext";
 import { useFlyingHeart } from "@/contexts/FlyingHeartContext";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
+import { collectionQueryKeys } from "@/hooks/useCollectionProducts";
 import { OptimizedImage } from "@/components/OptimizedImage";
 import type { Bouquet } from "@/types/bouquet";
 
@@ -56,7 +58,7 @@ const BouquetCard = memo(({
   const { addToCart } = useCartWithToast();
   const { toggleFavorite, isFavorite } = useFavorites();
   const { triggerFlyingHeart } = useFlyingHeart();
-  const navigate = useNavigate();
+  const queryClient = useQueryClient();
   
   const tags = getBouquetTags(bouquet);
   const isFav = isFavorite(bouquet.id);
@@ -74,34 +76,34 @@ const BouquetCard = memo(({
       className="group cursor-pointer"
     >
       {/* Premium Luxury Card */}
-      <motion.div 
-        className="w-full rounded-2xl md:rounded-3xl overflow-hidden relative"
-        style={{
-          background: 'linear-gradient(180deg, #ffffff 0%, #f8f5f1 100%)',
-          border: '1px solid rgba(255, 255, 255, 0.2)',
-          // ⚡ PERFORMANCE: CSS containment for better scroll performance
-          contain: 'layout style paint',
-          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)'
-        }}
-        whileHover={{ scale: 1.02, y: -4 }}
-        whileTap={{ scale: 0.98 }}
-        transition={{ duration: 0.3, ease: "easeOut" }}
-        onClick={() => {
-          navigate(`/product/${bouquet.id}`, { 
-            state: { 
-              product: {
-                id: bouquet.id,
-                title: bouquet.name,
-                price: bouquet.price,
-                description: bouquet.description,
-                imageUrl: bouquet.image,
-                images: [bouquet.image, bouquet.image, bouquet.image],
-                category: bouquet.displayCategory || 'Premium Bouquets'
-              }
-            }
+      <Link
+        to={`/product/${bouquet.id}`}
+        onMouseEnter={() => {
+          // Prefetch product data on hover for instant navigation
+          queryClient.prefetchQuery({
+            queryKey: collectionQueryKeys.detail(bouquet.id),
+            queryFn: async () => {
+              const { getCollectionProduct } = await import('@/lib/api/collection-products');
+              return getCollectionProduct(bouquet.id);
+            },
+            staleTime: 5 * 60 * 1000,
           });
         }}
+        className="block"
       >
+        <motion.div 
+          className="w-full rounded-2xl md:rounded-3xl overflow-hidden relative"
+          style={{
+            background: 'linear-gradient(180deg, #ffffff 0%, #f8f5f1 100%)',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            // ⚡ PERFORMANCE: CSS containment for better scroll performance
+            contain: 'layout style paint',
+            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)'
+          }}
+          whileHover={{ scale: 1.02, y: -4 }}
+          whileTap={{ scale: 0.98 }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
+        >
         {/* Image Section */}
         <motion.div 
           className="relative overflow-hidden aspect-square"
@@ -404,6 +406,7 @@ const BouquetCard = memo(({
           </div>
         </motion.div>
       </motion.div>
+      </Link>
     </motion.div>
   );
 });

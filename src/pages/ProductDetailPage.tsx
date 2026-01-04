@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useParams, useLocation, useNavigate } from 'react-router-dom';
+import { useState, useEffect, useMemo } from 'react';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ShoppingCart,
@@ -19,8 +19,9 @@ import { useFavorites } from '@/contexts/FavoritesContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import UltraNavigation from '@/components/UltraNavigation';
 import BackToTop from '@/components/BackToTop';
-import { generatedBouquets } from '@/data/generatedBouquets';
-import { useCollectionProduct } from '@/hooks/useCollectionProducts';
+import { useCollectionProduct, useCollectionProducts } from '@/hooks/useCollectionProducts';
+import { useQueryClient } from '@tanstack/react-query';
+import { collectionQueryKeys } from '@/hooks/useCollectionProducts';
 import type { Bouquet } from '@/types/bouquet';
 import { encodeImageUrl } from '@/lib/imageUtils';
 
@@ -431,10 +432,12 @@ const PriceDisplay = ({ price }: { price: number }) => (
 // Suggested Flower Card Component
 const SuggestedFlowerCard = ({
   flower,
-  index
+  index,
+  queryClient
 }: {
   flower: typeof suggestedFlowers[0];
   index: number;
+  queryClient: ReturnType<typeof useQueryClient>;
 }) => {
   const navigate = useNavigate();
 
@@ -450,19 +453,16 @@ const SuggestedFlowerCard = ({
       whileHover={{ y: -8, scale: 1.02 }}
       className="group cursor-pointer"
       onClick={() => {
-        navigate(`/product/${flower.id}`, {
-          state: {
-            product: {
-              id: flower.id,
-              title: flower.title,
-              price: flower.price,
-              description: flower.description,
-              imageUrl: flower.image,
-              images: [flower.image, flower.image, flower.image],
-              category: flower.category
-            }
-          }
+        // Prefetch before navigation for instant load
+        queryClient.prefetchQuery({
+          queryKey: collectionQueryKeys.detail(flower.id),
+          queryFn: async () => {
+            const { getCollectionProduct } = await import('@/lib/api/collection-products');
+            return getCollectionProduct(flower.id);
+          },
+          staleTime: 5 * 60 * 1000,
         });
+        navigate(`/product/${flower.id}`);
       }}
     >
       <div className="bg-white/80 backdrop-blur-sm rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 border border-amber-100/60">
@@ -569,8 +569,8 @@ const CategoryCard = ({
 // Main Product Detail Page Component
 const ProductDetailPage = () => {
   const { id } = useParams<{ id: string }>();
-  const location = useLocation();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { addToCart } = useCartWithToast();
   const { isFavorite, toggleFavorite } = useFavorites();
   const isMobile = useIsMobile();
@@ -578,21 +578,28 @@ const ProductDetailPage = () => {
   // Get random 4 categories that update when product changes
   const [displayCategories, setDisplayCategories] = useState(() => getRandomCategories());
 
-  // Fetch product data using React Query
+  // Fetch product data using React Query (single source of truth)
   const { data: product, isLoading: isLoadingProduct, error } = useCollectionProduct(id);
 
+  // Fetch all products for recommendations
+  const { data: allProducts } = useCollectionProducts({ isActive: true });
+
   // Transform product data to match component interface
-  const productData: ProductData = product ? {
-    id: product.id,
-    title: product.title,
-    price: product.price,
-    description: product.description || '',
-    imageUrl: encodeImageUrl(product.image_urls?.[0] || ''),
-    images: product.image_urls?.map(url => encodeImageUrl(url)) || [],
-    category: product.display_category || product.category || '',
-    inStock: !product.is_out_of_stock
-  } : {
+  const productData: ProductData = useMemo(() => {
+    if (product) {
+      return {
+        id: product.id,
+        title: product.title,
+        price: product.price,
+        description: product.description || '',
+        imageUrl: encodeImageUrl(product.image_urls?.[0] || ''),
+        images: product.image_urls?.map(url => encodeImageUrl(url)) || [],
+        category: product.display_category || product.category || '',
+        inStock: !product.is_out_of_stock
+      };
+    }
     // Fallback to mock data if no product found
+    return {
       id: id || 'ember-rose-symphony',
       title: 'Ember Rose Symphony',
       price: 125.00,
@@ -606,6 +613,7 @@ const ProductDetailPage = () => {
       category: 'Premium Bouquets',
       inStock: true
     };
+  }, [product, id]);
 
   // Local state management
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -619,31 +627,46 @@ const ProductDetailPage = () => {
   const selectedSizeOption = sizeOptions.find(option => option.id === selectedSize);
   const currentPrice = productData.price + (selectedSizeOption?.priceModifier || 0);
 
-  // Smart recommendation logic
-  const getRecommendations = (): Bouquet[] => {
+  // Smart recommendation logic using React Query data
+  const recommendedBouquets = useMemo((): Bouquet[] => {
+    if (!allProducts || !product) return [];
+
     const currentCategory = productData.category;
     const currentId = productData.id;
     const currentPrice = productData.price;
 
+    // Transform products to Bouquet format
+    const availableBouquets: Bouquet[] = allProducts
+      .filter(p => p.id !== currentId)
+      .map(p => ({
+        id: p.id,
+        name: p.title,
+        price: p.price,
+        image: encodeImageUrl(p.image_urls?.[0] || ''),
+        description: p.description || '',
+        category: p.category || '',
+        displayCategory: p.display_category || p.category || '',
+        featured: p.featured || false,
+        is_out_of_stock: p.is_out_of_stock || false,
+        discount_percentage: p.discount_percentage || null
+      }));
+
     // Find bouquets from the same or related categories
-    let sameCategoryBouquets = generatedBouquets.filter(
-      b => b.displayCategory === currentCategory && b.id !== currentId
+    let sameCategoryBouquets = availableBouquets.filter(
+      b => b.displayCategory === currentCategory
     );
 
     // If not enough same category, find similar price range
     if (sameCategoryBouquets.length < 4) {
-      const similarPriceBouquets = generatedBouquets.filter(
-        b => b.id !== currentId &&
-          Math.abs(b.price - currentPrice) <= 50
+      const similarPriceBouquets = availableBouquets.filter(
+        b => Math.abs(b.price - currentPrice) <= 50
       );
       sameCategoryBouquets = [...sameCategoryBouquets, ...similarPriceBouquets];
     }
 
     // If still not enough, add featured bouquets
     if (sameCategoryBouquets.length < 4) {
-      const featuredBouquets = generatedBouquets.filter(
-        b => b.featured && b.id !== currentId
-      );
+      const featuredBouquets = availableBouquets.filter(b => b.featured);
       sameCategoryBouquets = [...sameCategoryBouquets, ...featuredBouquets];
     }
 
@@ -653,47 +676,7 @@ const ProductDetailPage = () => {
     );
 
     return uniqueBouquets.slice(0, 4);
-  };
-
-  const recommendedBouquets = getRecommendations();
-
-  // Fetch product from Supabase if no state is passed
-  useEffect(() => {
-    const fetchProduct = async () => {
-      // If we have state, use it
-      if (location.state?.product) {
-        setProductData(location.state.product);
-        return;
-      }
-
-      // If we have an ID, try to fetch from Supabase
-      if (id) {
-        setIsLoadingProduct(true);
-        try {
-          const product = await getCollectionProduct(id);
-          if (product) {
-            setProductData({
-              id: product.id,
-              title: product.title,
-              price: product.price,
-              description: product.description || '',
-              imageUrl: encodeImageUrl(product.image_urls?.[0] || ''),
-              images: product.image_urls?.map(url => encodeImageUrl(url)) || [encodeImageUrl(product.image_urls?.[0] || '')],
-              category: product.category || product.display_category || 'Premium Bouquets',
-              inStock: product.is_active !== false
-            });
-          }
-        } catch (error) {
-          console.error('Error fetching product:', error);
-          // Keep fallback data
-        } finally {
-          setIsLoadingProduct(false);
-        }
-      }
-    };
-
-    fetchProduct();
-  }, [id, location.state]);
+  }, [allProducts, product, productData]);
 
   // Update categories when product changes (different categories for each product)
   useEffect(() => {
@@ -703,6 +686,20 @@ const ProductDetailPage = () => {
     const newCategories = getRandomCategories(productIdForSeed);
     setDisplayCategories(newCategories);
   }, [id, productData.id]);
+
+  // Prefetch recommended products for faster navigation
+  useEffect(() => {
+    recommendedBouquets.forEach((bouquet) => {
+      queryClient.prefetchQuery({
+        queryKey: collectionQueryKeys.detail(bouquet.id),
+        queryFn: async () => {
+          const { getCollectionProduct } = await import('@/lib/api/collection-products');
+          return getCollectionProduct(bouquet.id);
+        },
+        staleTime: 5 * 60 * 1000,
+      });
+    });
+  }, [recommendedBouquets, queryClient]);
 
 
   // Handle add to cart - includes quantity
@@ -971,26 +968,28 @@ const ProductDetailPage = () => {
 
           <div className="flex overflow-x-auto pb-8 gap-4 snap-x snap-mandatory sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:gap-8 -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-hide">
             {recommendedBouquets.map((bouquet, index) => (
-              <motion.div
+              <Link
                 key={bouquet.id}
+                to={`/product/${bouquet.id}`}
+                onMouseEnter={() => {
+                  // Prefetch product data on hover for instant navigation
+                  queryClient.prefetchQuery({
+                    queryKey: collectionQueryKeys.detail(bouquet.id),
+                    queryFn: async () => {
+                      const { getCollectionProduct } = await import('@/lib/api/collection-products');
+                      return getCollectionProduct(bouquet.id);
+                    },
+                    staleTime: 5 * 60 * 1000,
+                  });
+                }}
+                className="block min-w-[280px] sm:min-w-0 snap-center"
+              >
+              <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 viewport={{ once: true }}
-                className="group cursor-pointer min-w-[280px] sm:min-w-0 snap-center"
-                onClick={() => navigate(`/product/${bouquet.id}`, {
-                  state: {
-                    product: {
-                      id: bouquet.id,
-                      title: bouquet.name,
-                      price: bouquet.price,
-                      description: bouquet.description,
-                      imageUrl: bouquet.image,
-                      images: [bouquet.image, bouquet.image, bouquet.image],
-                      category: bouquet.displayCategory
-                    }
-                  }
-                })}
+                className="group cursor-pointer"
               >
                 <div className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
                   <div className="relative overflow-hidden h-64">
@@ -1017,33 +1016,18 @@ const ProductDetailPage = () => {
                       <span className="text-2xl font-bold bg-gradient-to-r from-amber-600 to-amber-400 bg-clip-text text-transparent">
                         ${bouquet.price}
                       </span>
-                      <motion.button
+                      <motion.span
+                        className="px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-white text-sm font-semibold rounded-lg hover:shadow-lg transition-all inline-block"
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
-                        className="px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-white text-sm font-semibold rounded-lg hover:shadow-lg transition-all"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigate(`/product/${bouquet.id}`, {
-                            state: {
-                              product: {
-                                id: bouquet.id,
-                                title: bouquet.name,
-                                price: bouquet.price,
-                                description: bouquet.description,
-                                imageUrl: bouquet.image,
-                                images: [bouquet.image, bouquet.image, bouquet.image],
-                                category: bouquet.displayCategory
-                              }
-                            }
-                          });
-                        }}
                       >
                         View Details
-                      </motion.button>
+                      </motion.span>
                     </div>
                   </div>
                 </div>
               </motion.div>
+              </Link>
             ))}
           </div>
         </div>

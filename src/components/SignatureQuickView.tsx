@@ -22,6 +22,8 @@ import {
 import { useCartWithToast } from '@/hooks/useCartWithToast';
 import { Link } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useQueryClient } from '@tanstack/react-query';
+import { collectionQueryKeys } from '@/hooks/useCollectionProducts';
 
 // ==================== TYPES ====================
 export interface QuickViewItem {
@@ -80,6 +82,7 @@ const DEFAULT_CATEGORY = 'Signature Collection';
 // ==================== COMPONENT ====================
 const SignatureQuickView = ({ open, item, onClose }: SignatureQuickViewProps) => {
   const { addToCart } = useCartWithToast();
+  const queryClient = useQueryClient();
   const dialogRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
 
@@ -905,17 +908,16 @@ const SignatureQuickView = ({ open, item, onClose }: SignatureQuickViewProps) =>
                   {/* View Full Details Link */}
                   <Link
                     to={`/product/${productData.id}`}
-                    state={{
-                      product: {
-                        id: String(productData.id),
-                        title: productData.name,
-                        price: productData.basePrice,
-                        description: productData.description,
-                        imageUrl: productData.images[0],
-                        images: productData.images,
-                        category: productData.category,
-                        inStock: productData.inStock
-                      }
+                    onMouseEnter={() => {
+                      // Prefetch product data on hover for instant navigation
+                      queryClient.prefetchQuery({
+                        queryKey: collectionQueryKeys.detail(String(productData.id)),
+                        queryFn: async () => {
+                          const { getCollectionProduct } = await import('@/lib/api/collection-products');
+                          return getCollectionProduct(String(productData.id));
+                        },
+                        staleTime: 5 * 60 * 1000,
+                      });
                     }}
                     className="flex items-center justify-center gap-2 text-amber-700 hover:text-amber-800 font-semibold text-sm transition-colors"
                   >
