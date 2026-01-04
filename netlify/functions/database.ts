@@ -523,10 +523,22 @@ export const handler: Handler = async (
   
   try {
     // Parse request body
-    request = JSON.parse(event.body || '{}') as DatabaseRequest;
+    try {
+      request = JSON.parse(event.body || '{}') as DatabaseRequest;
+    } catch (parseError) {
+      logSecurityEvent('validation_error', 'warning', event.path, ip, {
+        reason: 'Invalid JSON in request body',
+        error: parseError instanceof Error ? parseError.message : 'Unknown parse error',
+      });
+      return {
+        statusCode: 400,
+        headers,
+        body: JSON.stringify({ error: 'Invalid JSON in request body' }),
+      };
+    }
     
     // Validate request - check for missing fields
-    if (!request.operation) {
+    if (!request || !request.operation) {
       logSecurityEvent('validation_error', 'warning', event.path, ip, {
         reason: 'Missing required field: operation',
       });
@@ -537,10 +549,10 @@ export const handler: Handler = async (
       };
     }
     
-    if (!request.table) {
+    if (!request || !request.table) {
       logSecurityEvent('validation_error', 'warning', event.path, ip, {
         reason: 'Missing required field: table',
-        operation: request.operation,
+        operation: request?.operation,
       });
       return {
         statusCode: 400,
