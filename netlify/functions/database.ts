@@ -509,16 +509,8 @@ export const handler: Handler = async (
     };
   }
   
-  // Check if database is configured
-  if (!supabase) {
-    console.error('[Database API] Database not configured');
-    return {
-      statusCode: 500,
-      headers,
-      body: JSON.stringify({ error: 'Database not configured' }),
-    };
-  }
-  
+  // IMPORTANT: Validate request BEFORE checking database configuration
+  // This ensures validation errors return 400, not 500
   let request: DatabaseRequest | null = null;
   
   try {
@@ -585,6 +577,16 @@ export const handler: Handler = async (
         statusCode: 400,
         headers,
         body: JSON.stringify({ error: 'Invalid table name. Only alphanumeric characters, underscores, and hyphens are allowed.' }),
+      };
+    }
+    
+    // NOW check if database is configured (after validation passes)
+    if (!supabase) {
+      console.error('[Database API] Database not configured');
+      return {
+        statusCode: 500,
+        headers,
+        body: JSON.stringify({ error: 'Database not configured' }),
       };
     }
     
