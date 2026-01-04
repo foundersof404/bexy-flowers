@@ -1,0 +1,50 @@
+﻿[
+    {
+        "status":  "pass",
+        "timestamp":  "2026-01-04T01:18:35Z",
+        "details":  "HTTP 200",
+        "test":  "health_endpoint"
+    },
+    {
+        "status":  "pass",
+        "timestamp":  "2026-01-04T01:18:36Z",
+        "details":  "CORS headers found",
+        "test":  "cors_headers"
+    },
+    {
+        "status":  "pass",
+        "timestamp":  "2026-01-04T01:18:38Z",
+        "details":  "HTTP 200",
+        "test":  "image_generation_basic"
+    },
+    {
+        "status":  "pass",
+        "timestamp":  "2026-01-04T01:18:39Z",
+        "details":  "HTTP 401",
+        "test":  "auth_missing_key"
+    },
+    {
+        "status":  "pass",
+        "timestamp":  "2026-01-04T01:18:39Z",
+        "details":  "HTTP 401",
+        "test":  "auth_invalid_key"
+    },
+    {
+        "status":  "pass",
+        "timestamp":  "2026-01-04T01:18:40Z",
+        "details":  "HTTP 400",
+        "test":  "dimension_validation"
+    },
+    {
+        "status":  "pass",
+        "timestamp":  "2026-01-04T01:19:31Z",
+        "details":  "10230ms",
+        "test":  "performance_avg"
+    },
+    {
+        "status":  "pass",
+        "timestamp":  "2026-01-04T01:19:31Z",
+        "details":  "HTTP 400",
+        "test":  "error_malformed_json"
+    }
+]
