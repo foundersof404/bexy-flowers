@@ -1,4 +1,4 @@
-import { supabase } from '../supabase';
+import { db } from './database-client';
 import { uploadImage, deleteImage, extractPathFromUrl } from '../supabase-storage';
 import type { Database } from '../supabase';
 
@@ -142,13 +142,6 @@ export async function deleteAccessory(id: string): Promise<void> {
     }
   }
 
-  const { error } = await supabase
-    .from('accessories')
-    .delete()
-    .eq('id', id);
-
-  if (error) {
-    throw new Error(`Failed to delete accessory: ${error.message}`);
-  }
+  await db.delete('accessories', { id });
 }
 

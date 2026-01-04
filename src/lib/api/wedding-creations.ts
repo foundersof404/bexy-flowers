@@ -1,4 +1,4 @@
-import { supabase } from '../supabase';
+import { db } from './database-client';
 import { uploadImage, deleteImage, extractPathFromUrl } from '../supabase-storage';
 import type { Database } from '../supabase';
 
@@ -10,55 +10,26 @@ type WeddingCreationUpdate = Database['public']['Tables']['wedding_creations']['
  * Get all wedding creations (admin - gets all)
  */
 export async function getWeddingCreations(): Promise<WeddingCreation[]> {
-  const { data, error } = await supabase
-    .from('wedding_creations')
-    .select('*')
-    .order('display_order', { ascending: true })
-    .order('created_at', { ascending: false });
-
-  if (error) {
-    throw new Error(`Failed to fetch wedding creations: ${error.message}`);
-  }
-
-  return data;
+  return await db.select<WeddingCreation>('wedding_creations', {
+    orderBy: { column: 'display_order', ascending: true }
+  });
 }
 
 /**
  * Get active wedding creations (public - only active)
  */
 export async function getActiveWeddingCreations(): Promise<WeddingCreation[]> {
-  const { data, error } = await supabase
-    .from('wedding_creations')
-    .select('*')
-    .eq('is_active', true)
-    .order('display_order', { ascending: true })
-    .order('created_at', { ascending: false });
-
-  if (error) {
-    throw new Error(`Failed to fetch active wedding creations: ${error.message}`);
-  }
-
-  return data || [];
+  return await db.select<WeddingCreation>('wedding_creations', {
+    filters: { is_active: true },
+    orderBy: { column: 'display_order', ascending: true }
+  });
 }
 
 /**
  * Get a single wedding creation by ID
  */
 export async function getWeddingCreation(id: string): Promise<WeddingCreation | null> {
-  const { data, error } = await supabase
-    .from('wedding_creations')
-    .select('*')
-    .eq('id', id)
-    .single();
-
-  if (error) {
-    if (error.code === 'PGRST116') {
-      return null; // Not found
-    }
-    throw new Error(`Failed to fetch wedding creation: ${error.message}`);
-  }
-
-  return data;
+  return await db.selectOne<WeddingCreation>('wedding_creations', { id });
 }
 
 /**
@@ -77,16 +48,12 @@ export async function createWeddingCreation(
     throw new Error(`Failed to upload image: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 
-  const { data, error } = await supabase
-    .from('wedding_creations')
-    .insert({
-      ...creation,
-      image_url: imageUrl,
-    })
-    .select()
-    .single();
+  const data = await db.insert<WeddingCreation>('wedding_creations', {
+    ...creation,
+    image_url: imageUrl,
+  });
 
-  if (error) {
+  if (!data) {
     // Delete uploaded image if database insert fails
     try {
       const path = extractPathFromUrl(imageUrl, 'wedding-creations');
@@ -94,7 +61,7 @@ export async function createWeddingCreation(
     } catch (deleteError) {
       console.error('Failed to delete uploaded image after insert failure:', deleteError);
     }
-    throw new Error(`Failed to create wedding creation: ${error.message}`);
+    throw new Error('Failed to create wedding creation');
   }
 
   return data;
@@ -128,7 +95,7 @@ export async function updateWeddingCreation(
     try {
       const result = await uploadImage('wedding-creations', newImage);
       imageUrl = result.url;
-      
+
       // Delete old image from Supabase Storage if we're replacing it
       // Only delete if the old URL is from Supabase Storage (contains the bucket name)
       const currentCreation = await getWeddingCreation(id);
@@ -157,15 +124,10 @@ export async function updateWeddingCreation(
     updateData.image_url = updates.image_url;
   }
 
-  const { data, error } = await supabase
-    .from('wedding_creations')
-    .update(updateData)
-    .eq('id', id)
-    .select()
-    .single();
+  const data = await db.update<WeddingCreation>('wedding_creations', { id }, updateData);
 
-  if (error) {
-    throw new Error(`Failed to update wedding creation: ${error.message}`);
+  if (!data || data.length === 0) {
+    throw new Error('Failed to update wedding creation');
   }
 
   return data;
@@ -186,13 +148,6 @@ export async function deleteWeddingCreation(id: string): Promise<void> {
     }
   }
 
-  const { error } = await supabase
-    .from('wedding_creations')
-    .delete()
-    .eq('id', id);
-
-  if (error) {
-    throw new Error(`Failed to delete wedding creation: ${error.message}`);
-  }
+  await db.delete('wedding_creations', { id });
 }
 

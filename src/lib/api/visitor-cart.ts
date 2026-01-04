@@ -3,7 +3,7 @@
  * Handles database operations for visitor cart items
  */
 
-import { supabase } from '../supabase';
+import { db } from './database-client';
 import { getVisitorId } from '../visitor';
 import { CartItem } from '@/types/cart';
 
@@ -110,16 +110,10 @@ export async function getVisitorCart(): Promise<CartItem[]> {
     await ensureVisitor();
     const visitorId = getVisitorId();
 
-    const { data, error } = await supabase
-      .from('visitor_carts')
-      .select('*')
-      .eq('visitor_id', visitorId)
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      console.error('Error fetching cart:', error);
-      return [];
-    }
+    const data = await db.select<VisitorCartItem>('visitor_carts', {
+      filters: { visitor_id: visitorId },
+      orderBy: { column: 'created_at', ascending: false }
+    });
 
     return (data || []).map(transformCartItem);
   } catch (error) {
@@ -139,55 +133,39 @@ export async function upsertVisitorCartItem(item: CartItem): Promise<boolean> {
     const dbItem = transformToDbFormat(item, visitorId);
 
     // Check if item exists (handle NULL values properly)
-    let query = supabase
-      .from('visitor_carts')
-      .select('id, quantity')
-      .eq('visitor_id', visitorId)
-      .eq('product_id', String(item.id));
-    
+    const filters: any = {
+      visitor_id: visitorId,
+      product_id: String(item.id)
+    };
+
     if (item.size) {
-      query = query.eq('size', item.size);
+      filters.size = item.size;
     } else {
-      query = query.is('size', null);
+      filters.size = null;
     }
-    
+
     if (item.personalNote) {
-      query = query.eq('personal_note', item.personalNote);
+      filters.personal_note = item.personalNote;
     } else {
-      query = query.is('personal_note', null);
+      filters.personal_note = null;
     }
-    
-    const { data: existing } = await query.maybeSingle();
+
+    const existing = await db.selectOne<VisitorCartItem>('visitor_carts', filters);
 
     if (existing) {
       // Update existing item
-      const { error } = await supabase
-        .from('visitor_carts')
-        .update({
-          quantity: item.quantity,
-          price: item.price,
-          title: item.title,
-          image: item.image,
-          description: item.description || null,
-          accessories: item.accessories || null,
-          gift_info: item.giftInfo || null,
-        })
-        .eq('id', existing.id);
-
-      if (error) {
-        console.error('Error updating cart item:', error);
-        return false;
-      }
+      await db.update('visitor_carts', { id: existing.id }, {
+        quantity: item.quantity,
+        price: item.price,
+        title: item.title,
+        image: item.image,
+        description: item.description || null,
+        accessories: item.accessories || null,
+        gift_info: item.giftInfo || null,
+      });
     } else {
       // Insert new item
-      const { error } = await supabase
-        .from('visitor_carts')
-        .insert(dbItem);
-
-      if (error) {
-        console.error('Error inserting cart item:', error);
-        return false;
-      }
+      await db.insert('visitor_carts', dbItem);
     }
 
     return true;
@@ -208,30 +186,24 @@ export async function removeVisitorCartItem(
   try {
     const visitorId = getVisitorId();
 
-    const query = supabase
-      .from('visitor_carts')
-      .delete()
-      .eq('visitor_id', visitorId)
-      .eq('product_id', String(productId));
+    const filters: any = {
+      visitor_id: visitorId,
+      product_id: String(productId)
+    };
 
     if (size !== undefined) {
-      query.eq('size', size);
+      filters.size = size;
     } else {
-      query.is('size', null);
+      filters.size = null;
     }
 
     if (personalNote !== undefined) {
-      query.eq('personal_note', personalNote);
+      filters.personal_note = personalNote;
     } else {
-      query.is('personal_note', null);
+      filters.personal_note = null;
     }
 
-    const { error } = await query;
-
-    if (error) {
-      console.error('Error removing cart item:', error);
-      return false;
-    }
+    await db.delete('visitor_carts', filters);
 
     return true;
   } catch (error) {
@@ -252,29 +224,26 @@ export async function updateVisitorCartItemQuantity(
   try {
     const visitorId = getVisitorId();
 
-    let query = supabase
-      .from('visitor_carts')
-      .update({ quantity })
-      .eq('visitor_id', visitorId)
-      .eq('product_id', String(productId));
+    const filters: any = {
+      visitor_id: visitorId,
+      product_id: String(productId)
+    };
 
     if (size !== undefined && size !== null) {
-      query = query.eq('size', size);
+      filters.size = size;
     } else {
-      query = query.is('size', null);
+      filters.size = null;
     }
 
     if (personalNote !== undefined && personalNote !== null) {
-      query = query.eq('personal_note', personalNote);
+      filters.personal_note = personalNote;
     } else {
-      query = query.is('personal_note', null);
+      filters.personal_note = null;
     }
 
-    const { error } = await query;
-
-    if (error) {
-      console.error('Error updating cart item quantity:', error);
-      return false;
+    const existing = await db.selectOne<VisitorCartItem>('visitor_carts', filters);
+    if (existing) {
+      await db.update('visitor_carts', { id: existing.id }, { quantity });
     }
 
     return true;
@@ -291,15 +260,7 @@ export async function clearVisitorCart(): Promise<boolean> {
   try {
     const visitorId = getVisitorId();
 
-    const { error } = await supabase
-      .from('visitor_carts')
-      .delete()
-      .eq('visitor_id', visitorId);
-
-    if (error) {
-      console.error('Error clearing cart:', error);
-      return false;
-    }
+    await db.delete('visitor_carts', { visitor_id: visitorId });
 
     return true;
   } catch (error) {
@@ -317,17 +278,12 @@ export async function syncCartToDatabase(items: CartItem[]): Promise<void> {
     const visitorId = getVisitorId();
 
     // Delete all existing items for this visitor
-    await supabase
-      .from('visitor_carts')
-      .delete()
-      .eq('visitor_id', visitorId);
+    await db.delete('visitor_carts', { visitor_id: visitorId });
 
     // Insert all current items
     if (items.length > 0) {
       const dbItems = items.map(item => transformToDbFormat(item, visitorId));
-      await supabase
-        .from('visitor_carts')
-        .insert(dbItems);
+      await db.insert('visitor_carts', dbItems);
     }
   } catch (error) {
     console.error('Error syncing cart to database:', error);

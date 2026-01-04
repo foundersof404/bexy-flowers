@@ -3,7 +3,7 @@
  * Handles database operations for visitor favorite products
  */
 
-import { supabase } from '../supabase';
+import { db } from './database-client';
 import { getVisitorId } from '../visitor';
 import { FavoriteProduct } from '@/types/favorites';
 
@@ -105,16 +105,10 @@ export async function getVisitorFavorites(): Promise<FavoriteProduct[]> {
     await ensureVisitor();
     const visitorId = getVisitorId();
 
-    const { data, error } = await supabase
-      .from('visitor_favorites')
-      .select('*')
-      .eq('visitor_id', visitorId)
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      console.error('Error fetching favorites:', error);
-      return [];
-    }
+    const data = await db.select<VisitorFavoriteItem>('visitor_favorites', {
+      filters: { visitor_id: visitorId },
+      orderBy: { column: 'created_at', ascending: false }
+    });
 
     return (data || []).map(transformFavoriteItem);
   } catch (error) {
@@ -133,17 +127,7 @@ export async function addVisitorFavorite(product: FavoriteProduct): Promise<bool
 
     const dbItem = transformToDbFormat(product, visitorId);
 
-    const { error } = await supabase
-      .from('visitor_favorites')
-      .upsert(dbItem, {
-        onConflict: 'visitor_id,product_id',
-        ignoreDuplicates: false
-      });
-
-    if (error) {
-      console.error('Error adding favorite:', error);
-      return false;
-    }
+    await db.insert('visitor_favorites', dbItem);
 
     return true;
   } catch (error) {
@@ -159,16 +143,10 @@ export async function removeVisitorFavorite(productId: string | number): Promise
   try {
     const visitorId = getVisitorId();
 
-    const { error } = await supabase
-      .from('visitor_favorites')
-      .delete()
-      .eq('visitor_id', visitorId)
-      .eq('product_id', String(productId));
-
-    if (error) {
-      console.error('Error removing favorite:', error);
-      return false;
-    }
+    await db.delete('visitor_favorites', {
+      visitor_id: visitorId,
+      product_id: String(productId)
+    });
 
     return true;
   } catch (error) {
@@ -184,19 +162,11 @@ export async function isVisitorFavorite(productId: string | number): Promise<boo
   try {
     const visitorId = getVisitorId();
 
-    const { data, error } = await supabase
-      .from('visitor_favorites')
-      .select('id')
-      .eq('visitor_id', visitorId)
-      .eq('product_id', String(productId))
-      .single();
+    const data = await db.select<VisitorFavoriteItem>('visitor_favorites', {
+      filters: { visitor_id: visitorId, product_id: String(productId) }
+    });
 
-    if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
-      console.error('Error checking favorite:', error);
-      return false;
-    }
-
-    return !!data;
+    return data.length > 0;
   } catch (error) {
     console.error('Error in isVisitorFavorite:', error);
     return false;
@@ -210,15 +180,7 @@ export async function clearVisitorFavorites(): Promise<boolean> {
   try {
     const visitorId = getVisitorId();
 
-    const { error } = await supabase
-      .from('visitor_favorites')
-      .delete()
-      .eq('visitor_id', visitorId);
-
-    if (error) {
-      console.error('Error clearing favorites:', error);
-      return false;
-    }
+    await db.delete('visitor_favorites', { visitor_id: visitorId });
 
     return true;
   } catch (error) {
@@ -236,22 +198,19 @@ export async function syncFavoritesToDatabase(favorites: FavoriteProduct[]): Pro
     const visitorId = getVisitorId();
 
     // Delete all existing favorites for this visitor
-    await supabase
-      .from('visitor_favorites')
-      .delete()
-      .eq('visitor_id', visitorId);
+    await db.delete('visitor_favorites', { visitor_id: visitorId });
 
     // Insert all current favorites
     if (favorites.length > 0) {
       const dbItems = favorites.map(item => transformToDbFormat(item, visitorId));
-      await supabase
-        .from('visitor_favorites')
-        .insert(dbItems);
+      await db.insert('visitor_favorites', dbItems);
     }
   } catch (error) {
     console.error('Error syncing favorites to database:', error);
   }
 }
+
+
 
 
 

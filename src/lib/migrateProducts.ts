@@ -5,7 +5,7 @@
  * Run this from browser console or create a one-time migration page.
  */
 
-import { supabase } from './supabase';
+import { db } from './api/database-client';
 import type { Database } from './supabase';
 
 type CollectionProductInsert = Database['public']['Tables']['collection_products']['Insert'];

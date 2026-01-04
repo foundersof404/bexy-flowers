@@ -287,8 +287,8 @@ async function generateWithPollinations(
     console.log('[ImageGen] Resolution:', `${width}x${height}`);
     console.log('[ImageGen] Enhanced prompt:', shouldEnhance);
     console.log('[ImageGen] Prompt length:', cleanedPrompt.length);
+    // SECURITY: Removed URL logging to prevent API key exposure
     console.log('[ImageGen] URL length:', pollinationsUrl.length);
-    console.log('[ImageGen] URL (first 200 chars):', pollinationsUrl.substring(0, 200) + '...');
     
     // Pollinations doesn't use Authorization headers in browser (CORS blocked)
     // Their free tier works without API keys from browsers
@@ -343,7 +343,8 @@ async function generateWithPollinations(
                 `URL length: ${pollinationsUrl.length} characters. ` +
                 `Please check console for full URL.`;
             console.error('[ImageGen] ❌ Image load error:', event);
-            console.error('[ImageGen] ❌ Full URL:', pollinationsUrl);
+            // SECURITY: Removed full URL logging to prevent any potential key exposure
+            console.error('[ImageGen] ❌ Image generation failed - URL length:', pollinationsUrl.length);
             reject(new Error(errorMsg));
         };
         

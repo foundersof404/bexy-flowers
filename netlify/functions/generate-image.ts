@@ -106,15 +106,30 @@ function isOriginAllowed(origin: string | null): boolean {
 /**
  * Validate API key
  */
-function validateAPIKey(event: HandlerEvent): boolean {
+function validateAPIKey(event: HandlerEvent): { allowed: boolean; reason?: string } {
   const frontendApiKey = process.env.FRONTEND_API_KEY;
   if (!frontendApiKey) {
     console.warn('[Security] FRONTEND_API_KEY not set - allowing all requests');
-    return true; // Allow if not configured (backward compatibility)
+    return { allowed: true }; // Allow if not configured (backward compatibility)
   }
   
   const providedKey = event.headers['x-api-key'] || event.headers['X-API-Key'];
-  return providedKey === frontendApiKey;
+  
+  if (!providedKey) {
+    return { 
+      allowed: false, 
+      reason: 'API key required but not provided. Please set VITE_FRONTEND_API_KEY in Netlify environment variables.' 
+    };
+  }
+  
+  if (providedKey !== frontendApiKey) {
+    return { 
+      allowed: false, 
+      reason: 'API key mismatch. Please verify VITE_FRONTEND_API_KEY matches FRONTEND_API_KEY in Netlify.' 
+    };
+  }
+  
+  return { allowed: true };
 }
 
 /**
@@ -431,16 +446,22 @@ export const handler: Handler = async (
   // This allows automated tests and API clients to work
   
   // Validate API key
-  if (!validateAPIKey(event)) {
+  const apiKeyValidation = validateAPIKey(event);
+  if (!apiKeyValidation.allowed) {
     const responseTime = Date.now() - startTime;
     logSecurityEvent('auth_failure', 'error', event.path, ip, {
-      reason: 'Invalid API key',
+      reason: apiKeyValidation.reason || 'Invalid API key',
+      hasBackendKey: !!process.env.FRONTEND_API_KEY,
+      hasFrontendKey: !!(event.headers['x-api-key'] || event.headers['X-API-Key']),
     });
-    logRequest(event, ip, responseTime, false, 401, 'Invalid API key');
+    logRequest(event, ip, responseTime, false, 401, apiKeyValidation.reason || 'Invalid API key');
     return {
       statusCode: 401,
       headers: corsHeaders,
-      body: JSON.stringify({ error: 'Unauthorized: Invalid API key' }),
+      body: JSON.stringify({ 
+        error: 'Unauthorized: Invalid API key',
+        message: apiKeyValidation.reason || 'API key validation failed. Please check your environment variables.',
+      }),
     };
   }
   

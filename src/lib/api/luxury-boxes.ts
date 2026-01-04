@@ -1,4 +1,4 @@
-import { supabase } from '../supabase';
+import { db } from './database-client';
 import type { Database } from '../supabase';
 
 type LuxuryBox = Database['public']['Tables']['luxury_boxes']['Row'];
@@ -90,16 +90,10 @@ export async function getLuxuryBoxWithDetails(id: string): Promise<LuxuryBoxWith
  * Create a luxury box
  */
 export async function createLuxuryBox(box: Omit<LuxuryBoxInsert, 'id' | 'created_at' | 'updated_at'>): Promise<LuxuryBox> {
-  const { data, error } = await supabase
-    .from('luxury_boxes')
-    .insert(box)
-    .select()
-    .single();
-
-  if (error) {
-    throw new Error(`Failed to create luxury box: ${error.message}`);
+  const data = await db.insert<LuxuryBox>('luxury_boxes', box);
+  if (!data) {
+    throw new Error('Failed to create luxury box');
   }
-
   return data;
 }
 
@@ -107,32 +101,18 @@ export async function createLuxuryBox(box: Omit<LuxuryBoxInsert, 'id' | 'created
  * Update a luxury box
  */
 export async function updateLuxuryBox(id: string, updates: LuxuryBoxUpdate): Promise<LuxuryBox> {
-  const { data, error } = await supabase
-    .from('luxury_boxes')
-    .update(updates)
-    .eq('id', id)
-    .select()
-    .single();
-
-  if (error) {
-    throw new Error(`Failed to update luxury box: ${error.message}`);
+  const data = await db.update<LuxuryBox>('luxury_boxes', { id }, updates);
+  if (!data || data.length === 0) {
+    throw new Error('Failed to update luxury box');
   }
-
-  return data;
+  return data[0];
 }
 
 /**
  * Delete a luxury box (cascades to colors and sizes)
  */
 export async function deleteLuxuryBox(id: string): Promise<void> {
-  const { error } = await supabase
-    .from('luxury_boxes')
-    .delete()
-    .eq('id', id);
-
-  if (error) {
-    throw new Error(`Failed to delete luxury box: ${error.message}`);
-  }
+  await db.delete('luxury_boxes', { id });
 }
 
 // ==================== Box Colors ====================
@@ -158,16 +138,10 @@ export async function getBoxColors(boxId: string): Promise<BoxColor[]> {
  * Create a box color
  */
 export async function createBoxColor(color: Omit<BoxColorInsert, 'id' | 'created_at' | 'updated_at'>): Promise<BoxColor> {
-  const { data, error } = await supabase
-    .from('box_colors')
-    .insert(color)
-    .select()
-    .single();
-
-  if (error) {
-    throw new Error(`Failed to create box color: ${error.message}`);
+  const data = await db.insert<BoxColor>('box_colors', color);
+  if (!data) {
+    throw new Error('Failed to create box color');
   }
-
   return data;
 }
 
@@ -175,32 +149,18 @@ export async function createBoxColor(color: Omit<BoxColorInsert, 'id' | 'created
  * Update a box color
  */
 export async function updateBoxColor(id: string, updates: BoxColorUpdate): Promise<BoxColor> {
-  const { data, error } = await supabase
-    .from('box_colors')
-    .update(updates)
-    .eq('id', id)
-    .select()
-    .single();
-
-  if (error) {
-    throw new Error(`Failed to update box color: ${error.message}`);
+  const data = await db.update<BoxColor>('box_colors', { id }, updates);
+  if (!data || data.length === 0) {
+    throw new Error('Failed to update box color');
   }
-
-  return data;
+  return data[0];
 }
 
 /**
  * Delete a box color
  */
 export async function deleteBoxColor(id: string): Promise<void> {
-  const { error } = await supabase
-    .from('box_colors')
-    .delete()
-    .eq('id', id);
-
-  if (error) {
-    throw new Error(`Failed to delete box color: ${error.message}`);
-  }
+  await db.delete('box_colors', { id });
 }
 
 // ==================== Box Sizes ====================
@@ -226,16 +186,10 @@ export async function getBoxSizes(boxId: string): Promise<BoxSize[]> {
  * Create a box size
  */
 export async function createBoxSize(size: Omit<BoxSizeInsert, 'id' | 'created_at' | 'updated_at'>): Promise<BoxSize> {
-  const { data, error } = await supabase
-    .from('box_sizes')
-    .insert(size)
-    .select()
-    .single();
-
-  if (error) {
-    throw new Error(`Failed to create box size: ${error.message}`);
+  const data = await db.insert<BoxSize>('box_sizes', size);
+  if (!data) {
+    throw new Error('Failed to create box size');
   }
-
   return data;
 }
 
@@ -243,31 +197,17 @@ export async function createBoxSize(size: Omit<BoxSizeInsert, 'id' | 'created_at
  * Update a box size
  */
 export async function updateBoxSize(id: string, updates: BoxSizeUpdate): Promise<BoxSize> {
-  const { data, error } = await supabase
-    .from('box_sizes')
-    .update(updates)
-    .eq('id', id)
-    .select()
-    .single();
-
-  if (error) {
-    throw new Error(`Failed to update box size: ${error.message}`);
+  const data = await db.update<BoxSize>('box_sizes', { id }, updates);
+  if (!data || data.length === 0) {
+    throw new Error('Failed to update box size');
   }
-
-  return data;
+  return data[0];
 }
 
 /**
  * Delete a box size
  */
 export async function deleteBoxSize(id: string): Promise<void> {
-  const { error } = await supabase
-    .from('box_sizes')
-    .delete()
-    .eq('id', id);
-
-  if (error) {
-    throw new Error(`Failed to delete box size: ${error.message}`);
-  }
+  await db.delete('box_sizes', { id });
 }
 
