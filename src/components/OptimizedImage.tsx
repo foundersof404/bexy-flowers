@@ -1,203 +1,153 @@
-import { useState, useEffect, useRef, ImgHTMLAttributes } from 'react';
-import { motion } from 'framer-motion';
-import { encodeImageUrl } from '@/lib/imageUtils';
-
-interface OptimizedImageProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, 'onLoad' | 'onError'> {
-  src: string;
-  alt: string;
-  className?: string;
-  priority?: boolean; // For above-the-fold images
-  aspectRatio?: string; // e.g., "16/9", "4/3", "1/1"
-  objectFit?: 'cover' | 'contain' | 'fill' | 'none' | 'scale-down';
-  blurDataURL?: string; // Optional blur placeholder
-  onLoadComplete?: () => void;
-  sizes?: string; // ⚡ Responsive image sizes for optimal loading
-}
-
 /**
- * OptimizedImage Component
+ * Optimized Image Component
  * 
  * Features:
- * - Progressive loading with blur placeholder
- * - Lazy loading with intersection observer
- * - Automatic aspect ratio handling
- * - Loading state with skeleton
+ * - Lazy loading with Intersection Observer
+ * - Responsive images with srcset
+ * - Placeholder/skeleton while loading
  * - Error handling with fallback
- * - Memory efficient
+ * - WebP format support
  */
-export const OptimizedImage = ({
+
+import { useState, useEffect, useRef } from 'react';
+import type { ImgHTMLAttributes } from 'react';
+import { motion } from 'framer-motion';
+
+interface OptimizedImageProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, 'src'> {
+  src: string;
+  alt: string;
+  width?: number;
+  height?: number;
+  className?: string;
+  placeholder?: string;
+  fallback?: string;
+  priority?: boolean; // Load immediately (above the fold)
+  sizes?: string; // For responsive images
+}
+
+export function OptimizedImage({
   src,
   alt,
+  width,
+  height,
   className = '',
+  placeholder,
+  fallback,
   priority = false,
-  aspectRatio,
-  objectFit = 'cover',
-  blurDataURL,
-  onLoadComplete,
-  sizes = '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw', // ⚡ Default responsive sizes
+  sizes,
   ...props
-}: OptimizedImageProps) => {
-  const [isLoading, setIsLoading] = useState(true);
-  const [isInView, setIsInView] = useState(priority); // Priority images load immediately
+}: OptimizedImageProps) {
+  const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
-  // Encode image URL to handle special characters like % in folder names
-  const encodedSrc = encodeImageUrl(src);
-  const [imageSrc, setImageSrc] = useState<string | null>(priority ? encodedSrc : null);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [isInView, setIsInView] = useState(priority);
   const imgRef = useRef<HTMLImageElement>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
 
-  // Intersection Observer for lazy loading - observe container instead of image
+  // Intersection Observer for lazy loading
   useEffect(() => {
-    if (priority || !containerRef.current) return;
+    if (priority || isInView) return;
 
-    observerRef.current = new IntersectionObserver(
+    const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             setIsInView(true);
-            setImageSrc(encodedSrc);
-            observerRef.current?.disconnect();
+            observer.disconnect();
           }
         });
       },
       {
-        rootMargin: '100px', // Start loading 100px before image enters viewport for better UX
+        rootMargin: '50px', // Start loading 50px before entering viewport
         threshold: 0.01,
       }
     );
 
-    if (containerRef.current) {
-      observerRef.current.observe(containerRef.current);
+    if (imgRef.current) {
+      observer.observe(imgRef.current);
+      observerRef.current = observer;
     }
 
     return () => {
-      observerRef.current?.disconnect();
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
     };
-  }, [encodedSrc, priority]);
+  }, [priority, isInView]);
 
-  // Preload image
-  useEffect(() => {
-    if (!imageSrc) return;
+  const handleLoad = () => {
+    setIsLoaded(true);
+  };
 
-    const img = new Image();
-    img.src = imageSrc;
+  const handleError = () => {
+    setHasError(true);
+    setIsLoaded(true);
+  };
 
-    img.onload = () => {
-      setIsLoading(false);
-      onLoadComplete?.();
-    };
+  // Generate responsive srcset for WebP
+  const generateSrcSet = (baseSrc: string): string => {
+    if (!baseSrc || baseSrc.startsWith('data:') || baseSrc.startsWith('blob:')) {
+      return '';
+    }
 
-    img.onerror = () => {
-      setHasError(true);
-      setIsLoading(false);
-    };
+    // If already has query params or is external, return as-is
+    if (baseSrc.includes('?') || baseSrc.startsWith('http')) {
+      return '';
+    }
 
-    return () => {
-      img.onload = null;
-      img.onerror = null;
-    };
-  }, [imageSrc, onLoadComplete]);
+    // Generate different sizes for responsive images
+    const sizes = [400, 800, 1200, 1600];
+    return sizes
+      .map((size) => {
+        // Try WebP first, fallback to original
+        const webpSrc = baseSrc.replace(/\.(jpg|jpeg|png)$/i, '.webp');
+        return `${webpSrc}?w=${size} ${size}w`;
+      })
+      .join(', ');
+  };
 
-  // Fallback image for errors - using brand logo
-  const fallbackSrc = '/assets/bexy-flowers-logo.webp';
+  const imageSrc = hasError && fallback ? fallback : src;
+  const srcSet = generateSrcSet(imageSrc);
 
   return (
     <div
-      ref={containerRef}
       className={`relative overflow-hidden ${className}`}
-      style={{ aspectRatio: aspectRatio || 'auto' }}
+      style={{ width, height }}
+      ref={imgRef}
     >
-      {/* Blur placeholder or skeleton */}
-      {isLoading && (
-        <motion.div
-          className="absolute inset-0 bg-gradient-to-br from-slate-100 to-slate-200"
-          initial={{ opacity: 1 }}
-          animate={{ opacity: isLoading ? 1 : 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          {/* Animated shimmer effect */}
-          <motion.div
-            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent"
-            animate={{
-              x: ['-100%', '100%'],
-            }}
-            transition={{
-              duration: 1.5,
-              repeat: Infinity,
-              ease: 'linear',
-            }}
-          />
-        </motion.div>
-      )}
-
-      {/* Blur placeholder if provided */}
-      {blurDataURL && isLoading && (
-        <img
-          src={blurDataURL}
-          alt=""
-          className="absolute inset-0 w-full h-full"
-          style={{
-            objectFit,
-            filter: 'blur(20px)',
-            transform: 'scale(1.1)',
-          }}
-          aria-hidden="true"
+      {/* Placeholder/Skeleton */}
+      {!isLoaded && placeholder && (
+        <div
+          className="absolute inset-0 bg-gradient-to-br from-slate-100 to-slate-200 animate-pulse"
+          style={{ width, height }}
         />
       )}
 
-      {/* Main image - always render but control visibility */}
-      <motion.img
-        ref={imgRef}
-        src={hasError ? fallbackSrc : (isInView ? (imageSrc || encodedSrc) : '')}
-        alt={alt}
-        className={`w-full h-full ${className} ${hasError ? 'p-8 opacity-50' : ''}`}
-        style={{
-          objectFit: hasError ? 'contain' : objectFit,
-          opacity: isLoading || !isInView ? 0 : 1,
-          transition: 'opacity 0.3s ease-in-out',
-          visibility: isInView ? 'visible' : 'hidden',
-        }}
-        loading={priority ? 'eager' : 'lazy'}
-        decoding="async"
-        draggable={false}
-        sizes={sizes}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: isLoading || !isInView ? 0 : 1 }}
-        transition={{ duration: 0.3 }}
-        {...props}
-      />
+      {/* Actual Image */}
+      {isInView && (
+        <motion.img
+          src={imageSrc}
+          srcSet={srcSet}
+          sizes={sizes || '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw'}
+          alt={alt}
+          width={width}
+          height={height}
+          loading={priority ? 'eager' : 'lazy'}
+          decoding="async"
+          className={`transition-opacity duration-300 ${
+            isLoaded ? 'opacity-100' : 'opacity-0'
+          } ${className}`}
+          onLoad={handleLoad}
+          onError={handleError}
+          {...props}
+        />
+      )}
 
-      {/* Loading indicator for priority images */}
-      {priority && isLoading && (
+      {/* Loading indicator */}
+      {!isLoaded && !placeholder && (
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-8 h-8 border-3 border-amber-500 border-t-transparent rounded-full animate-spin" />
+          <div className="w-8 h-8 border-2 border-amber-400 border-t-transparent rounded-full animate-spin" />
         </div>
       )}
     </div>
   );
-};
-
-/**
- * Skeleton loader for card grids
- */
-export const ImageSkeleton = ({ className = '', aspectRatio }: { className?: string; aspectRatio?: string }) => (
-  <div
-    className={`relative overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200 ${className}`}
-    style={{ aspectRatio: aspectRatio || 'auto' }}
-  >
-    <motion.div
-      className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent"
-      animate={{
-        x: ['-100%', '100%'],
-      }}
-      transition={{
-        duration: 1.5,
-        repeat: Infinity,
-        ease: 'linear',
-      }}
-    />
-  </div>
-);
-
-export default OptimizedImage;
+}

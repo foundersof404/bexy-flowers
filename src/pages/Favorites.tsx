@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState, memo, useCallback, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
+import { collectionQueryKeys } from '@/hooks/useCollectionProducts';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Heart, ShoppingCart, ArrowLeft, Sparkles } from 'lucide-react';
@@ -14,7 +16,7 @@ const Footer = React.lazy(() => import('@/components/Footer'));
 gsap.registerPlugin(ScrollTrigger);
 
 const Favorites = memo(() => {
-  const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { favorites, removeFromFavorites, isFavorite, toggleFavorite, getTotalFavorites } = useFavorites();
   const { addToCart } = useCartWithToast();
   const sectionRef = useRef<HTMLElement>(null);
@@ -248,6 +250,21 @@ const Favorites = memo(() => {
                       onHoverEnd={() => setHoveredCard(null)}
                     >
                       {/* Premium Luxury Card - Optimized Design */}
+                      <Link
+                        to={`/product/${favorite.id}`}
+                        onMouseEnter={() => {
+                          // Prefetch product data on hover for instant navigation
+                          queryClient.prefetchQuery({
+                            queryKey: collectionQueryKeys.detail(String(favorite.id)),
+                            queryFn: async () => {
+                              const { getCollectionProduct } = await import('@/lib/api/collection-products');
+                              return getCollectionProduct(String(favorite.id));
+                            },
+                            staleTime: 5 * 60 * 1000,
+                          });
+                        }}
+                        className="block"
+                      >
                       <motion.div
                         className="relative rounded-2xl overflow-hidden cursor-pointer border border-slate-200/80"
                         style={{
@@ -266,21 +283,6 @@ const Favorites = memo(() => {
                         transition={{ 
                           duration: 0.3, 
                           ease: [0.23, 1, 0.32, 1] 
-                        }}
-                        onClick={() => {
-                          navigate(`/product/${favorite.id}`, {
-                            state: {
-                              product: {
-                                id: favorite.id,
-                                title: favorite.title || favorite.name,
-                                price: favorite.price,
-                                description: favorite.description,
-                                imageUrl: favorite.image || favorite.imageUrl,
-                                images: [favorite.image || favorite.imageUrl],
-                                category: favorite.category || 'Premium Bouquets'
-                              }
-                            }
-                          });
                         }}
                       >
                         {/* Optimized Pink Border Overlay - Simplified */}
@@ -513,6 +515,7 @@ const Favorites = memo(() => {
                           </motion.div>
                         )}
                       </motion.div>
+                      </Link>
                     </motion.div>
                   );
                 })}

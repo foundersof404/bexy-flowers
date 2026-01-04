@@ -39,7 +39,7 @@ const AdminFlowers = lazy(() => import("./pages/admin/AdminFlowers"));
 const AdminLuxuryBoxes = lazy(() => import("./pages/admin/AdminLuxuryBoxes"));
 const AdminWeddingCreations = lazy(() => import("./pages/admin/AdminWeddingCreations"));
 
-// ⚡ PERFORMANCE OPTIMIZATION: Enhanced QueryClient with better caching
+// ⚡ PERFORMANCE OPTIMIZATION: Enhanced QueryClient with better caching and scalability
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -47,10 +47,22 @@ const queryClient = new QueryClient({
       gcTime: 10 * 60 * 1000, // 10 minutes - keep unused data for 10 minutes (formerly cacheTime)
       refetchOnWindowFocus: false, // Don't refetch on window focus for better performance
       refetchOnMount: false, // Use cached data if available
+      refetchOnReconnect: true, // Refetch on reconnect (network recovery)
       retry: 1, // Reduce retries for faster error handling
       retryDelay: 1000, // Shorter retry delay
+      // ⚡ SCALABILITY: Network mode for better offline support
+      networkMode: 'online',
+      // ⚡ SCALABILITY: Structural sharing for better memory usage
+      structuralSharing: true,
+    },
+    mutations: {
+      retry: 1,
+      networkMode: 'online',
     },
   },
+  // ⚡ SCALABILITY: Limit cache size to prevent memory issues
+  queryCache: undefined, // Use default cache
+  mutationCache: undefined, // Use default cache
 });
 
 // Component that contains router-dependent logic

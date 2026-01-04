@@ -1372,25 +1372,25 @@ const ImageGallery = () => {
   useEffect(() => {
     if (weddingCreationsQuery.data) {
       const creations = weddingCreationsQuery.data;
-      console.log('Loaded wedding creations:', creations.length, creations);
+        console.log('Loaded wedding creations:', creations.length, creations);
 
-      // Filter out empty/null/undefined image URLs and encode valid ones
-      const imageUrls = creations
-        .map(creation => creation.image_url)
-        .filter((url): url is string => Boolean(url && url.trim()))
-        .map(url => {
-          const encoded = encodeImageUrl(url);
-          console.log('Encoding wedding image URL:', url, '->', encoded);
-          return encoded;
-        })
-        .filter(url => url.trim() !== ''); // Filter out any empty strings after encoding
+        // Filter out empty/null/undefined image URLs and encode valid ones
+        const imageUrls = creations
+          .map(creation => creation.image_url)
+          .filter((url): url is string => Boolean(url && url.trim()))
+          .map(url => {
+            const encoded = encodeImageUrl(url);
+            console.log('Encoding wedding image URL:', url, '->', encoded);
+            return encoded;
+          })
+          .filter(url => url.trim() !== ''); // Filter out any empty strings after encoding
 
-      console.log('Final wedding image URLs:', imageUrls.length, imageUrls);
-      setWeddingImages(imageUrls);
+        console.log('Final wedding image URLs:', imageUrls.length, imageUrls);
+        setWeddingImages(imageUrls);
     } else if (weddingCreationsQuery.error) {
       console.error('Failed to load wedding images:', weddingCreationsQuery.error);
-      setWeddingImages([]);
-    }
+        setWeddingImages([]);
+      }
 
     setLoadingImages(weddingCreationsQuery.isLoading);
   }, [weddingCreationsQuery.data, weddingCreationsQuery.error, weddingCreationsQuery.isLoading]);

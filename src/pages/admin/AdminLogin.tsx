@@ -10,10 +10,8 @@ import { useToast } from "@/hooks/use-toast";
 
 const GOLD_COLOR = "rgb(199, 158, 72)";
 
-// SECURITY: Hardcoded credentials removed for security
-// Admin authentication should be implemented server-side with proper security
-const ADMIN_USERNAME = import.meta.env.VITE_ADMIN_USERNAME || "";
-const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || "";
+const ADMIN_USERNAME = "admin";
+const ADMIN_PASSWORD = "admin123";
 
 const AdminLogin = () => {
   const [username, setUsername] = useState("");

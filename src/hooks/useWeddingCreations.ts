@@ -1,7 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   getWeddingCreations,
-  getActiveWeddingCreations,
   getWeddingCreation,
   createWeddingCreation,
   updateWeddingCreation,
@@ -28,14 +27,7 @@ export const useWeddingCreations = (filters?: {
 }) => {
   return useQuery({
     queryKey: weddingQueryKeys.list(filters),
-    queryFn: async () => {
-      // If isActive filter is true, use getActiveWeddingCreations
-      if (filters?.isActive === true) {
-        return await getActiveWeddingCreations();
-      }
-      // Otherwise, get all wedding creations
-      return await getWeddingCreations();
-    },
+    queryFn: () => getWeddingCreations(filters),
     staleTime: 5 * 60 * 1000, // 5 minutes - wedding data changes less frequently
     gcTime: 10 * 60 * 1000,
     refetchOnWindowFocus: false,
