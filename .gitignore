@@ -52,3 +52,5 @@ models/*.safetensors
 models/*.ckpt
 models/*.pt
 models/*.pth
+# Local Netlify folder
+.netlify
