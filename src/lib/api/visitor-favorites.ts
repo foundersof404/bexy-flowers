@@ -29,32 +29,25 @@ async function ensureVisitor(): Promise<void> {
   const visitorId = getVisitorId();
   
   try {
-    // Call the database function to get or create visitor
-    const { error } = await supabase.rpc('get_or_create_visitor', {
-      p_visitor_id: visitorId
-    });
-
-    if (error) {
-      // If function doesn't exist, try direct insert/update
-      const { data: existing } = await supabase
-        .from('visitors')
-        .select('id')
-        .eq('visitor_id', visitorId)
-        .single();
+    // Try to call the database function to get or create visitor
+    try {
+      await db.rpc('get_or_create_visitor', {
+        p_visitor_id: visitorId
+      });
+    } catch (rpcError) {
+      // If function doesn't exist, try direct insert/update via database proxy
+      const existing = await db.selectOne('visitors', { visitor_id: visitorId });
 
       if (!existing) {
-        await supabase
-          .from('visitors')
-          .insert({
-            visitor_id: visitorId,
-            first_visit_at: new Date().toISOString(),
-            last_visit_at: new Date().toISOString()
-          });
+        await db.insert('visitors', {
+          visitor_id: visitorId,
+          first_visit_at: new Date().toISOString(),
+          last_visit_at: new Date().toISOString()
+        });
       } else {
-        await supabase
-          .from('visitors')
-          .update({ last_visit_at: new Date().toISOString() })
-          .eq('visitor_id', visitorId);
+        await db.update('visitors', { visitor_id: visitorId }, {
+          last_visit_at: new Date().toISOString()
+        });
       }
     }
   } catch (error) {

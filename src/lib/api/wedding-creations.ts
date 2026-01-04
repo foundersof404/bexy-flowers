@@ -49,8 +49,8 @@ export async function createWeddingCreation(
   }
 
   const data = await db.insert<WeddingCreation>('wedding_creations', {
-    ...creation,
-    image_url: imageUrl,
+      ...creation,
+      image_url: imageUrl,
   });
 
   if (!data) {
@@ -95,7 +95,7 @@ export async function updateWeddingCreation(
     try {
       const result = await uploadImage('wedding-creations', newImage);
       imageUrl = result.url;
-
+      
       // Delete old image from Supabase Storage if we're replacing it
       // Only delete if the old URL is from Supabase Storage (contains the bucket name)
       const currentCreation = await getWeddingCreation(id);
