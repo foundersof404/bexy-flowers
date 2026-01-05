@@ -112,7 +112,9 @@ export default defineConfig(({ mode }) => ({
   optimizeDeps: {
     include: [
       'react',
+      'react/jsx-runtime',
       'react-dom',
+      'react-dom/client',
       'react-router-dom',
       '@tanstack/react-query',
       'framer-motion',
@@ -125,6 +127,7 @@ export default defineConfig(({ mode }) => ({
     esbuildOptions: {
       // Handle CommonJS modules like stats.js properly
       format: 'esm',
+      jsx: 'automatic', // Use automatic JSX runtime
     },
   },
 }));
