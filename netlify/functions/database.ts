@@ -22,8 +22,9 @@ declare const process: {
 };
 
 // Get Supabase credentials from environment (server-side only)
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
+// Get Supabase credentials from environment (server-side only)
+const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseServiceKey) {
   console.error('[Database API] Missing Supabase environment variables');
@@ -99,7 +100,7 @@ function generateFingerprint(event: HandlerEvent, ip: string): string {
     event.headers['user-agent'] || 'unknown',
     event.headers['accept-language'] || 'unknown',
   ];
-  
+
   // Simple hash
   const str = components.join('|');
   let hash = 0;
@@ -119,7 +120,7 @@ function validateAPIKey(event: HandlerEvent): boolean {
   if (!frontendApiKey) {
     return true; // Allow if not configured (backward compatibility)
   }
-  
+
   const providedKey = event.headers['x-api-key'] || event.headers['X-API-Key'];
   return providedKey === frontendApiKey;
 }
@@ -133,13 +134,13 @@ function getSecurityHeaders(origin: string): Record<string, string> {
     'X-Content-Type-Options': 'nosniff',
     'X-Frame-Options': 'DENY',
   };
-  
+
   if (ALLOWED_ORIGINS.some(allowed => origin.startsWith(allowed))) {
     headers['Access-Control-Allow-Origin'] = origin;
     headers['Access-Control-Allow-Headers'] = 'Content-Type, X-API-Key';
     headers['Access-Control-Allow-Methods'] = 'POST, OPTIONS';
   }
-  
+
   return headers;
 }
 
@@ -159,7 +160,7 @@ function isValidTableName(table: string | undefined): boolean {
  */
 function checkRateLimit(ip: string): { allowed: boolean; retryAfter?: number; error?: string } {
   const now = Date.now();
-  
+
   // Reset daily counters if needed
   if (now - globalDailyReset > 24 * 60 * 60 * 1000) {
     globalDailyRequests = 0;
@@ -171,12 +172,12 @@ function checkRateLimit(ip: string): { allowed: boolean; retryAfter?: number; er
       }
     });
   }
-  
+
   // Check global daily limit
   if (globalDailyRequests >= MAX_DAILY_REQUESTS) {
     return { allowed: false, error: 'Daily request limit reached. Please try again tomorrow.' };
   }
-  
+
   // Get or create rate limit data
   let data = rateLimitStore.get(ip);
   if (!data) {
@@ -189,22 +190,22 @@ function checkRateLimit(ip: string): { allowed: boolean; retryAfter?: number; er
     };
     rateLimitStore.set(ip, data);
   }
-  
+
   // Check if IP is blocked
   if (data.blocked && now < data.blockUntil) {
     const retryAfter = Math.ceil((data.blockUntil - now) / 1000);
     return { allowed: false, retryAfter, error: `IP temporarily blocked. Retry after ${retryAfter} seconds.` };
   }
-  
+
   // Reset block if expired
   if (data.blocked && now >= data.blockUntil) {
     data.blocked = false;
     data.blockUntil = 0;
   }
-  
+
   // Clean old requests (older than 1 hour)
   data.requests = data.requests.filter(timestamp => now - timestamp < 60 * 60 * 1000);
-  
+
   // Check per-minute limit
   const requestsLastMinute = data.requests.filter(timestamp => now - timestamp < 60 * 1000).length;
   if (requestsLastMinute >= RATE_LIMITS.perMinute) {
@@ -213,18 +214,18 @@ function checkRateLimit(ip: string): { allowed: boolean; retryAfter?: number; er
     data.blockUntil = now + 60 * 60 * 1000;
     return { allowed: false, retryAfter: 3600, error: 'Rate limit exceeded. IP blocked for 1 hour.' };
   }
-  
+
   // Check per-hour limit
   const requestsLastHour = data.requests.length;
   if (requestsLastHour >= RATE_LIMITS.perHour) {
     return { allowed: false, retryAfter: 3600, error: 'Hourly rate limit exceeded. Please try again later.' };
   }
-  
+
   // Check per-day limit
   if (data.dailyCount >= RATE_LIMITS.perDay) {
     return { allowed: false, error: 'Daily rate limit exceeded. Please try again tomorrow.' };
   }
-  
+
   // Check minimum delay between requests
   if (data.requests.length > 0) {
     const lastRequest = data.requests[data.requests.length - 1];
@@ -234,12 +235,12 @@ function checkRateLimit(ip: string): { allowed: boolean; retryAfter?: number; er
       return { allowed: false, retryAfter, error: `Please wait ${retryAfter}ms between requests.` };
     }
   }
-  
+
   // All checks passed - add request
   data.requests.push(now);
   data.dailyCount++;
   globalDailyRequests++;
-  
+
   return { allowed: true };
 }
 
@@ -260,7 +261,7 @@ async function executeOperation(request: DatabaseRequest): Promise<any> {
     switch (operation) {
       case 'select': {
         let query = supabase.from(table).select(select || '*');
-        
+
         // Apply filters
         if (filters) {
           for (const [key, value] of Object.entries(filters)) {
@@ -303,17 +304,17 @@ async function executeOperation(request: DatabaseRequest): Promise<any> {
             }
           }
         }
-        
+
         // Apply ordering
         if (orderBy) {
           query = query.order(orderBy.column, { ascending: orderBy.ascending !== false });
         }
-        
+
         // Apply limit
         if (limit) {
           query = query.limit(limit);
         }
-        
+
         const { data: result, error } = await query;
         if (error) throw error;
         return result;
@@ -338,19 +339,19 @@ async function executeOperation(request: DatabaseRequest): Promise<any> {
         if (!filters || Object.keys(filters).length === 0) {
           throw new Error('Update operation requires at least one filter (safety measure)');
         }
-        
+
         // Additional validation: prevent updating all records
         if (Object.keys(filters).length === 0) {
           throw new Error('Update operation requires filters to prevent accidental mass updates');
         }
-        
+
         let query = supabase.from(table).update(data);
-        
+
         // Apply filters
         for (const [key, value] of Object.entries(filters)) {
           query = query.eq(key, value);
         }
-        
+
         const { data: result, error } = await query.select(select || '*');
         if (error) throw error;
         return result;
@@ -360,19 +361,19 @@ async function executeOperation(request: DatabaseRequest): Promise<any> {
         if (!filters || Object.keys(filters).length === 0) {
           throw new Error('Delete operation requires at least one filter (safety measure)');
         }
-        
+
         // Additional validation: prevent deleting all records
         if (Object.keys(filters).length === 0) {
           throw new Error('Delete operation requires filters to prevent accidental mass deletes');
         }
-        
+
         let query = supabase.from(table).delete();
-        
+
         // Apply filters
         for (const [key, value] of Object.entries(filters)) {
           query = query.eq(key, value);
         }
-        
+
         const { error } = await query;
         if (error) throw error;
         return { success: true };
@@ -382,12 +383,12 @@ async function executeOperation(request: DatabaseRequest): Promise<any> {
         if (!functionName) {
           throw new Error('RPC operation requires functionName');
         }
-        
+
         // Validate function name
         if (!isValidTableName(functionName)) {
           throw new Error('Invalid function name');
         }
-        
+
         const { data: result, error } = await supabase.rpc(
           functionName,
           functionParams || {}
@@ -412,14 +413,14 @@ export const handler: Handler = async (
   const startTime = Date.now();
   const ip = getClientIP(event);
   const origin = event.headers.origin || event.headers.referer || '';
-  
+
   const headers = getSecurityHeaders(origin);
-  
+
   // Handle preflight
   if (event.httpMethod === 'OPTIONS') {
     return { statusCode: 200, headers, body: '' };
   }
-  
+
   // Only POST allowed
   if (event.httpMethod !== 'POST') {
     return {
@@ -428,7 +429,7 @@ export const handler: Handler = async (
       body: JSON.stringify({ error: 'Method not allowed. Only POST requests are accepted.' }),
     };
   }
-  
+
   // Check origin (allow requests without origin for testing/API clients)
   if (origin && !ALLOWED_ORIGINS.some(allowed => origin.startsWith(allowed))) {
     logSecurityEvent('error', 'warning', event.path, ip, {
@@ -442,13 +443,13 @@ export const handler: Handler = async (
       body: JSON.stringify({ error: 'Forbidden: Origin not allowed' }),
     };
   }
-  
+
   // If no origin provided, allow if API key is valid (for API clients/testing)
   // This allows automated tests and API clients to work
   if (!origin) {
     // Will be validated by API key check below
   }
-  
+
   // Validate API key
   if (!validateAPIKey(event)) {
     logSecurityEvent('auth_failure', 'error', event.path, ip, {
@@ -461,7 +462,7 @@ export const handler: Handler = async (
       body: JSON.stringify({ error: 'Unauthorized: Invalid API key' }),
     };
   }
-  
+
   // Check rate limits (distributed with Redis fallback to memory)
   const fingerprint = generateFingerprint(event, ip);
   const rateLimitCheck = await checkDistributedRateLimit(ip, fingerprint, {
@@ -471,7 +472,7 @@ export const handler: Handler = async (
     minDelay: RATE_LIMITS.minDelay,
     maxDailyRequests: MAX_DAILY_REQUESTS,
   });
-  
+
   if (!rateLimitCheck.allowed) {
     logSecurityEvent('rate_limit', 'warning', event.path, ip, {
       retryAfter: rateLimitCheck.retryAfter,
@@ -497,7 +498,7 @@ export const handler: Handler = async (
       }),
     };
   }
-  
+
   // Check request body size (limit to 1MB)
   const bodySize = event.body?.length || 0;
   const MAX_BODY_SIZE = 1024 * 1024; // 1MB
@@ -508,11 +509,11 @@ export const handler: Handler = async (
       body: JSON.stringify({ error: 'Request body too large. Maximum size: 1MB' }),
     };
   }
-  
+
   // IMPORTANT: Validate request BEFORE checking database configuration
   // This ensures validation errors return 400, not 500
   let request: DatabaseRequest | null = null;
-  
+
   try {
     // Parse request body
     try {
@@ -528,7 +529,7 @@ export const handler: Handler = async (
         body: JSON.stringify({ error: 'Invalid JSON in request body' }),
       };
     }
-    
+
     // Validate request - check for missing fields
     if (!request || !request.operation) {
       logSecurityEvent('validation_error', 'warning', event.path, ip, {
@@ -540,7 +541,7 @@ export const handler: Handler = async (
         body: JSON.stringify({ error: 'Missing required field: operation' }),
       };
     }
-    
+
     if (!request || !request.table) {
       logSecurityEvent('validation_error', 'warning', event.path, ip, {
         reason: 'Missing required field: table',
@@ -552,7 +553,7 @@ export const handler: Handler = async (
         body: JSON.stringify({ error: 'Missing required field: table' }),
       };
     }
-    
+
     // Validate operation type
     const validOperations = ['select', 'insert', 'update', 'delete', 'rpc'];
     if (!validOperations.includes(request.operation)) {
@@ -566,7 +567,7 @@ export const handler: Handler = async (
         body: JSON.stringify({ error: `Invalid operation: ${request.operation}. Valid operations: ${validOperations.join(', ')}` }),
       };
     }
-    
+
     // Validate table name (prevent SQL injection)
     if (!isValidTableName(request.table)) {
       logSecurityEvent('validation_error', 'warning', event.path, ip, {
@@ -579,7 +580,7 @@ export const handler: Handler = async (
         body: JSON.stringify({ error: 'Invalid table name. Only alphanumeric characters, underscores, and hyphens are allowed.' }),
       };
     }
-    
+
     // NOW check if database is configured (after validation passes)
     if (!supabase) {
       console.error('[Database API] Database not configured');
@@ -589,13 +590,13 @@ export const handler: Handler = async (
         body: JSON.stringify({ error: 'Database not configured' }),
       };
     }
-    
+
     // Execute operation
     const result = await executeOperation(request);
-    
+
     const responseTime = Date.now() - startTime;
     console.log(`[Database API] ✅ ${request.operation} on ${request.table} - ${responseTime}ms`);
-    
+
     // Log performance metric
     logPerformanceMetric(event.path, responseTime, 200);
     logSecurityEvent('success', 'info', event.path, ip, {
@@ -603,7 +604,7 @@ export const handler: Handler = async (
       table: request.table,
       responseTime,
     });
-    
+
     return {
       statusCode: 200,
       headers: { ...headers, 'Content-Type': 'application/json' },
@@ -612,16 +613,16 @@ export const handler: Handler = async (
   } catch (error) {
     const responseTime = Date.now() - startTime;
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    
+
     // Determine if this is a validation error (400) or server error (500)
-    const isValidationError = 
+    const isValidationError =
       errorMessage.includes('Invalid') ||
       errorMessage.includes('Missing required') ||
       errorMessage.includes('requires') ||
       errorMessage.includes('Unsupported operation');
-    
+
     const statusCode = isValidationError ? 400 : 500;
-    
+
     // Log error event
     logSecurityEvent(isValidationError ? 'validation_error' : 'error', isValidationError ? 'warning' : 'error', event.path, ip, {
       operation: request?.operation,
@@ -631,7 +632,7 @@ export const handler: Handler = async (
     });
     logPerformanceMetric(event.path, responseTime, statusCode);
     console.error(`[Database API] ❌ Error: ${errorMessage} - ${responseTime}ms`);
-    
+
     return {
       statusCode,
       headers,

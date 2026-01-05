@@ -34,27 +34,51 @@ interface DatabaseResponse<T = any> {
 async function databaseRequest<T = any>(request: DatabaseRequest): Promise<T> {
   const frontendApiKey = import.meta.env.VITE_FRONTEND_API_KEY;
   
-  const response = await fetch(API_ENDPOINT, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(frontendApiKey && { 'X-API-Key': frontendApiKey }),
-    },
-    body: JSON.stringify(request),
-  });
-  
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-    throw new Error(errorData.error || errorData.message || `Database request failed: ${response.status}`);
+  try {
+    const response = await fetch(API_ENDPOINT, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(frontendApiKey && { 'X-API-Key': frontendApiKey }),
+      },
+      body: JSON.stringify(request),
+    });
+    
+    if (!response.ok) {
+      // Handle 404 specifically (Netlify Functions not available)
+      if (response.status === 404) {
+        if (import.meta.env.DEV) {
+          throw new Error(
+            'Netlify Functions not available. Please run `npm run dev:netlify` instead of `npm run dev` to enable serverless functions locally.'
+          );
+        }
+        throw new Error('Database endpoint not found. Please ensure Netlify Functions are deployed.');
+      }
+      
+      const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+      throw new Error(errorData.error || errorData.message || `Database request failed: ${response.status}`);
+    }
+    
+    const result: DatabaseResponse<T> = await response.json();
+    
+    if (!result.success) {
+      throw new Error(result.error || 'Database operation failed');
+    }
+    
+    return result.data;
+  } catch (error) {
+    // Re-throw if it's already an Error with a message
+    if (error instanceof Error) {
+      throw error;
+    }
+    // Handle network errors
+    if (import.meta.env.DEV) {
+      throw new Error(
+        `Network error: ${error}. Make sure Netlify Dev is running with \`npm run dev:netlify\``
+      );
+    }
+    throw new Error(`Database request failed: ${error}`);
   }
-  
-  const result: DatabaseResponse<T> = await response.json();
-  
-  if (!result.success) {
-    throw new Error(result.error || 'Database operation failed');
-  }
-  
-  return result.data;
 }
 
 /**

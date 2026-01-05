@@ -14,12 +14,24 @@ export default defineConfig(({ mode }) => ({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
       },
+      // Proxy Netlify Functions in development
+      // When running `npm run dev`, try to proxy to Netlify Dev if running
+      // Otherwise, this will fail gracefully and show a helpful error
+      '/.netlify/functions': {
+        target: 'http://localhost:8888',
+        changeOrigin: true,
+        secure: false,
+      },
     },
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      // Force react-reconciler to use the correct version with ConcurrentRoot export
+      "react-reconciler": path.resolve(__dirname, "./node_modules/react-reconciler"),
+      // Force scheduler to use the correct version compatible with React 18.3.1
+      "scheduler": path.resolve(__dirname, "./node_modules/scheduler"),
     },
   },
   build: {
@@ -28,6 +40,12 @@ export default defineConfig(({ mode }) => ({
     minify: 'esbuild', // Faster than terser
     cssMinify: true,
     sourcemap: false, // Disable in production for smaller bundles
+    // Fix CommonJS module resolution for stats.js used by @react-three/drei
+    commonjsOptions: {
+      // Transform CommonJS to ES modules for better compatibility
+      transformMixedEsModules: true,
+      include: [/node_modules\/stats\.js/],
+    },
     rollupOptions: {
       output: {
         // ⚡ PERFORMANCE: Manual chunking for better caching and parallel loading
@@ -91,7 +109,15 @@ export default defineConfig(({ mode }) => ({
       'react-router-dom',
       '@tanstack/react-query',
       'framer-motion',
+      'react-reconciler', // Force include to ensure correct version
+      'scheduler', // Force include to ensure correct version
     ],
     exclude: ['@react-three/fiber', '@react-three/drei'], // Exclude heavy 3D libs from pre-bundling
+    // Note: force: true removed - it's too slow. Use only when dependencies change.
+    // If you encounter module resolution issues, temporarily set force: true
+    esbuildOptions: {
+      // Handle CommonJS modules like stats.js properly
+      format: 'esm',
+    },
   },
 }));
