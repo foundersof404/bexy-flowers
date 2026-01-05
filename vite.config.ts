@@ -28,11 +28,15 @@ export default defineConfig(({ mode }) => ({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      // Force React to use a single instance (fixes createContext undefined errors)
+      "react": path.resolve(__dirname, "./node_modules/react"),
+      "react-dom": path.resolve(__dirname, "./node_modules/react-dom"),
       // Force react-reconciler to use the correct version with ConcurrentRoot export
       "react-reconciler": path.resolve(__dirname, "./node_modules/react-reconciler"),
       // Force scheduler to use the correct version compatible with React 18.3.1
       "scheduler": path.resolve(__dirname, "./node_modules/scheduler"),
     },
+    dedupe: ['react', 'react-dom'], // Deduplicate React instances
   },
   build: {
     // ⚡ PERFORMANCE: Optimize build for scalability
@@ -52,8 +56,11 @@ export default defineConfig(({ mode }) => ({
         manualChunks: (id) => {
           // Vendor chunks
           if (id.includes('node_modules')) {
-            // React and React DOM
-            if (id.includes('react') || id.includes('react-dom')) {
+            // React and React DOM - ensure single instance
+            if (id.includes('react') && !id.includes('react-dom') && !id.includes('react-router') && !id.includes('react-')) {
+              return 'react-vendor';
+            }
+            if (id.includes('react-dom')) {
               return 'react-vendor';
             }
             // React Router
