@@ -170,21 +170,17 @@ const Collection = () => {
                     Preparing your luxury collection
                   </p>
                 </div>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-5 lg:gap-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8 md:gap-12 lg:gap-16">
                   {Array.from({ length: 6 }).map((_, index) => (
                     <div
                       key={index}
-                      className="rounded-2xl md:rounded-3xl bg-white/80 border border-gray-200/60 shadow-sm overflow-hidden"
+                      className="rounded-sm bg-black overflow-hidden"
                     >
-                      <div className="aspect-square bg-gradient-to-br from-slate-100 to-slate-200 animate-pulse" />
-                      <div className="p-3 md:p-4 space-y-3">
-                        <div className="h-3 w-1/2 bg-slate-200 rounded-full animate-pulse" />
-                        <div className="h-3 w-3/4 bg-slate-100 rounded-full animate-pulse" />
-                        <div className="h-px w-full bg-slate-200/80" />
-                        <div className="flex items-center justify-between gap-2">
-                          <div className="h-4 w-16 bg-slate-200 rounded-full animate-pulse" />
-                          <div className="h-8 w-20 bg-slate-100 rounded-full animate-pulse" />
-                        </div>
+                      <div className="aspect-[3/4] bg-gradient-to-br from-slate-100 to-slate-200 animate-pulse" />
+                      <div className="mt-6 space-y-2 p-4">
+                        <div className="h-6 w-3/4 bg-slate-200 rounded animate-pulse" />
+                        <div className="h-4 w-1/2 bg-slate-100 rounded animate-pulse" />
+                        <div className="h-12 w-full bg-slate-200 rounded animate-pulse" />
                       </div>
                     </div>
                   ))}
@@ -219,7 +215,7 @@ const Collection = () => {
                   </motion.p>
                 </motion.div>
                 
-                {/* Grid without filtration animation - smooth scroll animations inside */}
+                {/* Grid with arts-style layout */}
                 <BouquetGrid 
                   bouquets={filteredBouquets}
                   onBouquetClick={handleBouquetClick}

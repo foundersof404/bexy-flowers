@@ -1,177 +1,133 @@
-import { useEffect, useRef, useMemo, memo } from "react";
-import { motion, useReducedMotion } from "framer-motion";
-import { gsap } from "gsap";
-import { OptimizedImage } from "@/components/OptimizedImage";
-import heroBackground from "@/assets/hero-bg.jpg";
+import { useRef, memo } from "react";
+import { motion } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const CollectionHeroComponent = () => {
   const heroRef = useRef<HTMLElement>(null);
-  const particlesRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
-  const shouldReduceMotion = useReducedMotion();
-  
-  const prefersReducedMotion = useMemo(() => 
-    typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches,
-    []
-  );
-
-  useEffect(() => {
-    if (isMobile || prefersReducedMotion || shouldReduceMotion || !particlesRef.current) {
-      return;
-    }
-
-    const particles = particlesRef.current.children;
-    gsap.set(particles, {
-      x: () => gsap.utils.random(-200, 200),
-      y: () => gsap.utils.random(-200, 200),
-      scale: () => gsap.utils.random(0.5, 1.5),
-      opacity: () => gsap.utils.random(0.3, 0.8)
-    });
-
-    gsap.to(particles, {
-      y: "-=100",
-      rotation: 180,
-      duration: () => gsap.utils.random(15, 25),
-      ease: "none",
-      repeat: -1,
-      stagger: { each: 1, repeat: -1 },
-      force3D: true
-    });
-  }, [isMobile, prefersReducedMotion, shouldReduceMotion]);
 
   return (
     <section 
       ref={heroRef}
-      className="relative min-h-[85vh] flex items-center justify-center overflow-hidden pt-16 sm:pt-20 pb-8 sm:pb-12"
+      className="relative min-h-[70vh] flex items-center justify-center overflow-hidden pt-20 sm:pt-24 pb-12 sm:pb-16"
       style={{
-        background: `
-          radial-gradient(circle at 20% 80%, hsl(var(--primary) / 0.05) 0%, transparent 50%),
-          radial-gradient(circle at 80% 20%, hsl(var(--primary) / 0.08) 0%, transparent 50%),
-          radial-gradient(circle at 40% 40%, hsl(var(--primary) / 0.03) 0%, transparent 50%)
-        `,
-        minHeight: isMobile ? '70vh' : '85vh'
+        background: 'linear-gradient(180deg, #FEFCF8 0%, #F9F7F2 100%)',
+        minHeight: isMobile ? '60vh' : '70vh'
       }}
     >
-      {/* Ambient Gold Ribbons */}
-      <div className="absolute inset-0 pointer-events-none z-10 overflow-hidden">
-        {[...Array(3)].map((_, idx) => (
-          <motion.div
-            key={`ribbon-${idx}`}
-            initial={{ opacity: 0.2, rotate: 0, y: 0 }}
-            animate={{ 
-              opacity: [0.15, 0.35, 0.2], 
-              rotate: idx % 2 === 0 ? [0, 4, -4, 0] : [0, -5, 5, 0],
-              y: [-20, 30, -40]
-            }}
-            // Run once for the same visual effect without an infinite loop
-            transition={{ duration: 24 + idx * 4, repeat: 0, ease: "easeInOut" }}
-            className="absolute w-[50vw] h-[50vw] bg-gradient-to-br from-[#c9a14e1f] via-[#fff6e6] to-transparent blur-3xl"
+      {/* Subtle Blurred Rose Background Elements */}
+      <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
+        {/* Top-left rose */}
+        <motion.div
+          className="absolute w-64 h-64 sm:w-96 sm:h-96 top-0 left-0"
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 0.2, scale: 1 }}
+          transition={{ duration: 1.5, ease: "easeOut" }}
+        >
+          <div 
+            className="w-full h-full rounded-full blur-3xl"
             style={{
-              top: idx === 0 ? '-5%' : idx === 1 ? '25%' : '55%',
-              left: idx === 0 ? '-10%' : idx === 1 ? '45%' : '65%'
+              background: 'radial-gradient(circle, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.2) 30%, transparent 70%)'
             }}
           />
-        ))}
+        </motion.div>
+        
+        {/* Bottom-left rose */}
+        <motion.div
+          className="absolute w-72 h-72 sm:w-[28rem] sm:h-[28rem] bottom-0 left-0"
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 0.15, scale: 1 }}
+          transition={{ duration: 1.5, delay: 0.2, ease: "easeOut" }}
+        >
+          <div 
+            className="w-full h-full rounded-full blur-3xl"
+            style={{
+              background: 'radial-gradient(circle, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.15) 30%, transparent 70%)'
+            }}
+          />
+        </motion.div>
+        
+        {/* Top-right subtle hint */}
+        <motion.div
+          className="absolute w-48 h-48 sm:w-64 sm:h-64 top-0 right-0"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 0.1 }}
+          transition={{ duration: 1.5, delay: 0.4, ease: "easeOut" }}
+        >
+          <div 
+            className="w-full h-full rounded-full blur-2xl"
+            style={{
+              background: 'radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 30%, transparent 70%)'
+            }}
+          />
+        </motion.div>
+        
+        {/* Center-right subtle hint */}
+        <motion.div
+          className="absolute w-56 h-56 sm:w-80 sm:h-80 top-1/2 right-0"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 0.08 }}
+          transition={{ duration: 1.5, delay: 0.6, ease: "easeOut" }}
+        >
+          <div 
+            className="w-full h-full rounded-full blur-2xl"
+            style={{
+              background: 'radial-gradient(circle, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.08) 30%, transparent 70%)'
+            }}
+          />
+        </motion.div>
       </div>
 
-      {/* Background Image with Parallax Effect - Reduced on mobile and desktop for performance */}
-      <motion.div
-        className="absolute inset-0 z-0"
-        initial={{ scale: shouldReduceMotion || isMobile ? 1 : 1.1 }}
-        animate={{ scale: 1 }}
-        transition={{ 
-          // Keep an initial smooth reveal but avoid an infinite loop
-          duration: shouldReduceMotion || isMobile ? 0 : 20, 
-          ease: "linear",
-          repeat: 0
-        }}
-        style={{ willChange: shouldReduceMotion || isMobile ? "auto" : "transform" }}
-      >
-        <img
-          src={heroBackground}
-          alt="Luxury floral background"
-          className="w-full h-full object-cover opacity-40"
-          loading="eager"
-          decoding="async"
-          style={{ willChange: "auto" }}
-        />
-      </motion.div>
-
-      {/* Gradient Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-white/85 via-white/70 to-white/85 z-10" />
-
-      {/* Floating Particles Background - Further reduced for performance */}
-      {!isMobile && !shouldReduceMotion && (
-        <div ref={particlesRef} className="absolute inset-0 pointer-events-none z-15" aria-hidden="true">
-          {Array.from({ length: 10 }, (_, i) => (
-            <motion.div
-              key={i}
-              className="absolute w-1 h-1 bg-primary rounded-full"
-              style={{
-                filter: "blur(0.5px)",
-                boxShadow: "0 0 10px hsl(var(--primary))"
-              }}
-            />
-          ))}
-        </div>
-      )}
-
-      {/* Gradient Orbs - Hidden on mobile and reduced motion */}
-      {!isMobile && !shouldReduceMotion && (
-        <>
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-pulse-gold"></div>
-          <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-primary/15 rounded-full blur-3xl animate-float"></div>
-        </>
-      )}
-
-      {/* Hero Content - Moved upward */}
+      {/* Hero Content - Elegant Design Matching Product Layout */}
       <div
-        className="relative z-20 text-center max-w-6xl mx-auto px-4 xs:px-5 sm:px-6 lg:px-8"
+        className="relative z-20 text-center max-w-4xl mx-auto px-4 xs:px-5 sm:px-6 lg:px-8"
         style={{ marginTop: "-10px" }}
       >
         <motion.div
-          className="space-y-6 sm:space-y-8"
+          className="space-y-4 sm:space-y-6"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
         >
+          {/* Brand Name */}
           <motion.p 
-            className="uppercase tracking-[0.4em] text-xs sm:text-sm text-slate-500"
+            className="uppercase tracking-ultra-wide text-xs sm:text-sm text-slate-700 font-medium"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15, duration: 0.6 }}
           >
-            Bexy Signature Atelier
+            BEXY SIGNATURE ATELIER
           </motion.p>
 
+          {/* Main Heading */}
           <motion.h1 
-            className="font-luxury text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-8xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 bg-clip-text text-transparent relative px-2"
+            className="font-luxury text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-slate-900 relative"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.8 }}
             style={{
-              filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))',
-              letterSpacing: '0.05em'
+              letterSpacing: '0.02em',
+              lineHeight: '1.1'
             }}
           >
-            Our Complete Collection
-            {/* Animated Gold Underline */}
-            <motion.div 
-              className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 h-1 bg-gradient-to-r from-amber-400 to-yellow-500 rounded-full"
-              initial={{ width: 0 }}
-              animate={{ width: '200px' }}
-              transition={{ delay: 0.8, duration: 1.2, ease: "easeOut" }}
-            />
+            <span className="block">Our Complete</span>
+            <span className="block mt-1">Collection</span>
           </motion.h1>
 
-          <div className="relative">
-            <div className="w-40 h-0.5 bg-gradient-to-r from-transparent via-[#C79E48]/60 to-transparent mx-auto" />
-            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-[#C79E48] rotate-45 shadow-lg shadow-[#C79E48]/40" />
-          </div>
+          {/* Golden Divider with Diamond */}
+          <motion.div 
+            className="relative flex items-center justify-center my-4 sm:my-6"
+            initial={{ opacity: 0, scaleX: 0 }}
+            animate={{ opacity: 1, scaleX: 1 }}
+            transition={{ delay: 0.6, duration: 0.8, ease: "easeOut" }}
+          >
+            <div className="w-24 sm:w-32 h-px bg-gradient-to-r from-transparent via-[#C79E48] to-transparent" />
+            <div className="absolute w-2 h-2 bg-[#C79E48] rotate-45 shadow-sm" />
+          </motion.div>
 
+          {/* Description */}
           <motion.p 
-            className="text-base sm:text-lg md:text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed font-body"
+            className="text-sm sm:text-base md:text-lg text-slate-700 max-w-3xl mx-auto leading-relaxed font-body"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.45, duration: 0.7 }}
@@ -179,8 +135,6 @@ const CollectionHeroComponent = () => {
             Discover Lebanon&apos;s most luxurious floral portfolio — curated themes, couture arrangements, and limited editions designed to celebrate every exquisite moment.
           </motion.p>
         </motion.div>
-
-        {/* Stats moved to end of Collection page for better layout & performance */}
       </div>
     </section>
   );

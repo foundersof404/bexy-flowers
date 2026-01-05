@@ -85,6 +85,9 @@ export default {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      letterSpacing: {
+        "ultra-wide": "0.4em",
+      },
       keyframes: {
         "accordion-down": {
           from: {
