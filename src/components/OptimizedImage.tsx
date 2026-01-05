@@ -110,8 +110,8 @@ export function OptimizedImage({
 
   return (
     <div
-      className={`relative overflow-hidden ${className}`}
-      style={{ width, height }}
+      className={`relative overflow-hidden ${className.includes('!w-full') ? 'w-full h-full' : className}`}
+      style={{ width: width || '100%', height: height || '100%' }}
       ref={imgRef}
     >
       {/* Placeholder/Skeleton */}
@@ -133,9 +133,9 @@ export function OptimizedImage({
           height={height}
           loading={priority ? 'eager' : 'lazy'}
           decoding="async"
-          className={`transition-opacity duration-300 ${
+          className={`transition-opacity duration-300 w-full h-full ${
             isLoaded ? 'opacity-100' : 'opacity-0'
-          } ${className}`}
+          } ${className.includes('object-cover') ? 'object-cover object-center' : ''}`}
           onLoad={handleLoad}
           onError={handleError}
           {...props}
