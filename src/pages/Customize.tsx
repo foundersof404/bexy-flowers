@@ -1,12 +1,12 @@
 import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Box, Gift, Check, CheckCircle2, Wand2, Plus, Minus, X, Info, ChevronRight, Palette, ShoppingCart, Circle, Square, Heart, Download, MessageCircle, Sparkles, ArrowRight } from "lucide-react";
+import { Box, Gift, Check, CheckCircle2, Wand2, Plus, Minus, X, Info, ChevronRight, Palette, ShoppingCart, Circle, Square, Heart, Download, MessageCircle, Sparkles, ArrowRight, Star, Crown, GraduationCap, Heart as HeartIcon, Candy } from "lucide-react";
 import UltraNavigation from "@/components/UltraNavigation";
 import { useCart } from "@/contexts/CartContext";
 import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
 import heroBouquetMain from "@/assets/bouquet-4.jpg";
-import { flowers, flowerFamilies, EnhancedFlower } from "@/data/flowers";
+import { flowers, flowerFamilies, EnhancedFlower, Season } from "@/data/flowers";
 import { generateBouquetImage as generateImage } from "@/lib/api/imageGeneration";
 
 // --- Types ---
@@ -26,6 +26,7 @@ interface Size {
   name: string;
   priceMultiplier: number;
   description: string;
+  maxFlowers: number; // Maximum number of flowers for this size
 }
 
 interface ColorOption {
@@ -46,6 +47,13 @@ interface BoxShape {
   icon: any;
 }
 
+interface Accessory {
+  id: string;
+  name: string;
+  icon: any;
+  price: number;
+}
+
 // --- Data ---
 const packages: Package[] = [
   { id: "box", name: "Luxury Box", type: "box", icon: Box, basePrice: 20, description: "Premium rigid box" },
@@ -53,9 +61,9 @@ const packages: Package[] = [
 ];
 
 const sizes: Size[] = [
-  { id: "small", name: "Small", priceMultiplier: 1.0, description: "Perfect for a sweet gesture" },
-  { id: "medium", name: "Medium", priceMultiplier: 1.5, description: "Our most popular size" },
-  { id: "large", name: "Large", priceMultiplier: 2.0, description: "A grand statement" }
+  { id: "small", name: "Small", priceMultiplier: 1.0, description: "Perfect for a sweet gesture", maxFlowers: 10 },
+  { id: "medium", name: "Medium", priceMultiplier: 1.5, description: "Our most popular size", maxFlowers: 22 },
+  { id: "large", name: "Large", priceMultiplier: 2.0, description: "A grand statement", maxFlowers: 37 }
 ];
 
 const colors: ColorOption[] = [
@@ -71,6 +79,13 @@ const boxShapes: BoxShape[] = [
   { id: "round", name: "Round", icon: Circle },
   { id: "square", name: "Square", icon: Square },
   { id: "heart", name: "Heart", icon: Heart }
+];
+
+const accessories: Accessory[] = [
+  { id: "crown", name: "Crown", icon: Crown, price: 5 },
+  { id: "graduation-hat", name: "Graduation Hat", icon: GraduationCap, price: 4 },
+  { id: "bear", name: "Bear", icon: HeartIcon, price: 6 },
+  { id: "chocolate", name: "Chocolate", icon: Candy, price: 3 }
 ];
 
 // Horizontal Progress Stepper Component
@@ -133,8 +148,13 @@ const Customize: React.FC = () => {
   const [flowerMode, setFlowerMode] = useState<"specific" | "mix" | null>(null);
   const [selectedFamily, setSelectedFamily] = useState<string | null>(null);
   const [selectedFlowers, setSelectedFlowers] = useState<Record<string, SelectedFlower>>({});
+  const [withGlitter, setWithGlitter] = useState<boolean>(false);
+  const [selectedAccessories, setSelectedAccessories] = useState<string[]>([]);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [flowerFilter, setFlowerFilter] = useState<"all" | "popular" | "romantic" | "minimal" | "luxury" | "seasonal">("all");
+  const [seasonFilter, setSeasonFilter] = useState<Season | "all-seasons">("all-seasons");
+  const flowersGridRef = useRef<HTMLDivElement>(null);
 
   // Cleanup blob URLs
   useEffect(() => {
@@ -149,7 +169,46 @@ const Customize: React.FC = () => {
   const step1Complete = !!selectedPackage && (selectedPackage.type === "wrap" || !!selectedBoxShape);
   const step2Complete = !!selectedSize && !!selectedColor;
   const step3Complete = Object.keys(selectedFlowers).length > 0;
-  const currentStep = !step1Complete ? 1 : !step2Complete ? 2 : 3;
+  const step4Complete = true; // Glitter selection is optional (always complete)
+  const step5Complete = true; // Accessories selection is optional (always complete)
+  const currentStep = !step1Complete ? 1 : !step2Complete ? 2 : !step3Complete ? 3 : !step4Complete ? 4 : 5;
+
+  // Refs for sections
+  const step1Ref = useRef<HTMLDivElement>(null);
+  const boxShapeRef = useRef<HTMLDivElement>(null);
+  const step2Ref = useRef<HTMLDivElement>(null);
+  const step3Ref = useRef<HTMLDivElement>(null);
+  const previewCardRef = useRef<HTMLDivElement>(null);
+
+  // State for sticky preview card position
+  const [previewCardTop, setPreviewCardTop] = useState<number>(96);
+  const [scrollY, setScrollY] = useState<number>(0);
+
+  // Calculate preview card position to align with step1
+  useEffect(() => {
+    const updatePosition = () => {
+      if (step1Ref.current) {
+        const rect = step1Ref.current.getBoundingClientRect();
+        const absoluteTop = rect.top + window.scrollY;
+        setPreviewCardTop(absoluteTop);
+      }
+      setScrollY(window.scrollY);
+    };
+
+    const handleScroll = () => {
+      setScrollY(window.scrollY);
+    };
+
+    const timeoutId = setTimeout(updatePosition, 100);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('resize', updatePosition);
+
+    return () => {
+      clearTimeout(timeoutId);
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', updatePosition);
+    };
+  }, []);
 
   // Reset box shape when package changes
   useEffect(() => {
@@ -158,10 +217,57 @@ const Customize: React.FC = () => {
     }
   }, [selectedPackage]);
 
+  // Auto-scroll: When Luxury Box is selected, scroll to box shape
+  useEffect(() => {
+    if (selectedPackage?.type === "box" && boxShapeRef.current) {
+      setTimeout(() => {
+        boxShapeRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 300);
+    }
+  }, [selectedPackage]);
+
+  // Auto-scroll: When box shape is selected, scroll to size & color
+  useEffect(() => {
+    if (selectedBoxShape && step2Ref.current) {
+      setTimeout(() => {
+        step2Ref.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 300);
+    }
+  }, [selectedBoxShape]);
+
+  // Auto-scroll: When size and color are both selected, scroll to flowers
+  useEffect(() => {
+    if (step2Complete && step3Ref.current) {
+      setTimeout(() => {
+        step3Ref.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 300);
+    }
+  }, [step2Complete]);
+
+  // Reset filter when mode changes
+  useEffect(() => {
+    setFlowerFilter("all");
+    setSeasonFilter("all-seasons");
+  }, [flowerMode, selectedFamily]);
+
+  // Auto-scroll: When family is selected, scroll to flowers grid
+  useEffect(() => {
+    if (selectedFamily && flowersGridRef.current) {
+      setTimeout(() => {
+        flowersGridRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 300);
+    }
+  }, [selectedFamily]);
+
   // Pricing
   const basePrice = (selectedPackage?.basePrice || 0) * (selectedSize?.priceMultiplier || 1);
   const flowerPrice = Object.values(selectedFlowers).reduce((acc, curr) => acc + (curr.flower.price * curr.quantity), 0);
-  const totalPrice = basePrice + flowerPrice;
+  const glitterPrice = withGlitter ? 2 : 0;
+  const accessoriesPrice = selectedAccessories.reduce((acc, accId) => {
+    const accessory = accessories.find(a => a.id === accId);
+    return acc + (accessory?.price || 0);
+  }, 0);
+  const totalPrice = basePrice + flowerPrice + glitterPrice + accessoriesPrice;
 
   // Price animation
   const [displayPrice, setDisplayPrice] = useState(0);
@@ -188,15 +294,35 @@ const Customize: React.FC = () => {
     animate();
   }, [totalPrice]);
 
+  // Get max flowers for current size
+  const maxFlowers = selectedSize?.maxFlowers || 10;
+  
+  // Calculate current total flowers
+  const currentTotalFlowers = Object.values(selectedFlowers).reduce((acc, curr) => acc + curr.quantity, 0);
+  const canAddMore = currentTotalFlowers < maxFlowers;
+  const remainingSlots = maxFlowers - currentTotalFlowers;
+
   // Handlers
   const handleAddFlower = (flower: EnhancedFlower) => {
-    setSelectedFlowers(prev => ({
-      ...prev,
-      [flower.id]: {
-        flower,
-        quantity: (prev[flower.id]?.quantity || 0) + 1
-      }
-    }));
+    if (flowerMode === "specific") {
+      // Specific Variety: Set to max flowers (only one flower type allowed)
+      setSelectedFlowers({
+        [flower.id]: {
+          flower,
+          quantity: maxFlowers
+        }
+      });
+    } else {
+      // Mix & Match: Add one at a time, but check max
+      if (!canAddMore) return; // Don't add if max reached
+      setSelectedFlowers(prev => ({
+        ...prev,
+        [flower.id]: {
+          flower,
+          quantity: (prev[flower.id]?.quantity || 0) + 1
+        }
+      }));
+    }
   };
 
   const handleRemoveFlower = (flowerId: string) => {
@@ -212,7 +338,12 @@ const Customize: React.FC = () => {
   };
 
   const handleAddToCart = () => {
-    const desc = `${selectedSize?.name} ${selectedColor?.name} ${selectedPackage?.name}${selectedBoxShape ? ` (${selectedBoxShape.name})` : ''} with ${Object.values(selectedFlowers).map(f => `${f.quantity} ${f.flower.name}`).join(', ')}`;
+    const flowerDesc = Object.values(selectedFlowers).map(f => `${f.quantity} ${f.flower.name}`).join(', ');
+    const glitterDesc = withGlitter ? " with glitter" : "";
+    const accessoriesDesc = selectedAccessories.length > 0 
+      ? ` with ${selectedAccessories.map(id => accessories.find(a => a.id === id)?.name).join(', ')}`
+      : "";
+    const desc = `${selectedSize?.name} ${selectedColor?.name} ${selectedPackage?.name}${selectedBoxShape ? ` (${selectedBoxShape.name})` : ''} with ${flowerDesc}${glitterDesc}${accessoriesDesc}`;
     addToCart({
       id: `custom-${Date.now()}`,
       title: "Custom Bouquet",
@@ -321,14 +452,103 @@ const Customize: React.FC = () => {
     }
   };
 
-  const availableFlowers = flowerMode === "specific" && selectedFamily
+  // Get current season in Lebanon (Mediterranean climate)
+  const getCurrentSeason = (): Season => {
+    const month = new Date().getMonth() + 1; // 1-12
+    if (month >= 3 && month <= 5) return "spring";
+    if (month >= 6 && month <= 9) return "summer";
+    if (month >= 10 && month <= 11) return "fall";
+    return "winter"; // Dec, Jan, Feb
+  };
+
+  const currentSeason = getCurrentSeason();
+
+  // Season configuration for display
+  const seasonConfig: Record<Season, { label: string; icon: string; color: string }> = {
+    spring: { label: "Spring", icon: "🌸", color: "bg-green-100 text-green-700 border-green-300" },
+    summer: { label: "Summer", icon: "☀️", color: "bg-yellow-100 text-yellow-700 border-yellow-300" },
+    fall: { label: "Fall", icon: "🍂", color: "bg-orange-100 text-orange-700 border-orange-300" },
+    winter: { label: "Winter", icon: "❄️", color: "bg-blue-100 text-blue-700 border-blue-300" },
+    "all-year": { label: "All Year", icon: "🌿", color: "bg-gray-100 text-gray-700 border-gray-300" }
+  };
+
+  // Flower categories mapping - maps filter categories to flower families
+  // Popular: Most commonly requested flowers
+  // Romantic: Red, pink, white roses (not blue/yellow), peonies, lilies, pink/red/white tulips, pink/white orchids
+  // Minimal: Simple, delicate filler flowers - gypsum, daisies, lavender
+  // Luxury: Premium, expensive flowers - orchids, peonies, hydrangeas, lilies
+  // Seasonal: Empty array - seasonal filter shows ALL flowers, then filters by season
+  const flowerCategories: Record<string, string[]> = {
+    popular: ["roses", "tulips", "carnation"],
+    romantic: ["roses", "peonies", "lily", "tulips", "orchid"], // Will filter by color in logic
+    minimal: ["gypsum", "daisies", "lavender"],
+    luxury: ["orchid", "peonies", "hydrangea", "lily"],
+    seasonal: [] // Empty - seasonal filter shows ALL flowers
+  };
+
+  // Get recommended flowers based on package/size (Florist's Choice)
+  const getRecommendedFlowers = (): string[] => {
+    if (selectedPackage?.type === "box" && selectedSize?.id === "medium") {
+      return ["rose-red", "rose-pink", "peony-pink", "orchid-white", "hydrangea-white"];
+    }
+    if (selectedPackage?.type === "wrap") {
+      return ["rose-red", "rose-pink", "tulip-red", "lily-pink"];
+    }
+    return ["rose-red", "rose-pink", "tulip-pink", "carnation-red"];
+  };
+
+  const recommendedFlowerIds = getRecommendedFlowers();
+
+  // Filter flowers by family (specific variety mode)
+  const filteredFlowers = flowerMode === "specific" && selectedFamily
     ? flowers.filter(f => f.family === selectedFamily)
     : flowers;
+
+  // Filter by category (popular, romantic, minimal, luxury, seasonal)
+  let categoryFiltered = filteredFlowers;
+  if (flowerFilter !== "all" && flowerFilter !== "seasonal") {
+    const families = flowerCategories[flowerFilter] || [];
+    categoryFiltered = filteredFlowers.filter(f => {
+      if (!families.includes(f.family)) return false;
+      
+      // Additional color-based filtering for specific categories
+      if (flowerFilter === "romantic") {
+        // Romantic: Exclude blue, yellow roses (not romantic colors)
+        if (f.family === "roses" && (f.colorName === "blue" || f.colorName === "yellow")) return false;
+        // Romantic tulips: red, pink, white (exclude blue, yellow, peach)
+        if (f.family === "tulips" && !["red", "pink", "white"].includes(f.colorName)) return false;
+      }
+      if (flowerFilter === "minimal") {
+        // Minimal: Simple flowers - gypsum, daisies, lavender (all colors are fine for minimal)
+        // No additional filtering needed
+      }
+      if (flowerFilter === "luxury") {
+        // Luxury: Premium flowers - orchids, peonies, hydrangeas, lilies (all colors are fine)
+        // No additional filtering needed
+      }
+      
+      return true;
+    });
+  }
+
+  // Filter by season if seasonal category is selected
+  // When "seasonal" is selected, show ALL flowers (not filtered by families), then filter by season if specific season is chosen
+  const availableFlowers = flowerFilter === "seasonal"
+    ? seasonFilter === "all-seasons"
+      ? filteredFlowers // Show ALL flowers when "all-seasons" is selected (not categoryFiltered)
+      : filteredFlowers.filter(f => {
+          // Filter by specific season - if flower has seasons data, filter by it
+          if (!f.seasons || f.seasons.length === 0) return false; // Exclude flowers without season data
+          return f.seasons.includes(seasonFilter);
+        })
+    : categoryFiltered;
 
   const steps = [
     { id: 1, title: "Base", icon: Box },
     { id: 2, title: "Details", icon: Palette },
-    { id: 3, title: "Blooms", icon: Sparkles }
+    { id: 3, title: "Blooms", icon: Sparkles },
+    { id: 4, title: "Glitter", icon: Star },
+    { id: 5, title: "Extras", icon: Gift }
   ];
 
   return (
@@ -347,14 +567,15 @@ const Customize: React.FC = () => {
       <ProgressStepper currentStep={currentStep} steps={steps} />
 
       {/* Main Content - Split Screen Layout */}
-      <div className="max-w-7xl mx-auto px-4 md:px-8 pb-16">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 pb-16 overflow-x-hidden">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 w-full">
           
           {/* Left: Selection Panels */}
-          <div className="space-y-6">
+          <div className="space-y-6 w-full min-w-0">
             
             {/* Step 1: Package Selection */}
             <motion.div
+              ref={step1Ref}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm"
@@ -392,6 +613,7 @@ const Customize: React.FC = () => {
               <AnimatePresence>
                 {selectedPackage?.type === "box" && (
                   <motion.div
+                    ref={boxShapeRef}
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: "auto" }}
                     exit={{ opacity: 0, height: 0 }}
@@ -425,6 +647,7 @@ const Customize: React.FC = () => {
             {/* Step 2: Size & Color */}
             {step1Complete && (
               <motion.div
+                ref={step2Ref}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm"
@@ -485,9 +708,10 @@ const Customize: React.FC = () => {
             {/* Step 3: Flowers */}
             {step2Complete && (
               <motion.div
+                ref={step3Ref}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm"
+                className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm w-full min-w-0 overflow-x-hidden"
               >
                 <div className="flex items-center gap-3 mb-6">
                   <div className={`w-10 h-10 rounded-full flex items-center justify-center ${step3Complete ? 'bg-[#C79E48] text-white' : 'bg-gray-100 text-gray-400'}`}>
@@ -495,7 +719,13 @@ const Customize: React.FC = () => {
                   </div>
                   <div>
                     <h3 className="font-bold text-lg text-gray-900">Choose Your Blooms</h3>
-                    <p className="text-xs text-gray-500">Select your flowers</p>
+                    <p className="text-xs text-gray-500">
+                      {flowerMode === "specific" 
+                        ? "Select one flower type" 
+                        : selectedSize 
+                          ? `${currentTotalFlowers} / ${maxFlowers} flowers selected`
+                          : "Select your flowers"}
+                    </p>
                   </div>
                 </div>
 
@@ -533,18 +763,24 @@ const Customize: React.FC = () => {
                     </div>
 
                     {flowerMode === "specific" && !selectedFamily && (
-                      <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+                      <motion.div 
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="grid grid-cols-3 sm:grid-cols-4 gap-3"
+                      >
                         {flowerFamilies.map(fam => (
-                          <button
+                          <motion.button
                             key={fam.id}
                             onClick={() => setSelectedFamily(fam.id)}
+                            whileHover={{ y: -2, scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
                             className="p-4 rounded-lg border-2 border-gray-200 hover:border-[#C79E48] hover:bg-[#C79E48]/5 transition-all text-center"
                           >
                             <span className="text-2xl block mb-2">{fam.icon}</span>
                             <span className="text-xs font-medium text-gray-700">{fam.name}</span>
-                          </button>
+                          </motion.button>
                         ))}
-                      </div>
+                      </motion.div>
                     )}
 
                     {flowerMode === "specific" && selectedFamily && (
@@ -560,45 +796,235 @@ const Customize: React.FC = () => {
                       </div>
                     )}
 
+                    {/* Flower Filters - Available for both Specific Variety and Mix & Match */}
                     {(flowerMode === "mix" || (flowerMode === "specific" && selectedFamily)) && (
-                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 max-h-[500px] overflow-y-auto">
-                        {availableFlowers.map(flower => {
-                          const qty = selectedFlowers[flower.id]?.quantity || 0;
-                          return (
-                            <div
-                              key={flower.id}
-                              className={`p-3 rounded-xl border-2 transition-all ${
-                                qty > 0 ? 'border-[#C79E48] bg-[#C79E48]/5' : 'border-gray-200'
+                      <div className="space-y-3 mb-4">
+                        {/* Style Filters */}
+                        <div className="flex flex-wrap gap-2">
+                          {[
+                            { id: "all", label: "All" },
+                            { id: "popular", label: "Popular" },
+                            { id: "romantic", label: "Romantic" },
+                            { id: "minimal", label: "Minimal" },
+                            { id: "luxury", label: "Luxury" },
+                            { id: "seasonal", label: "Seasonal" }
+                          ].map(filter => (
+                            <button
+                              key={filter.id}
+                              onClick={() => setFlowerFilter(filter.id as any)}
+                              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                                flowerFilter === filter.id
+                                  ? 'bg-[#C79E48] text-white shadow-sm'
+                                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                               }`}
                             >
-                              <div className="aspect-square rounded-lg bg-gray-100 mb-2 overflow-hidden">
+                              {filter.label}
+                            </button>
+                          ))}
+                        </div>
+
+                        {/* Seasonal Filter - Only show when "seasonal" category is selected */}
+                        {flowerFilter === "seasonal" && (
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-xs font-medium text-gray-600">Season:</span>
+                            {[
+                              { id: "all-seasons", label: "All Seasons" },
+                              { id: "spring", label: "Spring", icon: "🌸" },
+                              { id: "summer", label: "Summer", icon: "☀️" },
+                              { id: "fall", label: "Fall", icon: "🍂" },
+                              { id: "winter", label: "Winter", icon: "❄️" }
+                            ].map(seasonFilterOption => (
+                              <button
+                                key={seasonFilterOption.id}
+                                onClick={() => {
+                                  setSeasonFilter(seasonFilterOption.id === "all-seasons" ? "all-seasons" : seasonFilterOption.id as Season);
+                                }}
+                                className={`px-2.5 py-1 rounded-full text-xs font-medium transition-all flex items-center gap-1 ${
+                                  (seasonFilterOption.id === "all-seasons" && seasonFilter === "all-seasons") ||
+                                  (seasonFilterOption.id !== "all-seasons" && seasonFilter === seasonFilterOption.id)
+                                    ? 'bg-[#C79E48]/20 text-[#C79E48] border border-[#C79E48]/30'
+                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                }`}
+                              >
+                                {seasonFilterOption.icon && <span>{seasonFilterOption.icon}</span>}
+                                {seasonFilterOption.label}
+                              </button>
+                            ))}
+                            <span className="text-[10px] text-gray-400 ml-auto">
+                              Current: {seasonConfig[currentSeason].icon} {seasonConfig[currentSeason].label}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Flower Count Indicator for Mix & Match */}
+                    {flowerMode === "mix" && selectedSize && (
+                      <div className={`mb-4 p-3 rounded-lg border-2 ${
+                        currentTotalFlowers >= maxFlowers 
+                          ? 'bg-green-50 border-green-300' 
+                          : currentTotalFlowers >= maxFlowers * 0.8
+                          ? 'bg-yellow-50 border-yellow-300'
+                          : 'bg-blue-50 border-blue-300'
+                      }`}>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-semibold text-gray-700">Flowers Selected:</span>
+                          <span className={`text-sm font-bold ${
+                            currentTotalFlowers >= maxFlowers 
+                              ? 'text-green-700' 
+                              : currentTotalFlowers >= maxFlowers * 0.8
+                              ? 'text-yellow-700'
+                              : 'text-blue-700'
+                          }`}>
+                            {currentTotalFlowers} / {maxFlowers}
+                          </span>
+                        </div>
+                        {currentTotalFlowers >= maxFlowers && (
+                          <div className="text-xs text-green-700 mt-1">✓ Maximum capacity reached</div>
+                        )}
+                        {currentTotalFlowers < maxFlowers && remainingSlots <= 5 && (
+                          <div className="text-xs text-yellow-700 mt-1">Only {remainingSlots} more slot{remainingSlots !== 1 ? 's' : ''} available</div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Recommended Section */}
+                    {(flowerMode === "mix" || (flowerMode === "specific" && selectedFamily)) && step1Complete && step2Complete && (
+                      <div className="mb-4 p-4 bg-gradient-to-r from-[#C79E48]/5 to-[#C79E48]/10 rounded-xl border border-[#C79E48]/20">
+                        <div className="flex items-center gap-2 mb-3">
+                          <Sparkles className="w-4 h-4 text-[#C79E48]" />
+                          <span className="text-sm font-bold text-[#C79E48]">Florist's Choice</span>
+                          <span className="text-xs text-gray-500">Recommended for {selectedPackage?.name} {selectedSize?.name}</span>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {availableFlowers
+                            .filter(f => recommendedFlowerIds.includes(f.id))
+                            .slice(0, 4)
+                            .map(flower => (
+                              <button
+                                key={flower.id}
+                                onClick={() => handleAddFlower(flower)}
+                                disabled={flowerMode === "mix" && !canAddMore}
+                                className={`px-3 py-1.5 bg-white border rounded-lg text-xs font-medium transition-all ${
+                                  flowerMode === "mix" && !canAddMore
+                                    ? 'border-gray-200 text-gray-400 cursor-not-allowed'
+                                    : 'border-[#C79E48]/30 text-gray-700 hover:bg-[#C79E48]/10 hover:border-[#C79E48]'
+                                }`}
+                              >
+                                {flower.name}
+                              </button>
+                            ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {(flowerMode === "mix" || (flowerMode === "specific" && selectedFamily)) && (
+                      <div ref={flowersGridRef} className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 max-h-[500px] overflow-y-auto overflow-x-hidden w-full">
+                        {availableFlowers.map(flower => {
+                          const qty = selectedFlowers[flower.id]?.quantity || 0;
+                          const isRecommended = recommendedFlowerIds.includes(flower.id);
+                          const isSelected = qty > 0;
+                          return (
+                            <motion.div
+                              key={flower.id}
+                              whileHover={!isSelected ? { y: -2 } : {}}
+                              className={`relative p-3 rounded-xl border-2 transition-all ${
+                                isSelected
+                                  ? 'border-[#C79E48] bg-gradient-to-br from-[#C79E48]/8 to-[#C79E48]/4 shadow-md translate-y-[-2px]'
+                                  : 'border-gray-200 bg-white hover:border-[#C79E48]/50 hover:shadow-sm'
+                              }`}
+                            >
+                              {isRecommended && !isSelected && (
+                                <div className="absolute -top-1.5 -right-1.5 bg-[#C79E48] text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 z-10 shadow-md whitespace-nowrap">
+                                  <Sparkles className="w-2.5 h-2.5" />
+                                  Choice
+                                </div>
+                              )}
+                              
+                              <div className="aspect-square rounded-lg bg-gray-100 mb-2 overflow-hidden relative">
                                 <img
                                   src={flower.imageUrl}
                                   alt={flower.name}
-                                  className="w-full h-full object-cover"
+                                  className={`w-full h-full object-cover ${
+                                    flower.seasons && 
+                                    !flower.seasons.includes("all-year") && 
+                                    !flower.seasons.includes(currentSeason)
+                                      ? "opacity-50 grayscale-[30%]" 
+                                      : ""
+                                  }`}
                                 />
+                                {/* Out of Season Overlay */}
+                                {flower.seasons && 
+                                 !flower.seasons.includes("all-year") && 
+                                 !flower.seasons.includes(currentSeason) && (
+                                  <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center p-2 z-20">
+                                    <div className="text-white text-center">
+                                      <div className="text-xs font-bold mb-1">Not This Season</div>
+                                      <div className="text-[10px] text-white/90">
+                                        Available in {flower.seasons.map(s => seasonConfig[s].label).join(", ")}
+                                      </div>
+                                    </div>
+                                  </div>
+                                )}
+                                {isSelected && (
+                                  <motion.div
+                                    initial={{ scale: 0, opacity: 0 }}
+                                    animate={{ scale: 1, opacity: 1 }}
+                                    className="absolute top-2 right-2 w-5 h-5 bg-[#C79E48] rounded-full flex items-center justify-center shadow-md z-30"
+                                  >
+                                    <Check className="w-3 h-3 text-white" strokeWidth={2.5} />
+                                  </motion.div>
+                                )}
                               </div>
+                              
                               <div className="text-xs font-bold text-gray-900 mb-1">{flower.name}</div>
                               <div className="text-xs text-[#C79E48] font-bold mb-2">${flower.price.toFixed(2)}</div>
+                              
                               {qty > 0 ? (
-                                <div className="flex items-center justify-between">
-                                  <button onClick={() => handleRemoveFlower(flower.id)} className="w-7 h-7 rounded-full border border-gray-300 flex items-center justify-center hover:bg-red-50">
-                                    <Minus className="w-3 h-3" />
-                                  </button>
-                                  <span className="font-bold text-sm">{qty}</span>
-                                  <button onClick={() => handleAddFlower(flower)} className="w-7 h-7 rounded-full bg-[#C79E48] text-white flex items-center justify-center">
-                                    <Plus className="w-3 h-3" />
-                                  </button>
-                                </div>
+                                flowerMode === "specific" ? (
+                                  // Specific Variety: Show fixed quantity (no controls)
+                                  <div className="text-center py-2">
+                                    <div className="text-xs text-gray-500 mb-1">Quantity</div>
+                                    <div className="font-bold text-lg text-[#C79E48]">{qty}</div>
+                                    <div className="text-[10px] text-gray-400 mt-1">Fixed for {selectedSize?.name} size</div>
+                                  </div>
+                                ) : (
+                                  // Mix & Match: Show controls with max limit
+                                  <div className="flex items-center justify-between">
+                                    <button 
+                                      onClick={() => handleRemoveFlower(flower.id)} 
+                                      className="w-7 h-7 rounded-full border border-gray-300 flex items-center justify-center hover:bg-red-50 transition-colors"
+                                    >
+                                      <Minus className="w-3 h-3" />
+                                    </button>
+                                    <span className="font-bold text-sm">{qty}</span>
+                                    <button 
+                                      onClick={() => handleAddFlower(flower)} 
+                                      disabled={!canAddMore}
+                                      className={`w-7 h-7 rounded-full flex items-center justify-center transition-colors ${
+                                        canAddMore 
+                                          ? 'bg-[#C79E48] text-white hover:bg-[#b08d45]' 
+                                          : 'bg-gray-300 text-gray-400 cursor-not-allowed'
+                                      }`}
+                                    >
+                                      <Plus className="w-3 h-3" />
+                                    </button>
+                                  </div>
+                                )
                               ) : (
                                 <button
                                   onClick={() => handleAddFlower(flower)}
-                                  className="w-full py-1.5 bg-gray-100 hover:bg-[#C79E48] hover:text-white rounded-lg text-xs font-medium transition-colors"
+                                  disabled={flowerMode === "mix" && !canAddMore}
+                                  className={`w-full py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                                    flowerMode === "mix" && !canAddMore
+                                      ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                      : 'bg-gray-100 hover:bg-[#C79E48] hover:text-white'
+                                  }`}
                                 >
-                                  Add
+                                  {flowerMode === "specific" ? "Select" : canAddMore ? "Add" : "Max Reached"}
                                 </button>
                               )}
-                            </div>
+                            </motion.div>
                           );
                         })}
                       </div>
@@ -608,10 +1034,109 @@ const Customize: React.FC = () => {
               </motion.div>
             )}
 
+            {/* Step 4: Glitter */}
+            {step3Complete && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm w-full min-w-0 overflow-x-hidden"
+              >
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center bg-[#C79E48] text-white">
+                    <Star className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-lg text-gray-900">Add Glitter</h3>
+                    <p className="text-xs text-gray-500">Make it sparkle! (+$2)</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <button
+                    onClick={() => setWithGlitter(false)}
+                    className={`p-6 rounded-xl border-2 transition-all text-left ${
+                      !withGlitter
+                        ? 'border-[#C79E48] bg-[#C79E48]/5'
+                        : 'border-gray-200 hover:border-[#C79E48]/50'
+                    }`}
+                  >
+                    <div className="text-3xl mb-3">✨</div>
+                    <h4 className="font-bold text-gray-900 mb-1">Without Glitter</h4>
+                    <p className="text-xs text-gray-500">Classic and elegant</p>
+                  </button>
+                  <button
+                    onClick={() => setWithGlitter(true)}
+                    className={`p-6 rounded-xl border-2 transition-all text-left ${
+                      withGlitter
+                        ? 'border-[#C79E48] bg-[#C79E48]/5'
+                        : 'border-gray-200 hover:border-[#C79E48]/50'
+                    }`}
+                  >
+                    <div className="text-3xl mb-3">⭐</div>
+                    <h4 className="font-bold text-gray-900 mb-1">With Glitter</h4>
+                    <p className="text-xs text-gray-500">Sparkle and shine (+$2)</p>
+                  </button>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Step 5: Accessories */}
+            {step3Complete && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm w-full min-w-0 overflow-x-hidden"
+              >
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center bg-[#C79E48] text-white">
+                    <Gift className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-lg text-gray-900">Add Accessories</h3>
+                    <p className="text-xs text-gray-500">Optional extras to personalize</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                  {accessories.map(accessory => {
+                    const Icon = accessory.icon;
+                    const isSelected = selectedAccessories.includes(accessory.id);
+                    return (
+                      <button
+                        key={accessory.id}
+                        onClick={() => {
+                          setSelectedAccessories(prev => 
+                            prev.includes(accessory.id)
+                              ? prev.filter(id => id !== accessory.id)
+                              : [...prev, accessory.id]
+                          );
+                        }}
+                        className={`p-4 rounded-xl border-2 transition-all text-center ${
+                          isSelected
+                            ? 'border-[#C79E48] bg-[#C79E48]/5'
+                            : 'border-gray-200 hover:border-[#C79E48]/50'
+                        }`}
+                      >
+                        <Icon className={`w-8 h-8 mx-auto mb-2 ${isSelected ? 'text-[#C79E48]' : 'text-gray-400'}`} />
+                        <div className="font-bold text-sm text-gray-900 mb-1">{accessory.name}</div>
+                        <div className="text-xs text-[#C79E48] font-semibold">+${accessory.price}</div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </motion.div>
+            )}
+
           </div>
 
           {/* Right: Preview & Summary */}
-          <div className="lg:sticky lg:top-24 h-fit">
+          <div 
+            className="hidden lg:block fixed right-4 xl:right-8 h-fit z-10"
+            style={{ 
+              width: 'clamp(20rem, 30vw, 28rem)',
+              top: `${Math.max(96, previewCardTop - scrollY + 16)}px`
+            }}
+          >
             <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
               
               {/* Preview Area */}
