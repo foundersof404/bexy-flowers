@@ -73,7 +73,7 @@ const BouquetCard = memo(({
         delay: index * 0.05,
         ease: [0.23, 1, 0.32, 1]
       }}
-      className="group cursor-pointer"
+      className="group cursor-pointer h-full w-full"
     >
       {/* Premium Luxury Card */}
       <Link
@@ -89,10 +89,10 @@ const BouquetCard = memo(({
             staleTime: 5 * 60 * 1000,
           });
         }}
-        className="block"
+        className="block h-full w-full"
       >
         <motion.div 
-          className="w-full rounded-2xl md:rounded-3xl overflow-hidden relative"
+          className="w-full h-full rounded-2xl md:rounded-3xl overflow-hidden relative flex flex-col"
           style={{
             background: 'linear-gradient(180deg, #ffffff 0%, #f8f5f1 100%)',
             border: '1px solid rgba(255, 255, 255, 0.2)',
@@ -104,21 +104,20 @@ const BouquetCard = memo(({
           whileTap={{ scale: 0.98 }}
           transition={{ duration: 0.3, ease: "easeOut" }}
         >
-        {/* Image Section */}
-        <motion.div 
-          className="relative overflow-hidden aspect-square"
+        {/* Image Section - Fixed square aspect ratio using padding-bottom trick */}
+        <div 
+          className="relative w-full flex-shrink-0"
+          style={{ paddingBottom: '100%', height: 0 }}
         >
           <motion.div
-            className="w-full h-full"
+            className="absolute inset-0 w-full h-full overflow-hidden"
             whileHover={{ scale: 1.05 }}
             transition={{ duration: 0.4, ease: "easeOut" }}
           >
             <OptimizedImage
               src={bouquet.image}
               alt={bouquet.name}
-              className="w-full h-full object-cover transition-transform duration-400 ease-out group-hover:scale-110"
-              aspectRatio="1/1"
-              objectFit="cover"
+              className="!w-full !h-full object-cover object-center transition-transform duration-400 ease-out group-hover:scale-110"
               priority={index < 4}
             />
           </motion.div>
@@ -246,11 +245,11 @@ const BouquetCard = memo(({
               <Eye className="w-3.5 h-3.5 md:w-4 md:h-4 text-slate-700" strokeWidth={2} />
             </motion.button>
           </motion.div>
-        </motion.div>
+        </div>
 
-        {/* Info Section */}
+        {/* Info Section - Flexible height but consistent minimum */}
         <motion.div 
-          className="p-3 md:p-4 lg:p-6 relative z-10"
+          className="p-3 md:p-4 lg:p-6 relative z-10 flex-1 flex flex-col"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: index * 0.05 + 0.15 }}
@@ -278,7 +277,7 @@ const BouquetCard = memo(({
 
           {/* Description */}
           <motion.p 
-            className="text-gray-600 leading-relaxed text-[11px] md:text-xs lg:text-sm line-clamp-2 mt-1"
+            className="text-gray-600 leading-relaxed text-[11px] md:text-xs lg:text-sm line-clamp-2 mt-1 min-h-[2.5em]"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.4, delay: index * 0.05 + 0.3 }}
@@ -287,7 +286,7 @@ const BouquetCard = memo(({
           </motion.p>
 
           {/* Tags */}
-          <div className="flex gap-1 md:gap-1.5 lg:gap-2 mt-2 md:mt-3 flex-wrap">
+          <div className="flex gap-1 md:gap-1.5 lg:gap-2 mt-2 md:mt-3 flex-wrap min-h-[24px]">
             {tags.slice(0, 2).map((tag, tagIndex) => (
               <motion.span
                 key={tagIndex}
@@ -313,8 +312,8 @@ const BouquetCard = memo(({
             transition={{ duration: 0.5, delay: index * 0.05 + 0.4 }}
           />
 
-          {/* Price and Add to Cart */}
-          <div className="flex flex-col gap-2 md:gap-3">
+          {/* Price and Add to Cart - Push to bottom */}
+          <div className="flex flex-col gap-2 md:gap-3 mt-auto">
             <motion.div 
               className="flex items-baseline justify-between"
               initial={{ opacity: 0, x: -10 }}
@@ -420,17 +419,19 @@ const BouquetGridComponent = ({ bouquets, onBouquetClick, selectedCategory }: Bo
   return (
     <motion.div 
       className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-5 lg:gap-8 w-full px-0"
+      style={{ gridAutoRows: '1fr' }}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.4 }}
     >
       {visibleBouquets.map((bouquet, index) => (
-        <BouquetCard
-          key={bouquet.id}
-          bouquet={bouquet}
-          index={index}
-          onBouquetClick={onBouquetClick}
-        />
+        <div key={bouquet.id} className="flex h-full">
+          <BouquetCard
+            bouquet={bouquet}
+            index={index}
+            onBouquetClick={onBouquetClick}
+          />
+        </div>
       ))}
     </motion.div>
   );

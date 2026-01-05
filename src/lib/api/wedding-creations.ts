@@ -7,10 +7,29 @@ type WeddingCreationInsert = Database['public']['Tables']['wedding_creations']['
 type WeddingCreationUpdate = Database['public']['Tables']['wedding_creations']['Update'];
 
 /**
- * Get all wedding creations (admin - gets all)
+ * Get wedding creations with optional filters
  */
-export async function getWeddingCreations(): Promise<WeddingCreation[]> {
+export async function getWeddingCreations(filters?: {
+  category?: string;
+  featured?: boolean;
+  isActive?: boolean;
+}): Promise<WeddingCreation[]> {
+  const queryFilters: Record<string, any> = {};
+  
+  if (filters?.isActive !== undefined) {
+    queryFilters.is_active = filters.isActive;
+  }
+  
+  if (filters?.featured !== undefined) {
+    queryFilters.featured = filters.featured;
+  }
+  
+  if (filters?.category) {
+    queryFilters.category = filters.category;
+  }
+  
   return await db.select<WeddingCreation>('wedding_creations', {
+    filters: Object.keys(queryFilters).length > 0 ? queryFilters : undefined,
     orderBy: { column: 'display_order', ascending: true }
   });
 }
