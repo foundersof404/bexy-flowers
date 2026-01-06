@@ -196,8 +196,27 @@ const CarouselHero = () => {
 
     const videoElement = videoRef.current;
     
+    // Force video to cover full width
+    const forceFullWidth = () => {
+      if (videoElement) {
+        videoElement.style.width = '100vw';
+        videoElement.style.maxWidth = '100vw';
+        videoElement.style.left = '0';
+        videoElement.style.right = '0';
+        videoElement.style.marginLeft = '0';
+        videoElement.style.marginRight = '0';
+      }
+    };
+    
+    // Force full width immediately
+    forceFullWidth();
+    
     // Load the video source
     videoElement.load();
+    
+    // Force full width after load
+    videoElement.addEventListener('loadedmetadata', forceFullWidth);
+    videoElement.addEventListener('loadeddata', forceFullWidth);
     
     // Attempt to play (may require user interaction on some browsers)
     const playPromise = videoElement.play();
@@ -206,7 +225,37 @@ const CarouselHero = () => {
         // Auto-play was prevented, video will play when user interacts
       });
     }
+    
+    return () => {
+      videoElement.removeEventListener('loadedmetadata', forceFullWidth);
+      videoElement.removeEventListener('loadeddata', forceFullWidth);
+    };
   }, [isMobile, shouldLoadVideo]);
+
+  // Handle window resize to ensure video stays full width
+  useEffect(() => {
+    if (!isMobile || !videoRef.current) return;
+
+    const handleResize = () => {
+      if (videoRef.current) {
+        videoRef.current.style.width = '100vw';
+        videoRef.current.style.maxWidth = '100vw';
+        videoRef.current.style.left = '0';
+        videoRef.current.style.right = '0';
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('orientationchange', handleResize);
+    
+    // Force resize on mount
+    setTimeout(handleResize, 100);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('orientationchange', handleResize);
+    };
+  }, [isMobile]);
 
   const handleShopNow = () => {
     navigate('/collection');
