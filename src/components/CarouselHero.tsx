@@ -10,6 +10,7 @@ import './CarouselHero.css';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useImagePreloader } from '@/hooks/useImagePreloader';
 // WebM video - using ?url suffix for Vite to handle it as an asset
+// Optimized: 720p max, no audio, compressed WebM for smaller file size
 import video1Url from '@/assets/video/video1.WebM?url';
 
 interface SlideData {
@@ -76,8 +77,11 @@ const CarouselHero = () => {
   const isMobile = useIsMobile();
   const swiperRef = useRef<SwiperType | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const [imagesLoaded, setImagesLoaded] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [isVideoVisible, setIsVideoVisible] = useState(false);
+  const [shouldLoadVideo, setShouldLoadVideo] = useState(false);
 
   // Collect all images for preloading
   const allSlideImages = slides.flatMap(slide => [slide.productImage, slide.bgImage]);
@@ -152,6 +156,58 @@ const CarouselHero = () => {
     return () => clearTimeout(timer);
   }, []);
 
+  // Intersection Observer for lazy loading video only when visible
+  useEffect(() => {
+    if (!isMobile) return;
+
+    // Observe the container to detect when hero section enters viewport
+    const targetElement = containerRef.current || videoRef.current;
+    if (!targetElement) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setIsVideoVisible(true);
+            // Load video source only when visible
+            if (!shouldLoadVideo) {
+              setShouldLoadVideo(true);
+            }
+          }
+        });
+      },
+      {
+        root: null,
+        rootMargin: '100px', // Start loading 100px before entering viewport
+        threshold: 0.01, // Trigger when 1% visible
+      }
+    );
+
+    observer.observe(targetElement);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [isMobile, shouldLoadVideo]);
+
+  // Load and play video when it becomes visible
+  useEffect(() => {
+    if (!isMobile || !videoRef.current || !shouldLoadVideo) return;
+
+    const videoElement = videoRef.current;
+    
+    // Load the video source
+    videoElement.load();
+    
+    // Attempt to play (may require user interaction on some browsers)
+    const playPromise = videoElement.play();
+    if (playPromise !== undefined) {
+      playPromise.catch(() => {
+        // Auto-play was prevented, video will play when user interacts
+      });
+    }
+  }, [isMobile, shouldLoadVideo]);
+
   const handleShopNow = () => {
     navigate('/collection');
   };
@@ -162,17 +218,22 @@ const CarouselHero = () => {
 
   return (
     <div className="carousel-hero-container" ref={containerRef}>
-      {/* Video background for mobile view */}
+      {/* Video background for mobile view - Optimized with lazy loading */}
       {isMobile && (
         <video
+          ref={videoRef}
           className="hero-video-bg"
           autoPlay
           muted
           loop
           playsInline
-          preload="auto"
+          preload="none"
+          poster={getImagePath('image1.png')}
+          aria-label="Hero background video"
         >
-          <source src={video1Url} type="video/webm" />
+          {shouldLoadVideo && (
+            <source src={video1Url} type="video/webm" />
+          )}
         </video>
       )}
       <div className="carousel-hero-wrapper">
