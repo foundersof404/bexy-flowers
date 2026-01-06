@@ -15,4 +15,5 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  assetsInclude: ["**/*.WebM", "**/*.webm", "**/*.mp4"],
 });

@@ -9,7 +9,8 @@ import 'swiper/css/pagination';
 import './CarouselHero.css';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useImagePreloader } from '@/hooks/useImagePreloader';
-import video1 from '@/assets/video/video1.mp4';
+// WebM video - using ?url suffix for Vite to handle it as an asset
+import video1Url from '@/assets/video/video1.WebM?url';
 
 interface SlideData {
   id: string;
@@ -171,7 +172,7 @@ const CarouselHero = () => {
           playsInline
           preload="auto"
         >
-          <source src={video1} type="video/mp4" />
+          <source src={video1Url} type="video/webm" />
         </video>
       )}
       <div className="carousel-hero-wrapper">
