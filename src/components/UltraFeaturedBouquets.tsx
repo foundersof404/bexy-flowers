@@ -51,33 +51,15 @@ const UltraFeaturedBouquets = () => {
   }).filter(Boolean) || [];
 
 
-  // Setup GSAP animations when bouquets are loaded
+  // Setup GSAP hover effects (no scroll animations)
   useEffect(() => {
     if (loading || bouquets.length === 0) return;
     
-    const section = sectionRef.current;
     const cards = cardsRef.current;
 
-    if (section && cards.length > 0) {
-      // Staggered reveal animation - optimized with refreshPriority
-      ScrollTrigger.create({
-        trigger: section,
-        start: "top 80%",
-        refreshPriority: -1, // Lower priority for better performance
-        onEnter: () => {
-          gsap.to(cards, {
-            duration: 0.8,
-            y: 0,
-            opacity: 1,
-            rotateX: 0,
-            stagger: 0.15,
-            ease: "power3.out"
-          });
-        }
-      });
-
-      // Set initial states
-      gsap.set(cards, { y: 100, opacity: 0, rotateX: -15 });
+    if (cards.length > 0) {
+      // Set initial states - visible immediately
+      gsap.set(cards, { y: 0, opacity: 1, rotateX: 0 });
 
       // Enhanced 3D hover effects for modern cards
       cards.forEach((card, index) => {
@@ -217,38 +199,26 @@ const UltraFeaturedBouquets = () => {
         }}
       >
       <div className="max-w-7xl mx-auto relative z-10">
-        <motion.div
+        <div
           className="text-center mb-6 sm:mb-8 relative"
-          initial={{ opacity: 0, y: 50 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, ease: [0.23, 1, 0.32, 1] }}
-          viewport={{ once: true }}
         >
           {/* Luxury Typography with Gold Accent */}
-          <motion.h2 
+          <h2 
             className="font-luxury text-2xl sm:text-3xl md:text-5xl lg:text-6xl xl:text-8xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 bg-clip-text text-transparent relative px-2"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            viewport={{ once: true }}
             style={{
               filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))',
               letterSpacing: '0.05em'
             }}
           >
             SIGNATURE COLLECTION
-            {/* Animated Gold Underline */}
-            <motion.div 
+            {/* Gold Underline */}
+            <div 
               className="absolute -bottom-1 sm:-bottom-2 left-1/2 transform -translate-x-1/2 h-0.5 sm:h-1 bg-gradient-to-r from-amber-400 to-yellow-500 rounded-full"
-              initial={{ width: 0 }}
-              whileInView={{ width: '120px' }}
-              transition={{ duration: 1.2, delay: 0.8, ease: "easeOut" }}
-              viewport={{ once: true }}
               style={{
                 width: 'clamp(100px, 30vw, 200px)'
               }}
             />
-          </motion.h2>
+          </h2>
 
           {/* Enhanced Decorative Elements */}
           <div className="relative mb-4 sm:mb-6 md:mb-8">
@@ -257,16 +227,12 @@ const UltraFeaturedBouquets = () => {
           </div>
 
           {/* Enhanced Description */}
-          <motion.p 
+          <p 
             className="font-body text-sm sm:text-base md:text-lg lg:text-xl text-slate-600 max-w-4xl mx-auto leading-relaxed font-light px-2"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            viewport={{ once: true }}
           >
             Discover our curated selection of premium floral arrangements designed to elevate any space.
-          </motion.p>
-        </motion.div>
+          </p>
+        </div>
 
         <div className="flex justify-center">
           <div 
@@ -349,19 +315,11 @@ const UltraFeaturedBouquets = () => {
               }}
               className="block w-full"
             >
-            <motion.div
+            <div
               ref={(el) => {
                 if (el) cardsRef.current[index] = el;
               }}
                 className="group cursor-pointer w-full"
-              initial={{ opacity: 0, y: 100 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ 
-                duration: 0.8, 
-                delay: index * 0.1,
-                ease: [0.23, 1, 0.32, 1]
-              }}
-              viewport={{ once: true }}
             >
                  {/* Card structure with fully rounded corners */}
                  <div 
@@ -535,7 +493,7 @@ const UltraFeaturedBouquets = () => {
                      </ul>
                 </div>
               </div>
-            </motion.div>
+            </div>
             </Link>
              );
            })}
@@ -544,12 +502,8 @@ const UltraFeaturedBouquets = () => {
           </div>
         </div>
 
-        <motion.div
+        <div
           className="text-center mt-8 sm:mt-12 md:mt-16 px-2"
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.4 }}
-          viewport={{ once: true }}
         >
           <motion.button
          className="
@@ -585,7 +539,7 @@ const UltraFeaturedBouquets = () => {
               →
             </motion.div>
           </motion.button>
-        </motion.div>
+        </div>
       </div>
     </section>
 

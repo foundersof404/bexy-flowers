@@ -15,8 +15,7 @@ import {
 import LazySection from "@/components/LazySection";
 import UltraNavigation from "@/components/UltraNavigation";
 import BackToTop from "@/components/BackToTop";
-const InteractiveBackground = React.lazy(() => import("@/components/interactive/InteractiveBackground"));
-const UltraHero = React.lazy(() => import("@/components/UltraHero"));
+const CarouselHero = React.lazy(() => import("@/components/CarouselHero"));
 const UltraFeaturedBouquets = React.lazy(() => import("@/components/UltraFeaturedBouquets"));
 const UltraCategories = React.lazy(() => import("@/components/UltraCategories"));
 // Replaced heavy interactive builder on home with lightweight CTA
@@ -95,32 +94,20 @@ const ProfessionalCustomSection = React.memo(() => {
 
       <div className="relative z-10 max-w-7xl mx-auto">
         {/* Premium Header */}
-        <motion.div
+        <div
           className="text-center mb-12 sm:mb-16 md:mb-20 relative px-2"
-          initial={{ opacity: 0, y: 50 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.5, margin: "0px 0px -100px 0px" }}
-          transition={{ duration: 1, ease: [0.23, 1, 0.32, 1] }}
         >
           {/* Modern Floating Badge */}
-          <motion.div 
+          <div 
             className="inline-flex items-center gap-1.5 sm:gap-2 px-4 sm:px-6 py-2 sm:py-3 rounded-full bg-gradient-to-r from-slate-800/10 to-slate-700/10 backdrop-blur-xl border border-slate-600/20 mb-6 sm:mb-8"
-            initial={{ scale: 0.8, opacity: 0 }}
-            whileInView={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            viewport={{ once: true, amount: 0.5, margin: "0px 0px -100px 0px" }}
           >
             <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 animate-pulse" />
             <span className="text-xs sm:text-sm font-medium text-slate-700 tracking-wider uppercase">Professional Customization</span>
-          </motion.div>
+          </div>
 
           {/* Main Title - Luxury Typography with Gold Accent */}
-          <motion.h2
+          <h2
             className="font-luxury text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-8xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 bg-clip-text text-transparent relative"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.5, margin: "0px 0px -100px 0px" }}
-            transition={{ duration: 0.8, delay: 0.2 }}
             style={{
               filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))',
               letterSpacing: '0.05em'
@@ -130,14 +117,11 @@ const ProfessionalCustomSection = React.memo(() => {
             <br />
             PERFECT BOUQUET
             {/* Animated Gold Underline */}
-            <motion.div
+            <div
               className="absolute -bottom-1 sm:-bottom-2 left-1/2 transform -translate-x-1/2 h-0.5 sm:h-1 bg-gradient-to-r from-[#C79E48] to-[#D4A85A] rounded-full"
-              initial={{ width: 0 }}
-              whileInView={{ width: 'clamp(120px, 30vw, 200px)' }}
-              viewport={{ once: true, amount: 0.5, margin: "0px 0px -100px 0px" }}
-              transition={{ duration: 1.2, delay: 0.8, ease: "easeOut" }}
+              style={{ width: 'clamp(120px, 30vw, 200px)' }}
             />
-          </motion.h2>
+          </h2>
 
           {/* Enhanced Decorative Elements */}
           <div className="relative mb-4 sm:mb-6 md:mb-8">
@@ -146,18 +130,14 @@ const ProfessionalCustomSection = React.memo(() => {
           </div>
 
           {/* Subtitle - Enhanced Description */}
-          <motion.p
+          <p
             className="font-body text-sm sm:text-base md:text-lg lg:text-xl text-slate-600 max-w-4xl mx-auto leading-relaxed font-light px-2"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.5, margin: "0px 0px -100px 0px" }}
-            transition={{ duration: 0.8, delay: 0.4 }}
           >
             Create a bespoke floral masterpiece with unlimited creative freedom.
             <br className="hidden sm:block" />
             Choose from our curated premium selection and design something uniquely yours.
-          </motion.p>
-        </motion.div>
+          </p>
+        </div>
 
         {/* Feature Cards - Premium Grid */}
         <div className="relative mb-16">
@@ -168,37 +148,15 @@ const ProfessionalCustomSection = React.memo(() => {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 md:gap-8 lg:gap-10 xl:gap-12">
             {features.map((feature, index) => {
-              const getInitialState = () => {
-                if (feature.direction === "left") {
-                  return { opacity: 0, x: -100, scale: 0.9 };
-                } else if (feature.direction === "right") {
-                  return { opacity: 0, x: 100, scale: 0.9 };
-                }
-                // Optimized: removed expensive blur filter animation for center card
-                return { opacity: 0, scale: 0.6 };
-              };
-
-              const getAnimateState = () => {
-                return { opacity: 1, x: 0, scale: 1 };
-              };
-
               const gradient135 = `linear-gradient(135deg, ${feature.gradientColors[0]} 0%, ${feature.gradientColors[1]} 50%, ${feature.gradientColors[2]} 100%)`;
               const gradient90 = `linear-gradient(90deg, ${feature.gradientColors[0]} 0%, ${feature.gradientColors[1]} 50%, ${feature.gradientColors[2]} 100%)`;
               const gradient225 = `linear-gradient(225deg, ${feature.gradientColors[0]} 0%, ${feature.gradientColors[1]} 50%, ${feature.gradientColors[2]} 100%)`;
               const Icon = feature.icon;
 
               return (
-                <motion.div
+                <div
                   key={index}
                   className="group relative"
-                initial={getInitialState()}
-                whileInView={getAnimateState()}
-                viewport={{ once: true, amount: 0.5, margin: "0px 0px -100px 0px" }}
-                transition={{
-                  duration: feature.direction === "center" ? 1 : 0.8,
-                  delay: index * 0.2,
-                  ease: feature.direction === "center" ? [0.34, 1.56, 0.64, 1] : [0.23, 1, 0.32, 1]
-                }}
                 >
                   <motion.div
                     className="relative h-full p-4 sm:p-5 md:p-6 rounded-2xl sm:rounded-3xl overflow-hidden border border-[#C6A15B]/20 bg-white shadow-[0_10px_35px_rgba(0,0,0,0.05)] transition-all duration-300"
@@ -279,72 +237,52 @@ const ProfessionalCustomSection = React.memo(() => {
                       style={{ background: gradient225, borderRadius: '0 16px 0 100%' }}
                     />
                   </motion.div>
-                </motion.div>
+                </div>
               );
             })}
           </div>
         </div>
 
         {/* CTA Button Section - Elegant Frame */}
-        <motion.div
+        <div
           className="relative text-center mt-6 sm:mt-8"
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.5, margin: "0px 0px -100px 0px" }}
-          transition={{ duration: 0.8, delay: 0.6 }}
         >
           {/* Elegant Decorative Frame */}
           <div className="relative inline-block px-4 sm:px-8 md:px-12 lg:px-16 py-6 sm:py-8 md:py-10 lg:py-12">
             {/* Top Left Corner */}
-            <motion.div
+            <div
               className="absolute top-0 left-0 w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16"
               style={{
                 borderTop: '2px solid rgba(194, 154, 67, 0.3)',
                 borderLeft: '2px solid rgba(194, 154, 67, 0.3)',
               }}
-              initial={{ opacity: 0, scale: 0 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true, amount: 0.5, margin: "0px 0px -100px 0px" }}
-              transition={{ duration: 0.6, delay: 0.8 }}
             />
             
             {/* Top Right Corner */}
-            <motion.div
+            <div
               className="absolute top-0 right-0 w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16"
               style={{
                 borderTop: '2px solid rgba(194, 154, 67, 0.3)',
                 borderRight: '2px solid rgba(194, 154, 67, 0.3)',
               }}
-              initial={{ opacity: 0, scale: 0 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true, amount: 0.5, margin: "0px 0px -100px 0px" }}
-              transition={{ duration: 0.6, delay: 0.8 }}
             />
             
             {/* Bottom Left Corner */}
-            <motion.div
+            <div
               className="absolute bottom-0 left-0 w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16"
               style={{
                 borderBottom: '2px solid rgba(194, 154, 67, 0.3)',
                 borderLeft: '2px solid rgba(194, 154, 67, 0.3)',
               }}
-              initial={{ opacity: 0, scale: 0 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true, amount: 0.5, margin: "0px 0px -100px 0px" }}
-              transition={{ duration: 0.6, delay: 0.8 }}
             />
             
             {/* Bottom Right Corner */}
-            <motion.div
+            <div
               className="absolute bottom-0 right-0 w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16"
               style={{
                 borderBottom: '2px solid rgba(194, 154, 67, 0.3)',
                 borderRight: '2px solid rgba(194, 154, 67, 0.3)',
               }}
-              initial={{ opacity: 0, scale: 0 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true, amount: 0.5, margin: "0px 0px -100px 0px" }}
-              transition={{ duration: 0.6, delay: 0.8 }}
             />
 
             {/* Optimized Floating Particles Around Button - Reduced for performance */}
@@ -426,21 +364,17 @@ const ProfessionalCustomSection = React.memo(() => {
             </motion.a>
 
             {/* Trust Badge */}
-            <motion.p
+            <p
               className="mt-4 sm:mt-6 text-xs sm:text-sm px-2"
               style={{
                 color: '#737373',
                 letterSpacing: '0.02em'
               }}
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true, amount: 0.5, margin: "0px 0px -100px 0px" }}
-              transition={{ duration: 0.6, delay: 0.9 }}
             >
               ✨ Trusted by over 10,000+ satisfied customers worldwide
-            </motion.p>
+            </p>
           </div>
-        </motion.div>
+        </div>
       </div>
     </section>
   );
@@ -452,12 +386,9 @@ const Index = () => {
   return (
     <div className="min-h-screen overflow-x-hidden relative">
       <UltraNavigation />
-      <Suspense fallback={null}>
-        <InteractiveBackground />
-      </Suspense>
       <div className="relative z-10">
         <Suspense fallback={null}>
-          <UltraHero />
+          <CarouselHero />
         </Suspense>
         <LazySection rootMargin="400px 0px">
           <Suspense fallback={null}>
