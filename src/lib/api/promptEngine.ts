@@ -206,7 +206,9 @@ export const NEGATIVE_PROMPTS = {
   ],
   packaging: [
     'torn paper', 'damaged box', 'dirty packaging', 'wrinkled ribbon',
-    'cheap materials', 'plastic wrap visible', 'tape visible'
+    'cheap materials', 'plastic wrap visible', 'tape visible',
+    'empty box', 'box without flowers', 'closed box', 'box lid on',
+    'cardboard texture visible', 'unfinished box edges', 'dented box'
   ],
   composition: [
     'cluttered', 'busy background', 'distracting elements',
@@ -455,8 +457,7 @@ export function buildAdvancedPrompt(options: PromptBuilderOptions): BuiltPrompt 
 
   const totalFlowers = flowers.reduce((sum, f) => sum + f.quantity, 0);
   
-  // Build DETAILED flower descriptions with exact quantities
-  // Priority: larger quantities first, then by flower type
+  // Build DETAILED flower descriptions with exact quantities and visual characteristics
   const sortedFlowers = [...flowers].sort((a, b) => b.quantity - a.quantity);
   const flowerDescriptions: string[] = [];
   
@@ -467,10 +468,13 @@ export function buildAdvancedPrompt(options: PromptBuilderOptions): BuiltPrompt 
     
     // Get detailed visual for this flower type
     const visual = FLOWER_VISUALS[flowerFamily];
+    const colorVisual = COLOR_VISUALS[colorName] || colorName;
+    
     if (visual && qty > 0) {
-      flowerDescriptions.push(`exactly ${qty} ${colorName} ${flowerFamily} with ${visual.bloomShape}`);
+      // Include bloom shape and petal style for realistic rendering
+      flowerDescriptions.push(`${qty} fresh ${colorVisual} ${flowerFamily} with ${visual.bloomShape}, ${visual.petalStyle}`);
     } else if (qty > 0) {
-      flowerDescriptions.push(`exactly ${qty} ${colorName} ${flowerFamily}`);
+      flowerDescriptions.push(`${qty} fresh ${colorVisual} ${flowerFamily} flowers`);
     }
   });
   
@@ -482,33 +486,125 @@ export function buildAdvancedPrompt(options: PromptBuilderOptions): BuiltPrompt 
   
   if (packageType === 'box') {
     const shape = boxShape || 'square';
-    // Exact box description
-    parts.push(`${size} ${color} ${shape} luxury flower gift box`);
-    parts.push(`containing ${flowersText}`);
-    parts.push(`flowers arranged inside open box`);
-    parts.push(`top-down aerial view looking into box`);
-    parts.push(`gold BEXY text on box`);
+    
+    // ENHANCED BOX DESCRIPTIONS for realistic generation
+    // Box material and finish descriptions - premium leather-like finish
+    const boxMaterials: Record<string, string> = {
+      'black': 'matte black premium leather-textured',
+      'white': 'elegant white smooth matte finish',
+      'gold': 'luxurious champagne gold satin finish',
+      'pink': 'soft blush pink leather-textured',
+      'blue': 'navy blue premium leather-textured',
+      'red': 'deep burgundy velvet-textured'
+    };
+    const boxMaterial = boxMaterials[color.toLowerCase()] || `${color} premium`;
+    
+    // Box shape specific descriptions - optimized for 3/4 angle view
+    const shapeDescriptions: Record<string, { shape: string; interior: string; arrangement: string; viewAngle: string }> = {
+      'round': {
+        shape: 'perfectly circular cylinder hatbox',
+        interior: 'round opening',
+        arrangement: 'flowers arranged in a beautiful dome shape overflowing slightly above the box rim, tightly packed roses filling the entire circular space',
+        viewAngle: 'elegant three-quarter angle view from slightly above, showing both the flower dome and the curved box side with Bexy Flowers logo'
+      },
+      'square': {
+        shape: 'square luxury gift box with sharp clean edges',
+        interior: 'square opening',
+        arrangement: 'flowers arranged in neat rows creating a lush dome shape rising above the box edges, tightly packed grid pattern',
+        viewAngle: 'elegant three-quarter angle view from slightly above, showing both the flower arrangement and box corner with Bexy Flowers logo'
+      },
+      'heart': {
+        shape: 'romantic heart-shaped gift box with smooth curved edges',
+        interior: 'heart-shaped opening',
+        arrangement: 'flowers densely packed following the heart contour, roses standing upright filling the entire heart shape with blooms facing upward',
+        viewAngle: 'elegant three-quarter angle view from slightly above, showing the heart shape clearly with flowers and the curved box side with Bexy Flowers logo'
+      },
+      'rectangle': {
+        shape: 'elegant rectangular gift box',
+        interior: 'rectangular opening',
+        arrangement: 'flowers arranged in rows along the length creating a dome shape, tightly packed',
+        viewAngle: 'elegant three-quarter angle view from slightly above, showing both the flower arrangement and box side with Bexy Flowers logo'
+      }
+    };
+    const shapeConfig = shapeDescriptions[shape.toLowerCase()] || shapeDescriptions['square'];
+    
+    // Size descriptions for boxes
+    const sizeDescriptions: Record<string, string> = {
+      'small': 'compact 15cm',
+      'medium': 'standard 25cm',
+      'large': 'grand 35cm'
+    };
+    const sizeDesc = sizeDescriptions[size.toLowerCase()] || 'medium-sized';
+    
+    // Build detailed box prompt - 3/4 angle view like reference images
+    parts.push(`${sizeDesc} ${shapeConfig.shape} made of ${boxMaterial} material`);
+    parts.push(`box is open with lid removed`);
+    parts.push(`${totalFlowers} real fresh flowers inside: ${flowersText}`);
+    parts.push(`${shapeConfig.arrangement}`);
+    parts.push(`all flower heads facing upward showing full beautiful blooms`);
+    parts.push(`flowers creating a lush dome shape rising above the box rim`);
+    parts.push(`${shapeConfig.viewAngle}`);
+    parts.push(`elegant black "Bexy Flowers" logo printed on the box side`);
+    parts.push(`box placed on a clean surface`);
+    
   } else {
-    // Exact bouquet description
-    parts.push(`${size} hand-tied flower bouquet`);
-    parts.push(`containing ${flowersText}`);
-    parts.push(`wrapped in ${color} paper with matching ribbon`);
-    parts.push(`front three-quarter view`);
-    parts.push(`small BEXY tag on ribbon`);
+    // ENHANCED WRAP/BOUQUET DESCRIPTIONS - including heart shape option
+    const wrapShape = boxShape || 'classic'; // boxShape can be 'heart' for wrap too
+    
+    const wrapMaterials: Record<string, string> = {
+      'black': 'elegant matte black Korean-style wrapping paper with pleated ruffled edges',
+      'white': 'crisp white tissue paper with kraft backing',
+      'gold': 'champagne gold metallic wrapping paper',
+      'pink': 'soft blush pink tissue paper',
+      'blue': 'dusty blue kraft paper',
+      'red': 'deep burgundy tissue paper'
+    };
+    const wrapMaterial = wrapMaterials[color.toLowerCase()] || `${color} wrapping paper`;
+    
+    const sizeDescriptions: Record<string, string> = {
+      'small': 'petite hand-held',
+      'medium': 'standard presentation',
+      'large': 'grand luxury oversized'
+    };
+    const sizeDesc = sizeDescriptions[size.toLowerCase()] || 'elegant';
+    
+    // Check if heart-shaped wrap bouquet
+    if (wrapShape === 'heart') {
+      // Heart-shaped wrapped bouquet - like Image 1 reference
+      parts.push(`${sizeDesc} heart-shaped flower bouquet arrangement`);
+      parts.push(`${totalFlowers} real fresh flowers: ${flowersText}`);
+      parts.push(`flowers arranged in a perfect heart shape when viewed from above`);
+      parts.push(`roses densely packed to form a romantic heart silhouette`);
+      parts.push(`wrapped in ${wrapMaterial} with decorative pleated ruffled border around the heart`);
+      parts.push(`the wrapping paper forms an elegant frame around the heart-shaped flowers`);
+      parts.push(`front view showing the full heart shape of the flower arrangement`);
+      parts.push(`small satin ribbon with message banner across the flowers`);
+      parts.push(`small gold "BEXY" brand tag on ribbon`);
+    } else {
+      // Classic wrapped bouquet
+      parts.push(`${sizeDesc} hand-tied flower bouquet`);
+      parts.push(`${totalFlowers} real fresh flowers: ${flowersText}`);
+      parts.push(`flowers arranged in cascading dome shape with focal flowers in center`);
+      parts.push(`professionally wrapped in ${wrapMaterial}`);
+      parts.push(`paper gathered and tied with matching satin ribbon bow`);
+      parts.push(`stems neatly trimmed and visible below wrap`);
+      parts.push(`front three-quarter angle view showing full bouquet face`);
+      parts.push(`small gold "BEXY" brand tag hanging from ribbon`);
+    }
   }
   
   // Add glitter only if selected
   if (withGlitter) {
-    parts.push(`fine glitter dust on flower petals`);
+    parts.push(`subtle fine glitter dust sparkling on flower petals catching the light`);
   }
   
   // Add accessories with exact descriptions
   if (accessories.length > 0) {
     const accDescriptions: Record<string, string> = {
-      'crown': 'small golden crown on top of flowers',
-      'graduation-hat': 'miniature black graduation cap among flowers',
-      'bear': 'small plush teddy bear next to flowers',
-      'chocolate': 'box of chocolates beside arrangement'
+      'crown': 'small decorative golden tiara crown placed on top center of flowers',
+      'graduation-hat': 'miniature black graduation mortarboard cap with gold tassel among flowers',
+      'bear': 'small cute plush teddy bear (10cm) sitting beside the arrangement',
+      'chocolate': 'elegant box of assorted chocolates placed next to flowers'
     };
     accessories.forEach(acc => {
       if (accDescriptions[acc]) {
@@ -517,8 +613,11 @@ export function buildAdvancedPrompt(options: PromptBuilderOptions): BuiltPrompt 
     });
   }
   
-  // Technical quality - minimal, focused
-  parts.push(`professional product photography, white background, soft studio lighting`);
+  // Technical quality - optimized for realistic product photography
+  parts.push(`professional florist product photography`);
+  parts.push(`pure white seamless background`);
+  parts.push(`soft diffused studio lighting with gentle shadows`);
+  parts.push(`sharp focus on flowers, 8K detail`);
   
   const positivePrompt = parts.join(', ');
   
@@ -529,8 +628,9 @@ export function buildAdvancedPrompt(options: PromptBuilderOptions): BuiltPrompt 
   const flowerListSimple = flowers.map(f => `${f.quantity} ${f.flower.colorName} ${f.flower.family}`).join(', ');
   
   // Build human-readable preview
+  const wrapShapeDisplay = packageType === 'wrap' && boxShape === 'heart' ? 'Heart-Shaped Bouquet' : 'Wrapped Bouquet';
   const previewParts: string[] = [
-    `📦 ${packageType === 'box' ? `${boxShape || 'Square'} Box` : 'Wrapped Bouquet'} (${size}, ${color})`,
+    `📦 ${packageType === 'box' ? `${boxShape || 'Square'} Box` : wrapShapeDisplay} (${size}, ${color})`,
     `🌸 ${totalFlowers} flowers: ${flowerListSimple}`,
   ];
   if (withGlitter) previewParts.push('✨ With glitter');
