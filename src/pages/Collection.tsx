@@ -11,6 +11,7 @@ import Footer from "@/components/Footer";
 import { CollectionStats } from "@/components/collection/CollectionStats";
 import BackToTop from "@/components/BackToTop";
 import LazySection from "@/components/LazySection";
+import { FooterSkeleton } from "@/components/SectionSkeletons";
 import type { Bouquet } from "@/types/bouquet";
 import { generatedCategories } from "@/data/generatedBouquets";
 import { encodeImageUrl } from "@/lib/imageUtils";
@@ -252,7 +253,7 @@ const Collection = () => {
 
         {/* Footer */}
         <LazySection rootMargin="600px 0px">
-          <Suspense fallback={null}>
+          <Suspense fallback={<FooterSkeleton />}>
             <Footer />
           </Suspense>
         </LazySection>

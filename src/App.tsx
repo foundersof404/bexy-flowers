@@ -17,6 +17,32 @@ import { useNavigationPredictor } from "@/hooks/useNavigationPredictor";
 import { useComponentPrefetch } from "@/hooks/useComponentPrefetch";
 import { usePerformanceMonitor } from "@/hooks/usePerformanceMonitor";
 import { register as registerServiceWorker } from "@/lib/serviceWorkerRegistration";
+import { gsap } from "gsap";
+
+// Configure GSAP globally to suppress null target warnings
+gsap.config({
+  nullTargetWarn: false,
+});
+
+// ⚡ PERFORMANCE: Preload critical routes immediately on app load
+// This ensures instant navigation for new users
+const preloadCriticalRoutes = () => {
+  // Preload main pages that users navigate to most
+  import("./pages/Index");
+  import("./pages/Collection");
+  import("./components/UltraNavigation");
+  import("./components/Footer");
+};
+
+// Start preloading after initial render
+if (typeof window !== 'undefined') {
+  // Use requestIdleCallback for non-blocking preload, fallback to setTimeout
+  if ('requestIdleCallback' in window) {
+    (window as any).requestIdleCallback(() => preloadCriticalRoutes(), { timeout: 2000 });
+  } else {
+    setTimeout(preloadCriticalRoutes, 100);
+  }
+}
 
 // ⚡ PERFORMANCE OPTIMIZATION: Route-based code splitting
 // Lazy load all routes to reduce initial bundle size by ~68%

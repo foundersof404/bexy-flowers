@@ -481,7 +481,7 @@ export async function generateBouquetImage(
         height = AI_CONFIG.generation.defaultHeight, 
         enhancePrompt: shouldEnhance = AI_CONFIG.generation.autoEnhancePrompts,
         negativePrompt,
-        useCache = true,
+        useCache = false, // DISABLED: Always generate fresh images, never cache
         cacheHash,
         onProgress,
         configuration

@@ -447,88 +447,78 @@ export function buildAdvancedPrompt(options: PromptBuilderOptions): BuiltPrompt 
     flowers,
     withGlitter,
     accessories,
-    stylePreset = 'classic',
-    template,
     includeNegative = true
   } = options;
 
-  const style = STYLE_PRESETS[stylePreset];
+  // NOTE: stylePreset and template are IGNORED to prevent unrealistic images
+  // We focus ONLY on exact user inputs for accurate generation
+
   const totalFlowers = flowers.reduce((sum, f) => sum + f.quantity, 0);
   
-  // Get template if specified
-  const templateConfig = template ? PROMPT_TEMPLATES.find(t => t.id === template) : null;
-  
-  // Size configurations with composition rules
-  const sizeConfigs: Record<string, { desc: string; composition: string; density: string }> = {
-    'small': { 
-      desc: 'compact petite small-sized', 
-      composition: 'intimate tight arrangement',
-      density: 'closely packed flowers filling the space'
-    },
-    'medium': { 
-      desc: 'medium-sized elegant', 
-      composition: 'balanced harmonious arrangement',
-      density: 'well-distributed flowers with natural spacing'
-    },
-    'large': { 
-      desc: 'large grand impressive full-sized', 
-      composition: 'abundant luxurious arrangement',
-      density: 'generous display with layered depth'
-    }
-  };
-  const sizeConfig = sizeConfigs[size.toLowerCase()] || sizeConfigs['medium'];
-  
-  // Packaging color descriptions
-  const packagingColors: Record<string, string> = {
-    'black': 'elegant matte black with subtle sheen',
-    'white': 'pristine pure white with clean finish',
-    'gold': 'luxurious shimmering metallic gold',
-    'pink': 'soft romantic blush pink',
-    'blue': 'serene powder blue',
-    'red': 'rich deep burgundy red'
-  };
-  const packagingColor = packagingColors[color.toLowerCase()] || color;
-  
-  // Build concise flower descriptions (keep under 1000 chars total)
+  // Build DETAILED flower descriptions with exact quantities
+  // Priority: larger quantities first, then by flower type
+  const sortedFlowers = [...flowers].sort((a, b) => b.quantity - a.quantity);
   const flowerDescriptions: string[] = [];
-  flowers.forEach(f => {
+  
+  sortedFlowers.forEach(f => {
     const colorName = f.flower.colorName.toLowerCase();
     const flowerFamily = f.flower.family.toLowerCase();
-    flowerDescriptions.push(`${f.quantity} ${colorName} ${flowerFamily}`);
+    const qty = f.quantity;
+    
+    // Get detailed visual for this flower type
+    const visual = FLOWER_VISUALS[flowerFamily];
+    if (visual && qty > 0) {
+      flowerDescriptions.push(`exactly ${qty} ${colorName} ${flowerFamily} with ${visual.bloomShape}`);
+    } else if (qty > 0) {
+      flowerDescriptions.push(`exactly ${qty} ${colorName} ${flowerFamily}`);
+    }
   });
+  
   const flowersText = flowerDescriptions.join(', ');
   
-  // Build COMPACT prompt (must stay under 1000 chars for serverless function)
+  // Build PRECISE prompt focused on user inputs only
+  // Pollinations Flux model works best with clear, structured descriptions
   const parts: string[] = [];
   
   if (packageType === 'box') {
     const shape = boxShape || 'square';
-    parts.push(`${sizeConfig.desc} ${packagingColor} ${shape} flower gift box`);
-    parts.push(`${totalFlowers} flowers: ${flowersText}`);
-    parts.push(`top-down view, lid open, "BEXY" gold text on box`);
+    // Exact box description
+    parts.push(`${size} ${color} ${shape} luxury flower gift box`);
+    parts.push(`containing ${flowersText}`);
+    parts.push(`flowers arranged inside open box`);
+    parts.push(`top-down aerial view looking into box`);
+    parts.push(`gold BEXY text on box`);
   } else {
-    parts.push(`${sizeConfig.desc} hand-tied bouquet wrapped in ${packagingColor} paper`);
-    parts.push(`${totalFlowers} flowers: ${flowersText}`);
-    parts.push(`front view, satin ribbon with "BEXY" tag`);
+    // Exact bouquet description
+    parts.push(`${size} hand-tied flower bouquet`);
+    parts.push(`containing ${flowersText}`);
+    parts.push(`wrapped in ${color} paper with matching ribbon`);
+    parts.push(`front three-quarter view`);
+    parts.push(`small BEXY tag on ribbon`);
   }
   
+  // Add glitter only if selected
   if (withGlitter) {
-    parts.push(`subtle glitter sparkle on petals`);
+    parts.push(`fine glitter dust on flower petals`);
   }
   
+  // Add accessories with exact descriptions
   if (accessories.length > 0) {
-    const accNames: Record<string, string> = {
-      'crown': 'golden crown',
-      'graduation-hat': 'graduation cap',
-      'bear': 'teddy bear',
-      'chocolate': 'chocolates'
+    const accDescriptions: Record<string, string> = {
+      'crown': 'small golden crown on top of flowers',
+      'graduation-hat': 'miniature black graduation cap among flowers',
+      'bear': 'small plush teddy bear next to flowers',
+      'chocolate': 'box of chocolates beside arrangement'
     };
-    const accList = accessories.map(a => accNames[a] || a).join(', ');
-    parts.push(`with ${accList}`);
+    accessories.forEach(acc => {
+      if (accDescriptions[acc]) {
+        parts.push(accDescriptions[acc]);
+      }
+    });
   }
   
-  parts.push(`${style.name} style, ${style.lightingStyle}`);
-  parts.push(`8K photorealistic product photography, white background, studio lighting`);
+  // Technical quality - minimal, focused
+  parts.push(`professional product photography, white background, soft studio lighting`);
   
   const positivePrompt = parts.join(', ');
   
@@ -542,11 +532,9 @@ export function buildAdvancedPrompt(options: PromptBuilderOptions): BuiltPrompt 
   const previewParts: string[] = [
     `📦 ${packageType === 'box' ? `${boxShape || 'Square'} Box` : 'Wrapped Bouquet'} (${size}, ${color})`,
     `🌸 ${totalFlowers} flowers: ${flowerListSimple}`,
-    `🎨 Style: ${style.name}`,
   ];
   if (withGlitter) previewParts.push('✨ With glitter');
   if (accessories.length > 0) previewParts.push(`🎁 Accessories: ${accessories.join(', ')}`);
-  if (templateConfig) previewParts.push(`📋 Template: ${templateConfig.name}`);
   
   return {
     positive: positivePrompt,

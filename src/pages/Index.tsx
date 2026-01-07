@@ -1,4 +1,4 @@
-import React, { Suspense, useRef } from "react";
+import React, { Suspense, useRef, useEffect } from "react";
 import { motion, useInView } from "framer-motion";
 import {
   Sparkles,
@@ -16,6 +16,14 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import LazySection from "@/components/LazySection";
 import UltraNavigation from "@/components/UltraNavigation";
 import BackToTop from "@/components/BackToTop";
+import {
+  HeroSkeleton,
+  FeaturedBouquetsSkeleton,
+  CategoriesSkeleton,
+  GenericSectionSkeleton,
+  FooterSkeleton
+} from "@/components/SectionSkeletons";
+
 const CarouselHero = React.lazy(() => import("@/components/CarouselHero"));
 const UltraFeaturedBouquets = React.lazy(() => import("@/components/UltraFeaturedBouquets"));
 const UltraCategories = React.lazy(() => import("@/components/UltraCategories"));
@@ -24,6 +32,13 @@ const UltraCategories = React.lazy(() => import("@/components/UltraCategories"))
 const ZodiacBouquetQuiz = React.lazy(() => import("@/components/culture/ZodiacBouquetQuiz"));
 const FlowerCareGuide = React.lazy(() => import("@/components/culture/FlowerCareGuide"));
 const Footer = React.lazy(() => import("@/components/Footer"));
+
+// Preload critical components immediately for faster navigation
+const preloadCriticalComponents = () => {
+  import("@/components/CarouselHero");
+  import("@/components/UltraFeaturedBouquets");
+  import("@/components/UltraCategories");
+};
 
 // Professional Custom Bouquet Section Component - Optimized for performance
 const ProfessionalCustomSection = React.memo(() => {
@@ -407,20 +422,25 @@ const ProfessionalCustomSection = React.memo(() => {
 ProfessionalCustomSection.displayName = 'ProfessionalCustomSection';
 
 const Index = () => {
+  // Preload critical components on mount for faster subsequent navigation
+  useEffect(() => {
+    preloadCriticalComponents();
+  }, []);
+
   return (
     <div className="min-h-screen overflow-x-hidden relative">
       <UltraNavigation />
       <div className="relative z-10">
-        <Suspense fallback={null}>
+        <Suspense fallback={<HeroSkeleton />}>
           <CarouselHero />
         </Suspense>
         <LazySection rootMargin="400px 0px">
-          <Suspense fallback={null}>
+          <Suspense fallback={<FeaturedBouquetsSkeleton />}>
             <UltraFeaturedBouquets />
           </Suspense>
         </LazySection>
         <LazySection rootMargin="400px 0px">
-          <Suspense fallback={null}>
+          <Suspense fallback={<CategoriesSkeleton />}>
             <UltraCategories />
           </Suspense>
         </LazySection>
@@ -429,17 +449,17 @@ const Index = () => {
           <ProfessionalCustomSection />
         </LazySection>
         <LazySection rootMargin="400px 0px">
-          <Suspense fallback={null}>
+          <Suspense fallback={<GenericSectionSkeleton />}>
             <ZodiacBouquetQuiz />
           </Suspense>
         </LazySection>
         <LazySection rootMargin="400px 0px">
-          <Suspense fallback={null}>
+          <Suspense fallback={<GenericSectionSkeleton />}>
             <FlowerCareGuide />
           </Suspense>
         </LazySection>
         <LazySection rootMargin="600px 0px">
-          <Suspense fallback={null}>
+          <Suspense fallback={<FooterSkeleton />}>
             <Footer />
           </Suspense>
         </LazySection>
