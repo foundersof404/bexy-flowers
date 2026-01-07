@@ -1,13 +1,15 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Box, Gift, Check, CheckCircle2, Wand2, Plus, Minus, X, Info, ChevronRight, Palette, ShoppingCart, Circle, Square, Heart, Download, MessageCircle, Sparkles, ArrowRight, Star, Crown, GraduationCap, Heart as HeartIcon, Candy } from "lucide-react";
+import { Box, Gift, Check, CheckCircle2, Wand2, Plus, Minus, X, Info, ChevronRight, Palette, ShoppingCart, Circle, Square, Heart, Download, MessageCircle, Sparkles, ArrowRight, Star, Crown, GraduationCap, Heart as HeartIcon, Candy, Eye, EyeOff, History, BookmarkPlus, Bookmark, RefreshCw, Loader2 } from "lucide-react";
 import UltraNavigation from "@/components/UltraNavigation";
 import { useCart } from "@/contexts/CartContext";
 import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
 import heroBouquetMain from "@/assets/bouquet-4.jpg";
 import { flowers, flowerFamilies, EnhancedFlower, Season } from "@/data/flowers";
-import { generateBouquetImage as generateImage } from "@/lib/api/imageGeneration";
+import { generateBouquetImage as generateImage, generateWithVariation, ProgressStage } from "@/lib/api/imageGeneration";
+import { buildAdvancedPrompt, STYLE_PRESETS, PROMPT_TEMPLATES, StylePreset, PromptTemplate } from "@/lib/api/promptEngine";
+import { getPromptHistory, getFavorites, addToFavorites, removeFromFavorites, isFavorite, PromptHistoryEntry } from "@/lib/api/promptHistory";
 // Video for mobile hero background
 import video2Url from '@/assets/video/Video2.webm?url';
 
@@ -160,6 +162,18 @@ const Customize: React.FC = () => {
   const [flowerFilter, setFlowerFilter] = useState<"all" | "popular" | "romantic" | "minimal" | "luxury" | "seasonal">("all");
   const [seasonFilter, setSeasonFilter] = useState<Season | "all-seasons">("all-seasons");
   const flowersGridRef = useRef<HTMLDivElement>(null);
+
+  // Enhanced AI State
+  const [selectedStylePreset, setSelectedStylePreset] = useState<StylePreset>('classic');
+  const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
+  const [showPromptPreview, setShowPromptPreview] = useState(false);
+  const [currentPrompt, setCurrentPrompt] = useState<{ positive: string; negative: string; preview: string; hash: string } | null>(null);
+  const [generationProgress, setGenerationProgress] = useState<ProgressStage | null>(null);
+  const [showHistory, setShowHistory] = useState(false);
+  const [promptHistory, setPromptHistory] = useState<PromptHistoryEntry[]>([]);
+  const [favorites, setFavorites] = useState<PromptHistoryEntry[]>([]);
+  const [variationIndex, setVariationIndex] = useState(0);
+  const [lastGeneratedPrompt, setLastGeneratedPrompt] = useState<string | null>(null);
 
   // Cleanup blob URLs
   useEffect(() => {
@@ -490,59 +504,253 @@ const Customize: React.FC = () => {
     }
   };
 
-  // AI Generation
+  // Load history and favorites on mount
+  useEffect(() => {
+    setPromptHistory(getPromptHistory());
+    setFavorites(getFavorites());
+  }, []);
+
+  // Build current prompt whenever selections change
+  const buildCurrentPrompt = useCallback(() => {
+    if (!selectedPackage || !selectedSize || !selectedColor || Object.keys(selectedFlowers).length === 0) {
+      return null;
+    }
+
+    const flowerData = Object.values(selectedFlowers).map(({ flower, quantity }) => ({
+      flower,
+      quantity
+    }));
+
+    const prompt = buildAdvancedPrompt({
+      packageType: selectedPackage.type,
+      boxShape: selectedBoxShape?.name.toLowerCase(),
+      size: selectedSize.name.toLowerCase(),
+      color: selectedColor.name.toLowerCase(),
+      flowers: flowerData,
+      withGlitter,
+      accessories: selectedAccessories,
+      stylePreset: selectedStylePreset,
+      template: selectedTemplate || undefined,
+      includeNegative: true
+    });
+
+    return prompt;
+  }, [selectedPackage, selectedBoxShape, selectedSize, selectedColor, selectedFlowers, withGlitter, selectedAccessories, selectedStylePreset, selectedTemplate]);
+
+  // Update prompt preview when selections change
+  useEffect(() => {
+    const prompt = buildCurrentPrompt();
+    setCurrentPrompt(prompt);
+  }, [buildCurrentPrompt]);
+
+  // Progress stage labels
+  const progressLabels: Record<ProgressStage, string> = {
+    'checking-cache': 'Checking cache...',
+    'building-prompt': 'Building prompt...',
+    'connecting': 'Connecting to AI...',
+    'generating': 'Generating image...',
+    'processing': 'Processing result...',
+    'caching': 'Saving to cache...',
+    'complete': 'Complete!'
+  };
+
+  // AI Generation with enhanced features
   const generateBouquetImage = async () => {
     setIsGenerating(true);
     setGeneratedImage(null);
+    setGenerationProgress(null);
+    
     try {
-      const flowerDetails: string[] = [];
-      const flowerBreakdown: string[] = [];
-      let totalFlowerCount = 0;
-      
-      Object.values(selectedFlowers).forEach(({ flower, quantity }) => {
-        totalFlowerCount += quantity;
-        flowerDetails.push(`${quantity} ${flower.colorName} ${flower.family}`);
-        if (quantity > 1) {
-          flowerBreakdown.push(`${quantity} ${flower.colorName} ${flower.family} blooms`);
-        } else {
-          flowerBreakdown.push(`1 ${flower.colorName} ${flower.family} bloom`);
-        }
-      });
-
-      const flowersText = flowerDetails.length > 0 ? flowerDetails.join(', ') : 'mixed roses';
-      const arrangementText = flowerBreakdown.length > 0 ? flowerBreakdown.join(', ') : 'mixed flower arrangement';
-      const colorName = selectedColor?.name.toLowerCase() || "white";
-      const sizeName = selectedSize?.name.toLowerCase() || "medium";
-      const packageType = selectedPackage?.type || "box";
-      const packageName = selectedPackage?.name || (packageType === "box" ? "Luxury Box" : "Signature Wrap");
-
-      let fullPrompt = "";
-      if (packageType === "box") {
-        const boxShapeName = selectedBoxShape?.name.toLowerCase() || "square";
-        fullPrompt = `A premium ${colorName} luxury gift box, ${boxShapeName} shape, ${sizeName} size dimensions, filled with a stunning flower bouquet containing exactly ${totalFlowerCount} fresh premium flowers: ${flowersText}, expertly arranged in a professional ${sizeName} size floral arrangement featuring ${arrangementText}, top-down aerial view, bird's eye perspective, camera positioned directly above, showing the elegant ${colorName} ${boxShapeName} box with lid fully open revealing the beautiful flowers arranged inside, the box lid displays elegant golden text "Bexy Flowers" in elegant script font, clearly visible and readable, soft professional studio lighting from above creating gentle natural shadows, diffused natural light, premium floral gift presentation, Bexy Flowers luxury brand signature, elegant premium quality, commercial product photography, white seamless background, isolated on white`;
-      } else {
-        fullPrompt = `A ${sizeName} size elegant flower bouquet, containing exactly ${totalFlowerCount} fresh premium flowers: ${flowersText}, beautifully arranged with ${arrangementText} in a professional florist style, wrapped elegantly in ${colorName} decorative paper with matching ${colorName} satin ribbon bow, the ribbon features a small elegant tag with golden text "Bexy Flowers" clearly visible and readable, front view, standing upright, three-quarter angle view, professional florist arrangement, fresh premium flowers, soft natural studio lighting, diffused light, Bexy Flowers signature style, premium quality luxury floral gift, commercial product photography, white seamless background, isolated on white`;
+      const prompt = buildCurrentPrompt();
+      if (!prompt) {
+        toast.error("Please complete all selections first");
+        setIsGenerating(false);
+        return;
       }
 
+      setLastGeneratedPrompt(prompt.positive);
+
+      // Build configuration for history
+      const configuration = {
+        packageType: selectedPackage!.type,
+        boxShape: selectedBoxShape?.name.toLowerCase(),
+        size: selectedSize!.name.toLowerCase(),
+        color: selectedColor!.name.toLowerCase(),
+        flowers: Object.values(selectedFlowers).map(({ flower, quantity }) => ({
+          id: flower.id,
+          name: flower.name,
+          quantity
+        })),
+        withGlitter,
+        accessories: selectedAccessories,
+        stylePreset: selectedStylePreset,
+        template: selectedTemplate || undefined
+      };
+
       toast.loading("Generating your bouquet preview...", { id: 'generating-toast' });
-      const result = await generateImage(fullPrompt, {
+      
+      const result = await generateImage(prompt.positive, {
         width: 1024,
         height: 1024,
         enhancePrompt: true,
+        negativePrompt: prompt.negative,
+        useCache: true,
+        cacheHash: prompt.hash,
+        onProgress: (stage) => setGenerationProgress(stage),
+        configuration
       });
 
       if (generatedImage && generatedImage.startsWith('blob:')) {
         URL.revokeObjectURL(generatedImage);
       }
+      
       setGeneratedImage(result.imageUrl);
-      toast.success("Preview generated!", { id: 'generating-toast' });
+      setVariationIndex(0);
+      
+      // Refresh history
+      setPromptHistory(getPromptHistory());
+      
+      if (result.cached) {
+        toast.success("Preview loaded from cache!", { id: 'generating-toast' });
+      } else {
+        toast.success("Preview generated!", { id: 'generating-toast' });
+      }
     } catch (error) {
       toast.dismiss('generating-toast');
       toast.error("Could not generate preview", {
         description: "AI services are busy. Try again in a moment.",
       });
+    } finally {
       setIsGenerating(false);
+      setGenerationProgress(null);
     }
+  };
+
+  // Generate variation of current design
+  const generateVariation = async () => {
+    if (!lastGeneratedPrompt) {
+      toast.error("Generate an image first before creating variations");
+      return;
+    }
+
+    setIsGenerating(true);
+    const newVariationIndex = variationIndex + 1;
+    setVariationIndex(newVariationIndex);
+
+    try {
+      toast.loading(`Creating variation ${newVariationIndex}...`, { id: 'variation-toast' });
+      
+      const result = await generateWithVariation(lastGeneratedPrompt, newVariationIndex, {
+        width: 1024,
+        height: 1024,
+        onProgress: (stage) => setGenerationProgress(stage)
+      });
+
+      if (generatedImage && generatedImage.startsWith('blob:')) {
+        URL.revokeObjectURL(generatedImage);
+      }
+      
+      setGeneratedImage(result.imageUrl);
+      toast.success(`Variation ${newVariationIndex} created!`, { id: 'variation-toast' });
+    } catch (error) {
+      toast.dismiss('variation-toast');
+      toast.error("Could not generate variation");
+    } finally {
+      setIsGenerating(false);
+      setGenerationProgress(null);
+    }
+  };
+
+  // Toggle favorite for current configuration
+  const toggleCurrentFavorite = () => {
+    if (!currentPrompt) return;
+
+    const entry: PromptHistoryEntry = {
+      id: `fav-${Date.now()}`,
+      hash: currentPrompt.hash,
+      prompt: currentPrompt.positive,
+      preview: currentPrompt.preview,
+      imageUrl: generatedImage || undefined,
+      createdAt: Date.now(),
+      configuration: {
+        packageType: selectedPackage!.type,
+        boxShape: selectedBoxShape?.name.toLowerCase(),
+        size: selectedSize!.name.toLowerCase(),
+        color: selectedColor!.name.toLowerCase(),
+        flowers: Object.values(selectedFlowers).map(({ flower, quantity }) => ({
+          id: flower.id,
+          name: flower.name,
+          quantity
+        })),
+        withGlitter,
+        accessories: selectedAccessories,
+        stylePreset: selectedStylePreset,
+        template: selectedTemplate || undefined
+      }
+    };
+
+    if (isFavorite(currentPrompt.hash)) {
+      const fav = favorites.find(f => f.hash === currentPrompt.hash);
+      if (fav) {
+        removeFromFavorites(fav.id);
+        toast.success("Removed from favorites");
+      }
+    } else {
+      if (addToFavorites(entry)) {
+        toast.success("Added to favorites!");
+      } else {
+        toast.error("Favorites list is full (max 10)");
+      }
+    }
+    setFavorites(getFavorites());
+  };
+
+  // Load configuration from history entry
+  const loadFromHistory = (entry: PromptHistoryEntry) => {
+    const config = entry.configuration;
+    
+    // Find and set package
+    const pkg = packages.find(p => p.type === config.packageType);
+    if (pkg) setSelectedPackage(pkg);
+    
+    // Find and set box shape
+    if (config.boxShape) {
+      const shape = boxShapes.find(s => s.name.toLowerCase() === config.boxShape);
+      if (shape) setSelectedBoxShape(shape);
+    }
+    
+    // Find and set size
+    const size = sizes.find(s => s.name.toLowerCase() === config.size);
+    if (size) setSelectedSize(size);
+    
+    // Find and set color
+    const color = colors.find(c => c.name.toLowerCase() === config.color);
+    if (color) setSelectedColor(color);
+    
+    // Set flowers
+    const newSelectedFlowers: Record<string, SelectedFlower> = {};
+    config.flowers.forEach(f => {
+      const flower = flowers.find(fl => fl.id === f.id);
+      if (flower) {
+        newSelectedFlowers[f.id] = { flower, quantity: f.quantity };
+      }
+    });
+    setSelectedFlowers(newSelectedFlowers);
+    setFlowerMode(Object.keys(newSelectedFlowers).length > 1 ? 'mix' : 'specific');
+    
+    // Set other options
+    setWithGlitter(config.withGlitter);
+    setSelectedAccessories(config.accessories);
+    if (config.stylePreset) setSelectedStylePreset(config.stylePreset as StylePreset);
+    if (config.template) setSelectedTemplate(config.template);
+    
+    // Load image if available
+    if (entry.imageUrl) {
+      setGeneratedImage(entry.imageUrl);
+    }
+    
+    setShowHistory(false);
+    toast.success("Configuration loaded!");
   };
 
   // Get current season in Lebanon (Mediterranean climate)
@@ -1270,6 +1478,199 @@ const Customize: React.FC = () => {
               </motion.div>
             )}
 
+            {/* Step 6: AI Style & Templates */}
+            {step3Complete && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm w-full min-w-0 overflow-x-hidden"
+              >
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center bg-gradient-to-br from-[#C79E48] to-[#d4af4a] text-white">
+                    <Sparkles className="w-5 h-5" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-bold text-lg text-gray-900">AI Style & Templates</h3>
+                    <p className="text-xs text-gray-500">Customize the AI generation style</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setShowHistory(!showHistory)}
+                      className={`p-2 rounded-lg transition-colors ${showHistory ? 'bg-[#C79E48] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                      title="History"
+                    >
+                      <History className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={toggleCurrentFavorite}
+                      disabled={!currentPrompt}
+                      className={`p-2 rounded-lg transition-colors ${
+                        currentPrompt && isFavorite(currentPrompt.hash) 
+                          ? 'bg-[#C79E48] text-white' 
+                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      } disabled:opacity-50`}
+                      title={currentPrompt && isFavorite(currentPrompt.hash) ? "Remove from favorites" : "Add to favorites"}
+                    >
+                      {currentPrompt && isFavorite(currentPrompt.hash) ? <Bookmark className="w-4 h-4" /> : <BookmarkPlus className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+
+                {/* History Panel */}
+                <AnimatePresence>
+                  {showHistory && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="mb-6 overflow-hidden"
+                    >
+                      <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                        <div className="flex items-center justify-between mb-3">
+                          <h4 className="font-semibold text-sm text-gray-700">Recent & Favorites</h4>
+                          <button onClick={() => setShowHistory(false)} className="text-gray-400 hover:text-gray-600">
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                        
+                        {/* Favorites */}
+                        {favorites.length > 0 && (
+                          <div className="mb-4">
+                            <p className="text-xs font-medium text-[#C79E48] mb-2 flex items-center gap-1">
+                              <Bookmark className="w-3 h-3" /> Favorites
+                            </p>
+                            <div className="space-y-2 max-h-32 overflow-y-auto">
+                              {favorites.slice(0, 3).map(entry => (
+                                <button
+                                  key={entry.id}
+                                  onClick={() => loadFromHistory(entry)}
+                                  className="w-full text-left p-2 bg-white rounded-lg border border-gray-200 hover:border-[#C79E48] transition-colors"
+                                >
+                                  <p className="text-xs text-gray-700 truncate">{entry.preview}</p>
+                                  <p className="text-[10px] text-gray-400">{new Date(entry.createdAt).toLocaleDateString()}</p>
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Recent History */}
+                        <div>
+                          <p className="text-xs font-medium text-gray-500 mb-2 flex items-center gap-1">
+                            <History className="w-3 h-3" /> Recent
+                          </p>
+                          {promptHistory.length > 0 ? (
+                            <div className="space-y-2 max-h-32 overflow-y-auto">
+                              {promptHistory.slice(0, 5).map(entry => (
+                                <button
+                                  key={entry.id}
+                                  onClick={() => loadFromHistory(entry)}
+                                  className="w-full text-left p-2 bg-white rounded-lg border border-gray-200 hover:border-[#C79E48] transition-colors"
+                                >
+                                  <p className="text-xs text-gray-700 truncate">{entry.preview}</p>
+                                  <p className="text-[10px] text-gray-400">{new Date(entry.createdAt).toLocaleDateString()}</p>
+                                </button>
+                              ))}
+                            </div>
+                          ) : (
+                            <p className="text-xs text-gray-400 text-center py-2">No history yet</p>
+                          )}
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {/* Style Presets */}
+                <div className="mb-6">
+                  <h4 className="text-sm font-semibold text-gray-700 mb-3">Style Preset</h4>
+                  <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                    {Object.values(STYLE_PRESETS).map(preset => (
+                      <button
+                        key={preset.id}
+                        onClick={() => setSelectedStylePreset(preset.id)}
+                        className={`p-3 rounded-xl border-2 transition-all text-center ${
+                          selectedStylePreset === preset.id
+                            ? 'border-[#C79E48] bg-[#C79E48]/5'
+                            : 'border-gray-200 hover:border-[#C79E48]/50'
+                        }`}
+                      >
+                        <span className="text-xl block mb-1">{preset.icon}</span>
+                        <span className="text-xs font-medium text-gray-700">{preset.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Occasion Templates */}
+                <div className="mb-6">
+                  <h4 className="text-sm font-semibold text-gray-700 mb-3">Quick Templates</h4>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      onClick={() => setSelectedTemplate(null)}
+                      className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                        !selectedTemplate
+                          ? 'bg-[#C79E48] text-white'
+                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      }`}
+                    >
+                      None
+                    </button>
+                    {PROMPT_TEMPLATES.map(template => (
+                      <button
+                        key={template.id}
+                        onClick={() => setSelectedTemplate(template.id)}
+                        className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                          selectedTemplate === template.id
+                            ? 'bg-[#C79E48] text-white'
+                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        }`}
+                        title={template.description}
+                      >
+                        {template.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Prompt Preview Toggle */}
+                <div className="border-t border-gray-200 pt-4">
+                  <button
+                    onClick={() => setShowPromptPreview(!showPromptPreview)}
+                    className="flex items-center gap-2 text-sm text-gray-600 hover:text-[#C79E48] transition-colors"
+                  >
+                    {showPromptPreview ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    {showPromptPreview ? 'Hide' : 'Show'} AI Prompt Preview
+                  </button>
+                  
+                  <AnimatePresence>
+                    {showPromptPreview && currentPrompt && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="mt-3 overflow-hidden"
+                      >
+                        <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                          <p className="text-xs font-medium text-gray-500 mb-2">Configuration Summary:</p>
+                          <p className="text-xs text-gray-700 whitespace-pre-line mb-3">{currentPrompt.preview}</p>
+                          
+                          <p className="text-xs font-medium text-gray-500 mb-1">AI Prompt (truncated):</p>
+                          <p className="text-[10px] text-gray-500 font-mono bg-white p-2 rounded border max-h-20 overflow-y-auto">
+                            {currentPrompt.positive.substring(0, 300)}...
+                          </p>
+                          
+                          <p className="text-[10px] text-gray-400 mt-2">
+                            Cache Hash: {currentPrompt.hash}
+                          </p>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </motion.div>
+            )}
+
             {/* Preview Card - Appears at the end after all selections (Mobile) */}
             {isMobile && step3Complete && (
               <motion.div
@@ -1321,7 +1722,9 @@ const Customize: React.FC = () => {
                           <div className="absolute inset-0 border-4 border-[#C79E48]/30 rounded-full" />
                           <div className="absolute inset-0 border-4 border-[#C79E48] border-t-transparent rounded-full animate-spin" />
                         </div>
-                        <p className="font-bold text-sm">Creating Your Bouquet</p>
+                        <p className="font-bold text-sm">
+                          {generationProgress ? progressLabels[generationProgress] : 'Creating Your Bouquet'}
+                        </p>
                       </div>
                     </div>
                   )}
@@ -1331,15 +1734,26 @@ const Customize: React.FC = () => {
                 <button
                   onClick={generateBouquetImage}
                   disabled={!step3Complete || isGenerating}
-                  className={`w-full py-3.5 rounded-xl font-bold text-sm transition-all mb-4 flex items-center justify-center gap-2 ${
+                  className={`w-full py-3.5 rounded-xl font-bold text-sm transition-all mb-2 flex items-center justify-center gap-2 ${
                     step3Complete && !isGenerating
                       ? 'bg-gradient-to-r from-[#C79E48] to-[#d4af4a] text-white hover:shadow-lg hover:scale-[1.02]'
                       : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                   }`}
                 >
-                  <Wand2 className="w-4 h-4" />
-                  {isGenerating ? "Generating..." : generatedImage ? "Regenerate" : "Generate Preview"}
+                  {isGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wand2 className="w-4 h-4" />}
+                  {isGenerating ? (generationProgress ? progressLabels[generationProgress] : "Generating...") : generatedImage ? "Regenerate" : "Generate Preview"}
                 </button>
+
+                {/* Variation Button */}
+                {generatedImage && !isGenerating && (
+                  <button
+                    onClick={generateVariation}
+                    className="w-full py-2.5 rounded-xl font-medium text-sm transition-all mb-4 flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                    Create Variation {variationIndex > 0 && `(${variationIndex})`}
+                  </button>
+                )}
 
                 {generatedImage && (
                   <div className="flex gap-2 mb-4">
@@ -1460,7 +1874,9 @@ const Customize: React.FC = () => {
                         <div className="absolute inset-0 border-4 border-[#C79E48]/30 rounded-full" />
                         <div className="absolute inset-0 border-4 border-[#C79E48] border-t-transparent rounded-full animate-spin" />
                       </div>
-                      <p className="font-bold text-sm">Creating Your Bouquet</p>
+                      <p className="font-bold text-sm">
+                        {generationProgress ? progressLabels[generationProgress] : 'Creating Your Bouquet'}
+                      </p>
                     </div>
                   </div>
                 )}
@@ -1470,15 +1886,26 @@ const Customize: React.FC = () => {
               <button
                 onClick={generateBouquetImage}
                 disabled={!step3Complete || isGenerating}
-                className={`w-full py-3.5 rounded-xl font-bold text-sm transition-all mb-4 flex items-center justify-center gap-2 ${
+                className={`w-full py-3.5 rounded-xl font-bold text-sm transition-all mb-2 flex items-center justify-center gap-2 ${
                   step3Complete && !isGenerating
                     ? 'bg-gradient-to-r from-[#C79E48] to-[#d4af4a] text-white hover:shadow-lg hover:scale-[1.02]'
                     : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                 }`}
               >
-                <Wand2 className="w-4 h-4" />
-                {isGenerating ? "Generating..." : generatedImage ? "Regenerate" : "Generate Preview"}
+                {isGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wand2 className="w-4 h-4" />}
+                {isGenerating ? (generationProgress ? progressLabels[generationProgress] : "Generating...") : generatedImage ? "Regenerate" : "Generate Preview"}
               </button>
+
+              {/* Variation Button */}
+              {generatedImage && !isGenerating && (
+                <button
+                  onClick={generateVariation}
+                  className="w-full py-2.5 rounded-xl font-medium text-sm transition-all mb-4 flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                  Create Variation {variationIndex > 0 && `(${variationIndex})`}
+                </button>
+              )}
 
               {generatedImage && (
                 <div className="flex gap-2 mb-4">
