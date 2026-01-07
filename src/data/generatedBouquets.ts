@@ -924,5 +924,10 @@ export const generatedCategories = [
     "id": "wedding-percent-events",
     "name": "Wedding & Events",
     "count": 9
+  },
+  {
+    "id": "arts",
+    "name": "The Arts",
+    "count": 3
   }
 ];

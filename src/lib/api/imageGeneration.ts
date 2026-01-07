@@ -5,19 +5,58 @@
  * 1. Pollinations AI (Primary)
  * 2. HuggingFace Inference (Backup)
  * 3. Improved prompts and error handling
+ * 
+ * Enhanced Features:
+ * - Negative prompts for better results
+ * - Image caching by configuration hash
+ * - Progressive loading support
+ * - Prompt history tracking
  */
 
 import AI_CONFIG, { buildPollinationsUrl, isApiEnabled } from './aiConfig';
+import { getCachedImage, cacheImage, blobUrlToBase64 } from './imageCache';
+import { addToHistory, PromptHistoryEntry } from './promptHistory';
+import { buildNegativePrompt } from './promptEngine';
 
 interface GenerationOptions {
     width?: number;
     height?: number;
     enhancePrompt?: boolean;
+    negativePrompt?: string;
+    useCache?: boolean;
+    cacheHash?: string;
+    onProgress?: (stage: ProgressStage) => void;
+    configuration?: PromptConfiguration;
+}
+
+export type ProgressStage = 
+    | 'checking-cache'
+    | 'building-prompt'
+    | 'connecting'
+    | 'generating'
+    | 'processing'
+    | 'caching'
+    | 'complete';
+
+export interface PromptConfiguration {
+    packageType: 'box' | 'wrap';
+    boxShape?: string;
+    size: string;
+    color: string;
+    flowers: Array<{ id: string; name: string; quantity: number }>;
+    withGlitter: boolean;
+    accessories: string[];
+    stylePreset?: string;
+    template?: string;
 }
 
 interface GenerationResult {
     imageUrl: string;
-    source: 'pollinations' | 'huggingface' | 'placeholder';
+    source: 'pollinations' | 'huggingface' | 'placeholder' | 'cache';
+    cached?: boolean;
+    hash?: string;
+    prompt?: string;
+    negativePrompt?: string;
 }
 
 /**
@@ -465,6 +504,7 @@ async function generateWithHuggingFace(
 
 /**
  * Main generation function with intelligent fallback
+ * Enhanced with caching, negative prompts, and progress tracking
  */
 export async function generateBouquetImage(
     prompt: string,
@@ -473,11 +513,54 @@ export async function generateBouquetImage(
     const { 
         width = AI_CONFIG.generation.defaultWidth, 
         height = AI_CONFIG.generation.defaultHeight, 
-        enhancePrompt: shouldEnhance = AI_CONFIG.generation.autoEnhancePrompts 
+        enhancePrompt: shouldEnhance = AI_CONFIG.generation.autoEnhancePrompts,
+        negativePrompt,
+        useCache = true,
+        cacheHash,
+        onProgress,
+        configuration
     } = options;
     
-    console.log('[ImageGen] Starting generation with prompt:', prompt);
-    console.log('[ImageGen] Config:', { width, height, enhancePrompt: shouldEnhance });
+    // Progress callback helper
+    const reportProgress = (stage: ProgressStage) => {
+        if (onProgress) {
+            onProgress(stage);
+        }
+    };
+    
+    console.log('[ImageGen] Starting generation with prompt:', prompt.substring(0, 100) + '...');
+    console.log('[ImageGen] Config:', { width, height, enhancePrompt: shouldEnhance, useCache, hasNegative: !!negativePrompt });
+    
+    // Step 1: Check cache if enabled
+    if (useCache && cacheHash) {
+        reportProgress('checking-cache');
+        console.log('[ImageGen] Checking cache for hash:', cacheHash);
+        
+        try {
+            const cached = await getCachedImage(cacheHash);
+            if (cached) {
+                console.log('[ImageGen] ✅ Cache HIT! Returning cached image');
+                reportProgress('complete');
+                return {
+                    imageUrl: cached.imageUrl,
+                    source: 'cache',
+                    cached: true,
+                    hash: cacheHash,
+                    prompt: cached.prompt
+                };
+            }
+        } catch (cacheError) {
+            console.warn('[ImageGen] Cache check failed:', cacheError);
+        }
+    }
+    
+    reportProgress('building-prompt');
+    
+    // Build negative prompt if not provided
+    const finalNegativePrompt = negativePrompt || buildNegativePrompt();
+    console.log('[ImageGen] Using negative prompt:', finalNegativePrompt.substring(0, 50) + '...');
+    
+    reportProgress('connecting');
     
     // SINGLE HIGH-QUALITY GENERATION STRATEGY
     // With serverless function + secret key: UNLIMITED rate limits
@@ -508,6 +591,8 @@ export async function generateBouquetImage(
     let lastError: Error | null = null;
     const delays = AI_CONFIG.retry.delays;
     
+    reportProgress('generating');
+    
     for (let i = 0; i < strategies.length; i++) {
         const strategy = strategies[i];
         
@@ -524,7 +609,50 @@ export async function generateBouquetImage(
             const result = await strategy.fn();
             
             console.log(`[ImageGen] ✅ Success with ${strategy.name}`);
-            return result;
+            
+            reportProgress('processing');
+            
+            // Step 2: Cache the result if caching is enabled
+            if (useCache && cacheHash && result.imageUrl) {
+                reportProgress('caching');
+                try {
+                    // Convert blob URL to base64 for storage
+                    const base64Image = await blobUrlToBase64(result.imageUrl);
+                    await cacheImage(cacheHash, base64Image, prompt, {
+                        width,
+                        height,
+                        size: base64Image.length
+                    });
+                    console.log('[ImageGen] ✅ Image cached successfully');
+                } catch (cacheError) {
+                    console.warn('[ImageGen] Failed to cache image:', cacheError);
+                }
+            }
+            
+            // Step 3: Add to history if configuration provided
+            if (configuration) {
+                try {
+                    addToHistory({
+                        hash: cacheHash || '',
+                        prompt,
+                        preview: buildHistoryPreview(configuration),
+                        imageUrl: result.imageUrl,
+                        configuration
+                    });
+                    console.log('[ImageGen] ✅ Added to history');
+                } catch (historyError) {
+                    console.warn('[ImageGen] Failed to add to history:', historyError);
+                }
+            }
+            
+            reportProgress('complete');
+            
+            return {
+                ...result,
+                hash: cacheHash,
+                prompt,
+                negativePrompt: finalNegativePrompt
+            };
             
         } catch (error) {
             lastError = error as Error;
@@ -538,4 +666,44 @@ export async function generateBouquetImage(
     // All strategies failed
     console.error('[ImageGen] ❌ All generation methods failed');
     throw lastError || new Error('All AI services are currently unavailable. Please try again later.');
+}
+
+/**
+ * Build human-readable preview for history
+ */
+function buildHistoryPreview(config: PromptConfiguration): string {
+    const parts: string[] = [];
+    parts.push(`${config.packageType === 'box' ? '📦 Box' : '🎁 Wrap'} (${config.size}, ${config.color})`);
+    parts.push(`🌸 ${config.flowers.map(f => `${f.quantity}x ${f.name}`).join(', ')}`);
+    if (config.withGlitter) parts.push('✨ Glitter');
+    if (config.accessories.length > 0) parts.push(`🎀 ${config.accessories.join(', ')}`);
+    if (config.stylePreset) parts.push(`🎨 ${config.stylePreset}`);
+    return parts.join(' | ');
+}
+
+/**
+ * Generate image with variation (slightly different result)
+ */
+export async function generateWithVariation(
+    basePrompt: string,
+    variationIndex: number = 0,
+    options: GenerationOptions = {}
+): Promise<GenerationResult> {
+    const variationModifiers = [
+        'unique artistic interpretation, creative arrangement',
+        'alternative composition, fresh perspective',
+        'different camera angle, varied lighting',
+        'creative framing, artistic touch',
+        'subtle variation, unique style'
+    ];
+    
+    const modifier = variationModifiers[variationIndex % variationModifiers.length];
+    const variedPrompt = `${basePrompt}, ${modifier}`;
+    
+    // Don't use cache for variations - we want unique results
+    return generateBouquetImage(variedPrompt, {
+        ...options,
+        useCache: false,
+        cacheHash: undefined
+    });
 }

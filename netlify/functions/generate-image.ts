@@ -56,6 +56,8 @@ const ALLOWED_ORIGINS = [
   'https://bexyflowers.shop',
   'https://www.bexyflowers.shop',
   'http://localhost:5173', // Dev only
+  'http://localhost:51635', // Netlify dev server
+  'http://localhost:52933', // Current Netlify dev server
   'http://localhost:5174', // Dev only
 ];
 
