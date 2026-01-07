@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, useMemo, Suspense } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocation } from "react-router-dom";
 import UltraNavigation from "@/components/UltraNavigation";
@@ -17,6 +17,8 @@ import { encodeImageUrl } from "@/lib/imageUtils";
 import { useCollectionProducts } from "@/hooks/useCollectionProducts";
 import { useNavigationPredictor } from "@/hooks/useNavigationPredictor";
 import { useEnhancedRoutePrefetch } from "@/hooks/useEnhancedRoutePrefetch";
+import { useIsMobile } from "@/hooks/use-mobile";
+const CarouselHero = React.lazy(() => import("@/components/CarouselHero"));
 
 // Get default category ID - prefer "red-roses", fallback to first non-"all" category, or "all"
 const getDefaultCategoryId = (): string => {
@@ -41,6 +43,7 @@ const Collection = () => {
   const [selectedBouquet, setSelectedBouquet] = useState<Bouquet | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
+  const isMobile = useIsMobile();
 
   // Initialize navigation predictor and enhanced prefetching
   useNavigationPredictor();
@@ -150,8 +153,16 @@ const Collection = () => {
       <UltraNavigation />
       
       <div className="collection-content relative z-10">
-        {/* Immersive Hero Section */}
-        <CollectionHero />
+        {/* Hero Section - Mobile: Original CollectionHero, Desktop: CarouselHero */}
+        {isMobile ? (
+          <CollectionHero />
+        ) : (
+          <LazySection rootMargin="400px 0px">
+            <Suspense fallback={null}>
+              <CarouselHero />
+            </Suspense>
+          </LazySection>
+        )}
         
         {/* Fixed Category Navigation */}
         <CategoryNavigation 
@@ -170,7 +181,7 @@ const Collection = () => {
                     Preparing your luxury collection
                   </p>
                 </div>
-                <div className="grid grid-cols-3 md:grid-cols-3 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-8 lg:gap-12">
+                <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-3 lg:gap-12">
                   {Array.from({ length: 6 }).map((_, index) => (
                     <div
                       key={index}

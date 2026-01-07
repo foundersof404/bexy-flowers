@@ -11,6 +11,8 @@ import {
 } from '@/lib/api/collection-products';
 import type { Database } from '@/lib/supabase';
 
+type CollectionProduct = Database['public']['Tables']['collection_products']['Row'];
+
 // Query keys for better cache management
 export const collectionQueryKeys = {
   all: ['collection-products'] as const,
@@ -30,29 +32,15 @@ export const useCollectionProducts = (filters?: {
   featured?: boolean;
   isActive?: boolean;
 }) => {
-  return useQuery({
+  const queryClient = useQueryClient();
+  
+  return useQuery<CollectionProduct[]>({
     queryKey: collectionQueryKeys.list(filters),
     queryFn: () => getCollectionProducts(filters),
     staleTime: 5 * 60 * 1000, // 5 minutes - products don't change frequently
     gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
     refetchOnWindowFocus: false, // Don't refetch on window focus for better UX
     refetchOnMount: false, // Use cached data if available
-    // Prefetch related data when this query succeeds
-    onSuccess: (data) => {
-      // Pre-warm individual product queries for the first few products
-      // This helps with navigation to product detail pages
-      if (data && data.length > 0) {
-        const queryClient = useQueryClient();
-        // Pre-load first 5 products (most likely to be viewed)
-        data.slice(0, 5).forEach((product) => {
-          queryClient.prefetchQuery({
-            queryKey: collectionQueryKeys.detail(product.id),
-            queryFn: () => getCollectionProduct(product.id),
-            staleTime: 5 * 60 * 1000,
-          });
-        });
-      }
-    },
   });
 };
 

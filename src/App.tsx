@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { useSmoothScroll } from "@/hooks/useSmoothScroll";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -16,6 +16,7 @@ import GlobalCartWrapper from "@/components/GlobalCartWrapper";
 import { useNavigationPredictor } from "@/hooks/useNavigationPredictor";
 import { useComponentPrefetch } from "@/hooks/useComponentPrefetch";
 import { usePerformanceMonitor } from "@/hooks/usePerformanceMonitor";
+import { register as registerServiceWorker } from "@/lib/serviceWorkerRegistration";
 
 // ⚡ PERFORMANCE OPTIMIZATION: Route-based code splitting
 // Lazy load all routes to reduce initial bundle size by ~68%
@@ -39,30 +40,29 @@ const AdminFlowers = lazy(() => import("./pages/admin/AdminFlowers"));
 const AdminLuxuryBoxes = lazy(() => import("./pages/admin/AdminLuxuryBoxes"));
 const AdminWeddingCreations = lazy(() => import("./pages/admin/AdminWeddingCreations"));
 
-// ⚡ PERFORMANCE OPTIMIZATION: Enhanced QueryClient with better caching and scalability
+// ⚡ PERFORMANCE OPTIMIZATION: Enhanced QueryClient with aggressive caching for returning users
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes - data is fresh for 5 minutes
-      gcTime: 10 * 60 * 1000, // 10 minutes - keep unused data for 10 minutes (formerly cacheTime)
+      staleTime: 10 * 60 * 1000, // 10 minutes - data stays fresh longer for returning users
+      gcTime: 30 * 60 * 1000, // 30 minutes - keep cached data longer in memory
       refetchOnWindowFocus: false, // Don't refetch on window focus for better performance
-      refetchOnMount: false, // Use cached data if available
+      refetchOnMount: false, // Use cached data if available (critical for returning users)
       refetchOnReconnect: true, // Refetch on reconnect (network recovery)
-      retry: 1, // Reduce retries for faster error handling
-      retryDelay: 1000, // Shorter retry delay
+      retry: 2, // Retry failed requests
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
       // ⚡ SCALABILITY: Network mode for better offline support
       networkMode: 'online',
       // ⚡ SCALABILITY: Structural sharing for better memory usage
       structuralSharing: true,
+      // ⚡ CACHING: Enable persistent caching
+      persister: undefined, // Can be extended with IndexedDB persister
     },
     mutations: {
       retry: 1,
       networkMode: 'online',
     },
   },
-  // ⚡ SCALABILITY: Limit cache size to prevent memory issues
-  queryCache: undefined, // Use default cache
-  mutationCache: undefined, // Use default cache
 });
 
 // Component that contains router-dependent logic
@@ -109,6 +109,14 @@ const AppRouter = () => {
 const App = () => {
   // Initialize smooth scrolling (can be called outside router context)
   useSmoothScroll();
+
+  // Register service worker for caching
+  useEffect(() => {
+    if (import.meta.env.PROD) {
+      registerServiceWorker();
+      console.log('[App] Service Worker registration initiated');
+    }
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
