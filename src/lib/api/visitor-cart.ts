@@ -53,7 +53,10 @@ async function ensureVisitor(): Promise<void> {
       }
     }
   } catch (error) {
-    console.error('Error ensuring visitor:', error);
+    // Only log if it's not the expected "Netlify unavailable" error in dev mode
+    if (!(error instanceof Error && error.message === 'NETLIFY_FUNCTIONS_UNAVAILABLE')) {
+      console.error('Error ensuring visitor:', error);
+    }
     // Continue even if visitor creation fails
   }
 }
@@ -110,7 +113,10 @@ export async function getVisitorCart(): Promise<CartItem[]> {
 
     return (data || []).map(transformCartItem);
   } catch (error) {
-    console.error('Error in getVisitorCart:', error);
+    // Only log if it's not the expected "Netlify unavailable" error in dev mode
+    if (!(error instanceof Error && error.message === 'NETLIFY_FUNCTIONS_UNAVAILABLE')) {
+      console.error('Error in getVisitorCart:', error);
+    }
     return [];
   }
 }
@@ -279,7 +285,10 @@ export async function syncCartToDatabase(items: CartItem[]): Promise<void> {
       await db.insert('visitor_carts', dbItems);
     }
   } catch (error) {
-    console.error('Error syncing cart to database:', error);
+    // Only log if it's not the expected "Netlify unavailable" error in dev mode
+    if (!(error instanceof Error && error.message === 'NETLIFY_FUNCTIONS_UNAVAILABLE')) {
+      console.error('Error syncing cart to database:', error);
+    }
   }
 }
 

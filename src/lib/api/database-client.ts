@@ -10,6 +10,9 @@
 
 const API_ENDPOINT = '/.netlify/functions/database';
 
+// Track if we've already warned about Netlify functions (prevents console spam)
+let hasWarnedAboutNetlify = false;
+
 interface DatabaseRequest {
   operation: 'select' | 'insert' | 'update' | 'delete' | 'rpc';
   table: string;
@@ -48,9 +51,13 @@ async function databaseRequest<T = any>(request: DatabaseRequest): Promise<T> {
       // Handle 404 specifically (Netlify Functions not available)
       if (response.status === 404) {
         if (import.meta.env.DEV) {
-          throw new Error(
-            'Netlify Functions not available. Please run `npm run dev:netlify` instead of `npm run dev` to enable serverless functions locally.'
-          );
+          // Only warn once to prevent console spam
+          if (!hasWarnedAboutNetlify) {
+            hasWarnedAboutNetlify = true;
+            console.info('[Database] Netlify Functions not available in local dev. Using localStorage fallback.');
+          }
+          // Return empty result instead of throwing - let the calling code use localStorage fallback
+          throw new Error('NETLIFY_FUNCTIONS_UNAVAILABLE');
         }
         throw new Error('Database endpoint not found. Please ensure Netlify Functions are deployed.');
       }

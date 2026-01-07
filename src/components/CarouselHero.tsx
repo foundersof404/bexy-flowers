@@ -376,7 +376,6 @@ const CarouselHero = () => {
                       alt={`${slide.title} flower arrangement`}
                       loading={index === 0 ? "eager" : "lazy"}
                       decoding="async"
-                      fetchPriority={index === 0 ? "high" : "low"}
                       onLoad={() => {
                         // Update Swiper when images load
                         if (swiperRef.current) {

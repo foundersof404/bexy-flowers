@@ -16,6 +16,12 @@ import GlobalCartWrapper from "@/components/GlobalCartWrapper";
 import { useNavigationPredictor } from "@/hooks/useNavigationPredictor";
 import { useComponentPrefetch } from "@/hooks/useComponentPrefetch";
 import { usePerformanceMonitor } from "@/hooks/usePerformanceMonitor";
+import { gsap } from "gsap";
+
+// Configure GSAP globally to suppress null target warnings
+gsap.config({
+  nullTargetWarn: false,
+});
 
 // ⚡ PERFORMANCE OPTIMIZATION: Route-based code splitting
 // Lazy load all routes to reduce initial bundle size by ~68%
@@ -120,7 +126,7 @@ const App = () => {
                 <GlobalCartWrapper />
                 <Toaster />
                 <Sonner />
-                <BrowserRouter>
+                <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
                   <AppRouter />
                 </BrowserRouter>
               </FlyingHeartProvider>
