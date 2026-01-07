@@ -23,8 +23,8 @@ export const AI_CONFIG = {
     // - Size-aware composition rules
     // - Accessory placement details
     // - Style presets and templates
-    // Pollinations/Flux can handle longer prompts well (Flux has 12B parameters)
-    maxPromptLength: 1500,
+    // Note: Serverless function enforces 1000 char limit for security
+    maxPromptLength: 1000,
   },
 
   /**
