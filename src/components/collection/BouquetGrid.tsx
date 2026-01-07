@@ -176,11 +176,11 @@ const BouquetCard = memo(({
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.2 + 0.4 }}
-            className="absolute top-4 right-4 z-10"
+            className="absolute top-2 sm:top-3 md:top-4 right-2 sm:right-3 md:right-4 z-10"
             style={{ willChange: 'transform, opacity' }}
           >
-            <div className="px-3 py-1 bg-white/10 backdrop-blur-md border border-white/20 rounded-sm">
-              <span className="text-white text-xs font-bold tracking-widest">
+            <div className="px-1.5 sm:px-2 md:px-3 py-0.5 sm:py-1 bg-white/10 backdrop-blur-md border border-white/20 rounded-sm">
+              <span className="text-white text-[8px] sm:text-[10px] md:text-xs font-bold tracking-wider md:tracking-widest">
                 {badge}
               </span>
             </div>
@@ -193,11 +193,11 @@ const BouquetCard = memo(({
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.2 + 0.4 }}
-            className="absolute top-4 right-4 z-10"
+            className="absolute top-2 sm:top-3 md:top-4 right-2 sm:right-3 md:right-4 z-10"
             style={{ willChange: 'transform, opacity' }}
           >
-            <div className="px-3 py-1 bg-red-600/90 backdrop-blur-md border border-red-400/50 rounded-sm">
-              <span className="text-white text-xs font-bold tracking-widest">
+            <div className="px-1.5 sm:px-2 md:px-3 py-0.5 sm:py-1 bg-red-600/90 backdrop-blur-md border border-red-400/50 rounded-sm">
+              <span className="text-white text-[8px] sm:text-[10px] md:text-xs font-bold tracking-wider md:tracking-widest">
                 OUT OF STOCK
               </span>
             </div>
@@ -207,7 +207,7 @@ const BouquetCard = memo(({
         {/* Favorite Button */}
         <motion.button
           ref={heartButtonRef}
-          className="absolute top-4 left-4 z-10 w-10 h-10 rounded-full flex items-center justify-center"
+          className="absolute top-2 sm:top-3 md:top-4 left-2 sm:left-3 md:left-4 z-10 w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center"
           style={{
             background: isFav ? 'rgba(220, 38, 127, 0.2)' : 'rgba(255, 255, 255, 0.1)',
             backdropFilter: 'blur(8px)',
@@ -219,14 +219,14 @@ const BouquetCard = memo(({
           onClick={handleFavoriteClick}
         >
           <Heart 
-            className={`w-5 h-5 ${isFav ? 'fill-[#dc267f] text-[#dc267f]' : 'text-white'}`} 
+            className={`w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 ${isFav ? 'fill-[#dc267f] text-[#dc267f]' : 'text-white'}`} 
             strokeWidth={2} 
           />
         </motion.button>
 
         {/* Quick View Button */}
         <motion.button
-          className="absolute top-16 left-4 z-10 w-10 h-10 rounded-full flex items-center justify-center"
+          className="absolute top-10 sm:top-12 md:top-16 left-2 sm:left-3 md:left-4 z-10 w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center"
           style={{
             background: 'rgba(255, 255, 255, 0.1)',
             backdropFilter: 'blur(8px)',
@@ -240,7 +240,7 @@ const BouquetCard = memo(({
             onBouquetClick(bouquet);
           }}
         >
-          <Eye className="w-5 h-5 text-white" strokeWidth={2} />
+          <Eye className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 text-white" strokeWidth={2} />
         </motion.button>
 
         {/* Hover Overlay with Description */}
@@ -295,34 +295,34 @@ const BouquetCard = memo(({
 
       {/* Card Info Below Image */}
       <motion.div
-        className="mt-6 space-y-2"
+        className="mt-2 sm:mt-4 md:mt-6 space-y-1 sm:space-y-2"
         initial={{ opacity: 0, y: 10 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ delay: index * 0.2 + 0.5, duration: 0.6 }}
         style={{ willChange: 'transform, opacity' }}
       >
-        <div className="flex items-start justify-between">
-          <div>
-            <h3 className="text-xl sm:text-2xl md:text-3xl font-black tracking-ultra-wide text-foreground">
+        <div className="flex items-start justify-between gap-1">
+          <div className="flex-1 min-w-0">
+            <h3 className="text-[10px] sm:text-sm md:text-xl lg:text-2xl font-black tracking-wide md:tracking-ultra-wide text-foreground truncate">
               {bouquet.name.toUpperCase()}
             </h3>
-            <p className="text-[10px] sm:text-xs tracking-widest uppercase text-muted-foreground mt-1">
+            <p className="text-[8px] sm:text-[10px] md:text-xs tracking-wider md:tracking-widest uppercase text-muted-foreground mt-0.5">
               {bouquet.displayCategory || bouquet.category || "Collection"}
             </p>
           </div>
-          <div className="text-right">
+          <div className="text-right flex-shrink-0">
             {bouquet.discount_percentage && bouquet.discount_percentage > 0 ? (
               <div>
-                <p className="text-xs line-through text-muted-foreground">
+                <p className="text-[8px] sm:text-xs line-through text-muted-foreground">
                   ${bouquet.price.toFixed(2)}
                 </p>
-                <p className="text-lg sm:text-xl font-bold tracking-wider text-foreground">
+                <p className="text-xs sm:text-sm md:text-lg font-bold tracking-wider text-foreground">
                   ${finalPrice.toFixed(2)}
                 </p>
               </div>
             ) : (
-              <p className="text-lg sm:text-xl font-bold tracking-wider text-foreground">
+              <p className="text-xs sm:text-sm md:text-lg font-bold tracking-wider text-foreground">
                 ${bouquet.price.toFixed(2)}
               </p>
             )}
@@ -331,7 +331,7 @@ const BouquetCard = memo(({
 
         {/* Add to Cart Button */}
         <motion.button
-          className={`w-full h-12 rounded-sm font-semibold text-white flex items-center justify-center gap-2 relative overflow-hidden transition-all duration-200 ${
+          className={`w-full h-8 sm:h-10 md:h-12 rounded-sm font-semibold text-white flex items-center justify-center gap-1 sm:gap-2 relative overflow-hidden transition-all duration-200 ${
             bouquet.is_out_of_stock ? 'opacity-50 cursor-not-allowed' : ''
           }`}
           style={{
@@ -347,8 +347,8 @@ const BouquetCard = memo(({
           disabled={bouquet.is_out_of_stock}
           onClick={handleAddToCart}
         >
-          <ShoppingCart className="w-4 h-4 relative z-10" strokeWidth={2} />
-          <span className="relative z-10">
+          <ShoppingCart className="w-3 h-3 sm:w-4 sm:h-4 relative z-10" strokeWidth={2} />
+          <span className="relative z-10 text-[10px] sm:text-xs md:text-sm">
             {bouquet.is_out_of_stock ? 'Out of Stock' : 'Add to Cart'}
           </span>
         </motion.button>
@@ -376,7 +376,7 @@ const BouquetGridComponent = ({ bouquets, onBouquetClick, selectedCategory }: Bo
   const visibleBouquets = bouquets;
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8 md:gap-12 lg:gap-16 w-full">
+    <div className="grid grid-cols-3 md:grid-cols-3 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-8 lg:gap-12 w-full">
       {visibleBouquets.map((bouquet, index) => (
         <BouquetCard
           key={bouquet.id}

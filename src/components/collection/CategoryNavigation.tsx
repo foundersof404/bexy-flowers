@@ -21,11 +21,11 @@ const CategoryNavigationComponent = ({
 }: CategoryNavigationProps) => {
   return (
     <nav
-      className="sticky top-0 z-40 bg-slate-50/95 backdrop-blur-sm border-b border-slate-200/50"
+      className="sticky top-0 z-40 bg-[#FAF8F3]/98 backdrop-blur-md border-b border-[#E5DCC8]/50 shadow-sm"
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-center py-6 sm:py-8">
-          <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 md:gap-6">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
+        <div className="flex items-center justify-center py-3 sm:py-4 md:py-6">
+          <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 md:gap-4 lg:gap-6">
             {categories.map((category) => {
               const isSelected = selectedCategory === category.id;
               return (
@@ -33,19 +33,19 @@ const CategoryNavigationComponent = ({
                   key={category.id}
                   onClick={() => onCategoryChange(category.id)}
                   className={cn(
-                    "relative px-4 sm:px-5 lg:px-6 py-2.5 sm:py-3 rounded-sm text-sm sm:text-base font-medium transition-all duration-300",
+                    "relative px-2 sm:px-3 md:px-4 lg:px-5 py-1.5 sm:py-2 md:py-2.5 rounded-sm text-[10px] sm:text-xs md:text-sm lg:text-base font-semibold transition-all duration-300",
                     isSelected
-                      ? "text-[#C79E48] bg-[#F5F1E8]"
-                      : "text-slate-600 hover:text-slate-800"
+                      ? "text-[#C79E48] bg-[#F5F1E8] shadow-sm"
+                      : "text-[#6B5D52] hover:text-[#3D3027] hover:bg-[#F5F1E8]/50"
                   )}
-                  whileHover={{ scale: isSelected ? 1 : 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                  whileHover={{ scale: isSelected ? 1 : 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                 >
-                  <span className="relative z-10 flex items-center gap-1.5">
-                    <span>{category.name}</span>
+                  <span className="relative z-10 flex items-center gap-0.5 sm:gap-1">
+                    <span className="whitespace-nowrap">{category.name}</span>
                     <span className={cn(
-                      "text-xs",
-                      isSelected ? "text-[#C79E48]/80" : "text-slate-500"
+                      "text-[8px] sm:text-[10px] md:text-xs",
+                      isSelected ? "text-[#C79E48]/70" : "text-[#8B7355]/70"
                     )}>
                       ({category.count})
                     </span>
@@ -54,7 +54,7 @@ const CategoryNavigationComponent = ({
                   {/* Golden underline for selected */}
                   {isSelected && (
                     <motion.div
-                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#C79E48]"
+                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-[#C79E48] to-transparent"
                       initial={{ scaleX: 0 }}
                       animate={{ scaleX: 1 }}
                       transition={{ duration: 0.3, ease: "easeOut" }}

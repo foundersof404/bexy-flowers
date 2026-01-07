@@ -145,7 +145,7 @@ const Collection = () => {
   }, []);
 
   return (
-    <div ref={containerRef} className="relative min-h-screen bg-background" style={{ touchAction: 'pan-y' }}>
+    <div ref={containerRef} className="relative min-h-screen" style={{ background: 'linear-gradient(180deg, #FAF8F3 0%, #FFFFFF 100%)', touchAction: 'pan-y' }}>
       {/* Ultra Navigation */}
       <UltraNavigation />
       
@@ -161,16 +161,16 @@ const Collection = () => {
         />
         
         {/* Main Bouquet Grid - With Smooth Category Transitions */}
-        <section id="main-collection-grid" className="py-12 md:py-16 lg:py-20 px-3 sm:px-4 md:px-6 lg:px-8 w-full">
+        <section id="main-collection-grid" className="py-6 sm:py-8 md:py-12 lg:py-16 px-3 sm:px-4 md:px-6 lg:px-8 w-full" style={{ background: 'linear-gradient(180deg, #FFFFFF 0%, #FAF8F3 50%, #F5F1E8 100%)' }}>
           <div className="max-w-7xl mx-auto w-full">
             {loading ? (
-              <div className="py-12 md:py-16 lg:py-20">
-                <div className="mb-8 text-center">
-                  <p className="text-xs md:text-sm tracking-[0.2em] text-gray-500 uppercase">
+              <div className="py-6 sm:py-8 md:py-12 lg:py-16">
+                <div className="mb-4 sm:mb-6 md:mb-8 text-center">
+                  <p className="text-[10px] sm:text-xs md:text-sm tracking-[0.2em] text-[#8B7355] uppercase font-semibold">
                     Preparing your luxury collection
                   </p>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8 md:gap-12 lg:gap-16">
+                <div className="grid grid-cols-3 md:grid-cols-3 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-8 lg:gap-12">
                   {Array.from({ length: 6 }).map((_, index) => (
                     <div
                       key={index}
@@ -194,17 +194,17 @@ const Collection = () => {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: false, amount: 0.3 }}
                   transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
-                  className="mb-8 text-center"
+                  className="mb-4 sm:mb-6 md:mb-8 text-center"
                 >
                   <motion.p 
-                    className="text-sm text-gray-600"
+                    className="text-xs sm:text-sm text-[#6B5D52] font-medium"
                     initial={{ scale: 0.9 }}
                     whileInView={{ scale: 1 }}
                     viewport={{ once: false }}
                     transition={{ duration: 0.4, delay: 0.1 }}
                   >
                     Showing <motion.span 
-                      className="font-bold text-[#C29A43]"
+                      className="font-bold text-[#C79E48]"
                       initial={{ opacity: 0 }}
                       whileInView={{ opacity: 1 }}
                       viewport={{ once: false }}
@@ -228,7 +228,8 @@ const Collection = () => {
         
         {/* Featured Collections Divider - Enhanced with smooth animations */}
         <motion.div 
-          className="relative py-16 text-center"
+          className="relative py-8 sm:py-12 md:py-16 text-center"
+          style={{ background: 'linear-gradient(180deg, #F5F1E8 0%, #FAF8F3 100%)' }}
           initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: false, amount: 0.5 }}
@@ -241,12 +242,13 @@ const Collection = () => {
             viewport={{ once: false, amount: 0.5 }}
             transition={{ duration: 1.2, delay: 0.2, ease: "easeInOut" }}
           >
-            <div className="h-px w-full bg-gradient-to-r from-transparent via-primary to-transparent" />
+            <div className="h-px w-full bg-gradient-to-r from-transparent via-[#C79E48] to-transparent" />
           </motion.div>
           <motion.h2 
-            className="font-luxury text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-slate-800 relative z-10 bg-background px-4 sm:px-6 md:px-8 inline-block"
+            className="font-luxury text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold text-[#3D3027] relative z-10 px-3 sm:px-4 md:px-6 lg:px-8 inline-block"
             style={{
-              filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))',
+              background: 'linear-gradient(180deg, #FAF8F3 0%, #F5F1E8 100%)',
+              filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.05))',
               letterSpacing: '0.05em'
             }}
             initial={{ scale: 0.8, opacity: 0 }}
