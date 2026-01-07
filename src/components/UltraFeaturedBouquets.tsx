@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { collectionQueryKeys } from '@/hooks/useCollectionProducts';
 import { Button } from '@/components/ui/button';
@@ -19,6 +19,7 @@ const UltraFeaturedBouquets = () => {
   const queryClient = useQueryClient();
   const { addToCart } = useCartWithToast();
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
   const sectionRef = useRef<HTMLElement>(null);
   const cardsRef = useRef<HTMLDivElement[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -30,7 +31,7 @@ const UltraFeaturedBouquets = () => {
   const { data: signatureCollections, isLoading: loading } = useSignatureCollection();
 
   // Transform signature collections to bouquets format
-  const bouquets = signatureCollections?.map((item) => {
+  const allBouquets = signatureCollections?.map((item) => {
     const imageUrl = item.product?.image_urls?.[0];
     if (!imageUrl || !imageUrl.trim()) return null;
 
@@ -49,6 +50,9 @@ const UltraFeaturedBouquets = () => {
       signature_id: item.id,
     };
   }).filter(Boolean) || [];
+
+  // Show only 3 cards on mobile, all cards on desktop
+  const bouquets = isMobile ? allBouquets.slice(0, 3) : allBouquets;
 
 
   // Setup GSAP hover effects (no scroll animations)
@@ -251,7 +255,7 @@ const UltraFeaturedBouquets = () => {
               </div>
             ) : (
             <div 
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8 max-w-6xl mx-auto px-2 sm:px-4 w-full"
+              className="grid grid-cols-3 lg:grid-cols-3 gap-2 sm:gap-4 md:gap-6 lg:gap-8 max-w-6xl mx-auto px-2 sm:px-4 w-full"
             >
           {bouquets.map((bouquet, index) => {
             // Define consistent gold color for all cards
@@ -329,12 +333,13 @@ const UltraFeaturedBouquets = () => {
                      width: 'inherit',
                      height: 'auto',
                      background: '#fff',
-                     borderRadius: '1.25rem'
+                     borderRadius: '1.25rem',
+                     maxWidth: isMobile ? '100%' : 'inherit'
                    }}
                  >
                      {/* Image */}
                      <div 
-                       className="imgBox h-64 sm:h-72 md:h-80 lg:h-[clamp(8rem,20vw,18.75rem)]"
+                       className={`imgBox ${isMobile ? 'h-48 sm:h-64' : 'h-64 sm:h-72 md:h-80 lg:h-[clamp(8rem,20vw,18.75rem)]'}`}
                        style={{
                          position: 'relative',
                          width: '100%',
@@ -367,8 +372,8 @@ const UltraFeaturedBouquets = () => {
                            position: 'absolute',
                            bottom: '-0.375rem',
                            right: '-0.375rem',
-                           width: '6rem',
-                           height: '6rem',
+                           width: isMobile ? '4rem' : '6rem',
+                           height: isMobile ? '4rem' : '6rem',
                            background:'#fff',
                            borderTopLeftRadius: '50%'
                          }}
@@ -406,7 +411,7 @@ const UltraFeaturedBouquets = () => {
                            className="iconBox"
                        style={{
                              position: 'absolute',
-                             inset: '0.725rem',
+                             inset: isMobile ? '0.5rem' : '0.725rem',
                              background: currentColor,
                              borderRadius: '50%',
                              display: 'flex',
@@ -421,14 +426,14 @@ const UltraFeaturedBouquets = () => {
                       // Navigation is handled by the parent Link component
                     }}
                   >
-                          <ArrowUpRight color="#fff" size={22} strokeWidth={1.8} />
+                          <ArrowUpRight color="#fff" size={isMobile ? 16 : 22} strokeWidth={1.8} />
                          </motion.div>
                   </div>
                 </div>
 
                      {/* Content section */}
                      <div 
-                       className="content p-4 sm:p-5 md:p-6"
+                       className={`content ${isMobile ? 'p-2 sm:p-4' : 'p-4 sm:p-5 md:p-6'}`}
                        style={{
                          borderRadius: '0 0 1rem 1rem'
                        }}
@@ -436,23 +441,23 @@ const UltraFeaturedBouquets = () => {
                     <h3 
                       style={{
                         textTransform: 'capitalize',
-                        fontSize: 'clamp(1rem, 4vw, 1.8rem)',
+                        fontSize: isMobile ? 'clamp(0.75rem, 3vw, 1rem)' : 'clamp(1rem, 4vw, 1.8rem)',
                         color: '#111',
                         fontWeight: '700',
                         lineHeight: '1.2',
-                        marginBottom: '0.375rem'
+                        marginBottom: isMobile ? '0.25rem' : '0.375rem'
                       }}
                     >
                     {bouquet.name}
                   </h3>
                     <p 
                       style={{
-                        marginBottom: '0.75rem',
+                        marginBottom: isMobile ? '0.5rem' : '0.75rem',
                         color: '#565656',
-                        fontSize: 'clamp(0.875rem, 2.5vw, 1rem)',
+                        fontSize: isMobile ? 'clamp(0.625rem, 2vw, 0.75rem)' : 'clamp(0.875rem, 2.5vw, 1rem)',
                         lineHeight: '1.5',
                         display: '-webkit-box',
-                        WebkitLineClamp: 2,
+                        WebkitLineClamp: isMobile ? 1 : 2,
                         WebkitBoxOrient: 'vertical',
                         overflow: 'hidden'
                       }}
@@ -480,8 +485,8 @@ const UltraFeaturedBouquets = () => {
                              background: '#f0f0f0',
                              color: tag.color,
                              fontWeight: '700',
-                             fontSize: 'clamp(0.625rem, 2vw, 0.75rem)',
-                             padding: '0.25rem 0.5rem',
+                             fontSize: isMobile ? 'clamp(0.5rem, 1.5vw, 0.625rem)' : 'clamp(0.625rem, 2vw, 0.75rem)',
+                             padding: isMobile ? '0.125rem 0.375rem' : '0.25rem 0.5rem',
                              borderRadius: '0.25rem',
                              whiteSpace: 'nowrap',
                              letterSpacing: '0.05em'
