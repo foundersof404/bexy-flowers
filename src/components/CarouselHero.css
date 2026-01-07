@@ -33,6 +33,7 @@
   transition: background-color 0.6s ease;
   position: relative;
   overflow: hidden;
+  will-change: background-color;
 }
 
 /* Video background for mobile */
@@ -289,6 +290,7 @@
   line-height: 1em;
   transition-delay: 0.3s;
   color: var(--body-color);
+  font-display: swap;
 }
 
 @media screen and (max-width: 575px) {
@@ -342,6 +344,8 @@
   letter-spacing: -0.01em;
   transition-delay: 0.3s;
   color: var(--body-color);
+  contain: layout style paint;
+  content-visibility: auto;
 }
 
 @media screen and (max-width: 575px) {
@@ -406,6 +410,8 @@
   transition: background-color 0.6s ease;
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1),
               0 5px 15px rgba(0, 0, 0, 0.08);
+  will-change: background-color;
+  contain: layout style;
 }
 
 @media screen and (max-width: 930px) {
@@ -429,11 +435,15 @@
   position: absolute;
   top: 10%;
   left: 0;
-  transform: scale(1.1);
+  transform: scale(1.1) translateZ(0);
   transition-duration: 0.8s;
   z-index: 2;
-  filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.15)) 
-          drop-shadow(0 10px 20px rgba(0, 0, 0, 0.1));
+  filter: drop-shadow(0 15px 30px rgba(0, 0, 0, 0.12));
+  content-visibility: auto;
+  contain: layout style paint;
+  image-rendering: -webkit-optimize-contrast;
+  will-change: transform;
+  backface-visibility: hidden;
 }
 
 @media screen and (max-width: 930px) {

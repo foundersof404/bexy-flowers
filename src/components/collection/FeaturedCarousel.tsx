@@ -120,10 +120,10 @@ export const FeaturedCarousel = ({ bouquets, onBouquetClick }: FeaturedCarouselP
                       <OptimizedImage
                         src={bouquet.image}
                         alt={bouquet.name}
+                        width={400}
+                        height={300}
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                         priority={true}
-                        aspectRatio="4/3"
-                        objectFit="cover"
                       />
                       
                       {/* Overlay */}

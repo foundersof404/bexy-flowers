@@ -9,7 +9,7 @@ import Footer from "@/components/Footer";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import heroWeddingImage from "@/assets/heroWedding.jpg";
+import heroWeddingImage from "@/assets/heroWedding.webp";
 import { useWeddingCreations } from "@/hooks/useWeddingCreations";
 import { encodeImageUrl } from "@/lib/imageUtils";
 // Video for mobile hero background
@@ -251,12 +251,27 @@ const WeddingHero = () => {
         <div
           ref={imageRef}
           className="absolute inset-0 w-full h-full"
-          style={{ top: '12rem', height: 'calc(100% - 12rem)' }}
+          style={{ 
+            top: '12rem', 
+            height: 'calc(100% - 12rem)',
+            willChange: 'transform',
+            contain: 'layout style paint'
+          }}
         >
           <img
             src={heroWeddingImage}
             alt="Elegant Wedding Couple"
             className="w-full h-full object-cover"
+            loading="eager"
+            decoding="sync"
+            fetchPriority="high"
+            width="1920"
+            height="1080"
+            style={{
+              imageRendering: '-webkit-optimize-contrast',
+              backfaceVisibility: 'hidden',
+              transform: 'translateZ(0)'
+            }}
           />
           {/* Elegant overlay gradient */}
           <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/60" />

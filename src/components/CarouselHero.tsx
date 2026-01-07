@@ -36,8 +36,8 @@ const slides: SlideData[] = [
     price: '$49.90',
     contentTitle: 'Express your love with timeless elegance.',
     contentSubtitle: 'Our romantic collection features premium roses and delicate blooms, carefully arranged to convey your deepest emotions. Perfect for anniversaries, proposals, and special moments.',
-    bgImage: getImagePath('image1-bg.png'),
-    productImage: getImagePath('image1.png'),
+    bgImage: getImagePath('image1-bg.webp'),
+    productImage: getImagePath('image1.webp'),
     bgColor: '#ff0000'
   },
   {
@@ -46,8 +46,8 @@ const slides: SlideData[] = [
     price: '$59.90',
     contentTitle: 'Sophisticated arrangements for refined occasions.',
     contentSubtitle: 'Discover our elegant collection of premium florals, handcrafted by master florists. Each arrangement tells a story of luxury and sophistication, perfect for corporate events and formal celebrations.',
-    bgImage: getImagePath('image2-bg.png'),
-    productImage: getImagePath('image2.png'),
+    bgImage: getImagePath('image2-bg.webp'),
+    productImage: getImagePath('image2.webp'),
     bgColor: '#e9bf8b'
   },
   {
@@ -56,8 +56,8 @@ const slides: SlideData[] = [
     price: '$79.90',
     contentTitle: 'Exquisite blooms for the most discerning tastes.',
     contentSubtitle: 'Our luxury collection features rare and exotic flowers, arranged with artistic precision. Each piece is a masterpiece, designed to make a statement and create unforgettable impressions.',
-    bgImage: getImagePath('image3-bg.png'),
-    productImage: getImagePath('image3.png'),
+    bgImage: getImagePath('image3-bg.webp'),
+    productImage: getImagePath('image3.webp'),
     bgColor: '#b6d6c8'
   },
   {
@@ -66,8 +66,8 @@ const slides: SlideData[] = [
     price: '$69.90',
     contentTitle: 'Vibrant arrangements to brighten every celebration.',
     contentSubtitle: 'Celebrate life\'s special moments with our vibrant collection. From birthdays to graduations, our celebration bouquets bring joy and color to any occasion, crafted with care and attention to detail.',
-    bgImage: getImagePath('image4-bg.png'),
-    productImage: getImagePath('image4.png'),
+    bgImage: getImagePath('image4-bg.webp'),
+    productImage: getImagePath('image4.webp'),
     bgColor: '#e86357'
   }
 ];
@@ -90,53 +90,8 @@ const CarouselHero = () => {
   // Preload all images
   useImagePreloader(allSlideImages);
 
-  // Add preload link tags for critical images
-  useEffect(() => {
-    const preloadLinks: HTMLLinkElement[] = [];
-    const existingPreloads = new Set(
-      Array.from(document.querySelectorAll('link[rel="preload"]')).map(
-        (link) => (link as HTMLLinkElement).href
-      )
-    );
-
-    // Preload first slide with high priority
-    firstSlideImages.forEach((src) => {
-      const fullPath = new URL(src, window.location.origin).href;
-      if (!existingPreloads.has(fullPath)) {
-        const link = document.createElement('link');
-        link.rel = 'preload';
-        link.as = 'image';
-        link.href = src;
-        link.fetchPriority = 'high';
-        document.head.appendChild(link);
-        preloadLinks.push(link);
-      }
-    });
-
-    // Preload other slides with lower priority
-    slides.slice(1).forEach((slide) => {
-      [slide.productImage, slide.bgImage].forEach((src) => {
-        const fullPath = new URL(src, window.location.origin).href;
-        if (!existingPreloads.has(fullPath)) {
-          const link = document.createElement('link');
-          link.rel = 'preload';
-          link.as = 'image';
-          link.href = src;
-          link.fetchPriority = 'low';
-          document.head.appendChild(link);
-          preloadLinks.push(link);
-        }
-      });
-    });
-
-    return () => {
-      preloadLinks.forEach(link => {
-        if (link.parentNode) {
-          link.parentNode.removeChild(link);
-        }
-      });
-    };
-  }, []);
+  // Note: First image is preloaded in index.html for optimal LCP
+  // Other images are preloaded via useImagePreloader hook
 
   // Set body data attribute for styling
   useEffect(() => {
@@ -374,8 +329,14 @@ const CarouselHero = () => {
                       className="bottle-img"
                       src={slide.productImage}
                       alt={`${slide.title} flower arrangement`}
+                      width="600"
+                      height="800"
                       loading={index === 0 ? "eager" : "lazy"}
-                      decoding="async"
+                      decoding={index === 0 ? "sync" : "async"}
+                      fetchPriority={index === 0 ? "high" : "low"}
+                      style={{
+                        contentVisibility: index === 0 ? 'auto' : 'auto',
+                      }}
                       onLoad={() => {
                         // Update Swiper when images load
                         if (swiperRef.current) {

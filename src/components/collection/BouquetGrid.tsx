@@ -160,6 +160,8 @@ const BouquetCard = memo(({
           <OptimizedImage
             src={bouquet.image}
             alt={bouquet.name}
+            width={400}
+            height={500}
             className="w-full h-full object-cover"
             loading="lazy"
             decoding="async"
@@ -376,7 +378,7 @@ const BouquetGridComponent = ({ bouquets, onBouquetClick, selectedCategory }: Bo
   const visibleBouquets = bouquets;
 
   return (
-    <div className="grid grid-cols-3 md:grid-cols-3 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-8 lg:gap-12 w-full">
+    <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-3 lg:gap-12 w-full">
       {visibleBouquets.map((bouquet, index) => (
         <BouquetCard
           key={bouquet.id}
