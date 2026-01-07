@@ -5,7 +5,7 @@ import { X, Heart, ShoppingCart, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { OptimizedImage } from "@/components/OptimizedImage";
-import type { Bouquet } from "@/pages/Collection";
+import type { Bouquet } from "@/types/bouquet";
 import { useCartWithToast } from "@/hooks/useCartWithToast";
 import { useFavorites } from "@/contexts/FavoritesContext";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -167,13 +167,13 @@ export const ProductModal = ({ bouquet, onClose }: ProductModalProps) => {
     }
     
     // Add to cart logic
-    const numericPrice = typeof bouquet.price === 'string' ? parseFloat(bouquet.price.replace('$','')) : bouquet.price;
+    const numericPrice = bouquet.price;
     const finalPrice = bouquet.discount_percentage && bouquet.discount_percentage > 0
       ? numericPrice * (1 - bouquet.discount_percentage / 100)
       : numericPrice;
     
     addToCart({
-      id: typeof bouquet.id === 'string' ? parseInt(bouquet.id) : bouquet.id,
+      id: parseInt(bouquet.id),
       title: bouquet.name,
       price: finalPrice,
       image: bouquet.image
@@ -259,10 +259,10 @@ export const ProductModal = ({ bouquet, onClose }: ProductModalProps) => {
             <OptimizedImage
               src={bouquet.image}
               alt={bouquet.name}
+              width={isMobile ? 400 : 500}
+              height={isMobile ? 225 : 625}
               className="w-full h-full object-cover"
               priority={true}
-              aspectRatio={isMobile ? "16/9" : "4/5"}
-              objectFit="cover"
             />
             
             {/* Image Overlay */}

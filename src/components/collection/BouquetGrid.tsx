@@ -160,6 +160,8 @@ const BouquetCard = memo(({
           <OptimizedImage
             src={bouquet.image}
             alt={bouquet.name}
+            width={400}
+            height={500}
             className="w-full h-full object-cover"
             loading="lazy"
             decoding="async"

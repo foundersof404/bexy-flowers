@@ -388,7 +388,11 @@ const UltraCategories = () => {
                       <img
                         src={encodeImageUrl(category.image)}
                         alt={category.name}
+                        width="400"
+                        height="500"
                         className="w-full h-full object-cover transition-all duration-700 ease-out group-hover:scale-110 group-hover:brightness-110"
+                        loading="lazy"
+                        decoding="async"
                       />
                       
                       {/* Modern Gradient Overlay */}
@@ -502,7 +506,11 @@ const UltraCategories = () => {
                         <img
                           src={encodeImageUrl(category.image)}
                           alt={category.name}
+                          width="400"
+                          height="500"
                           className="w-full h-full object-cover transition-all duration-700 ease-out"
+                          loading="lazy"
+                          decoding="async"
                         />
                         
                         {/* Modern Gradient Overlay */}
@@ -577,7 +585,11 @@ const UltraCategories = () => {
                         <img
                           src={encodeImageUrl(category.image)}
                           alt={category.name}
+                          width="400"
+                          height="500"
                           className="w-full h-full object-cover transition-all duration-700 ease-out"
+                          loading="lazy"
+                          decoding="async"
                         />
                         
                         {/* Modern Gradient Overlay */}

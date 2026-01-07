@@ -41,6 +41,7 @@ export const useCollectionProducts = (filters?: {
     gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
     refetchOnWindowFocus: false, // Don't refetch on window focus for better UX
     refetchOnMount: false, // Use cached data if available
+    placeholderData: (previousData) => previousData, // Use previous data while fetching
   });
 };
 
