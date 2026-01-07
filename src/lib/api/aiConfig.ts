@@ -18,10 +18,13 @@ export const AI_CONFIG = {
     autoEnhancePrompts: true,
     
     // Maximum prompt length (characters)
-    // Increased to accommodate detailed prompts with branding, flower arrangements, and style presets
+    // Increased to accommodate highly detailed prompts with:
+    // - Flower-specific visual descriptions (petal shapes, bloom styles)
+    // - Size-aware composition rules
+    // - Accessory placement details
+    // - Style presets and templates
     // Pollinations/Flux can handle longer prompts well (Flux has 12B parameters)
-    // Enhanced prompts with negative prompts and arrangement positions need more space
-    maxPromptLength: 800,
+    maxPromptLength: 1500,
   },
 
   /**

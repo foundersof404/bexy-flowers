@@ -11,6 +11,108 @@
 
 import { EnhancedFlower } from '@/data/flowers';
 
+// Flower-specific visual characteristics for accurate AI rendering
+const FLOWER_VISUALS: Record<string, {
+  petalStyle: string;
+  bloomShape: string;
+  texture: string;
+  arrangement: string;
+}> = {
+  'roses': {
+    petalStyle: 'layered spiral petals with velvety soft texture',
+    bloomShape: 'classic cup-shaped bloom with tightly packed petals unfurling from center',
+    texture: 'smooth velvety petals with delicate edges',
+    arrangement: 'elegant long stems with glossy dark green leaves'
+  },
+  'tulips': {
+    petalStyle: 'smooth oval petals with pointed tips',
+    bloomShape: 'elegant cup-shaped or goblet bloom',
+    texture: 'satiny smooth waxy petals',
+    arrangement: 'single straight stem with broad lance-shaped leaves'
+  },
+  'peonies': {
+    petalStyle: 'densely packed ruffled petals in layers',
+    bloomShape: 'large lush ball-shaped fluffy bloom',
+    texture: 'soft delicate paper-thin petals with romantic ruffles',
+    arrangement: 'sturdy stems with deeply lobed dark green foliage'
+  },
+  'chrysanthemum': {
+    petalStyle: 'numerous thin elongated ray petals',
+    bloomShape: 'pompon or daisy-like radial bloom',
+    texture: 'firm slightly waxy petals',
+    arrangement: 'branching stems with aromatic serrated leaves'
+  },
+  'gypsum': {
+    petalStyle: 'tiny delicate star-shaped florets',
+    bloomShape: 'cloud-like clusters of miniature blooms',
+    texture: 'airy light feathery texture',
+    arrangement: 'wispy branching sprays perfect as filler'
+  },
+  'daisies': {
+    petalStyle: 'simple white ray petals around yellow center',
+    bloomShape: 'classic flat circular bloom with prominent center disc',
+    texture: 'crisp fresh petals',
+    arrangement: 'cheerful upright stems'
+  },
+  'sunflower': {
+    petalStyle: 'large golden yellow ray petals',
+    bloomShape: 'large circular head with dark brown seed center',
+    texture: 'slightly rough textured petals',
+    arrangement: 'tall thick sturdy stems with large leaves'
+  },
+  'lily': {
+    petalStyle: 'six elegant recurved petals with spots or plain',
+    bloomShape: 'trumpet or star-shaped dramatic bloom',
+    texture: 'smooth waxy petals often with speckles',
+    arrangement: 'tall stems with multiple blooms and lance leaves'
+  },
+  'orchid': {
+    petalStyle: 'exotic bilateral symmetry with distinctive lip petal',
+    bloomShape: 'intricate exotic bloom with unique labellum',
+    texture: 'waxy smooth almost artificial-looking perfection',
+    arrangement: 'arching sprays of multiple blooms'
+  },
+  'hydrangea': {
+    petalStyle: 'clusters of four-petaled small florets',
+    bloomShape: 'large round mophead or lacecap cluster',
+    texture: 'papery delicate florets',
+    arrangement: 'dense rounded flower heads on sturdy stems'
+  },
+  'gerbera': {
+    petalStyle: 'bold daisy-like ray petals in vibrant colors',
+    bloomShape: 'large flat circular bloom with contrasting center',
+    texture: 'smooth velvety petals',
+    arrangement: 'single long straight leafless stems'
+  },
+  'lavender': {
+    petalStyle: 'tiny tubular flowers in dense spikes',
+    bloomShape: 'slender elongated flower spikes',
+    texture: 'soft aromatic fuzzy texture',
+    arrangement: 'multiple stems with narrow silvery-green leaves'
+  },
+  'carnation': {
+    petalStyle: 'fringed ruffled petals with serrated edges',
+    bloomShape: 'rounded fluffy bloom with layered petals',
+    texture: 'slightly stiff clove-scented petals',
+    arrangement: 'sturdy stems with narrow gray-green leaves'
+  }
+};
+
+// Color-specific descriptions for accurate rendering
+const COLOR_VISUALS: Record<string, string> = {
+  'red': 'deep crimson red, rich ruby color',
+  'white': 'pure pristine white, snow-white, ivory cream',
+  'pink': 'soft blush pink, delicate rose pink',
+  'yellow': 'bright sunny yellow, golden yellow',
+  'blue': 'serene sky blue, soft periwinkle blue',
+  'peach': 'warm peach, soft apricot orange',
+  'purple': 'rich royal purple, deep violet',
+  'orange': 'vibrant tangerine orange, warm sunset orange',
+  'fushia': 'vivid hot pink fuchsia, magenta',
+  'terracotta': 'warm earthy terracotta, burnt sienna',
+  'dark blue': 'deep navy blue, midnight blue'
+};
+
 // Style Presets
 export type StylePreset = 'classic' | 'romantic' | 'minimal' | 'luxury' | 'modern' | 'vintage';
 
@@ -353,131 +455,153 @@ export function buildAdvancedPrompt(options: PromptBuilderOptions): BuiltPrompt 
   const style = STYLE_PRESETS[stylePreset];
   const totalFlowers = flowers.reduce((sum, f) => sum + f.quantity, 0);
   
-  // Get flower arrangement positions
-  const arrangementPositions = getFlowerArrangementPositions(flowers, packageType, boxShape);
-  
-  // Build detailed flower descriptions with exact colors and types
-  const flowerDescriptions = flowers.map(f => {
-    const colorName = f.flower.colorName.toLowerCase();
-    const flowerType = f.flower.family.toLowerCase();
-    const qty = f.quantity;
-    
-    // More descriptive flower terms
-    if (qty === 1) {
-      return `1 beautiful ${colorName} ${flowerType} bloom`;
-    } else if (qty <= 3) {
-      return `${qty} ${colorName} ${flowerType} blooms`;
-    } else {
-      return `${qty} fresh ${colorName} ${flowerType} flowers`;
-    }
-  });
-  
-  const flowerList = flowerDescriptions.join(', ');
-  
   // Get template if specified
   const templateConfig = template ? PROMPT_TEMPLATES.find(t => t.id === template) : null;
   
-  // Size descriptions for more accuracy
-  const sizeDescriptions: Record<string, string> = {
-    'small': 'compact petite small-sized',
-    'medium': 'medium-sized standard',
-    'large': 'large grand impressive full-sized'
+  // Size configurations with composition rules
+  const sizeConfigs: Record<string, { desc: string; composition: string; density: string }> = {
+    'small': { 
+      desc: 'compact petite small-sized', 
+      composition: 'intimate tight arrangement',
+      density: 'closely packed flowers filling the space'
+    },
+    'medium': { 
+      desc: 'medium-sized elegant', 
+      composition: 'balanced harmonious arrangement',
+      density: 'well-distributed flowers with natural spacing'
+    },
+    'large': { 
+      desc: 'large grand impressive full-sized', 
+      composition: 'abundant luxurious arrangement',
+      density: 'generous display with layered depth'
+    }
   };
-  const sizeDesc = sizeDescriptions[size.toLowerCase()] || size;
+  const sizeConfig = sizeConfigs[size.toLowerCase()] || sizeConfigs['medium'];
   
-  // Color descriptions for packaging
-  const colorDescriptions: Record<string, string> = {
-    'black': 'elegant matte black',
-    'white': 'pristine pure white',
-    'gold': 'luxurious shimmering gold',
-    'pink': 'soft blush pink',
-    'blue': 'serene sky blue',
-    'red': 'rich deep red'
+  // Packaging color descriptions
+  const packagingColors: Record<string, string> = {
+    'black': 'elegant matte black with subtle sheen',
+    'white': 'pristine pure white with clean finish',
+    'gold': 'luxurious shimmering metallic gold',
+    'pink': 'soft romantic blush pink',
+    'blue': 'serene powder blue',
+    'red': 'rich deep burgundy red'
   };
-  const colorDesc = colorDescriptions[color.toLowerCase()] || color;
+  const packagingColor = packagingColors[color.toLowerCase()] || color;
   
-  // Build the prompt parts
+  // Build DETAILED flower descriptions using FLOWER_VISUALS
+  const detailedFlowerDescriptions: string[] = [];
+  flowers.forEach(f => {
+    const colorName = f.flower.colorName.toLowerCase();
+    const flowerFamily = f.flower.family.toLowerCase();
+    const qty = f.quantity;
+    
+    // Get flower-specific visual details
+    const flowerVisual = FLOWER_VISUALS[flowerFamily];
+    const colorVisual = COLOR_VISUALS[colorName] || colorName;
+    
+    if (flowerVisual) {
+      // Create highly detailed flower description
+      detailedFlowerDescriptions.push(
+        `${qty} ${colorVisual} ${flowerFamily} with ${flowerVisual.bloomShape}, ${flowerVisual.petalStyle}`
+      );
+    } else {
+      // Fallback for unknown flower types
+      detailedFlowerDescriptions.push(`${qty} beautiful ${colorVisual} ${flowerFamily} flowers`);
+    }
+  });
+  
+  // Build the prompt parts - structured for Flux model
   const parts: string[] = [];
   
-  // 1. Main subject with precise details
+  // === SECTION 1: MAIN SUBJECT ===
   if (packageType === 'box') {
     const shape = boxShape || 'square';
-    const shapeDescriptions: Record<string, string> = {
-      'round': 'perfectly circular round',
-      'square': 'geometric square',
-      'heart': 'romantic heart-shaped'
+    const shapeDescriptions: Record<string, { desc: string; interior: string }> = {
+      'round': { 
+        desc: 'perfectly circular round luxury', 
+        interior: 'circular interior with flowers arranged in concentric circles from center outward'
+      },
+      'square': { 
+        desc: 'geometric square premium', 
+        interior: 'square interior with flowers arranged in a grid pattern with focal center'
+      },
+      'heart': { 
+        desc: 'romantic heart-shaped', 
+        interior: 'heart-shaped interior with flowers following the heart contour'
+      }
     };
-    const shapeDesc = shapeDescriptions[shape.toLowerCase()] || shape;
+    const shapeConfig = shapeDescriptions[shape.toLowerCase()] || shapeDescriptions['square'];
     
-    parts.push(`A premium ${colorDesc} luxury flower gift box`);
-    parts.push(`${shapeDesc} box shape, ${sizeDesc} dimensions`);
-    parts.push(`containing exactly ${totalFlowers} fresh premium flowers arranged inside: ${flowerList}`);
-    parts.push(`flower arrangement details: ${arrangementPositions}`);
-    parts.push(`top-down aerial view, bird's eye perspective, camera positioned directly above looking down`);
-    parts.push(`the ${colorDesc} ${shape} box lid is fully open, revealing the stunning flower arrangement inside`);
-    parts.push(`box interior lined with elegant tissue paper`);
-    parts.push(`box lid displays elegant golden embossed text "BEXY" in sophisticated capital letters, clearly visible and sharp`);
+    parts.push(`PRODUCT: A ${sizeConfig.desc} ${packagingColor} ${shapeConfig.desc} flower gift box`);
+    parts.push(`BOX DETAILS: ${shapeConfig.interior}, ${sizeConfig.composition}`);
+    parts.push(`FLOWER COUNT: Exactly ${totalFlowers} premium fresh flowers inside`);
+    parts.push(`FLOWERS: ${detailedFlowerDescriptions.join('; ')}`);
+    parts.push(`ARRANGEMENT: ${sizeConfig.density}, flowers facing upward showing full blooms`);
+    parts.push(`CAMERA: Top-down aerial view, bird's eye perspective, camera positioned directly above looking straight down into the open box`);
+    parts.push(`BOX STATE: Lid fully open or removed, revealing complete flower arrangement from above`);
+    parts.push(`BRANDING: Box exterior displays "BEXY" in elegant golden embossed capital letters, clearly legible`);
   } else {
-    parts.push(`A ${sizeDesc} elegant hand-tied flower bouquet`);
-    parts.push(`containing exactly ${totalFlowers} fresh premium flowers: ${flowerList}`);
-    parts.push(`flower arrangement details: ${arrangementPositions}`);
-    parts.push(`professionally wrapped in ${colorDesc} premium decorative paper`);
-    parts.push(`tied with matching ${colorDesc} satin ribbon bow`);
-    parts.push(`ribbon features an elegant tag with golden text "BEXY" clearly visible`);
-    parts.push(`front view, standing upright, three-quarter angle showing full bouquet`);
-    parts.push(`stems neatly trimmed and wrapped`);
+    // Wrapped bouquet
+    parts.push(`PRODUCT: A ${sizeConfig.desc} hand-tied flower bouquet`);
+    parts.push(`FLOWER COUNT: Exactly ${totalFlowers} premium fresh flowers`);
+    parts.push(`FLOWERS: ${detailedFlowerDescriptions.join('; ')}`);
+    parts.push(`ARRANGEMENT: ${sizeConfig.composition}, flowers gathered and tied professionally, ${sizeConfig.density}`);
+    parts.push(`WRAPPING: Professionally wrapped in ${packagingColor} premium kraft paper or decorative wrapping`);
+    parts.push(`RIBBON: Matching ${packagingColor} satin ribbon tied in elegant bow around stems`);
+    parts.push(`BRANDING: Small elegant tag attached to ribbon with golden "BEXY" text`);
+    parts.push(`CAMERA: Front three-quarter view, bouquet standing upright, showing full flower display and wrapping`);
+    parts.push(`STEMS: Neatly trimmed and wrapped, visible below the paper wrap`);
   }
   
-  // 2. Glitter effect with precise description
+  // === SECTION 2: GLITTER EFFECT ===
   if (withGlitter) {
-    parts.push(`delicate sparkle glitter dust scattered on flower petals`);
-    parts.push(`subtle shimmering highlights catching the light`);
-    parts.push(`magical fairy dust sparkle effect, not overdone`);
+    parts.push(`GLITTER EFFECT: Delicate fine sparkle dust lightly scattered across flower petals, subtle iridescent shimmer catching studio lights, fairy dust magical effect, tasteful not overdone`);
   }
   
-  // 3. Accessories with precise placement
+  // === SECTION 3: ACCESSORIES ===
   if (accessories.length > 0) {
-    const accessoryDescriptions: Record<string, string> = {
-      'crown': 'small decorative golden crown accessory placed prominently on top of the flowers, clearly visible',
-      'graduation-hat': 'miniature black graduation cap with gold tassel placed among the flowers, celebrating achievement',
-      'bear': 'cute small plush teddy bear toy nestled visibly in the flower arrangement',
-      'chocolate': 'elegant box of premium chocolates or chocolate truffles placed beside the flowers'
+    const accessoryDetails: Record<string, string> = {
+      'crown': `ACCESSORY - CROWN: Small decorative golden princess crown (5cm) placed prominently on top center of flowers, clearly visible metallic gold finish`,
+      'graduation-hat': `ACCESSORY - GRADUATION CAP: Miniature black graduation cap with gold tassel, positioned among the top flowers, celebrating achievement`,
+      'bear': `ACCESSORY - TEDDY BEAR: Cute small (10cm) plush teddy bear in neutral color, nestled visibly among the flowers, soft fuzzy texture`,
+      'chocolate': `ACCESSORY - CHOCOLATES: Elegant small box of premium chocolates or individual truffles in gold foil, placed beside or in front of the flowers`
     };
-    parts.push('ACCESSORIES INCLUDED:');
     accessories.forEach(acc => {
-      if (accessoryDescriptions[acc]) {
-        parts.push(accessoryDescriptions[acc]);
+      if (accessoryDetails[acc]) {
+        parts.push(accessoryDetails[acc]);
       }
     });
   }
   
-  // 4. Style preset modifiers
-  parts.push(style.promptModifiers);
-  parts.push(style.colorPalette);
-  parts.push(style.lightingStyle);
-  parts.push(style.backgroundStyle);
+  // === SECTION 4: STYLE & ATMOSPHERE ===
+  parts.push(`STYLE: ${style.name} aesthetic - ${style.promptModifiers}`);
+  parts.push(`COLOR MOOD: ${style.colorPalette}`);
+  parts.push(`LIGHTING: ${style.lightingStyle}`);
+  parts.push(`BACKGROUND: ${style.backgroundStyle}`);
   
-  // 5. Template modifiers
+  // === SECTION 5: TEMPLATE (occasion-specific) ===
   if (templateConfig) {
-    parts.push(templateConfig.basePrompt);
+    parts.push(`OCCASION: ${templateConfig.name} - ${templateConfig.basePrompt}`);
   }
   
-  // 6. Quality and technical keywords
-  parts.push('8K resolution, ultra-detailed, photorealistic');
-  parts.push('professional commercial product photography');
-  parts.push('sharp focus throughout, excellent depth of field');
-  parts.push('studio lighting setup, soft shadows');
-  parts.push('BEXY luxury floral brand, premium quality presentation');
+  // === SECTION 6: TECHNICAL QUALITY ===
+  parts.push(`QUALITY: 8K ultra-high resolution, photorealistic product photography, tack-sharp focus on every petal`);
+  parts.push(`RENDERING: Professional commercial photography quality, soft diffused studio lighting, subtle natural shadows`);
+  parts.push(`BRAND: BEXY luxury floral brand, premium elegant presentation`);
   
-  const positivePrompt = parts.join(', ');
+  const positivePrompt = parts.join('. ');
   
   // Build negative prompt
   const negativePrompt = includeNegative ? buildNegativePrompt() : '';
   
+  // Build simple flower list for preview
+  const flowerListSimple = flowers.map(f => `${f.quantity} ${f.flower.colorName} ${f.flower.family}`).join(', ');
+  
   // Build human-readable preview
   const previewParts: string[] = [
     `📦 ${packageType === 'box' ? `${boxShape || 'Square'} Box` : 'Wrapped Bouquet'} (${size}, ${color})`,
-    `🌸 ${totalFlowers} flowers: ${flowerList}`,
+    `🌸 ${totalFlowers} flowers: ${flowerListSimple}`,
     `🎨 Style: ${style.name}`,
   ];
   if (withGlitter) previewParts.push('✨ With glitter');

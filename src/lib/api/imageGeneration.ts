@@ -71,62 +71,28 @@ interface GenerationResult {
  * - Brand context
  */
 /**
- * Build ultra-detailed prompt optimized specifically for Pollinations/Flux
+ * Process prompt for Pollinations/Flux API
+ * 
+ * NOTE: The promptEngine.ts now handles all detailed prompt construction
+ * including flower visuals, arrangements, accessories, and quality keywords.
+ * This function only does minimal processing to avoid duplicate enhancement.
  * 
  * Pollinations/Flux behavior:
- * - Follows prompts with 97.3% fidelity
+ * - Follows prompts with high fidelity
  * - Responds to specific details (exact numbers, colors, positions)
  * - Can generate text/names when explicitly requested
  * - Understands professional photography terminology
- * - More details = better results
- * 
- * Structure: Subject (with all details) -> Composition -> Lighting -> Branding -> Quality -> Style
  */
 function buildStructuredPrompt(basePrompt: string): string {
-    if (!AI_CONFIG.generation.autoEnhancePrompts) {
-        return basePrompt;
-    }
-    
-    // Pollinations-specific quality keywords (Flux responds well to these)
-    // Order matters - put most important first
-    const qualityKeywords = [
-        '8K resolution',
-        'ultra-detailed',
-        'photorealistic',
-        'professional product photography',
-        'studio lighting',
-        'sharp focus',
-        'depth of field',
-    ].join(', ');
-    
-    // Style keywords for consistent aesthetic
-    const styleKeywords = [
-        'white seamless background',
-        'commercial photography',
-        'premium luxury presentation',
-        'elegant sophisticated style',
-    ].join(', ');
-    
-    // Brand reinforcement (mention multiple times for Pollinations)
-    // Pollinations benefits from brand mentions in multiple places
-    const brandKeywords = [
-        'Bexy Flowers luxury brand',
-        'Bexy Flowers signature style',
-        'premium quality Bexy Flowers',
-    ].join(', ');
-    
-    // Structured format optimized for Pollinations/Flux
-    // Base prompt already contains subject details and branding
-    // Add quality and style enhancements
-    const enhanced = `${basePrompt}, ${qualityKeywords}, ${styleKeywords}, ${brandKeywords}`;
-    
-    // Note: cleanPrompt will handle length limits
-    return enhanced;
+    // The promptEngine.ts now builds comprehensive prompts with all details
+    // No additional enhancement needed - just return the prompt as-is
+    // This prevents duplicate quality keywords and brand mentions
+    return basePrompt;
 }
 
 /**
- * Enhance prompt with professional photography keywords for better results
- * (Legacy function - now uses structured prompt builder)
+ * Process prompt for API submission
+ * (Simplified - promptEngine.ts handles detailed construction)
  */
 function enhancePrompt(basePrompt: string): string {
     return buildStructuredPrompt(basePrompt);
