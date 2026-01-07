@@ -116,32 +116,20 @@ const ZodiacBouquetQuiz = () => {
       <section className="py-32 px-4 relative z-10">
         <div className="container mx-auto px-4 max-w-4xl">
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.5, margin: "0px 0px -100px 0px" }}
-          transition={{ duration: 1, ease: [0.23, 1, 0.32, 1] }}
+        <div
           className="text-center mb-16 relative"
         >
           {/* Modern Floating Badge */}
-          <motion.div
+          <div
             className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-slate-800/10 to-slate-700/10 backdrop-blur-xl border border-slate-600/20 mb-8"
-            initial={{ scale: 0.8, opacity: 0 }}
-            whileInView={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            viewport={{ once: true, amount: 0.5, margin: "0px 0px -100px 0px" }}
           >
             <div className="w-2 h-2 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 animate-pulse" />
             <span className="text-sm font-medium text-slate-700 tracking-wider uppercase">Zodiac Bouquet Finder</span>
-          </motion.div>
+          </div>
           
           {/* Luxury Typography with Gold Accent */}
-          <motion.h1 
+          <h1 
             className="font-luxury text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 bg-clip-text text-transparent relative"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.5, margin: "0px 0px -100px 0px" }}
-            transition={{ duration: 0.8, delay: 0.3 }}
             style={{
               fontFamily: 'Playfair Display, serif',
               filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))',
@@ -151,15 +139,12 @@ const ZodiacBouquetQuiz = () => {
             FIND YOUR
             <br />
             COSMIC BOUQUET
-            {/* Animated Gold Underline */}
-            <motion.div 
+            {/* Gold Underline */}
+            <div 
               className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 h-1 bg-gradient-to-r from-[#C79E48] to-[#D4A85A] rounded-full"
-              initial={{ width: 0 }}
-              whileInView={{ width: '200px' }}
-              viewport={{ once: true, amount: 0.5, margin: "0px 0px -100px 0px" }}
-              transition={{ duration: 1.2, delay: 0.8, ease: "easeOut" }}
+              style={{ width: '200px' }}
             />
-          </motion.h1>
+          </h1>
           
           {/* Enhanced Decorative Elements */}
           <div className="relative mb-8">
@@ -168,16 +153,12 @@ const ZodiacBouquetQuiz = () => {
           </div>
           
           {/* Enhanced Description */}
-          <motion.p 
+          <p 
             className="text-gray-600 text-xl max-w-2xl mx-auto leading-relaxed font-light"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.5, margin: "0px 0px -100px 0px" }}
-            transition={{ duration: 0.8, delay: 0.4 }}
           >
             Discover the perfect floral arrangement that aligns with your zodiac sign and cosmic energy
-          </motion.p>
-        </motion.div>
+          </p>
+        </div>
 
         {/* Connected Progress Steps */}
         <motion.div

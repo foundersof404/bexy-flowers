@@ -78,26 +78,18 @@ const FlowerCareGuide = () => {
       </div>
 
       <div className="max-w-5xl mx-auto relative z-10">
-        <motion.div
+        <div
           className="text-center mb-8 sm:mb-10 md:mb-12"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          viewport={{ once: true }}
         >
           {/* Modern Floating Badge */}
-          <motion.div 
+          <div 
             className="inline-flex items-center gap-1.5 sm:gap-2 px-4 sm:px-6 py-2 sm:py-3 rounded-full bg-gradient-to-r from-slate-800/10 to-slate-700/10 backdrop-blur-xl border border-slate-600/20 mb-6 sm:mb-8"
-            initial={{ scale: 0.8, opacity: 0 }}
-            whileInView={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            viewport={{ once: true }}
           >
             <div className="w-2 h-2 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 animate-pulse" />
             <span className="text-sm font-medium text-slate-700 tracking-wider uppercase">EXPERT GUIDANCE</span>
-          </motion.div>
+          </div>
 
-          <motion.h2 
+          <h2 
             className="font-luxury text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 bg-clip-text text-transparent relative inline-block px-2"
             style={{
               fontFamily: 'Playfair Display, serif',
@@ -106,15 +98,12 @@ const FlowerCareGuide = () => {
             }}
           >
             MASTER FLOWER CARE
-            {/* Animated Gold Underline */}
-            <motion.div 
+            {/* Gold Underline */}
+            <div 
               className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 h-1 bg-gradient-to-r from-[#C79E48] to-[#D4A85A] rounded-full"
-              initial={{ width: 0 }}
-              whileInView={{ width: '100%' }}
-              viewport={{ once: true }}
-              transition={{ duration: 1.2, delay: 0.4, ease: "easeOut" }}
+              style={{ width: '100%' }}
             />
-          </motion.h2>
+          </h2>
 
           {/* Decorative Elements */}
           <div className="relative mb-8 mt-2">
@@ -125,7 +114,7 @@ const FlowerCareGuide = () => {
           <p className="text-slate-600 max-w-2xl mx-auto text-sm sm:text-base md:text-lg lg:text-xl font-light leading-relaxed px-4">
             Simple steps to keep your flowers fresh and beautiful for longer
           </p>
-        </motion.div>
+        </div>
 
         <div className="grid md:grid-cols-2 gap-4 sm:gap-6 items-stretch">
           {/* Left Side: Compact Navigation List */}

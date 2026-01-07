@@ -859,13 +859,9 @@ const UltraHero = () => {
 
       {/* Advanced Scroll Indicator - Desktop */}
       {!isMobile && (
-        <motion.div
+        <div
           className="absolute bottom-8 left-[47%] transform -translate-x-1/2 z-40"
-          initial={{ opacity: 0, y: shouldReduceMotion ? 0 : -30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: shouldReduceMotion ? 0 : 1, delay: shouldReduceMotion ? 0 : 2 }}
-          style={{ willChange: shouldReduceMotion ? "auto" : "transform, opacity" }}
+          style={{ opacity: 1 }}
         >
           <motion.div
             animate={shouldReduceMotion ? {} : { y: [0, 15, 0] }}
@@ -887,7 +883,7 @@ const UltraHero = () => {
               )}
             </div>
           </motion.div>
-        </motion.div>
+        </div>
       )}
 
       {/* Mobile Bouquet Images - Positioned on Left and Right */}

@@ -8,6 +8,8 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import heroBouquetMain from "@/assets/bouquet-4.jpg";
 import { flowers, flowerFamilies, EnhancedFlower, Season } from "@/data/flowers";
 import { generateBouquetImage as generateImage } from "@/lib/api/imageGeneration";
+// Video for mobile hero background
+import video2Url from '@/assets/video/Video2.webm?url';
 
 // --- Types ---
 const GOLD = "rgb(199, 158, 72)";
@@ -139,6 +141,9 @@ const ProgressStepper = ({ currentStep, steps }: { currentStep: number, steps: A
 const Customize: React.FC = () => {
   const isMobile = useIsMobile();
   const { addToCart } = useCart();
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [shouldLoadVideo, setShouldLoadVideo] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // State
   const [selectedPackage, setSelectedPackage] = useState<Package | null>(null);
@@ -164,6 +169,94 @@ const Customize: React.FC = () => {
       }
     };
   }, [generatedImage]);
+
+  // Intersection Observer for lazy loading video only when visible (mobile only)
+  useEffect(() => {
+    if (!isMobile) return;
+
+    const targetElement = containerRef.current || videoRef.current;
+    if (!targetElement) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && !shouldLoadVideo) {
+            setShouldLoadVideo(true);
+          }
+        });
+      },
+      {
+        root: null,
+        rootMargin: '100px',
+        threshold: 0.01,
+      }
+    );
+
+    observer.observe(targetElement);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [isMobile, shouldLoadVideo]);
+
+  // Load and play video when it becomes visible
+  useEffect(() => {
+    if (!isMobile || !videoRef.current || !shouldLoadVideo) return;
+
+    const videoElement = videoRef.current;
+    
+    const forceFullWidth = () => {
+      if (videoElement) {
+        videoElement.style.width = '100vw';
+        videoElement.style.maxWidth = '100vw';
+        videoElement.style.left = '0';
+        videoElement.style.right = '0';
+        videoElement.style.marginLeft = '0';
+        videoElement.style.marginRight = '0';
+      }
+    };
+    
+    forceFullWidth();
+    videoElement.load();
+    
+    videoElement.addEventListener('loadedmetadata', forceFullWidth);
+    videoElement.addEventListener('loadeddata', forceFullWidth);
+    
+    const playPromise = videoElement.play();
+    if (playPromise !== undefined) {
+      playPromise.catch(() => {
+        // Auto-play was prevented
+      });
+    }
+    
+    return () => {
+      videoElement.removeEventListener('loadedmetadata', forceFullWidth);
+      videoElement.removeEventListener('loadeddata', forceFullWidth);
+    };
+  }, [isMobile, shouldLoadVideo]);
+
+  // Handle window resize to ensure video stays full width
+  useEffect(() => {
+    if (!isMobile || !videoRef.current) return;
+
+    const handleResize = () => {
+      if (videoRef.current) {
+        videoRef.current.style.width = '100vw';
+        videoRef.current.style.maxWidth = '100vw';
+        videoRef.current.style.left = '0';
+        videoRef.current.style.right = '0';
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('orientationchange', handleResize);
+    setTimeout(handleResize, 100);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('orientationchange', handleResize);
+    };
+  }, [isMobile]);
 
   // Computed
   const step1Complete = !!selectedPackage && (selectedPackage.type === "wrap" || !!selectedBoxShape);
@@ -552,23 +645,73 @@ const Customize: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-white font-body">
+    <div className="min-h-screen bg-white font-body" ref={containerRef}>
       <UltraNavigation />
 
-      {/* Minimal Hero */}
-      <div className="pt-24 pb-8 px-6 bg-white border-b border-gray-100">
-        <div className="max-w-7xl mx-auto text-center">
-          <h1 className="text-3xl md:text-5xl font-luxury font-bold text-gray-900 mb-2">Design Your Masterpiece</h1>
-          <p className="text-sm text-gray-500">Handcrafted by expert florists</p>
+      {/* Hero Section at Top - Not Fixed */}
+      <section className={`relative w-full ${isMobile ? 'h-screen' : 'h-[70vh]'} overflow-hidden`} style={isMobile ? { marginTop: 0 } : {}}>
+        {/* Video background for mobile view */}
+        {isMobile && (
+          <video
+            ref={videoRef}
+            className="fixed left-0 right-0 w-full object-cover object-center pointer-events-none z-0"
+            style={{
+              width: '100vw',
+              height: 'calc(100vh + 50px)', // Increase height by 5cm (50px)
+              top: '-50px', // Move video 5cm to the top, behind header
+              left: 0,
+              right: 0,
+              marginLeft: 0,
+              marginRight: 0,
+              paddingLeft: 0,
+              paddingRight: 0,
+            }}
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="none"
+            aria-label="Hero background video"
+          >
+            {shouldLoadVideo && (
+              <source src={video2Url} type="video/webm" />
+            )}
+          </video>
+        )}
+
+        {/* Desktop background image */}
+        {!isMobile && (
+          <div className="absolute inset-0 w-full h-full">
+            <img
+              src={heroBouquetMain}
+              alt="Floral Design"
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/60" />
+          </div>
+        )}
+
+        {/* Hero Content */}
+        <div className="absolute inset-0 flex items-center justify-center z-10">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h1 className={`text-3xl md:text-5xl lg:text-6xl font-luxury font-bold mb-4 ${isMobile ? 'text-white' : 'text-white'}`} style={{ textShadow: '0 2px 8px rgba(0, 0, 0, 0.7), 0 1px 3px rgba(0, 0, 0, 0.4)' }}>
+              Design Your Masterpiece
+            </h1>
+            <p className={`text-base md:text-lg lg:text-xl ${isMobile ? 'text-white/90' : 'text-white/90'}`} style={{ textShadow: '0 2px 8px rgba(0, 0, 0, 0.7), 0 1px 3px rgba(0, 0, 0, 0.4)' }}>
+              Handcrafted by expert florists
+            </p>
+          </div>
         </div>
+      </section>
+
+      {/* Progress Stepper - After Hero */}
+      <div className="relative z-20 bg-white pt-4">
+        <ProgressStepper currentStep={currentStep} steps={steps} />
       </div>
 
-      {/* Progress Stepper */}
-      <ProgressStepper currentStep={currentStep} steps={steps} />
-
       {/* Main Content - Split Screen Layout */}
-      <div className="max-w-7xl mx-auto px-4 md:px-8 pb-16 overflow-x-hidden">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 w-full">
+      <div className="relative z-20 max-w-7xl mx-auto px-4 md:px-8 pb-16 overflow-x-hidden bg-white">
+        <div className={`grid grid-cols-1 ${isMobile ? '' : 'lg:grid-cols-2'} gap-8 lg:gap-12 w-full`}>
           
           {/* Left: Selection Panels */}
           <div className="space-y-6 w-full min-w-0">
@@ -1127,17 +1270,151 @@ const Customize: React.FC = () => {
               </motion.div>
             )}
 
+            {/* Preview Card - Appears at the end after all selections (Mobile) */}
+            {isMobile && step3Complete && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-white border border-gray-200 rounded-2xl shadow-sm p-4 mt-6"
+              >
+                {/* Preview Area */}
+                <div className="aspect-square rounded-xl bg-gray-50 mb-6 overflow-hidden border border-gray-200 relative">
+                  <AnimatePresence mode="wait">
+                    {generatedImage ? (
+                      <motion.img
+                        key={generatedImage}
+                        initial={{ opacity: 0, scale: 1.05 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        src={generatedImage}
+                        alt="Preview"
+                        className="w-full h-full object-cover"
+                        onLoad={() => setIsGenerating(false)}
+                      />
+                    ) : (
+                      <motion.div
+                        key="placeholder"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="w-full h-full flex flex-col items-center justify-center p-8 text-center"
+                        style={{
+                          background: selectedColor 
+                            ? `linear-gradient(135deg, ${selectedColor.hex}10 0%, ${selectedColor.hex}05 100%)`
+                            : undefined
+                        }}
+                      >
+                        <Wand2 className="w-16 h-16 text-gray-300 mb-4" />
+                        <p className="text-sm font-medium text-gray-600 mb-1">
+                          Ready to Preview
+                        </p>
+                        <p className="text-xs text-gray-400">
+                          Generate your custom design
+                        </p>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
+                  {isGenerating && (
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center">
+                      <div className="text-center text-white">
+                        <div className="relative w-16 h-16 mx-auto mb-4">
+                          <div className="absolute inset-0 border-4 border-[#C79E48]/30 rounded-full" />
+                          <div className="absolute inset-0 border-4 border-[#C79E48] border-t-transparent rounded-full animate-spin" />
+                        </div>
+                        <p className="font-bold text-sm">Creating Your Bouquet</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Generate Button */}
+                <button
+                  onClick={generateBouquetImage}
+                  disabled={!step3Complete || isGenerating}
+                  className={`w-full py-3.5 rounded-xl font-bold text-sm transition-all mb-4 flex items-center justify-center gap-2 ${
+                    step3Complete && !isGenerating
+                      ? 'bg-gradient-to-r from-[#C79E48] to-[#d4af4a] text-white hover:shadow-lg hover:scale-[1.02]'
+                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  }`}
+                >
+                  <Wand2 className="w-4 h-4" />
+                  {isGenerating ? "Generating..." : generatedImage ? "Regenerate" : "Generate Preview"}
+                </button>
+
+                {generatedImage && (
+                  <div className="flex gap-2 mb-4">
+                    <button
+                      onClick={handleDownloadImage}
+                      className="flex-1 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                    >
+                      <Download className="w-4 h-4" />
+                      Download
+                    </button>
+                    <button
+                      onClick={handleDownloadAndShareWhatsApp}
+                      className="flex-1 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                    >
+                      <MessageCircle className="w-4 h-4" />
+                      WhatsApp
+                    </button>
+                  </div>
+                )}
+
+                {/* Summary */}
+                <div className="border-t border-gray-200 pt-4 space-y-3">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-500">Base</span>
+                    <span className="font-medium text-gray-900">
+                      {selectedPackage?.name || <span className="text-gray-400">—</span>}
+                      {selectedBoxShape && ` (${selectedBoxShape.name})`}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-500">Size & Color</span>
+                    <span className="font-medium text-gray-900">
+                      {selectedSize?.name && selectedColor?.name ? `${selectedSize.name} / ${selectedColor.name}` : <span className="text-gray-400">—</span>}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-500">Flowers</span>
+                    <span className="font-medium text-gray-900 text-right">
+                      {Object.values(selectedFlowers).length > 0
+                        ? Object.values(selectedFlowers).map(f => `${f.quantity}x ${f.flower.name}`).join(', ')
+                        : <span className="text-gray-400">—</span>}
+                    </span>
+                  </div>
+                  <div className="pt-3 border-t border-gray-200">
+                    <div className="flex justify-between items-center">
+                      <span className="font-bold text-gray-900">Total</span>
+                      <span className="text-xl font-bold text-[#C79E48]">${displayPrice.toFixed(2)}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Add to Cart */}
+                <button
+                  onClick={handleAddToCart}
+                  disabled={!step3Complete}
+                  className="w-full mt-4 py-4 bg-[#C79E48] text-white rounded-xl font-bold hover:bg-[#b08d45] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  <ShoppingCart className="w-5 h-5" />
+                  Add to Cart
+                </button>
+              </motion.div>
+            )}
+
           </div>
 
-          {/* Right: Preview & Summary */}
+          {/* Right: Preview & Summary - Desktop only (mobile version is at top) */}
+          {!isMobile && (
           <div 
-            className="hidden lg:block fixed right-4 xl:right-8 h-fit z-10"
+            className="fixed right-4 xl:right-8 h-fit z-10"
             style={{ 
               width: 'clamp(20rem, 30vw, 28rem)',
               top: `${Math.max(96, previewCardTop - scrollY + 16)}px`
             }}
           >
-            <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+            <div className={`bg-white border border-gray-200 rounded-2xl shadow-sm ${isMobile ? 'p-4' : 'p-6'}`}>
               
               {/* Preview Area */}
               <div className="aspect-square rounded-xl bg-gray-50 mb-6 overflow-hidden border border-gray-200 relative">
@@ -1265,6 +1542,7 @@ const Customize: React.FC = () => {
 
             </div>
           </div>
+          )}
 
         </div>
       </div>

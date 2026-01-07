@@ -12,6 +12,8 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import heroWeddingImage from "@/assets/heroWedding.jpg";
 import { useWeddingCreations } from "@/hooks/useWeddingCreations";
 import { encodeImageUrl } from "@/lib/imageUtils";
+// Video for mobile hero background
+import video3Url from '@/assets/video/Video3.webm?url';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -43,6 +45,8 @@ const WeddingHero = () => {
   const imageRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [shouldLoadVideo, setShouldLoadVideo] = useState(false);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -120,25 +124,144 @@ const WeddingHero = () => {
     return () => ctx.revert();
   }, []);
 
+  // Intersection Observer for lazy loading video only when visible (mobile only)
+  useEffect(() => {
+    if (!isMobile) return;
+
+    const targetElement = heroRef.current || videoRef.current;
+    if (!targetElement) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && !shouldLoadVideo) {
+            setShouldLoadVideo(true);
+          }
+        });
+      },
+      {
+        root: null,
+        rootMargin: '100px',
+        threshold: 0.01,
+      }
+    );
+
+    observer.observe(targetElement);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [isMobile, shouldLoadVideo]);
+
+  // Load and play video when it becomes visible
+  useEffect(() => {
+    if (!isMobile || !videoRef.current || !shouldLoadVideo) return;
+
+    const videoElement = videoRef.current;
+    
+    const forceFullWidth = () => {
+      if (videoElement) {
+        videoElement.style.width = '100vw';
+        videoElement.style.maxWidth = '100vw';
+        videoElement.style.left = '0';
+        videoElement.style.right = '0';
+        videoElement.style.marginLeft = '0';
+        videoElement.style.marginRight = '0';
+      }
+    };
+    
+    forceFullWidth();
+    videoElement.load();
+    
+    videoElement.addEventListener('loadedmetadata', forceFullWidth);
+    videoElement.addEventListener('loadeddata', forceFullWidth);
+    
+    const playPromise = videoElement.play();
+    if (playPromise !== undefined) {
+      playPromise.catch(() => {
+        // Auto-play was prevented
+      });
+    }
+    
+    return () => {
+      videoElement.removeEventListener('loadedmetadata', forceFullWidth);
+      videoElement.removeEventListener('loadeddata', forceFullWidth);
+    };
+  }, [isMobile, shouldLoadVideo]);
+
+  // Handle window resize to ensure video stays full width
+  useEffect(() => {
+    if (!isMobile || !videoRef.current) return;
+
+    const handleResize = () => {
+      if (videoRef.current) {
+        videoRef.current.style.width = '100vw';
+        videoRef.current.style.maxWidth = '100vw';
+        videoRef.current.style.left = '0';
+        videoRef.current.style.right = '0';
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('orientationchange', handleResize);
+    setTimeout(handleResize, 100);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('orientationchange', handleResize);
+    };
+  }, [isMobile]);
+
   return (
-    <section ref={heroRef} className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-b from-[#fafafa] to-white" style={{ marginTop: '-12.3rem', paddingTop: '50' }}>
-      {/* Hero Image */}
-      <div
-        ref={imageRef}
-        className="absolute inset-0 w-full h-full"
-        style={{ top: '12rem', height: 'calc(100% - 12rem)' }}
-      >
-        <img
-          src={heroWeddingImage}
-          alt="Elegant Wedding Couple"
-          className="w-full h-full object-cover"
-        />
-        {/* Elegant overlay gradient */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/60" />
-      </div>
+    <section ref={heroRef} className={`relative ${isMobile ? 'h-screen' : 'min-h-screen'} flex items-center justify-center overflow-hidden ${isMobile ? 'bg-transparent' : 'bg-gradient-to-b from-[#fafafa] to-white'}`} style={isMobile ? { marginTop: 0 } : { marginTop: '-12.3rem', paddingTop: '50' }}>
+      {/* Video background for mobile view */}
+      {isMobile && (
+        <video
+          ref={videoRef}
+          className="fixed left-0 right-0 w-full object-cover object-center z-0 pointer-events-none"
+          style={{
+            width: '100vw',
+            height: 'calc(100vh + 50px)', // Increase height by 5cm (50px)
+            top: '-50px', // Move video 5cm to the top, behind header
+            left: 0,
+            right: 0,
+            marginLeft: 0,
+            marginRight: 0,
+            paddingLeft: 0,
+            paddingRight: 0,
+          }}
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="none"
+          aria-label="Hero background video"
+        >
+          {shouldLoadVideo && (
+            <source src={video3Url} type="video/webm" />
+          )}
+        </video>
+      )}
+
+      {/* Hero Image - Hidden on mobile, shown on desktop */}
+      {!isMobile && (
+        <div
+          ref={imageRef}
+          className="absolute inset-0 w-full h-full"
+          style={{ top: '12rem', height: 'calc(100% - 12rem)' }}
+        >
+          <img
+            src={heroWeddingImage}
+            alt="Elegant Wedding Couple"
+            className="w-full h-full object-cover"
+          />
+          {/* Elegant overlay gradient */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/60" />
+        </div>
+      )}
 
       {/* Content */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 md:py-16 text-center" style={{ marginTop: '12rem', transform: 'scale(0.85)' }}>
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 md:py-16 text-center" style={isMobile ? {} : { marginTop: '12rem', transform: 'scale(0.85)' }}>
         <div ref={textRef} className="space-y-3 sm:space-y-4 md:space-y-6">
           <motion.div
             initial={{ opacity: 0 }}
