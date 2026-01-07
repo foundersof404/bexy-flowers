@@ -5,10 +5,12 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
 
-let lenis: Lenis | null = null;
+// Module-level instance for scrollTo function (only used if hook is mounted)
+let globalLenis: Lenis | null = null;
 
 export const useSmoothScroll = () => {
   const rafIdRef = useRef<number | null>(null);
+  const lenisRef = useRef<Lenis | null>(null);
 
   useEffect(() => {
     // ⚡ PERFORMANCE: Configure ScrollTrigger for better performance
@@ -18,7 +20,7 @@ export const useSmoothScroll = () => {
     });
 
     // Initialize Lenis with heavy/strong smooth scroll settings
-    lenis = new Lenis({
+    const lenis = new Lenis({
       duration: 1.2, // Longer duration for heavier feel
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // Smooth easing
       smooth: true,
@@ -26,6 +28,9 @@ export const useSmoothScroll = () => {
       touchMultiplier: 2,
       infinite: false,
     });
+
+    lenisRef.current = lenis;
+    globalLenis = lenis; // Set global for scrollTo function
 
     // ⚡ PERFORMANCE: Throttle ScrollTrigger updates to reduce frame drops
     let lastUpdate = 0;
@@ -42,8 +47,10 @@ export const useSmoothScroll = () => {
 
     // Animation loop for Lenis
     function raf(time: number) {
-      lenis?.raf(time);
-      rafIdRef.current = requestAnimationFrame(raf);
+      if (lenisRef.current) {
+        lenisRef.current.raf(time);
+        rafIdRef.current = requestAnimationFrame(raf);
+      }
     }
 
     rafIdRef.current = requestAnimationFrame(raf);
@@ -51,10 +58,10 @@ export const useSmoothScroll = () => {
     // Update ScrollTrigger when Lenis scrolls
     ScrollTrigger.scrollerProxy(document.body, {
       scrollTop(value) {
-        if (arguments.length) {
-          lenis?.scrollTo(value, { immediate: true });
+        if (arguments.length && lenisRef.current) {
+          lenisRef.current.scrollTo(value, { immediate: true });
         }
-        return lenis?.scroll || 0;
+        return lenisRef.current?.scroll || 0;
       },
       getBoundingClientRect() {
         return {
@@ -69,21 +76,25 @@ export const useSmoothScroll = () => {
     return () => {
       if (rafIdRef.current !== null) {
         cancelAnimationFrame(rafIdRef.current);
+        rafIdRef.current = null;
       }
-      if (lenis) {
-        lenis.destroy();
-        lenis = null;
+      if (lenisRef.current) {
+        lenisRef.current.destroy();
+        lenisRef.current = null;
+      }
+      if (globalLenis === lenis) {
+        globalLenis = null;
       }
       // Don't kill all ScrollTriggers here as they're managed by components
       // ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
   }, []);
 
-  return lenis;
+  return lenisRef.current;
 };
 
 export const scrollTo = (target: string | number, options?: any) => {
-  if (lenis) {
-    lenis.scrollTo(target, options);
+  if (globalLenis) {
+    globalLenis.scrollTo(target, options);
   }
 };

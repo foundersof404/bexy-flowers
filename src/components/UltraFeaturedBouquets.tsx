@@ -57,102 +57,130 @@ const UltraFeaturedBouquets = () => {
 
   // Setup GSAP hover effects (no scroll animations)
   useEffect(() => {
-    if (loading || bouquets.length === 0) return;
+    if (loading || bouquets.length === 0) {
+      // Return empty cleanup if not ready
+      return () => {
+        gsap.killTweensOf(cardsRef.current);
+      };
+    }
     
     const cards = cardsRef.current;
+    if (cards.length === 0) {
+      return () => {
+        gsap.killTweensOf(cards);
+      };
+    }
 
-    if (cards.length > 0) {
-      // Set initial states - visible immediately
-      gsap.set(cards, { y: 0, opacity: 1, rotateX: 0 });
+    // Set initial states - visible immediately
+    gsap.set(cards, { y: 0, opacity: 1, rotateX: 0 });
 
-      // Enhanced 3D hover effects for modern cards
-      cards.forEach((card, index) => {
-        const image = card.querySelector('img');
-        const actionButtons = card.querySelector('[class*="absolute top-4 right-4"]');
-        const button = card.querySelector('button');
-        const glitterContainer = card.querySelector('[class*="Modern Dynamic Glitter Effect"]');
+    // Enhanced 3D hover effects for modern cards
+    const eventHandlers: Array<{ card: HTMLElement; mouseenter: (e: Event) => void; mouseleave: (e: Event) => void }> = [];
+    
+    cards.forEach((card, index) => {
+      const image = card.querySelector('img');
+      const actionButtons = card.querySelector('[class*="absolute top-4 right-4"]');
+      const button = card.querySelector('button');
+      const glitterContainer = card.querySelector('[class*="Modern Dynamic Glitter Effect"]');
 
-        let hoverTl: gsap.core.Timeline;
+      let hoverTl: gsap.core.Timeline;
 
-        card.addEventListener('mouseenter', () => {
-          hoverTl = gsap.timeline();
-          
-          hoverTl
-            .to(card, {
-              duration: 0.3,
-              rotateX: 0,
-              rotateY: 0,
-              z: 0,
-              scale: 1.03,
-              ease: "power2.out"
-            })
-            .to(image, {
-              duration: 0.3,
-              scale: 1.08,
-              filter: "brightness(1.05) saturate(1.05)",
-              ease: "power2.out"
-            }, 0)
-            .to(actionButtons, {
-              duration: 0.25,
-              y: 0,
-              opacity: 1,
-              ease: "back.out(1.7)"
-            }, 0.1)
-            .to(button, {
-              duration: 0.25,
-              y: -1,
-              scale: 1.02,
-              ease: "power2.out"
-            }, 0.2)
-            .to(glitterContainer, {
-              duration: 0.4,
-              opacity: 1,
-              ease: "power2.out"
-            }, 0);
-        });
-
-        card.addEventListener('mouseleave', () => {
-          if (hoverTl) hoverTl.kill();
-          
-          gsap.to(card, {
-            duration: 0.25,
+      const handleMouseEnter = () => {
+        hoverTl = gsap.timeline();
+        
+        hoverTl
+          .to(card, {
+            duration: 0.3,
             rotateX: 0,
             rotateY: 0,
             z: 0,
-            scale: 1,
+            scale: 1.03,
             ease: "power2.out"
-          });
-          gsap.to(image, {
-            duration: 0.25,
-            scale: 1,
-            filter: "brightness(1) saturate(1)",
-            ease: "power2.out"
-          });
-          gsap.to(actionButtons, {
-            duration: 0.2,
-            y: -8,
-            opacity: 0,
-            ease: "power2.out"
-          });
-          gsap.to(button, {
-            duration: 0.2,
-            y: 0,
-            scale: 1,
-            ease: "power2.out"
-          });
-          gsap.to(glitterContainer, {
+          })
+          .to(image, {
             duration: 0.3,
-            opacity: 0,
+            scale: 1.08,
+            filter: "brightness(1.05) saturate(1.05)",
             ease: "power2.out"
-          });
-        });
-      });
-    }
+          }, 0)
+          .to(actionButtons, {
+            duration: 0.25,
+            y: 0,
+            opacity: 1,
+            ease: "back.out(1.7)"
+          }, 0.1)
+          .to(button, {
+            duration: 0.25,
+            y: -1,
+            scale: 1.02,
+            ease: "power2.out"
+          }, 0.2)
+          .to(glitterContainer, {
+            duration: 0.4,
+            opacity: 1,
+            ease: "power2.out"
+          }, 0);
+      };
 
+      const handleMouseLeave = () => {
+        if (hoverTl) hoverTl.kill();
+        
+        gsap.to(card, {
+          duration: 0.25,
+          rotateX: 0,
+          rotateY: 0,
+          z: 0,
+          scale: 1,
+          ease: "power2.out"
+        });
+        gsap.to(image, {
+          duration: 0.25,
+          scale: 1,
+          filter: "brightness(1) saturate(1)",
+          ease: "power2.out"
+        });
+        gsap.to(actionButtons, {
+          duration: 0.2,
+          y: -8,
+          opacity: 0,
+          ease: "power2.out"
+        });
+        gsap.to(button, {
+          duration: 0.2,
+          y: 0,
+          scale: 1,
+          ease: "power2.out"
+        });
+        gsap.to(glitterContainer, {
+          duration: 0.3,
+          opacity: 0,
+          ease: "power2.out"
+        });
+      };
+
+      card.addEventListener('mouseenter', handleMouseEnter);
+      card.addEventListener('mouseleave', handleMouseLeave);
+      
+      eventHandlers.push({
+        card,
+        mouseenter: handleMouseEnter,
+        mouseleave: handleMouseLeave
+      });
+    });
+
+    // Cleanup function
     return () => {
+      // Remove all event listeners
+      eventHandlers.forEach(({ card, mouseenter, mouseleave }) => {
+        card.removeEventListener('mouseenter', mouseenter);
+        card.removeEventListener('mouseleave', mouseleave);
+      });
+      // Clean up ScrollTriggers
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+      // Kill any active GSAP animations
+      gsap.killTweensOf(cards);
     };
-  }, []);
+  }, [loading, bouquets.length]);
 
   // Auto-scroll functionality for luxury collection section
   useEffect(() => {

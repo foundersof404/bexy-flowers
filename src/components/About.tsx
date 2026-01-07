@@ -451,7 +451,7 @@ const About = () => {
                 {stat.icon}
               </motion.div>
               <div className="font-luxury text-xl sm:text-2xl font-bold text-slate-800 mb-1 sm:mb-2">
-                <span className="text-2xl sm:text-3xl md:text-4xl" style={{ fontFamily: 'Playfair Display, serif' }}>{stat.number}</span>
+                <span className="text-2xl sm:text-3xl md:text-4xl" style={{ fontFamily: 'EB Garamond, serif' }}>{stat.number}</span>
                 <span className="text-amber-500 text-2xl md:text-3xl">{stat.suffix}</span>
               </div>
               <div className="text-xs sm:text-sm text-slate-600 font-medium">

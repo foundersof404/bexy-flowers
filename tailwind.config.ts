@@ -30,8 +30,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        'luxury': ['Playfair Display', 'serif'],
-        'body': ['Inter', 'sans-serif'],
+        'luxury': ['EB Garamond', 'serif'],
+        'body': ['EB Garamond', 'serif'],
       },
       colors: {
         border: "hsl(var(--border))",

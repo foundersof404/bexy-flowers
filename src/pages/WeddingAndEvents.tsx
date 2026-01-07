@@ -126,7 +126,7 @@ const WeddingHero = () => {
 
   // Intersection Observer for lazy loading video only when visible (mobile only)
   useEffect(() => {
-    if (!isMobile) return;
+    if (!isMobile || shouldLoadVideo) return; // Early return if already loading
 
     const targetElement = heroRef.current || videoRef.current;
     if (!targetElement) return;
@@ -134,8 +134,10 @@ const WeddingHero = () => {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting && !shouldLoadVideo) {
+          if (entry.isIntersecting) {
             setShouldLoadVideo(true);
+            // Disconnect observer once video should load to prevent re-triggering
+            observer.disconnect();
           }
         });
       },
@@ -204,9 +206,10 @@ const WeddingHero = () => {
 
     window.addEventListener('resize', handleResize);
     window.addEventListener('orientationchange', handleResize);
-    setTimeout(handleResize, 100);
+    const timeoutId = setTimeout(handleResize, 100);
 
     return () => {
+      clearTimeout(timeoutId);
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('orientationchange', handleResize);
     };
@@ -393,8 +396,14 @@ const ServiceSection = ({
   // Auto-rotate images every 4 seconds if multiple images provided
   // Seamless loop - no blank/blink between transitions
   // Preload all images to ensure smooth transitions
+  const imageArrayLengthRef = React.useRef(imageArray.length);
+  
   useEffect(() => {
-    if (imageArray.length <= 1) return;
+    imageArrayLengthRef.current = imageArray.length;
+  }, [imageArray.length]);
+
+  useEffect(() => {
+    if (imageArrayLengthRef.current <= 1) return;
 
     // Preload all images for smooth transitions (no blank moments)
     imageArray.forEach((imgSrc) => {
@@ -404,13 +413,13 @@ const ServiceSection = ({
 
     const interval = setInterval(() => {
       setCurrentImageIndex((prev) => {
-        const next = (prev + 1) % imageArray.length;
+        const next = (prev + 1) % imageArrayLengthRef.current;
         return next;
       });
     }, 4000); // 4 seconds between transitions
 
     return () => clearInterval(interval);
-  }, [imageArray]);
+  }, [imageArray]); // Only restart if imageArray reference changes
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -1493,38 +1502,28 @@ const ImageGallery = () => {
 
   // Process wedding creations data
   useEffect(() => {
-    console.log('Wedding creations query state:', {
-      isLoading: weddingCreationsQuery.isLoading,
-      isError: weddingCreationsQuery.isError,
-      error: weddingCreationsQuery.error,
-      data: weddingCreationsQuery.data,
-      dataLength: weddingCreationsQuery.data?.length
-    });
-
-    if (weddingCreationsQuery.data) {
-      const creations = weddingCreationsQuery.data;
-      console.log('Loaded wedding creations:', creations.length, creations);
+    // Only process when we have data or error, not on every isLoading change
+    const data = weddingCreationsQuery.data;
+    if (data && Array.isArray(data)) {
+      console.log('Loaded wedding creations:', data.length);
 
       // Filter out empty/null/undefined image URLs and encode valid ones
-      const imageUrls = creations
-        .map(creation => creation.image_url)
+      const imageUrls = data
+        .map((creation: any) => creation.image_url)
         .filter((url): url is string => Boolean(url && url.trim()))
-        .map(url => {
-          const encoded = encodeImageUrl(url);
-          console.log('Encoding wedding image URL:', url, '->', encoded);
-          return encoded;
-        })
+        .map(url => encodeImageUrl(url))
         .filter(url => url.trim() !== ''); // Filter out any empty strings after encoding
 
-      console.log('Final wedding image URLs:', imageUrls.length, imageUrls);
+      console.log('Final wedding image URLs:', imageUrls.length);
       setWeddingImages(imageUrls);
       setLoadingImages(false);
     } else if (weddingCreationsQuery.error) {
       console.error('Failed to load wedding images:', weddingCreationsQuery.error);
       setWeddingImages([]);
       setLoadingImages(false);
-    } else {
-      setLoadingImages(weddingCreationsQuery.isLoading);
+    } else if (weddingCreationsQuery.isLoading) {
+      // Only set loading if we don't have data yet
+      setLoadingImages(true);
     }
   }, [weddingCreationsQuery.data, weddingCreationsQuery.error, weddingCreationsQuery.isLoading]);
 
@@ -1993,38 +1992,53 @@ const WeddingAndEvents = () => {
 
     // Make navigation semi-transparent with white text for wedding page
     const nav = document.querySelector('.ultra-navigation') as HTMLElement;
-    if (nav) {
-      // Check if mobile
-      const isMobileDevice = window.innerWidth <= 1024;
+    if (!nav) {
+      // Clean up body class if nav not found
+      return () => {
+        document.body.classList.remove('wedding-page');
+      };
+    }
 
-      // Set semi-transparent background - more visible on mobile
-      const initialOpacity = isMobileDevice ? 0.7 : 0.3;
-      const scrolledOpacity = isMobileDevice ? 0.9 : 0.5;
+    // Check if mobile
+    const isMobileDevice = window.innerWidth <= 1024;
 
-      nav.style.backgroundColor = `rgba(0, 0, 0, ${initialOpacity})`;
-      nav.style.backdropFilter = 'blur(10px)';
-      nav.style.transition = 'background-color 0.3s ease';
+    // Set semi-transparent background - more visible on mobile
+    const initialOpacity = isMobileDevice ? 0.7 : 0.3;
+    const scrolledOpacity = isMobileDevice ? 0.9 : 0.5;
 
-      // Update on scroll - keep semi-transparent but more opaque when scrolled
-      const handleScroll = () => {
+    nav.style.backgroundColor = `rgba(0, 0, 0, ${initialOpacity})`;
+    nav.style.backdropFilter = 'blur(10px)';
+    nav.style.transition = 'background-color 0.3s ease';
+
+    // Update on scroll - keep semi-transparent but more opaque when scrolled
+    // Use requestAnimationFrame to throttle scroll events
+    let rafId: number | null = null;
+    const handleScroll = () => {
+      if (rafId) return; // Skip if already scheduled
+      
+      rafId = requestAnimationFrame(() => {
         const scrolled = window.scrollY > 50;
         nav.style.backgroundColor = scrolled
           ? `rgba(0, 0, 0, ${scrolledOpacity})`
           : `rgba(0, 0, 0, ${initialOpacity})`;
-      };
+        rafId = null;
+      });
+    };
 
-      window.addEventListener('scroll', handleScroll, { passive: true });
-      handleScroll(); // Initial call
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll(); // Initial call
 
-      return () => {
-        window.removeEventListener('scroll', handleScroll);
-        document.body.classList.remove('wedding-page');
-        // Reset navigation when leaving page
-        nav.style.backgroundColor = '';
-        nav.style.backdropFilter = '';
-        nav.style.transition = '';
-      };
-    }
+    return () => {
+      if (rafId) {
+        cancelAnimationFrame(rafId);
+      }
+      window.removeEventListener('scroll', handleScroll);
+      document.body.classList.remove('wedding-page');
+      // Reset navigation when leaving page
+      nav.style.backgroundColor = '';
+      nav.style.backdropFilter = '';
+      nav.style.transition = '';
+    };
   }, []);
 
   return (

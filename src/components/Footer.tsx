@@ -38,7 +38,10 @@ const Footer = () => {
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
           >
-            <h3 className="font-luxury text-3xl font-bold text-primary">
+            <h3 
+              className="font-luxury text-3xl font-bold text-primary"
+              style={{ fontFamily: "'EB Garamond', serif" }}
+            >
               Bexy Flowers
             </h3>
             <p className="font-body text-background/80 leading-relaxed">

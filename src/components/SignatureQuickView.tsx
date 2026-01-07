@@ -437,7 +437,7 @@ const SignatureQuickView = ({ open, item, onClose }: SignatureQuickViewProps) =>
                     )}
                   </div>
 
-                  <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-3 leading-tight" style={{ fontFamily: '"Playfair Display", serif' }}>
+                  <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-3 leading-tight" style={{ fontFamily: '"EB Garamond", serif' }}>
                     {productData.name}
                   </h2>
 
@@ -454,14 +454,14 @@ const SignatureQuickView = ({ open, item, onClose }: SignatureQuickViewProps) =>
                   <div className="flex items-baseline gap-4 p-5 bg-gradient-to-r from-amber-50 to-amber-100/50 rounded-xl border-2 border-amber-200/50">
                     <div>
                       <p className="text-sm text-amber-800 font-semibold mb-1">Starting from</p>
-                      <p className="text-4xl font-bold text-amber-900" style={{ fontFamily: '"Playfair Display", serif' }}>
+                      <p className="text-4xl font-bold text-amber-900" style={{ fontFamily: '"EB Garamond", serif' }}>
                         ${productData.basePrice.toFixed(2)}
                       </p>
                     </div>
                     {selectedSize && (
                       <div className="ml-auto text-right">
                         <p className="text-xs text-slate-600 mb-1">Your Total</p>
-                        <p className="text-2xl font-bold text-slate-900" style={{ fontFamily: '"Playfair Display", serif' }}>
+                        <p className="text-2xl font-bold text-slate-900" style={{ fontFamily: '"EB Garamond", serif' }}>
                           ${totalPrice.toFixed(2)}
                         </p>
                       </div>
@@ -483,7 +483,7 @@ const SignatureQuickView = ({ open, item, onClose }: SignatureQuickViewProps) =>
                   <section>
                     <div className="flex items-center gap-3 mb-4">
                       <Flower2 className="w-5 h-5 text-amber-600" strokeWidth={2.5} />
-                      <h3 className="text-xl font-bold text-slate-900" style={{ fontFamily: '"Playfair Display", serif' }}>
+                      <h3 className="text-xl font-bold text-slate-900" style={{ fontFamily: '"EB Garamond", serif' }}>
                         Choose Your Size
                       </h3>
                     </div>
@@ -522,7 +522,7 @@ const SignatureQuickView = ({ open, item, onClose }: SignatureQuickViewProps) =>
                   <section>
                     <div className="flex items-center gap-3 mb-4">
                       <MessageSquare className="w-5 h-5 text-amber-600" strokeWidth={2.5} />
-                      <h3 className="text-xl font-bold text-slate-900" style={{ fontFamily: '"Playfair Display", serif' }}>
+                      <h3 className="text-xl font-bold text-slate-900" style={{ fontFamily: '"EB Garamond", serif' }}>
                         Personal Message
                       </h3>
                     </div>
@@ -545,7 +545,7 @@ const SignatureQuickView = ({ open, item, onClose }: SignatureQuickViewProps) =>
                   <section>
                     <div className="flex items-center gap-3 mb-4">
                       <Sparkles className="w-5 h-5 text-amber-600" strokeWidth={2.5} />
-                      <h3 className="text-xl font-bold text-slate-900" style={{ fontFamily: '"Playfair Display", serif' }}>
+                      <h3 className="text-xl font-bold text-slate-900" style={{ fontFamily: '"EB Garamond", serif' }}>
                         Add Elegant Touches
                       </h3>
                     </div>
@@ -694,7 +694,7 @@ const SignatureQuickView = ({ open, item, onClose }: SignatureQuickViewProps) =>
                   <section>
                     <div className="flex items-center gap-3 mb-4">
                       <Gift className="w-5 h-5 text-amber-600" strokeWidth={2.5} />
-                      <h3 className="text-xl font-bold text-slate-900" style={{ fontFamily: '"Playfair Display", serif' }}>
+                      <h3 className="text-xl font-bold text-slate-900" style={{ fontFamily: '"EB Garamond", serif' }}>
                         Gift Options
                       </h3>
                     </div>

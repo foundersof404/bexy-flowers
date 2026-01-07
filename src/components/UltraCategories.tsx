@@ -175,8 +175,9 @@ const UltraCategories = () => {
   useEffect(() => {
     const row1 = mobileRow1Ref.current;
     const row2 = mobileRow2Ref.current;
+    const container = sectionRef.current;
     
-    if (!row1 || !row2) return;
+    if (!row1 || !row2 || !container) return;
 
     const cardWidth = 196; // Reduced by 30% (280 * 0.7 = 196)
     const gap = 12; // gap-3 = 12px
@@ -191,6 +192,26 @@ const UltraCategories = () => {
     let tween1: gsap.core.Tween | null = null;
     let tween2: gsap.core.Tween | null = null;
 
+    // Use IntersectionObserver to pause animations when not visible
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            // Resume animations when visible
+            if (tween1) tween1.resume();
+            if (tween2) tween2.resume();
+          } else {
+            // Pause animations when not visible to save resources
+            if (tween1) tween1.pause();
+            if (tween2) tween2.pause();
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+
+    observer.observe(container);
+
     // Row 1: Scrolls left (normal direction) - infinite seamless loop
     // Force auto scroll always
     tween1 = gsap.to(row1, {
@@ -200,6 +221,7 @@ const UltraCategories = () => {
       force3D: true,
       repeat: -1,
       repeatDelay: 0,
+      paused: false, // Start paused, observer will resume
       modifiers: {
         x: (x) => {
           const val = parseFloat(x);
@@ -218,6 +240,7 @@ const UltraCategories = () => {
       force3D: true,
       repeat: -1,
       repeatDelay: 0,
+      paused: false, // Start paused, observer will resume
       modifiers: {
         x: (x) => {
           const val = parseFloat(x);
@@ -227,6 +250,7 @@ const UltraCategories = () => {
     });
 
     return () => {
+      observer.disconnect();
       if (tween1) tween1.kill();
       if (tween2) tween2.kill();
       gsap.killTweensOf(row1);

@@ -221,17 +221,32 @@ export const useNavigationPredictor = () => {
 
     // Predict and pre-load likely next routes
     const predictedRoutes = getPredictedRoutes(currentPath);
+    let preloadTimeoutId: NodeJS.Timeout | null = null;
     if (predictedRoutes.length > 0) {
       // Delay pre-loading slightly to avoid blocking current navigation
-      setTimeout(() => preloadPredictedRoutes(predictedRoutes), 300);
+      preloadTimeoutId = setTimeout(() => preloadPredictedRoutes(predictedRoutes), 300);
     }
 
     // Set up session end handlers
     const handleBeforeUnload = () => endSession();
+    let visibilityTimeoutId: NodeJS.Timeout | null = null;
     const handleVisibilityChange = () => {
       if (document.hidden) {
+        // Clear any pending timeout
+        if (visibilityTimeoutId) {
+          clearTimeout(visibilityTimeoutId);
+        }
         // User might be leaving, end session
-        setTimeout(endSession, 5000); // Give them 5 seconds to come back
+        visibilityTimeoutId = setTimeout(() => {
+          endSession();
+          visibilityTimeoutId = null;
+        }, 5000); // Give them 5 seconds to come back
+      } else {
+        // User came back, cancel the timeout
+        if (visibilityTimeoutId) {
+          clearTimeout(visibilityTimeoutId);
+          visibilityTimeoutId = null;
+        }
       }
     };
 
@@ -241,6 +256,12 @@ export const useNavigationPredictor = () => {
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
+      if (preloadTimeoutId) {
+        clearTimeout(preloadTimeoutId);
+      }
+      if (visibilityTimeoutId) {
+        clearTimeout(visibilityTimeoutId);
+      }
     };
   }, [location.pathname, startSession, endSession, recordNavigation, getPredictedRoutes, preloadPredictedRoutes]);
 

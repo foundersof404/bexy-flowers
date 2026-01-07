@@ -14,13 +14,18 @@ const FlyingHeart = ({ startX, startY, endX, endY, onComplete }: FlyingHeartProp
   const [isVisible, setIsVisible] = useState(true);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
+    const timer1 = setTimeout(() => {
       setIsVisible(false);
-      setTimeout(onComplete, 300);
     }, 800);
-    }, 500);
+    
+    const timer2 = setTimeout(() => {
+      onComplete();
+    }, 1100); // 800ms + 300ms
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer1);
+      clearTimeout(timer2);
+    };
   }, [onComplete]);
 
   return (

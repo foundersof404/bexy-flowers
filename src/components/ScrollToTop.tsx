@@ -79,16 +79,25 @@ const ScrollToTop = () => {
 
   // Also handle browser back/forward navigation
   useEffect(() => {
+    let popStateTimeoutId: NodeJS.Timeout | null = null;
     const handlePopState = () => {
+      // Clear any pending timeout to prevent accumulation
+      if (popStateTimeoutId) {
+        clearTimeout(popStateTimeoutId);
+      }
       // Small delay to ensure the DOM is ready
-      setTimeout(() => {
+      popStateTimeoutId = setTimeout(() => {
         resetScrollPosition();
+        popStateTimeoutId = null;
       }, 10);
     };
 
     window.addEventListener('popstate', handlePopState);
     return () => {
       window.removeEventListener('popstate', handlePopState);
+      if (popStateTimeoutId) {
+        clearTimeout(popStateTimeoutId);
+      }
     };
   }, [resetScrollPosition]);
 

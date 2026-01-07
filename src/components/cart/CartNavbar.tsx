@@ -28,7 +28,10 @@ const CartNavbar: React.FC = () => {
               <Flower2 className="w-6 h-6 text-white" />
             </motion.div>
             <div>
-              <h1 className="font-luxury text-xl font-bold text-slate-800 group-hover:text-amber-700 transition-colors">
+              <h1 
+                className="font-luxury text-xl font-bold text-slate-800 group-hover:text-amber-700 transition-colors"
+                style={{ fontFamily: "'EB Garamond', serif" }}
+              >
                 Bexy Flowers
               </h1>
               <p className="text-xs text-slate-500 font-body">E-commerce Cart</p>

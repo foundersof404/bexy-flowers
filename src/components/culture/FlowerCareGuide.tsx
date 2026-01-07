@@ -92,7 +92,7 @@ const FlowerCareGuide = () => {
           <h2 
             className="font-luxury text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 bg-clip-text text-transparent relative inline-block px-2"
             style={{
-              fontFamily: 'Playfair Display, serif',
+              fontFamily: 'EB Garamond, serif',
               filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))',
               letterSpacing: '0.05em'
             }}

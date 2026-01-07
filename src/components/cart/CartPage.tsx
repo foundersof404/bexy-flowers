@@ -21,69 +21,64 @@ const CartPage: React.FC = () => {
 
   // Track component lifecycle
   useEffect(() => {
-    console.log('🟢 CartPage MOUNTED');
-    console.log('📍 Location:', location.pathname);
-    console.log('🛒 Cart Items:', cartItems.length);
     componentMountedRef.current = true;
 
-    // GLOBAL CLICK LISTENER - to catch ALL clicks
-    const globalClickHandler = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      if (target && (target.textContent?.includes('Proceed to Checkout') || target.closest('button')?.textContent?.includes('Proceed to Checkout'))) {
-        console.log('🌍 GLOBAL CLICK DETECTED on checkout button!');
-        console.log('Target:', target);
-        console.log('Event:', e);
-      }
-    };
-    
-    document.addEventListener('click', globalClickHandler, true);
+    // GLOBAL CLICK LISTENER - to catch ALL clicks (only in development)
+    let globalClickHandler: ((e: MouseEvent) => void) | null = null;
+    if (process.env.NODE_ENV === 'development') {
+      globalClickHandler = (e: MouseEvent) => {
+        const target = e.target as HTMLElement;
+        if (target && (target.textContent?.includes('Proceed to Checkout') || target.closest('button')?.textContent?.includes('Proceed to Checkout'))) {
+          console.log('🌍 GLOBAL CLICK DETECTED on checkout button!');
+        }
+      };
+      document.addEventListener('click', globalClickHandler, true);
+    }
 
-    // Check if button exists and add test listener
+    // Check if button exists and add test listener (only in development)
     let testHandlerCleanup: (() => void) | null = null;
+    let timeoutId: NodeJS.Timeout | null = null;
     
-    const checkButton = () => {
-      if (checkoutButtonRef.current) {
-        console.log('✅ Checkout button found in DOM');
-        console.log('Button element:', checkoutButtonRef.current);
-        console.log('Button parent:', checkoutButtonRef.current.parentElement);
-        console.log('Button form:', checkoutButtonRef.current.form);
-        
-        // Add a test click listener directly to the DOM element
-        const testHandler = (e: Event) => {
-          console.log('🧪 DIRECT DOM CLICK LISTENER FIRED!');
-          e.preventDefault();
-          e.stopPropagation();
-          e.stopImmediatePropagation();
-          alert('DIRECT DOM LISTENER WORKS! Button is clickable!');
-        };
-        checkoutButtonRef.current.addEventListener('click', testHandler, true);
-        
-        // Store cleanup
-        testHandlerCleanup = () => {
-          checkoutButtonRef.current?.removeEventListener('click', testHandler, true);
-        };
-      } else {
-        console.warn('⚠️ Checkout button NOT found in DOM yet');
-      }
-    };
-    
-    // Check immediately and after a short delay
-    checkButton();
-    const timeoutId = setTimeout(checkButton, 100);
+    if (process.env.NODE_ENV === 'development') {
+      const checkButton = () => {
+        if (checkoutButtonRef.current) {
+          // Add a test click listener directly to the DOM element
+          const testHandler = (e: Event) => {
+            console.log('🧪 DIRECT DOM CLICK LISTENER FIRED!');
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+          };
+          checkoutButtonRef.current.addEventListener('click', testHandler, true);
+          
+          // Store cleanup
+          testHandlerCleanup = () => {
+            checkoutButtonRef.current?.removeEventListener('click', testHandler, true);
+          };
+        }
+      };
+      
+      // Check immediately and after a short delay
+      checkButton();
+      timeoutId = setTimeout(checkButton, 100);
+    }
 
     return () => {
-      clearTimeout(timeoutId);
-      document.removeEventListener('click', globalClickHandler, true);
+      if (timeoutId) clearTimeout(timeoutId);
+      if (globalClickHandler) {
+        document.removeEventListener('click', globalClickHandler, true);
+      }
       if (testHandlerCleanup) testHandlerCleanup();
-      console.log('🔴 CartPage UNMOUNTING');
       componentMountedRef.current = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Track cart changes
+  // Track cart changes (only in development)
   useEffect(() => {
-    console.log('🛒 Cart updated:', cartItems.length, 'items');
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🛒 Cart updated:', cartItems.length, 'items');
+    }
   }, [cartItems]);
 
   const handleContinueShopping = (e?: React.MouseEvent) => {

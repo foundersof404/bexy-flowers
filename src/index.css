@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -188,15 +190,15 @@ All colors MUST be HSL. No rounded corners - sharp and architectural.
 
   /* Typography */
   .font-luxury {
-    font-family: 'Playfair Display', serif;
+    font-family: 'EB Garamond', serif;
   }
 
   .font-body {
-    font-family: 'Inter', sans-serif;
+    font-family: 'EB Garamond', serif;
   }
 
   .font-serif {
-    font-family: 'Playfair Display', serif;
+    font-family: 'EB Garamond', serif;
   }
 }
 

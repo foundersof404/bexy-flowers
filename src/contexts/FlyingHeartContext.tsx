@@ -23,28 +23,39 @@ interface FlyingHeartProviderProps {
 export const FlyingHeartProvider: React.FC<FlyingHeartProviderProps> = ({ children }) => {
   const [flyingHearts, setFlyingHearts] = useState<FlyingHeartConfig[]>([]);
   const [navHeartPulse, setNavHeartPulse] = useState(false);
+  const timeoutRefs = React.useRef<NodeJS.Timeout[]>([]);
 
   const triggerFlyingHeart = useCallback((startX: number, startY: number, endX: number, endY: number) => {
+    // Clear any existing timeouts to prevent accumulation
+    timeoutRefs.current.forEach(timeout => clearTimeout(timeout));
+    timeoutRefs.current = [];
+
     // Add the flying heart
     setFlyingHearts(prev => [...prev, { startX, startY, endX, endY }]);
 
     // Trigger navbar heart pulse after animation completes
-    setTimeout(() => {
+    const timer1 = setTimeout(() => {
       setNavHeartPulse(true);
-      setTimeout(() => {
+      const timer2 = setTimeout(() => {
         setNavHeartPulse(false);
+        timeoutRefs.current = timeoutRefs.current.filter(t => t !== timer2);
       }, 600);
+      timeoutRefs.current.push(timer2);
+      timeoutRefs.current = timeoutRefs.current.filter(t => t !== timer1);
     }, 800);
+    timeoutRefs.current.push(timer1);
 
     // Remove the flying heart after animation completes
-    setTimeout(() => {
+    const timer3 = setTimeout(() => {
       setFlyingHearts(prev => {
         if (prev.length > 0) {
           return prev.slice(1); // Remove first heart
         }
         return prev;
       });
+      timeoutRefs.current = timeoutRefs.current.filter(t => t !== timer3);
     }, 1100);
+    timeoutRefs.current.push(timer3);
   }, []);
 
   const removeFlyingHeart = useCallback((index: number) => {
@@ -56,6 +67,14 @@ export const FlyingHeartProvider: React.FC<FlyingHeartProviderProps> = ({ childr
     navHeartPulse,
     setNavHeartPulse
   };
+
+  // Cleanup timeouts on unmount
+  React.useEffect(() => {
+    return () => {
+      timeoutRefs.current.forEach(timeout => clearTimeout(timeout));
+      timeoutRefs.current = [];
+    };
+  }, []);
 
   return (
     <FlyingHeartContext.Provider value={value}>

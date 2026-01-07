@@ -131,7 +131,7 @@ const ZodiacBouquetQuiz = () => {
           <h1 
             className="font-luxury text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 bg-clip-text text-transparent relative"
             style={{
-              fontFamily: 'Playfair Display, serif',
+              fontFamily: 'EB Garamond, serif',
               filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))',
               letterSpacing: '0.05em'
             }}
@@ -313,7 +313,7 @@ const WelcomeStep = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, delay: 0.4 }}
-      style={{ fontFamily: 'Playfair Display, serif' }}
+      style={{ fontFamily: 'EB Garamond, serif' }}
     >
       Welcome to Your{' '}
       <span className="text-[#C79E48]">Cosmic</span>{' '}
@@ -363,7 +363,7 @@ const BirthDetailsStep = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
     >
-      <h3 className="text-4xl font-bold text-gray-900 mb-4 tracking-wide" style={{ fontFamily: 'Playfair Display, serif' }}>
+      <h3 className="text-4xl font-bold text-gray-900 mb-4 tracking-wide" style={{ fontFamily: 'EB Garamond, serif' }}>
         Your Birth Details
       </h3>
       <p className="text-gray-600 text-xl font-light">
@@ -442,7 +442,7 @@ const ZodiacProfileStep = ({ sign }: { sign: ZodiacSign }) => (
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.4 }}
-        style={{ fontFamily: 'Playfair Display, serif' }}
+        style={{ fontFamily: 'EB Garamond, serif' }}
       >
         {sign.name}
       </motion.h3>
@@ -474,7 +474,7 @@ const ZodiacProfileStep = ({ sign }: { sign: ZodiacSign }) => (
       transition={{ duration: 0.6, delay: 0.7 }}
     >
       <div className="bg-white rounded-2xl p-5 border border-[#E8D4A8] shadow-md">
-        <h4 className="font-bold text-gray-900 text-lg mb-3 tracking-wide" style={{ fontFamily: 'Playfair Display, serif' }}>
+        <h4 className="font-bold text-gray-900 text-lg mb-3 tracking-wide" style={{ fontFamily: 'EB Garamond, serif' }}>
           Your Personality
         </h4>
         <p className="text-gray-800 leading-relaxed text-sm">
@@ -483,7 +483,7 @@ const ZodiacProfileStep = ({ sign }: { sign: ZodiacSign }) => (
       </div>
       
       <div className="bg-white rounded-2xl p-5 border border-[#E8D4A8] shadow-md">
-        <h4 className="font-bold text-gray-900 text-lg mb-3 tracking-wide" style={{ fontFamily: 'Playfair Display, serif' }}>
+        <h4 className="font-bold text-gray-900 text-lg mb-3 tracking-wide" style={{ fontFamily: 'EB Garamond, serif' }}>
           Your Traits
         </h4>
         <div className="flex flex-wrap gap-2">
@@ -510,7 +510,7 @@ const ZodiacProfileStep = ({ sign }: { sign: ZodiacSign }) => (
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, delay: 0.9 }}
     >
-      <h4 className="font-bold text-gray-900 text-lg mb-4 tracking-wide text-center" style={{ fontFamily: 'Playfair Display, serif' }}>
+      <h4 className="font-bold text-gray-900 text-lg mb-4 tracking-wide text-center" style={{ fontFamily: 'EB Garamond, serif' }}>
         Your Colors
       </h4>
       <div className="flex justify-center gap-4">
@@ -554,7 +554,7 @@ const BouquetSelectionStep = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
     >
-      <h3 className="text-4xl font-bold text-gray-900 mb-4 tracking-wide" style={{ fontFamily: 'Playfair Display, serif' }}>
+      <h3 className="text-4xl font-bold text-gray-900 mb-4 tracking-wide" style={{ fontFamily: 'EB Garamond, serif' }}>
         Your Perfect Match
       </h3>
       <p className="text-gray-600 text-xl font-light">
@@ -589,7 +589,7 @@ const BouquetSelectionStep = ({
               </div>
               
               <div className="flex-1">
-                <h4 className="font-bold text-gray-900 text-2xl mb-4 tracking-wide" style={{ fontFamily: 'Playfair Display, serif' }}>
+                <h4 className="font-bold text-gray-900 text-2xl mb-4 tracking-wide" style={{ fontFamily: 'EB Garamond, serif' }}>
                   {bouquet.name}
                 </h4>
                 <p className="text-gray-700 mb-6 leading-relaxed text-lg">
@@ -679,7 +679,7 @@ const ZodiacResult = ({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.4 }}
-          style={{ fontFamily: 'Playfair Display, serif' }}
+          style={{ fontFamily: 'EB Garamond, serif' }}
         >
           {userInfo.name}, Your{' '}
           <span className="text-[#C79E48]">Cosmic</span>{' '}
@@ -722,7 +722,7 @@ const ZodiacResult = ({
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.8, delay: 1.2 }}
               >
-                <h3 className="text-5xl font-bold text-gray-900 mb-6 tracking-wide" style={{ fontFamily: 'Playfair Display, serif' }}>
+                <h3 className="text-5xl font-bold text-gray-900 mb-6 tracking-wide" style={{ fontFamily: 'EB Garamond, serif' }}>
                   {bouquet.name}
                 </h3>
                 <p className="text-[#C79E48] text-4xl font-bold mb-8">
@@ -739,7 +739,7 @@ const ZodiacResult = ({
                 transition={{ duration: 0.8, delay: 1.4 }}
                 className="bg-white rounded-2xl p-8 border-2 border-[#E8D4A8] shadow-lg"
               >
-                <h4 className="font-bold text-gray-900 text-2xl mb-6 tracking-wide" style={{ fontFamily: 'Playfair Display, serif' }}>
+                <h4 className="font-bold text-gray-900 text-2xl mb-6 tracking-wide" style={{ fontFamily: 'EB Garamond, serif' }}>
                   Why This Bouquet?
                 </h4>
                 <p className="text-gray-800 mb-8 leading-relaxed text-lg">
@@ -791,7 +791,7 @@ const ZodiacResult = ({
         transition={{ duration: 0.8, delay: 2 }}
       >
         <Card className="p-10 bg-gradient-to-r from-[#F5F1E8] to-white border-2 border-[#D4A85A] shadow-xl shadow-[#C79E48]/10 rounded-3xl">
-          <h3 className="font-bold text-gray-900 text-3xl mb-12 text-center tracking-wide" style={{ fontFamily: 'Playfair Display, serif' }}>
+          <h3 className="font-bold text-gray-900 text-3xl mb-12 text-center tracking-wide" style={{ fontFamily: 'EB Garamond, serif' }}>
             Your Zodiac Insights
           </h3>
           <div className="grid md:grid-cols-3 gap-8">

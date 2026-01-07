@@ -7,7 +7,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { useRoutePrefetch } from '@/hooks/useRoutePrefetch';
 import { useRouteState } from '@/contexts/RouteStateContext';
 import {
-  ShoppingCart,
+  ShoppingBag,
   Menu,
   X,
   Home,
@@ -310,6 +310,7 @@ const UltraNavigation = () => {
                     <div className="ml-1 sm:ml-1.5 block">
                       <h1
                         className="font-luxury text-xs xs:text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold text-foreground whitespace-nowrap"
+                        style={{ fontFamily: "'EB Garamond', serif" }}
                       >
                         Bexy Flowers
                       </h1>
@@ -357,6 +358,7 @@ const UltraNavigation = () => {
                               className="relative whitespace-nowrap"
                               style={{
                                 color: isActive ? GOLD_COLOR : 'inherit',
+                                fontFamily: "'EB Garamond', serif",
                               }}
                               whileHover={{
                                 scale: 1.05,
@@ -487,7 +489,7 @@ const UltraNavigation = () => {
                         whileTap={isMobile ? { scale: 0.95 } : {}}
                         transition={{ duration: 0.3 }}
                       >
-                        <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 text-foreground transition-all duration-300" />
+                        <ShoppingBag className="w-5 h-5 sm:w-6 sm:h-6 text-foreground transition-all duration-300" />
                       </motion.div>
 
                       {/* Simplified Background - Reduced for performance */}
@@ -783,11 +785,15 @@ const UltraNavigation = () => {
                                     className="font-luxury font-medium relative text-lg sm:text-xl uppercase tracking-[0.15em]"
                                     style={{
                                       color: isActive ? GOLD_COLOR : 'inherit',
+                                      fontFamily: "'EB Garamond', serif",
                                     }}
                                   >
                                     {item.name}
                                   </div>
-                                  <div className="font-luxury italic text-xs sm:text-sm text-muted-foreground mt-1 tracking-wide">
+                                  <div 
+                                    className="font-luxury italic text-xs sm:text-sm text-muted-foreground mt-1 tracking-wide"
+                                    style={{ fontFamily: "'EB Garamond', serif" }}
+                                  >
                                     {item.description}
                                   </div>
                                 </div>
