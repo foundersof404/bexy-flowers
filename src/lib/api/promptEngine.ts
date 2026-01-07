@@ -356,45 +356,94 @@ export function buildAdvancedPrompt(options: PromptBuilderOptions): BuiltPrompt 
   // Get flower arrangement positions
   const arrangementPositions = getFlowerArrangementPositions(flowers, packageType, boxShape);
   
-  // Build flower list
-  const flowerList = flowers.map(f => `${f.quantity} ${f.flower.colorName} ${f.flower.family}`).join(', ');
+  // Build detailed flower descriptions with exact colors and types
+  const flowerDescriptions = flowers.map(f => {
+    const colorName = f.flower.colorName.toLowerCase();
+    const flowerType = f.flower.family.toLowerCase();
+    const qty = f.quantity;
+    
+    // More descriptive flower terms
+    if (qty === 1) {
+      return `1 beautiful ${colorName} ${flowerType} bloom`;
+    } else if (qty <= 3) {
+      return `${qty} ${colorName} ${flowerType} blooms`;
+    } else {
+      return `${qty} fresh ${colorName} ${flowerType} flowers`;
+    }
+  });
+  
+  const flowerList = flowerDescriptions.join(', ');
   
   // Get template if specified
   const templateConfig = template ? PROMPT_TEMPLATES.find(t => t.id === template) : null;
   
+  // Size descriptions for more accuracy
+  const sizeDescriptions: Record<string, string> = {
+    'small': 'compact petite small-sized',
+    'medium': 'medium-sized standard',
+    'large': 'large grand impressive full-sized'
+  };
+  const sizeDesc = sizeDescriptions[size.toLowerCase()] || size;
+  
+  // Color descriptions for packaging
+  const colorDescriptions: Record<string, string> = {
+    'black': 'elegant matte black',
+    'white': 'pristine pure white',
+    'gold': 'luxurious shimmering gold',
+    'pink': 'soft blush pink',
+    'blue': 'serene sky blue',
+    'red': 'rich deep red'
+  };
+  const colorDesc = colorDescriptions[color.toLowerCase()] || color;
+  
   // Build the prompt parts
   const parts: string[] = [];
   
-  // 1. Main subject
+  // 1. Main subject with precise details
   if (packageType === 'box') {
     const shape = boxShape || 'square';
-    parts.push(`A premium ${color} luxury gift box, ${shape} shape, ${size} size`);
-    parts.push(`filled with exactly ${totalFlowers} fresh premium flowers: ${flowerList}`);
-    parts.push(`arrangement: ${arrangementPositions}`);
-    parts.push(`top-down aerial view, bird's eye perspective, camera directly above`);
-    parts.push(`elegant ${color} ${shape} box with lid fully open revealing flowers`);
-    parts.push(`box lid displays golden text "Bexy Flowers" in elegant script font`);
+    const shapeDescriptions: Record<string, string> = {
+      'round': 'perfectly circular round',
+      'square': 'geometric square',
+      'heart': 'romantic heart-shaped'
+    };
+    const shapeDesc = shapeDescriptions[shape.toLowerCase()] || shape;
+    
+    parts.push(`A premium ${colorDesc} luxury flower gift box`);
+    parts.push(`${shapeDesc} box shape, ${sizeDesc} dimensions`);
+    parts.push(`containing exactly ${totalFlowers} fresh premium flowers arranged inside: ${flowerList}`);
+    parts.push(`flower arrangement details: ${arrangementPositions}`);
+    parts.push(`top-down aerial view, bird's eye perspective, camera positioned directly above looking down`);
+    parts.push(`the ${colorDesc} ${shape} box lid is fully open, revealing the stunning flower arrangement inside`);
+    parts.push(`box interior lined with elegant tissue paper`);
+    parts.push(`box lid displays elegant golden embossed text "BEXY" in sophisticated capital letters, clearly visible and sharp`);
   } else {
-    parts.push(`A ${size} elegant flower bouquet with exactly ${totalFlowers} fresh premium flowers: ${flowerList}`);
-    parts.push(`arrangement: ${arrangementPositions}`);
-    parts.push(`wrapped in ${color} decorative paper with matching ${color} satin ribbon bow`);
-    parts.push(`ribbon features elegant tag with golden text "Bexy Flowers"`);
-    parts.push(`front view, standing upright, three-quarter angle`);
+    parts.push(`A ${sizeDesc} elegant hand-tied flower bouquet`);
+    parts.push(`containing exactly ${totalFlowers} fresh premium flowers: ${flowerList}`);
+    parts.push(`flower arrangement details: ${arrangementPositions}`);
+    parts.push(`professionally wrapped in ${colorDesc} premium decorative paper`);
+    parts.push(`tied with matching ${colorDesc} satin ribbon bow`);
+    parts.push(`ribbon features an elegant tag with golden text "BEXY" clearly visible`);
+    parts.push(`front view, standing upright, three-quarter angle showing full bouquet`);
+    parts.push(`stems neatly trimmed and wrapped`);
   }
   
-  // 2. Glitter effect
+  // 2. Glitter effect with precise description
   if (withGlitter) {
-    parts.push(`subtle sparkle glitter dust on flower petals, shimmering highlights, magical sparkle effect`);
+    parts.push(`delicate sparkle glitter dust scattered on flower petals`);
+    parts.push(`subtle shimmering highlights catching the light`);
+    parts.push(`magical fairy dust sparkle effect, not overdone`);
   }
   
-  // 3. Accessories
+  // 3. Accessories with precise placement
   if (accessories.length > 0) {
     const accessoryDescriptions: Record<string, string> = {
-      'crown': 'small decorative golden crown accessory placed elegantly among the flowers',
-      'graduation-hat': 'miniature graduation cap accessory celebrating achievement',
-      'bear': 'cute small teddy bear plush toy nestled in the arrangement',
-      'chocolate': 'premium chocolate box or truffles elegantly placed beside the flowers'
+      'crown': 'small decorative golden crown accessory placed prominently on top of the flowers, clearly visible',
+      'graduation-hat': 'miniature black graduation cap with gold tassel placed among the flowers, celebrating achievement',
+      'bear': 'cute small plush teddy bear toy nestled visibly in the flower arrangement',
+      'chocolate': 'elegant box of premium chocolates or chocolate truffles placed beside the flowers'
     };
+    parts.push('ACCESSORIES INCLUDED:');
     accessories.forEach(acc => {
       if (accessoryDescriptions[acc]) {
         parts.push(accessoryDescriptions[acc]);
@@ -413,10 +462,12 @@ export function buildAdvancedPrompt(options: PromptBuilderOptions): BuiltPrompt 
     parts.push(templateConfig.basePrompt);
   }
   
-  // 6. Quality keywords
-  parts.push('8K resolution, ultra-detailed, photorealistic, professional product photography');
-  parts.push('sharp focus, depth of field, commercial photography');
-  parts.push('Bexy Flowers luxury brand signature, premium quality');
+  // 6. Quality and technical keywords
+  parts.push('8K resolution, ultra-detailed, photorealistic');
+  parts.push('professional commercial product photography');
+  parts.push('sharp focus throughout, excellent depth of field');
+  parts.push('studio lighting setup, soft shadows');
+  parts.push('BEXY luxury floral brand, premium quality presentation');
   
   const positivePrompt = parts.join(', ');
   
