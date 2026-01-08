@@ -58,6 +58,31 @@ interface Accessory {
   price: number;
 }
 
+// New interfaces for arrangement preferences
+interface ArrangementStyle {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+}
+
+interface DensityOption {
+  id: string;
+  name: string;
+  description: string;
+}
+
+interface BloomStage {
+  id: string;
+  name: string;
+  description: string;
+}
+
+interface FlowerPosition {
+  flowerId: string;
+  position: 'center' | 'edges' | 'scattered' | 'accent';
+}
+
 // --- Data ---
 const packages: Package[] = [
   { id: "box", name: "Luxury Box", type: "box", icon: Box, basePrice: 20, description: "Premium rigid box" },
@@ -90,6 +115,35 @@ const accessories: Accessory[] = [
   { id: "graduation-hat", name: "Graduation Hat", icon: GraduationCap, price: 4 },
   { id: "bear", name: "Bear", icon: HeartIcon, price: 6 },
   { id: "chocolate", name: "Chocolate", icon: Candy, price: 3 }
+];
+
+// Arrangement style options for AI accuracy
+const arrangementStyles: ArrangementStyle[] = [
+  { id: "dome", name: "Dome", description: "Rounded dome shape rising above container", icon: "🔵" },
+  { id: "flat", name: "Flat Top", description: "Even, flat arrangement at top", icon: "⬜" },
+  { id: "cascading", name: "Cascading", description: "Flowing, natural cascade effect", icon: "🌊" }
+];
+
+// Density options for flower spacing
+const densityOptions: DensityOption[] = [
+  { id: "tight", name: "Tightly Packed", description: "No gaps, densely arranged" },
+  { id: "medium", name: "Medium", description: "Balanced spacing" },
+  { id: "airy", name: "Airy & Loose", description: "Spacious, breathable arrangement" }
+];
+
+// Bloom stage options
+const bloomStages: BloomStage[] = [
+  { id: "full", name: "Fully Open", description: "All flowers fully bloomed" },
+  { id: "semi", name: "Semi-Open", description: "Partially opened blooms" },
+  { id: "mixed", name: "Mixed Stages", description: "Variety of bloom stages" }
+];
+
+// Position options for mix flowers
+const positionOptions = [
+  { id: "center", name: "Center", description: "Main focal point in center" },
+  { id: "edges", name: "Edges/Outer", description: "Around the outer ring" },
+  { id: "scattered", name: "Scattered", description: "Distributed throughout" },
+  { id: "accent", name: "Accent", description: "Small accent touches" }
 ];
 
 // Horizontal Progress Stepper Component
@@ -163,6 +217,12 @@ const Customize: React.FC = () => {
   const [flowerFilter, setFlowerFilter] = useState<"all" | "popular" | "romantic" | "minimal" | "luxury" | "seasonal">("all");
   const [seasonFilter, setSeasonFilter] = useState<Season | "all-seasons">("all-seasons");
   const flowersGridRef = useRef<HTMLDivElement>(null);
+
+  // Arrangement preferences for better AI accuracy
+  const [arrangementStyle, setArrangementStyle] = useState<string>("dome");
+  const [densityPreference, setDensityPreference] = useState<string>("tight");
+  const [bloomStage, setBloomStage] = useState<string>("full");
+  const [flowerPositions, setFlowerPositions] = useState<Record<string, string>>({});
 
   // Enhanced AI State
   const [showPromptPreview, setShowPromptPreview] = useState(false);
@@ -533,11 +593,16 @@ const Customize: React.FC = () => {
       withGlitter,
       withRibbon: selectedPackage.type === 'box' ? withRibbon : false,
       accessories: selectedAccessories,
-      includeNegative: true
+      includeNegative: true,
+      // New arrangement preferences for better AI accuracy
+      arrangementStyle: arrangementStyle as 'dome' | 'flat' | 'cascading',
+      densityPreference: densityPreference as 'tight' | 'medium' | 'airy',
+      bloomStage: bloomStage as 'full' | 'semi' | 'mixed',
+      flowerPositions: flowerPositions as Record<string, 'center' | 'edges' | 'scattered' | 'accent'>
     });
 
     return prompt;
-  }, [selectedPackage, selectedBoxShape, selectedSize, selectedColor, selectedFlowers, withGlitter, withRibbon, selectedAccessories]);
+  }, [selectedPackage, selectedBoxShape, selectedSize, selectedColor, selectedFlowers, withGlitter, withRibbon, selectedAccessories, arrangementStyle, densityPreference, bloomStage, flowerPositions]);
 
   // Update prompt preview when selections change
   useEffect(() => {
@@ -589,7 +654,12 @@ const Customize: React.FC = () => {
         withRibbon: selectedPackage.type === 'box' ? withRibbon : false,
         accessories: selectedAccessories,
         includeNegative: true,
-        seed: generationSeed // Unique seed ensures different image each time
+        seed: generationSeed, // Unique seed ensures different image each time
+        // Include arrangement preferences for better AI accuracy
+        arrangementStyle: arrangementStyle as 'dome' | 'flat' | 'cascading',
+        densityPreference: densityPreference as 'tight' | 'medium' | 'airy',
+        bloomStage: bloomStage as 'full' | 'semi' | 'mixed',
+        flowerPositions: flowerPositions as Record<string, 'center' | 'edges' | 'scattered' | 'accent'>
       });
 
       setLastGeneratedPrompt(prompt.positive);
@@ -1522,6 +1592,124 @@ const Customize: React.FC = () => {
                           );
                         })}
                       </div>
+                    )}
+
+                    {/* Arrangement Preferences - Shows when Mix & Match with 2+ flower types */}
+                    {flowerMode === "mix" && Object.keys(selectedFlowers).length >= 2 && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="mt-6 pt-6 border-t border-gray-200 space-y-5"
+                      >
+                        <div className="flex items-center gap-2 mb-4">
+                          <Sparkles className="w-5 h-5 text-[#C79E48]" />
+                          <h4 className="font-bold text-gray-900">Arrangement Preferences</h4>
+                          <span className="text-xs text-gray-500 ml-auto">Help AI create your perfect bouquet</span>
+                        </div>
+
+                        {/* Flower Positioning */}
+                        <div className="bg-gradient-to-r from-[#C79E48]/5 to-[#C79E48]/10 rounded-xl p-4 border border-[#C79E48]/20">
+                          <h5 className="font-semibold text-sm text-gray-900 mb-3 flex items-center gap-2">
+                            <span className="text-lg">🎯</span>
+                            Flower Positioning
+                          </h5>
+                          <p className="text-xs text-gray-500 mb-3">Where should each flower type be placed?</p>
+                          <div className="space-y-3">
+                            {Object.entries(selectedFlowers).map(([flowerId, { flower, quantity }]) => (
+                              <div key={flowerId} className="flex items-center gap-3 bg-white rounded-lg p-3 border border-gray-200">
+                                <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0">
+                                  <img src={flower.imageUrl} alt={flower.name} className="w-full h-full object-cover" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="text-xs font-bold text-gray-900 truncate">{quantity}x {flower.name}</div>
+                                  <select
+                                    value={flowerPositions[flowerId] || 'scattered'}
+                                    onChange={(e) => setFlowerPositions(prev => ({ ...prev, [flowerId]: e.target.value }))}
+                                    className="mt-1 w-full text-xs p-1.5 rounded border border-gray-300 focus:border-[#C79E48] focus:ring-1 focus:ring-[#C79E48] bg-white"
+                                  >
+                                    {positionOptions.map(pos => (
+                                      <option key={pos.id} value={pos.id}>{pos.name} - {pos.description}</option>
+                                    ))}
+                                  </select>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Arrangement Style */}
+                        <div>
+                          <h5 className="font-semibold text-sm text-gray-900 mb-3 flex items-center gap-2">
+                            <span className="text-lg">🌸</span>
+                            Arrangement Style
+                          </h5>
+                          <div className="grid grid-cols-3 gap-2">
+                            {arrangementStyles.map(style => (
+                              <button
+                                key={style.id}
+                                onClick={() => setArrangementStyle(style.id)}
+                                className={`p-3 rounded-lg border-2 transition-all text-center ${
+                                  arrangementStyle === style.id
+                                    ? 'border-[#C79E48] bg-[#C79E48]/5'
+                                    : 'border-gray-200 hover:border-[#C79E48]/50'
+                                }`}
+                              >
+                                <span className="text-xl block mb-1">{style.icon}</span>
+                                <div className="text-xs font-bold text-gray-900">{style.name}</div>
+                                <div className="text-[10px] text-gray-500 mt-0.5">{style.description}</div>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Density Preference */}
+                        <div>
+                          <h5 className="font-semibold text-sm text-gray-900 mb-3 flex items-center gap-2">
+                            <span className="text-lg">📏</span>
+                            Density & Spacing
+                          </h5>
+                          <div className="grid grid-cols-3 gap-2">
+                            {densityOptions.map(density => (
+                              <button
+                                key={density.id}
+                                onClick={() => setDensityPreference(density.id)}
+                                className={`p-3 rounded-lg border-2 transition-all text-center ${
+                                  densityPreference === density.id
+                                    ? 'border-[#C79E48] bg-[#C79E48]/5'
+                                    : 'border-gray-200 hover:border-[#C79E48]/50'
+                                }`}
+                              >
+                                <div className="text-xs font-bold text-gray-900">{density.name}</div>
+                                <div className="text-[10px] text-gray-500 mt-0.5">{density.description}</div>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Bloom Stage */}
+                        <div>
+                          <h5 className="font-semibold text-sm text-gray-900 mb-3 flex items-center gap-2">
+                            <span className="text-lg">🌷</span>
+                            Bloom Stage
+                          </h5>
+                          <div className="grid grid-cols-3 gap-2">
+                            {bloomStages.map(stage => (
+                              <button
+                                key={stage.id}
+                                onClick={() => setBloomStage(stage.id)}
+                                className={`p-3 rounded-lg border-2 transition-all text-center ${
+                                  bloomStage === stage.id
+                                    ? 'border-[#C79E48] bg-[#C79E48]/5'
+                                    : 'border-gray-200 hover:border-[#C79E48]/50'
+                                }`}
+                              >
+                                <div className="text-xs font-bold text-gray-900">{stage.name}</div>
+                                <div className="text-[10px] text-gray-500 mt-0.5">{stage.description}</div>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      </motion.div>
                     )}
                   </div>
                 )}

@@ -435,6 +435,11 @@ export interface PromptBuilderOptions {
   template?: string;
   includeNegative?: boolean;
   seed?: number; // Random seed for generating variations - each seed produces different image
+  // New arrangement preferences for more accurate AI generation
+  arrangementStyle?: 'dome' | 'flat' | 'cascading';
+  densityPreference?: 'tight' | 'medium' | 'airy';
+  bloomStage?: 'full' | 'semi' | 'mixed';
+  flowerPositions?: Record<string, 'center' | 'edges' | 'scattered' | 'accent'>;
 }
 
 export interface BuiltPrompt {
@@ -481,13 +486,19 @@ export function buildAdvancedPrompt(options: PromptBuilderOptions): BuiltPrompt 
     withRibbon = false,
     accessories,
     includeNegative = true,
-    seed = Date.now() // Default to current timestamp for unique generation
+    seed = Date.now(), // Default to current timestamp for unique generation
+    // New arrangement preferences
+    arrangementStyle = 'dome',
+    densityPreference = 'tight',
+    bloomStage = 'full',
+    flowerPositions = {}
   } = options;
 
   // NOTE: stylePreset and template are IGNORED to prevent unrealistic images
   // We focus ONLY on exact user inputs for accurate generation
 
   const totalFlowers = flowers.reduce((sum, f) => sum + f.quantity, 0);
+  const isMixFlowers = flowers.length > 1;
   
   // Generate variation phrases based on seed to ensure each generation is unique
   // This prevents API-side caching from returning identical images
@@ -513,6 +524,14 @@ export function buildAdvancedPrompt(options: PromptBuilderOptions): BuiltPrompt 
   const uniqueFlowerTypes = new Set<string>();
   const isMixAndMatch = flowers.length > 1;
   
+  // Position descriptions for clarity
+  const positionDescriptions: Record<string, string> = {
+    'center': 'placed prominently in the CENTER of the arrangement as the main focal point',
+    'edges': 'arranged around the OUTER EDGES forming a beautiful border ring',
+    'scattered': 'distributed EVENLY THROUGHOUT the entire arrangement',
+    'accent': 'placed as small ACCENT TOUCHES between other flowers'
+  };
+  
   sortedFlowers.forEach(f => {
     const colorName = f.flower.colorName.toLowerCase();
     const flowerFamily = f.flower.family.toLowerCase();
@@ -526,14 +545,26 @@ export function buildAdvancedPrompt(options: PromptBuilderOptions): BuiltPrompt 
     const visual = FLOWER_VISUALS[flowerFamily];
     const colorVisual = COLOR_VISUALS[colorName] || colorName;
     
+    // Get position for this flower (if specified)
+    const position = flowerPositions[f.flower.id];
+    const positionText = position ? `, ${positionDescriptions[position]}` : '';
+    
     if (visual && qty > 0) {
-      // Include bloom shape and petal style for realistic rendering
+      // Include bloom shape, petal style, AND position for mix flowers
       // STRICT: Use weighted keywords for Flux model emphasis
       // Flux format: (keyword:weight) where weight > 1.0 increases emphasis
-      flowerDescriptions.push(`(exactly ${qty} ${colorVisual} ${flowerFamily}:1.3), ${visual.bloomShape}, ${visual.petalStyle}`);
+      if (isMixFlowers && position) {
+        flowerDescriptions.push(`(exactly ${qty} ${colorVisual} ${flowerFamily}${positionText}:1.4), ${visual.bloomShape}, ${visual.petalStyle}`);
+      } else {
+        flowerDescriptions.push(`(exactly ${qty} ${colorVisual} ${flowerFamily}:1.3), ${visual.bloomShape}, ${visual.petalStyle}`);
+      }
     } else if (qty > 0) {
       // Use weighted emphasis for quantity accuracy
-      flowerDescriptions.push(`(exactly ${qty} ${colorVisual} ${flowerFamily}:1.3)`);
+      if (isMixFlowers && position) {
+        flowerDescriptions.push(`(exactly ${qty} ${colorVisual} ${flowerFamily}${positionText}:1.4)`);
+      } else {
+        flowerDescriptions.push(`(exactly ${qty} ${colorVisual} ${flowerFamily}:1.3)`);
+      }
     }
   });
   
@@ -549,9 +580,11 @@ export function buildAdvancedPrompt(options: PromptBuilderOptions): BuiltPrompt 
   let colorEnforcement: string;
   if (isMixAndMatch) {
     // MIX & MATCH: Strictly enforce ALL selected flower types and colors
-    const flowerBreakdown = sortedFlowers.map(f => 
-      `${f.quantity} ${f.flower.colorName.toLowerCase()} ${f.flower.family.toLowerCase()}`
-    ).join(', ');
+    const flowerBreakdown = sortedFlowers.map(f => {
+      const pos = flowerPositions[f.flower.id];
+      const posText = pos ? ` (${pos})` : '';
+      return `${f.quantity} ${f.flower.colorName.toLowerCase()} ${f.flower.family.toLowerCase()}${posText}`;
+    }).join(', ');
     colorEnforcement = `(CRITICAL MIX & MATCH: arrangement MUST contain ALL of these flowers visible: ${flowerBreakdown}:1.4), (each flower type MUST be clearly visible and distinguishable:1.3), (do NOT substitute or omit any flower type:1.3)`;
   } else if (isSingleColor) {
     // Use weighted emphasis for single color enforcement
@@ -560,6 +593,30 @@ export function buildAdvancedPrompt(options: PromptBuilderOptions): BuiltPrompt 
   } else {
     colorEnforcement = `(flowers in these exact colors only: ${colorList.join(', ')}:1.3), (no other colors:1.2)`;
   }
+  
+  // Build arrangement style description
+  const arrangementStyleDescriptions: Record<string, string> = {
+    'dome': 'flowers arranged in a beautiful rounded dome shape rising above the container',
+    'flat': 'flowers arranged with an even flat top surface at uniform height',
+    'cascading': 'flowers flowing naturally in a cascading waterfall effect'
+  };
+  const arrangementDesc = arrangementStyleDescriptions[arrangementStyle] || arrangementStyleDescriptions['dome'];
+  
+  // Build density description
+  const densityDescriptions: Record<string, string> = {
+    'tight': 'very tightly packed with no gaps or spaces between flowers',
+    'medium': 'balanced spacing with flowers touching but not crowded',
+    'airy': 'loose and airy arrangement with visible space between flowers'
+  };
+  const densityDesc = densityDescriptions[densityPreference] || densityDescriptions['tight'];
+  
+  // Build bloom stage description
+  const bloomDescriptions: Record<string, string> = {
+    'full': 'all flowers fully open and bloomed showing complete petals',
+    'semi': 'flowers partially opened in semi-bloom stage',
+    'mixed': 'variety of bloom stages from buds to fully open'
+  };
+  const bloomDesc = bloomDescriptions[bloomStage] || bloomDescriptions['full'];
   
   // Build PRECISE prompt focused on user inputs only
   // Pollinations Flux model works best with clear, structured descriptions
@@ -641,9 +698,14 @@ export function buildAdvancedPrompt(options: PromptBuilderOptions): BuiltPrompt 
     parts.push(`visible natural petal veins, soft dewy appearance, lifelike colors`);
     parts.push(`${colorEnforcement}`);
     parts.push(`${shapeConfig.arrangement}`);
-    parts.push(`(all ${totalFlowers} flowers clearly visible:1.3), (densely packed:1.2), (filling the entire box:1.2)`);
-    parts.push(`flower heads facing upward showing full open blooms`);
-    parts.push(`flowers creating a lush overflowing dome shape rising above the box rim`);
+    
+    // Add user-specified arrangement preferences for better accuracy
+    parts.push(`(${arrangementDesc}:1.3)`);
+    parts.push(`(${densityDesc}:1.3)`);
+    parts.push(`(${bloomDesc}:1.2)`);
+    
+    parts.push(`(all ${totalFlowers} flowers clearly visible:1.3), (filling the entire box:1.2)`);
+    parts.push(`flower heads facing upward showing beautiful blooms`);
     parts.push(`${shapeConfig.viewAngle}`);
     
     // Add ribbon wrap if selected - PRECISE placement instructions
@@ -709,7 +771,12 @@ export function buildAdvancedPrompt(options: PromptBuilderOptions): BuiltPrompt 
       parts.push(`${colorEnforcement}`);
       parts.push(`(all ${totalFlowers} flowers clearly visible in the arrangement:1.3)`);
       parts.push(`(flowers arranged in a perfect heart shape when viewed from above:1.3)`);
-      parts.push(`roses densely packed to form a romantic heart silhouette`);
+      
+      // Add user-specified arrangement preferences
+      parts.push(`(${densityDesc}:1.3)`);
+      parts.push(`(${bloomDesc}:1.2)`);
+      
+      parts.push(`roses forming a romantic heart silhouette`);
       parts.push(`wrapped in ${wrapMaterial} with decorative pleated ruffled border around the heart`);
       parts.push(`the wrapping paper forms an elegant frame around the heart-shaped flowers`);
       parts.push(`front view showing the full heart shape of the flower arrangement`);
@@ -727,8 +794,14 @@ export function buildAdvancedPrompt(options: PromptBuilderOptions): BuiltPrompt 
       parts.push(`natural organic flower petals with realistic texture and subtle imperfections`);
       parts.push(`visible natural petal veins, soft dewy appearance, lifelike colors`);
       parts.push(`${colorEnforcement}`);
-      parts.push(`(all ${totalFlowers} flowers clearly visible:1.3), (densely arranged:1.2)`);
-      parts.push(`flowers arranged in cascading dome shape with focal flowers in center`);
+      parts.push(`(all ${totalFlowers} flowers clearly visible:1.3)`);
+      
+      // Add user-specified arrangement preferences
+      parts.push(`(${arrangementDesc}:1.3)`);
+      parts.push(`(${densityDesc}:1.3)`);
+      parts.push(`(${bloomDesc}:1.2)`);
+      
+      parts.push(`flowers with focal flowers in center`);
       parts.push(`professionally wrapped in ${wrapMaterial}`);
       parts.push(`paper gathered and tied with matching satin ribbon bow`);
       parts.push(`stems neatly trimmed and visible below wrap`);

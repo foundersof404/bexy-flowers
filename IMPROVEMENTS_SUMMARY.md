@@ -3,6 +3,48 @@
 ## Overview
 This document summarizes the improvements made to enhance the accuracy of AI-generated flower bouquet images using the Pollinations AI (Flux model) system.
 
+---
+
+## NEW: Arrangement Preferences UI (Latest Update)
+
+### User Input Enhancements
+Added new input controls on the Customize page to help users specify exactly how they want their mixed flower arrangement to look. These preferences appear when users select 2+ flower types in "Mix & Match" mode.
+
+### New UI Controls:
+
+#### 1. 🎯 Flower Positioning
+Users can now specify WHERE each flower type should be placed:
+- **Center** - Main focal point in the center of arrangement
+- **Edges/Outer** - Around the outer ring forming a border
+- **Scattered** - Distributed evenly throughout
+- **Accent** - Small accent touches between other flowers
+
+**Example**: "Red roses in the CENTER, white tulips on the EDGES"
+
+#### 2. 🌸 Arrangement Style
+- **Dome** - Rounded dome shape rising above container
+- **Flat Top** - Even, flat arrangement at uniform height
+- **Cascading** - Flowing natural cascade effect
+
+#### 3. 📏 Density & Spacing
+- **Tightly Packed** - No gaps, densely arranged
+- **Medium** - Balanced spacing
+- **Airy & Loose** - Spacious, breathable arrangement
+
+#### 4. 🌷 Bloom Stage
+- **Fully Open** - All flowers fully bloomed
+- **Semi-Open** - Partially opened blooms
+- **Mixed Stages** - Variety of bloom stages
+
+### How It Works
+When users specify these preferences, they are converted into detailed AI prompt instructions with weighted keywords:
+- `(exactly 6 red roses placed prominently in the CENTER:1.4)`
+- `(flowers arranged in a beautiful rounded dome shape:1.3)`
+- `(very tightly packed with no gaps:1.3)`
+- `(all flowers fully open and bloomed:1.2)`
+
+---
+
 ## Changes Made
 
 ### 1. Enhanced Negative Prompts ✅
@@ -151,9 +193,20 @@ Based on Flux model best practices and prompt engineering research:
 ## Files Modified
 
 1. `src/lib/api/promptEngine.ts` - Main prompt engine with all improvements
-2. `src/lib/api/aiConfig.ts` - Added model documentation
-3. `AI_POLLINATION_ANALYSIS.md` - Comprehensive analysis (new)
-4. `IMPROVEMENTS_SUMMARY.md` - This summary (new)
+   - Added arrangement preferences support (style, density, bloom stage)
+   - Added flower positioning system for mix flowers
+   - Enhanced negative prompts with Flux-specific exclusions
+   - Implemented weighted keywords for emphasis
+   
+2. `src/pages/Customize.tsx` - Customize page with new UI controls
+   - Added arrangement style selector (dome, flat, cascading)
+   - Added density preference selector (tight, medium, airy)
+   - Added bloom stage selector (full, semi, mixed)
+   - Added per-flower positioning dropdown for mix arrangements
+   
+3. `src/lib/api/aiConfig.ts` - Added model documentation
+4. `AI_POLLINATION_ANALYSIS.md` - Comprehensive analysis (new)
+5. `IMPROVEMENTS_SUMMARY.md` - This summary (new)
 
 ## Next Steps
 
