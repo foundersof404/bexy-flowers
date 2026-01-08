@@ -253,7 +253,7 @@ const WeddingHero = () => {
           className="absolute inset-0 w-full h-full"
           style={{ 
             top: '12rem', 
-            height: 'calc(100% - 12rem)',
+            height: '100vh',
             willChange: 'transform',
             contain: 'layout style paint'
           }}
@@ -288,15 +288,15 @@ const WeddingHero = () => {
             className="inline-flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4"
           >
             <Sparkles className={`${isMobile ? 'w-3 h-3' : 'w-4 h-4'}`} style={{ color: GOLD_COLOR }} />
-            <span className={`${isMobile ? 'text-[10px]' : 'text-xs'} font-semibold tracking-[0.2em] sm:tracking-[0.3em] uppercase text-white/90`}>
+            <span className={`${isMobile ? 'text-[10px]' : 'text-xs'} font-normal uppercase text-white/90`} style={{ fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>
               Wedding & Events
             </span>
             <Sparkles className={`${isMobile ? 'w-3 h-3' : 'w-4 h-4'}`} style={{ color: GOLD_COLOR }} />
           </motion.div>
 
           <h1
-            className={`${isMobile ? 'text-2xl sm:text-3xl md:text-4xl lg:text-5xl' : 'text-4xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl'} font-serif font-bold mb-3 sm:mb-4 md:mb-6 leading-[1.1] text-white px-2`}
-            style={{ textShadow: '0 4px 20px rgba(0,0,0,0.3)' }}
+            className={`${isMobile ? 'text-2xl sm:text-3xl md:text-4xl lg:text-5xl' : 'text-4xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl'} font-luxury font-normal mb-3 sm:mb-4 md:mb-6 leading-[1.1] text-white px-2`}
+            style={{ letterSpacing: '-0.02em', textShadow: '0 4px 20px rgba(0,0,0,0.3)' }}
           >
             Beautiful Floral Arrangements
             <br className="hidden sm:block" />
@@ -326,8 +326,10 @@ const WeddingHero = () => {
           <div ref={buttonRef} className="pt-2 sm:pt-3">
             <Button
               size="lg"
-              className={`${isMobile ? 'text-xs sm:text-sm px-5 sm:px-6 py-4 sm:py-5' : 'text-base px-10 py-6'} font-semibold rounded-full shadow-2xl hover:shadow-3xl transition-all duration-300 relative overflow-hidden group w-full sm:w-auto`}
+              className={`${isMobile ? 'text-xs sm:text-sm px-5 sm:px-6 py-4 sm:py-5' : 'text-base px-10 py-6'} font-normal rounded-full shadow-2xl hover:shadow-3xl transition-all duration-300 relative overflow-hidden group w-full sm:w-auto`}
               style={{
+                fontFamily: "'EB Garamond', serif",
+                letterSpacing: '-0.02em',
                 background: `linear-gradient(135deg, ${GOLD_COLOR} 0%, rgba(199, 158, 72, 0.9) 100%)`,
                 color: 'white',
               }}
@@ -551,7 +553,7 @@ const ServiceSection = ({
                   ))
                 ) : (
                   <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                    <span className="text-gray-400 text-sm">No image available</span>
+                    <span className="text-foreground text-sm">No image available</span>
                   </div>
                 )}
                 {/* Gradient overlay */}
@@ -559,8 +561,8 @@ const ServiceSection = ({
                 {/* Title overlay on image */}
                 <div className="absolute bottom-0 left-0 right-0 p-6">
                   <h2
-                    className="text-3xl font-serif font-bold text-white mb-2"
-                    style={{ textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}
+                    className="text-3xl font-luxury font-normal text-white mb-2"
+                    style={{ letterSpacing: '-0.02em', textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}
                   >
                     {title}
                   </h2>
@@ -573,7 +575,7 @@ const ServiceSection = ({
 
               {/* Content section */}
               <div ref={contentRef} className="p-6 space-y-4">
-                <p className="text-sm text-gray-700 leading-relaxed">
+                <p className="text-sm text-foreground leading-relaxed">
                   {description}
                 </p>
 
@@ -585,7 +587,7 @@ const ServiceSection = ({
                           className="w-1.5 h-1.5 rounded-full flex-shrink-0"
                           style={{ backgroundColor: GOLD_COLOR }}
                         />
-                        <span className="text-xs text-gray-600">{feature}</span>
+                        <span className="text-xs text-foreground">{feature}</span>
                       </div>
                     ))}
                   </div>
@@ -594,8 +596,10 @@ const ServiceSection = ({
                 <Button
                   variant="outline"
                   size="lg"
-                  className="w-full rounded-full border-2 px-6 py-5 text-sm font-semibold mt-4"
+                  className="w-full rounded-full border-2 px-6 py-5 text-sm font-normal mt-4"
                   style={{
+                    fontFamily: "'EB Garamond', serif",
+                    letterSpacing: '-0.02em',
                     borderColor: GOLD_COLOR,
                     color: GOLD_COLOR,
                   }}
@@ -678,7 +682,7 @@ const ServiceSection = ({
                 ))
               ) : (
                 <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                  <span className="text-gray-400">No image available</span>
+                  <span className="text-foreground">No image available</span>
                 </div>
               )}
               <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10" />
@@ -705,10 +709,15 @@ const ServiceSection = ({
               transition={{ duration: 0.6 }}
             >
               <h2
-                className="font-luxury text-6xl md:text-8xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 bg-clip-text text-transparent relative uppercase"
+                className="font-luxury text-6xl md:text-8xl font-normal mb-4 sm:mb-6 relative uppercase"
                 style={{
+                  background: 'linear-gradient(135deg, #2c2d2a 0%, #3D3027 50%, #2c2d2a 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
                   filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))',
-                  letterSpacing: '0.05em'
+                  letterSpacing: '-0.02em',
+                  lineHeight: '1.2em'
                 }}
               >
                 {title.toUpperCase()}
@@ -724,7 +733,7 @@ const ServiceSection = ({
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.1 }}
-              className="text-base md:text-lg lg:text-xl text-gray-700 leading-relaxed"
+              className="text-base md:text-lg lg:text-xl text-foreground leading-relaxed"
             >
               {description}
             </motion.p>
@@ -743,7 +752,7 @@ const ServiceSection = ({
                       className="w-2 h-2 rounded-full mt-2 flex-shrink-0"
                       style={{ backgroundColor: GOLD_COLOR }}
                     />
-                    <span className="text-gray-700">{feature}</span>
+                    <span className="text-foreground">{feature}</span>
                   </li>
                 ))}
               </motion.ul>
@@ -759,8 +768,10 @@ const ServiceSection = ({
               <Button
                 variant="outline"
                 size="lg"
-                className="group rounded-full border-2 px-8 py-6 font-semibold transition-all duration-300"
+                className="group rounded-full border-2 px-8 py-6 font-normal transition-all duration-300"
                 style={{
+                  fontFamily: "'EB Garamond', serif",
+                  letterSpacing: '-0.02em',
                   borderColor: GOLD_COLOR,
                   color: GOLD_COLOR,
                 }}
@@ -850,7 +861,7 @@ const ConsultationModal = ({ isOpen, onClose, onConfirm }: {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-6">
-          <h3 className="text-2xl font-serif font-bold" style={{ color: '#1a1a1a' }}>
+          <h3 className="text-2xl font-luxury font-normal" style={{ color: '#2c2d2a', letterSpacing: '-0.02em' }}>
             Schedule a Consultation
           </h3>
           <button
@@ -858,14 +869,14 @@ const ConsultationModal = ({ isOpen, onClose, onConfirm }: {
             className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
             aria-label="Close"
           >
-            <span className="text-2xl text-gray-500">×</span>
+            <span className="text-2xl text-foreground">×</span>
           </button>
         </div>
 
         <div className="space-y-6">
           {/* Date Picker */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
+            <label className="block text-sm font-normal text-foreground mb-2" style={{ fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>
               Select Date
             </label>
             <input
@@ -892,7 +903,7 @@ const ConsultationModal = ({ isOpen, onClose, onConfirm }: {
 
           {/* Time Picker */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
+            <label className="block text-sm font-normal text-foreground mb-2" style={{ fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>
               Select Time
             </label>
             <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
@@ -902,7 +913,7 @@ const ConsultationModal = ({ isOpen, onClose, onConfirm }: {
                   onClick={() => setSelectedTime(time)}
                   className={`px-4 py-2 rounded-lg font-medium transition-all ${selectedTime === time
                       ? 'text-white'
-                      : 'text-gray-700 border-2 border-gray-200 hover:border-gray-300'
+                      : 'text-foreground border-2 border-gray-200 hover:border-gray-300'
                     }`}
                   style={{
                     backgroundColor: selectedTime === time ? GOLD_COLOR : 'transparent',
@@ -918,8 +929,8 @@ const ConsultationModal = ({ isOpen, onClose, onConfirm }: {
           {/* Selected Date & Time Display */}
           {selectedDate && selectedTime && (
             <div className="p-4 rounded-lg" style={{ backgroundColor: `${GOLD_COLOR}10` }}>
-              <p className="text-sm text-gray-600 mb-1">Selected:</p>
-              <p className="font-semibold" style={{ color: GOLD_COLOR }}>
+              <p className="text-sm text-foreground mb-1">Selected:</p>
+              <p className="font-normal" style={{ color: GOLD_COLOR, fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>
                 {new Date(selectedDate).toLocaleDateString('en-US', {
                   weekday: 'long',
                   year: 'numeric',
@@ -1080,15 +1091,15 @@ const PackageSection = () => {
             >
               <div className="inline-flex items-center gap-2 mb-4">
                 <Sparkles className="w-4 h-4" style={{ color: GOLD_COLOR }} />
-                <span className="text-xs font-semibold tracking-[0.2em] uppercase" style={{ color: GOLD_COLOR }}>
+                <span className="text-xs font-normal uppercase" style={{ color: GOLD_COLOR, fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>
                   Our Standard Package
                 </span>
                 <Sparkles className="w-4 h-4" style={{ color: GOLD_COLOR }} />
               </div>
-              <h2 className="text-3xl font-serif font-bold mb-3" style={{ color: '#1a1a1a' }}>
+              <h2 className="text-3xl font-luxury font-normal mb-3" style={{ color: '#2c2d2a', letterSpacing: '-0.02em' }}>
                 Complete Wedding Experience
               </h2>
-              <p className="text-sm text-gray-600 max-w-3xl mx-auto">
+              <p className="text-sm text-foreground max-w-3xl mx-auto">
                 Everything you need for your perfect day
               </p>
             </motion.div>
@@ -1105,11 +1116,11 @@ const PackageSection = () => {
               {/* Price Header - Prominent */}
               <div className="relative bg-gradient-to-br from-[rgba(199,158,72,0.1)] to-transparent p-6 text-center border-b border-[rgba(199,158,72,0.1)]">
                 <div className="mb-3">
-                  <span className="text-5xl font-bold font-serif" style={{ color: GOLD_COLOR }}>
+                  <span className="text-5xl font-normal font-luxury" style={{ color: GOLD_COLOR, letterSpacing: '-0.02em' }}>
                     $3,200
                   </span>
                 </div>
-                <p className="text-xs text-gray-600">
+                <p className="text-xs text-foreground">
                   Complete package • Customizable
                 </p>
               </div>
@@ -1125,10 +1136,10 @@ const PackageSection = () => {
                           key={index}
                           className="feature-card flex-shrink-0 w-[280px] bg-gradient-to-br from-white to-[rgba(199,158,72,0.02)] rounded-2xl p-4 border border-[rgba(199,158,72,0.15)]"
                         >
-                          <h3 className="font-serif font-semibold text-sm mb-1" style={{ color: '#1a1a1a' }}>
+                          <h3 className="font-luxury font-normal text-sm mb-1" style={{ color: '#2c2d2a', letterSpacing: '-0.02em' }}>
                             {feature.title}
                           </h3>
-                          <p className="text-xs text-gray-600 leading-relaxed">
+                          <p className="text-xs text-foreground leading-relaxed">
                             {feature.description}
                           </p>
                         </div>
@@ -1139,10 +1150,10 @@ const PackageSection = () => {
 
                 {/* Description */}
                 <div className="pt-4 border-t border-gray-100">
-                  <p className="text-xs text-gray-600 leading-relaxed mb-3">
+                  <p className="text-xs text-foreground leading-relaxed mb-3">
                     Our Standard Package offers a complete floral and décor experience designed to make your wedding day elegant and unforgettable.
                   </p>
-                  <p className="text-xs font-semibold" style={{ color: GOLD_COLOR }}>
+                  <p className="text-xs font-normal" style={{ color: GOLD_COLOR, fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>
                     ✨ The package can be customized upon request
                   </p>
                 </div>
@@ -1150,8 +1161,10 @@ const PackageSection = () => {
                 {/* CTA Button */}
                 <Button
                   size="lg"
-                  className="w-full rounded-full border-0 px-6 py-5 text-sm font-semibold shadow-xl"
+                  className="w-full rounded-full border-0 px-6 py-5 text-sm font-normal shadow-xl"
                   style={{
+                    fontFamily: "'EB Garamond', serif",
+                    letterSpacing: '-0.02em',
                     background: `linear-gradient(135deg, ${GOLD_COLOR} 0%, rgba(199, 158, 72, 0.9) 100%)`,
                     color: 'white',
                   }}
@@ -1192,21 +1205,26 @@ const PackageSection = () => {
           >
             <div className="inline-flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
               <Sparkles className="w-5 h-5" style={{ color: GOLD_COLOR }} />
-              <span className="text-sm font-semibold tracking-[0.3em] uppercase" style={{ color: GOLD_COLOR }}>
+              <span className="text-sm font-normal uppercase" style={{ color: GOLD_COLOR, fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>
                 Our Standard Package
               </span>
               <Sparkles className="w-5 h-5" style={{ color: GOLD_COLOR }} />
             </div>
             <h2
-              className="font-luxury text-6xl md:text-8xl font-bold mb-6 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 bg-clip-text text-transparent relative"
+              className="font-luxury text-6xl md:text-8xl font-normal mb-6 relative"
               style={{
+                background: 'linear-gradient(135deg, #2c2d2a 0%, #3D3027 50%, #2c2d2a 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
                 filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))',
-                letterSpacing: '0.05em'
+                letterSpacing: '-0.02em',
+                lineHeight: '1.2em'
               }}
             >
               COMPLETE WEDDING EXPERIENCE
             </h2>
-            <p className="text-base md:text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto px-2">
+            <p className="text-base md:text-lg lg:text-xl text-foreground max-w-3xl mx-auto px-2">
               Everything you need for your perfect day, beautifully arranged
             </p>
           </motion.div>
@@ -1218,14 +1236,14 @@ const PackageSection = () => {
               {/* Price Header */}
               <div className="text-center mb-8 sm:mb-10 md:mb-12">
                 <div className="mb-4 sm:mb-6">
-                  <span className={`${isMobile ? 'text-4xl sm:text-5xl md:text-6xl' : 'text-6xl md:text-7xl lg:text-8xl'} font-bold font-serif`} style={{ color: GOLD_COLOR }}>
+                  <span className={`${isMobile ? 'text-4xl sm:text-5xl md:text-6xl' : 'text-6xl md:text-7xl lg:text-8xl'} font-normal font-luxury`} style={{ color: GOLD_COLOR, letterSpacing: '-0.02em' }}>
                     $3,200
                   </span>
                 </div>
-                <p className={`${isMobile ? 'text-sm sm:text-base' : 'text-base md:text-lg lg:text-xl'} text-gray-600 max-w-3xl mx-auto leading-relaxed px-2`}>
+                <p className={`${isMobile ? 'text-sm sm:text-base' : 'text-base md:text-lg lg:text-xl'} text-foreground max-w-3xl mx-auto leading-relaxed px-2`}>
                   Our Standard Package offers a complete floral and décor experience designed to make your wedding day elegant and unforgettable. This package includes full arrangements from Bexy Flowers – from ceremony to reception – ensuring every detail is beautifully styled and cohesive.
                   <br className="mt-2 sm:mt-4" />
-                  <span className="font-semibold" style={{ color: GOLD_COLOR }}>
+                  <span className="font-normal" style={{ color: GOLD_COLOR, fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>
                     The package can be customized upon request
                   </span>
                 </p>
@@ -1243,10 +1261,10 @@ const PackageSection = () => {
                       <div className="absolute inset-0 bg-gradient-to-br from-[rgba(199,158,72,0.03)] to-transparent rounded-xl sm:rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
                       <div className="relative z-10">
-                        <h3 className={`font-serif font-semibold ${isMobile ? 'text-base' : 'text-lg'} mb-2`} style={{ color: '#1a1a1a' }}>
+                        <h3 className={`font-luxury font-normal ${isMobile ? 'text-base' : 'text-lg'} mb-2`} style={{ color: '#2c2d2a', letterSpacing: '-0.02em' }}>
                           {feature.title}
                         </h3>
-                        <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-gray-600 leading-relaxed`}>
+                        <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-foreground leading-relaxed`}>
                           {feature.description}
                         </p>
                       </div>
@@ -1259,8 +1277,10 @@ const PackageSection = () => {
               <div className="text-center">
                 <Button
                   size="lg"
-                  className={`${isMobile ? 'text-sm sm:text-base px-6 sm:px-8 py-5 sm:py-6' : 'text-lg px-12 py-7'} font-semibold rounded-full shadow-2xl hover:shadow-3xl transition-all duration-300 relative overflow-hidden group w-full sm:w-auto`}
+                  className={`${isMobile ? 'text-sm sm:text-base px-6 sm:px-8 py-5 sm:py-6' : 'text-lg px-12 py-7'} font-normal rounded-full shadow-2xl hover:shadow-3xl transition-all duration-300 relative overflow-hidden group w-full sm:w-auto`}
                   style={{
+                    fontFamily: "'EB Garamond', serif",
+                    letterSpacing: '-0.02em',
                     background: `linear-gradient(135deg, ${GOLD_COLOR} 0%, rgba(199, 158, 72, 0.9) 100%)`,
                     color: 'white',
                   }}
@@ -1360,7 +1380,7 @@ const ImageModal = ({
     >
       {/* Close button - X icon - Smaller on mobile, larger on desktop */}
       <button
-        className="absolute text-white font-bold transition-all duration-200 flex items-center justify-center rounded-full shadow-2xl"
+        className="absolute text-white font-normal transition-all duration-200 flex items-center justify-center rounded-full shadow-2xl"
         style={{
           top: isMobile ? '12px' : '16px',
           right: isMobile ? '12px' : '16px',
@@ -1369,6 +1389,8 @@ const ImageModal = ({
           width: isMobile ? '44px' : '70px',
           height: isMobile ? '44px' : '70px',
           pointerEvents: 'auto',
+          fontFamily: "'EB Garamond', serif",
+          letterSpacing: '-0.02em',
           zIndex: 1000000, // Highest z-index to be above everything
           backgroundColor: 'rgba(0, 0, 0, 0.85)',
           border: isMobile ? '2px solid rgba(255, 255, 255, 0.95)' : '3px solid rgba(255, 255, 255, 0.9)',
@@ -1515,9 +1537,9 @@ const ImageGallery = () => {
     isActive: true // Only get active wedding creations
   });
 
-  // Process wedding creations data
+  // Process wedding creations data - Fixed: removed isLoading from dependencies to prevent infinite loop
   useEffect(() => {
-    // Only process when we have data or error, not on every isLoading change
+    // Only process when we have data or error
     const data = weddingCreationsQuery.data;
     if (data && Array.isArray(data)) {
       console.log('Loaded wedding creations:', data.length);
@@ -1536,11 +1558,16 @@ const ImageGallery = () => {
       console.error('Failed to load wedding images:', weddingCreationsQuery.error);
       setWeddingImages([]);
       setLoadingImages(false);
-    } else if (weddingCreationsQuery.isLoading) {
-      // Only set loading if we don't have data yet
+    }
+    // Note: isLoading is handled separately - only update loading state when data actually changes
+  }, [weddingCreationsQuery.data, weddingCreationsQuery.error]);
+  
+  // Separate effect to handle initial loading state
+  useEffect(() => {
+    if (weddingCreationsQuery.isLoading && !weddingCreationsQuery.data) {
       setLoadingImages(true);
     }
-  }, [weddingCreationsQuery.data, weddingCreationsQuery.error, weddingCreationsQuery.isLoading]);
+  }, [weddingCreationsQuery.isLoading, weddingCreationsQuery.data]);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -1627,10 +1654,10 @@ const ImageGallery = () => {
               viewport={{ once: true }}
               transition={{ duration: 0.8 }}
             >
-              <h2 className="text-3xl font-serif font-bold mb-3" style={{ color: '#1a1a1a' }}>
+              <h2 className="text-3xl font-luxury font-normal mb-3" style={{ color: '#2c2d2a', letterSpacing: '-0.02em' }}>
                 Our Wedding Creations
               </h2>
-              <p className="text-sm text-gray-600 max-w-2xl mx-auto">
+              <p className="text-sm text-foreground max-w-2xl mx-auto">
                 Swipe to explore our stunning arrangements
               </p>
             </motion.div>
@@ -1713,7 +1740,7 @@ const ImageGallery = () => {
 
             {/* Grid view for quick access */}
             <div className="mt-8">
-              <p className="text-xs text-gray-500 text-center mb-4">Quick View</p>
+              <p className="text-xs text-foreground text-center mb-4">Quick View</p>
               <div className="grid grid-cols-4 gap-2">
                 {weddingImages.slice(0, 4).map((image, index) => (
                   <div
@@ -1762,7 +1789,7 @@ const ImageGallery = () => {
       <section className="relative py-12 sm:py-16 md:py-24 lg:py-32 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center py-12">
-            <Loader2 className="w-8 h-8 animate-spin text-gray-400 mx-auto" />
+            <Loader2 className="w-8 h-8 animate-spin text-foreground mx-auto" />
           </div>
         </div>
       </section>
@@ -1773,7 +1800,7 @@ const ImageGallery = () => {
     return (
       <section className="relative py-12 sm:py-16 md:py-24 lg:py-32 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center py-12 text-gray-500">
+          <div className="text-center py-12 text-foreground">
             <p>No wedding creation photos available at the moment.</p>
           </div>
         </div>
@@ -1793,15 +1820,20 @@ const ImageGallery = () => {
             transition={{ duration: 0.8 }}
           >
             <h2
-              className="font-luxury text-6xl md:text-8xl font-bold mb-3 sm:mb-4 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 bg-clip-text text-transparent relative uppercase"
+              className="font-luxury text-6xl md:text-8xl font-normal mb-3 sm:mb-4 relative uppercase"
               style={{
+                background: 'linear-gradient(135deg, #2c2d2a 0%, #3D3027 50%, #2c2d2a 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
                 filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))',
-                letterSpacing: '0.05em'
+                letterSpacing: '-0.02em',
+                lineHeight: '1.2em'
               }}
             >
               OUR WEDDING CREATIONS
             </h2>
-            <p className="text-base md:text-lg lg:text-xl text-gray-600 max-w-2xl mx-auto px-2">
+            <p className="text-base md:text-lg lg:text-xl text-foreground max-w-2xl mx-auto px-2">
               Explore our stunning wedding floral arrangements and decorations
             </p>
           </motion.div>
@@ -1831,7 +1863,7 @@ const ImageGallery = () => {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 <div className="absolute bottom-0 left-0 right-0 p-4 transform translate-y-full group-hover:translate-y-0 transition-transform duration-500">
-                  <p className="text-white text-sm font-semibold">View Details</p>
+                  <p className="text-white text-sm font-normal" style={{ fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>View Details</p>
                 </div>
               </div>
             ))}
@@ -1922,15 +1954,20 @@ const ContactSection = () => {
                 </motion.div>
 
                 <h2
-                  className={`${isMobile ? 'text-4xl sm:text-5xl' : 'text-5xl md:text-7xl lg:text-8xl'} font-luxury font-bold mb-3 sm:mb-4 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 bg-clip-text text-transparent relative uppercase`}
+                  className={`${isMobile ? 'text-4xl sm:text-5xl' : 'text-5xl md:text-7xl lg:text-8xl'} font-luxury font-normal mb-3 sm:mb-4 relative uppercase`}
                   style={{
+                    background: 'linear-gradient(135deg, #2c2d2a 0%, #3D3027 50%, #2c2d2a 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
                     filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))',
-                    letterSpacing: '0.05em'
+                    letterSpacing: '-0.02em',
+                    lineHeight: '1.2em'
                   }}
                 >
                   READY TO BEGIN YOUR JOURNEY?
                 </h2>
-                <p className={`${isMobile ? 'text-sm sm:text-base' : 'text-base md:text-lg lg:text-xl'} text-gray-600 mb-6 sm:mb-8`}>
+                <p className={`${isMobile ? 'text-sm sm:text-base' : 'text-base md:text-lg lg:text-xl'} text-foreground mb-6 sm:mb-8`}>
                   Let's discuss how we can make your special day unforgettable
                 </p>
               </div>
@@ -1942,8 +1979,10 @@ const ContactSection = () => {
                 >
                   <Button
                     size="lg"
-                    className={`w-full ${isMobile ? 'text-sm sm:text-base px-6 py-5' : 'text-lg px-8 py-7'} font-semibold rounded-full shadow-xl hover:shadow-2xl transition-all duration-300`}
+                    className={`w-full ${isMobile ? 'text-sm sm:text-base px-6 py-5' : 'text-lg px-8 py-7'} font-normal rounded-full shadow-xl hover:shadow-2xl transition-all duration-300`}
                     style={{
+                      fontFamily: "'EB Garamond', serif",
+                      letterSpacing: '-0.02em',
                       background: `linear-gradient(135deg, ${GOLD_COLOR} 0%, rgba(199, 158, 72, 0.9) 100%)`,
                       color: 'white',
                     }}
@@ -1963,8 +2002,10 @@ const ContactSection = () => {
                   <Button
                     size="lg"
                     variant="outline"
-                    className={`w-full ${isMobile ? 'text-sm sm:text-base px-6 py-5' : 'text-lg px-8 py-7'} font-semibold rounded-full border-2 transition-all duration-300`}
+                    className={`w-full ${isMobile ? 'text-sm sm:text-base px-6 py-5' : 'text-lg px-8 py-7'} font-normal rounded-full border-2 transition-all duration-300`}
                     style={{
+                      fontFamily: "'EB Garamond', serif",
+                      letterSpacing: '-0.02em',
                       borderColor: GOLD_COLOR,
                       color: GOLD_COLOR,
                     }}
@@ -1981,7 +2022,7 @@ const ContactSection = () => {
               </div>
 
               <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-gray-200 text-center">
-                <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-gray-500`}>
+                <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-foreground`}>
                   We respond to all inquiries within 24 hours
                 </p>
               </div>
@@ -2028,10 +2069,18 @@ const WeddingAndEvents = () => {
     // Update on scroll - keep semi-transparent but more opaque when scrolled
     // Use requestAnimationFrame to throttle scroll events
     let rafId: number | null = null;
+    let isMounted = true; // Track if component is still mounted
+    
     const handleScroll = () => {
-      if (rafId) return; // Skip if already scheduled
+      if (rafId || !isMounted) return; // Skip if already scheduled or unmounted
       
       rafId = requestAnimationFrame(() => {
+        // Double-check mounted state and nav existence
+        if (!isMounted || !nav) {
+          rafId = null;
+          return;
+        }
+        
         const scrolled = window.scrollY > 50;
         nav.style.backgroundColor = scrolled
           ? `rgba(0, 0, 0, ${scrolledOpacity})`
@@ -2044,15 +2093,19 @@ const WeddingAndEvents = () => {
     handleScroll(); // Initial call
 
     return () => {
+      isMounted = false; // Mark as unmounted to prevent any pending callbacks
       if (rafId) {
         cancelAnimationFrame(rafId);
+        rafId = null;
       }
       window.removeEventListener('scroll', handleScroll);
       document.body.classList.remove('wedding-page');
-      // Reset navigation when leaving page
-      nav.style.backgroundColor = '';
-      nav.style.backdropFilter = '';
-      nav.style.transition = '';
+      // Reset navigation when leaving page - only if nav still exists
+      if (nav && nav.parentNode) {
+        nav.style.backgroundColor = '';
+        nav.style.backdropFilter = '';
+        nav.style.transition = '';
+      }
     };
   }, []);
 

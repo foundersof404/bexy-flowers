@@ -177,11 +177,12 @@ const UltraHero = () => {
               style={{ willChange: shouldReduceMotion || isMobile ? "auto" : "transform, opacity" }}
             >
               <motion.h1
-                className={`${isMobile ? 'font-luxury text-[clamp(1.6rem,7vw,2.6rem)]' : 'font-luxury text-3xl md:text-4xl lg:text-5xl xl:text-6xl'} font-bold mb-3 text-slate-800 relative`}
+                className={`${isMobile ? 'font-luxury text-[clamp(1.6rem,7vw,2.6rem)]' : 'font-luxury text-3xl md:text-4xl lg:text-5xl xl:text-6xl'} font-bold mb-3 relative`}
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: shouldReduceMotion || isMobile ? 0 : 0.8, delay: shouldReduceMotion || isMobile ? 0 : 0.4 }}
                 style={{
+                  color: '#2c2d2a',
                   filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.08))',
                   letterSpacing: '0.02em',
                   lineHeight: '1.2'
@@ -371,8 +372,9 @@ const UltraHero = () => {
                   style={{ willChange: shouldReduceMotion || isMobile ? "auto" : "transform, opacity" }}
                 >
                   <span
-                    className={`inline-block ${isMobile ? 'text-slate-800 font-medium drop-shadow-sm' : 'text-slate-800 font-medium drop-shadow-md'}`}
+                    className={`inline-block font-medium ${isMobile ? 'drop-shadow-sm' : 'drop-shadow-md'}`}
                     style={{
+                      color: '#2c2d2a',
                       fontSize: isMobile ? 'clamp(0.95rem, 3.5vw, 1.15rem)' : undefined,
                       lineHeight: isMobile ? '1.6' : '1.5',
                       textShadow: isMobile
@@ -904,7 +906,8 @@ const UltraHero = () => {
           </motion.div>
 
           <motion.div
-            className="absolute bottom-0 left-1/2 transform -translate-x-1/2 z-20 flex flex-col items-center gap-4 text-black text-[0.98rem] cursor-pointer"
+            className="absolute bottom-0 left-1/2 transform -translate-x-1/2 z-20 flex flex-col items-center gap-4 text-[0.98rem] cursor-pointer"
+            style={{ color: '#2c2d2a' }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 1.4 }}

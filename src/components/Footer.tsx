@@ -39,7 +39,8 @@ const Footer = () => {
             viewport={{ once: true }}
           >
             <h3 
-              className="font-luxury text-3xl font-bold text-primary"
+              className="font-luxury text-3xl font-normal text-primary"
+              style={{ letterSpacing: '-0.02em' }}
               style={{ fontFamily: "'EB Garamond', serif" }}
             >
               Bexy Flowers
@@ -61,7 +62,7 @@ const Footer = () => {
             transition={{ duration: 0.6, delay: 0.1 }}
             viewport={{ once: true }}
           >
-            <h4 className="font-luxury text-xl font-semibold text-primary">Quick Links</h4>
+            <h4 className="font-luxury text-xl font-normal text-primary" style={{ letterSpacing: '-0.02em' }}>Quick Links</h4>
             <ul className="space-y-2 font-body">
               <li><a href="/collection" className="text-background/80 hover:text-primary transition-colors">Shop All</a></li>
               <li><a href="/customize" className="text-background/80 hover:text-primary transition-colors">Custom Bouquets</a></li>
@@ -79,7 +80,7 @@ const Footer = () => {
             transition={{ duration: 0.6, delay: 0.2 }}
             viewport={{ once: true }}
           >
-            <h4 className="font-luxury text-xl font-semibold text-primary">Customer Service</h4>
+            <h4 className="font-luxury text-xl font-normal text-primary" style={{ letterSpacing: '-0.02em' }}>Customer Service</h4>
             <ul className="space-y-2 font-body">
               <li><a href="#" className="text-background/80 hover:text-primary transition-colors">Delivery Info</a></li>
               <li><a href="#" className="text-background/80 hover:text-primary transition-colors">Care Guide</a></li>
@@ -97,7 +98,7 @@ const Footer = () => {
             transition={{ duration: 0.6, delay: 0.3 }}
             viewport={{ once: true }}
           >
-            <h4 className="font-luxury text-xl font-semibold text-primary">Get In Touch</h4>
+            <h4 className="font-luxury text-xl font-normal text-primary" style={{ letterSpacing: '-0.02em' }}>Get In Touch</h4>
             <div className="flex flex-col gap-3 font-body">
               <div className="flex items-center space-x-3">
                 <Phone className="w-4 h-4 text-primary" />

@@ -329,14 +329,14 @@ const CartPage: React.FC = () => {
             className="text-center max-w-md mx-auto"
           >
             <div className="mb-8">
-              <ShoppingBag className="w-24 h-24 text-slate-300 mx-auto mb-4" />
+              <ShoppingBag className="w-24 h-24 mx-auto mb-4" style={{ color: '#2c2d2a' }} />
             </div>
             
-            <h2 className="font-luxury text-3xl font-bold text-slate-800 mb-4">
+            <h2 className="font-luxury text-3xl font-normal mb-4" style={{ color: '#2c2d2a', letterSpacing: '-0.02em' }}>
               Your cart is empty
             </h2>
             
-            <p className="text-slate-600 mb-8 font-body">
+            <p className="mb-8 font-body" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>
               Looks like you haven't added any beautiful arrangements to your cart yet. 
               Start shopping to find the perfect flowers for your special moments.
             </p>
@@ -344,7 +344,8 @@ const CartPage: React.FC = () => {
             <Button
               type="button"
               onClick={handleContinueShopping}
-              className="bg-gradient-to-r from-amber-400 to-amber-600 hover:from-amber-500 hover:to-amber-700 text-white font-semibold px-8 py-3 rounded-full"
+              className="bg-gradient-to-r from-amber-400 to-amber-600 hover:from-amber-500 hover:to-amber-700 text-white font-normal px-8 py-3 rounded-full"
+              style={{ fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Continue Shopping
@@ -370,10 +371,10 @@ const CartPage: React.FC = () => {
           className="flex items-center justify-between mb-8"
         >
           <div>
-            <h1 className="font-luxury text-4xl sm:text-5xl font-bold text-slate-800 mb-2">
+            <h1 className="font-luxury text-4xl sm:text-5xl font-normal mb-2" style={{ color: '#2c2d2a', letterSpacing: '-0.02em' }}>
               Shopping Cart
             </h1>
-            <p className="text-slate-600 font-body">
+            <p className="font-body" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>
               {cartItems.length} {cartItems.length === 1 ? 'item' : 'items'} in your cart
             </p>
           </div>
@@ -382,7 +383,8 @@ const CartPage: React.FC = () => {
             type="button"
             onClick={handleContinueShopping}
             variant="outline"
-            className="border-slate-300 text-slate-700 hover:bg-slate-50"
+            className="border-slate-300 hover:bg-slate-50"
+            style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif" }}
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Continue Shopping
@@ -391,7 +393,7 @@ const CartPage: React.FC = () => {
 
         {/* TEST BUTTON - to verify buttons work on this page */}
         <div className="mb-4 p-4 bg-yellow-100 border-2 border-yellow-500 rounded">
-          <p className="text-sm font-bold mb-2">DEBUG: Test if buttons work on this page</p>
+          <p className="text-sm font-normal mb-2" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif" }}>DEBUG: Test if buttons work on this page</p>
           <button
             type="button"
             onClick={() => {
@@ -427,22 +429,22 @@ const CartPage: React.FC = () => {
 
                     {/* Product Details */}
                     <div className="flex-1 text-center sm:text-left">
-                      <h3 className="font-luxury text-lg font-bold text-slate-800 mb-1">
+                      <h3 className="font-luxury text-lg font-normal mb-1" style={{ color: '#2c2d2a', letterSpacing: '-0.02em' }}>
                         {item.title}
                       </h3>
-                      <p className="text-slate-600 font-body text-sm">
+                      <p className="font-body text-sm" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif" }}>
                         ${item.price} each
                       </p>
                       {item.size && (
                         <div className="mt-2">
-                          <span className="inline-block bg-amber-100 text-amber-800 text-xs font-semibold px-2 py-1 rounded-full">
+                          <span className="inline-block bg-amber-100 text-xs font-normal px-2 py-1 rounded-full" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif" }}>
                             Size: {item.size}
                           </span>
                         </div>
                       )}
                       {item.description && (
                         <div className="mt-2">
-                          <p className="text-slate-500 text-xs italic max-w-md">
+                          <p className="text-xs italic max-w-md" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif" }}>
                             "{item.description}"
                           </p>
                         </div>
@@ -452,17 +454,17 @@ const CartPage: React.FC = () => {
                     {/* Quantity and Price */}
                     <div className="flex flex-col sm:flex-row items-center gap-4">
                       <div className="text-center">
-                        <p className="text-sm text-slate-600 mb-1">Quantity</p>
+                        <p className="text-sm mb-1" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif" }}>Quantity</p>
                         <div className="flex items-center gap-2">
-                          <span className="font-luxury text-lg font-bold text-slate-800">
+                          <span className="font-luxury text-lg font-normal" style={{ color: '#2c2d2a', letterSpacing: '-0.02em' }}>
                             {item.quantity}
                           </span>
                         </div>
                       </div>
 
                       <div className="text-center">
-                        <p className="text-sm text-slate-600 mb-1">Subtotal</p>
-                        <p className="font-luxury text-lg font-bold text-amber-700">
+                        <p className="text-sm mb-1" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif" }}>Subtotal</p>
+                        <p className="font-luxury text-lg font-normal" style={{ color: '#C79E48', letterSpacing: '-0.02em' }}>
                           ${(item.price * item.quantity).toFixed(2)}
                         </p>
                       </div>
@@ -491,28 +493,28 @@ const CartPage: React.FC = () => {
             className="lg:col-span-1"
           >
             <Card className="p-6 bg-white/60 backdrop-blur-sm border border-white/30 sticky top-8" style={{ position: 'relative', zIndex: 10 }}>
-              <h3 className="font-luxury text-2xl font-bold text-slate-800 mb-6">
+              <h3 className="font-luxury text-2xl font-normal mb-6" style={{ color: '#2c2d2a', letterSpacing: '-0.02em' }}>
                 Order Summary
               </h3>
 
               <div className="space-y-4 mb-6">
-                <div className="flex justify-between text-slate-600">
+                <div className="flex justify-between" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif" }}>
                   <span>Subtotal ({cartItems.length} items)</span>
                   <span>${totalPrice.toFixed(2)}</span>
                 </div>
                 
-                <div className="flex justify-between text-slate-600">
+                <div className="flex justify-between" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif" }}>
                   <span>Shipping</span>
                   <span className="text-green-600">Free</span>
                 </div>
                 
-                <div className="flex justify-between text-slate-600">
+                <div className="flex justify-between" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif" }}>
                   <span>Tax</span>
                   <span>${(totalPrice * 0.08).toFixed(2)}</span>
                 </div>
                 
                 <div className="border-t border-slate-200 pt-4">
-                  <div className="flex justify-between font-luxury text-xl font-bold text-slate-800">
+                  <div className="flex justify-between font-luxury text-xl font-normal" style={{ color: '#2c2d2a', letterSpacing: '-0.02em' }}>
                     <span>Total</span>
                     <span>${(totalPrice * 1.08).toFixed(2)}</span>
                   </div>
@@ -545,7 +547,8 @@ const CartPage: React.FC = () => {
                     console.log('👆 onTouchEnd fired');
                     e.preventDefault();
                   }}
-                  className="w-full bg-gradient-to-r from-amber-400 to-amber-600 hover:from-amber-500 hover:to-amber-700 text-white font-semibold py-6 rounded-full"
+                  className="w-full bg-gradient-to-r from-amber-400 to-amber-600 hover:from-amber-500 hover:to-amber-700 text-white font-normal py-6 rounded-full"
+                  style={{ fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}
                   style={{ 
                     position: 'relative', 
                     zIndex: 1000,
@@ -568,7 +571,7 @@ const CartPage: React.FC = () => {
                 </Button>
               </div>
 
-              <p className="text-xs text-slate-500 text-center mt-4">
+              <p className="text-xs text-center mt-4" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif" }}>
                 Secure checkout powered by our trusted payment partners
               </p>
             </Card>

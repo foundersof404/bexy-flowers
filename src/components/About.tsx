@@ -293,14 +293,19 @@ const About = () => {
         >
           {/* Luxury Typography with Gold Accent */}
           <motion.h1 
-            className="font-luxury text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-8xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 bg-clip-text text-transparent relative px-2"
+            className="font-luxury text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-8xl font-normal mb-4 sm:mb-6 relative px-2"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
             viewport={{ once: true }}
             style={{
+              background: 'linear-gradient(135deg, #2c2d2a 0%, #3D3027 50%, #2c2d2a 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
               filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))',
-              letterSpacing: '0.05em'
+              letterSpacing: '-0.02em',
+              lineHeight: '1.2em'
             }}
           >
             THE ART OF FLORAL COUTURE
@@ -321,7 +326,7 @@ const About = () => {
           </div>
 
           <motion.p 
-            className="font-body text-sm sm:text-base md:text-lg lg:text-xl text-slate-600 max-w-4xl mx-auto leading-relaxed font-light px-4" 
+            className="font-body text-sm sm:text-base md:text-lg lg:text-xl text-foreground max-w-4xl mx-auto leading-relaxed font-light px-4" 
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
@@ -367,7 +372,7 @@ const About = () => {
           >
             <div className="text-center lg:text-left">
               <motion.h2 
-                className="font-luxury text-3xl md:text-4xl font-bold text-slate-800 mb-3" 
+                className="font-luxury text-3xl md:text-4xl font-normal text-foreground mb-3" 
                 variants={headingReveal}
               >
                 Our Story
@@ -382,7 +387,7 @@ const About = () => {
             </div>
 
             {/* SUGGESTION: More personal and compelling story */}
-            <div className="flex flex-col gap-4 md:gap-6 text-slate-700 text-sm sm:text-base md:text-lg leading-relaxed px-2 md:px-0" style={{ fontFamily: 'Inter, ui-sans-serif, system-ui', lineHeight: 1.8 }}>
+            <div className="flex flex-col gap-4 md:gap-6 text-sm sm:text-base md:text-lg leading-relaxed px-2 md:px-0" style={{ fontFamily: "'EB Garamond', serif", lineHeight: 1.8, color: '#2c2d2a' }}>
               <motion.p variants={paragraphReveal}>
                 Born in 2024 from a <span className="font-medium" style={{ color: 'rgb(201, 161, 78)' }}>family legacy</span> of over <span className="font-medium" style={{ color: 'rgb(201, 161, 78)' }}>25 years</span> in floral design, Bexy Flowers introduced a dream to Lebanon: the country's first <span className="font-medium" style={{ color: 'rgb(201, 161, 78)' }}>glitter flower boutique</span>. We blend time-honored techniques with a spark of <span className="font-medium" style={{ color: 'rgb(201, 161, 78)' }}>modern magic</span>.
               </motion.p>
@@ -396,20 +401,20 @@ const About = () => {
 
             <div className="grid sm:grid-cols-2 gap-4 sm:gap-6 pt-2 items-stretch">
               <div className="p-6 rounded-2xl bg-white/80 backdrop-blur border border-amber-100/60 shadow-sm transition-transform duration-300 hover:-translate-y-1 hover:shadow-[0_12px_30px_rgba(198,157,72,0.18)]">
-                <div className="flex items-center gap-2 font-semibold text-slate-800 mb-2" style={{ fontFamily: 'Inter, ui-sans-serif, system-ui' }}>
+                <div className="flex items-center gap-2 font-normal text-foreground mb-2" style={{ fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#C69D48" strokeWidth="1.5" className="w-5 h-5"><path d="M12 2l3 7h7l-5.5 4 2 7L12 17l-6.5 3 2-7L2 9h7l3-7z"/></svg>
                   Our Mission
                 </div>
-                <div className="text-slate-600 text-sm leading-relaxed" style={{ fontFamily: 'Inter, ui-sans-serif, system-ui' }}>
+                <div className="text-foreground text-sm leading-relaxed" style={{ fontFamily: "'EB Garamond', serif" }}>
                   To craft breathtaking floral narratives that turn your cherished moments into unforgettable memories.
                 </div>
               </div>
               <div className="p-6 rounded-2xl bg-white/80 backdrop-blur border border-amber-100/60 shadow-sm transition-transform duration-300 hover:-translate-y-1 hover:shadow-[0_12px_30px_rgba(198,157,72,0.18)]">
-                <div className="flex items-center gap-2 font-semibold text-slate-800 mb-2" style={{ fontFamily: 'Inter, ui-sans-serif, system-ui' }}>
+                <div className="flex items-center gap-2 font-normal text-foreground mb-2" style={{ fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#C69D48" strokeWidth="1.5" className="w-5 h-5"><path d="M8 5l4-3 4 3 3 4-3 4-4 3-4-3-3-4 3-4z"/></svg>
                   Our Vision
                 </div>
-                <div className="text-slate-600 text-sm leading-relaxed" style={{ fontFamily: 'Inter, ui-sans-serif, system-ui' }}>
+                <div className="text-foreground text-sm leading-relaxed" style={{ fontFamily: "'EB Garamond', serif" }}>
                   To be Lebanon's most sought-after floral couturier, celebrated for our pioneering designs and artistry.
                 </div>
               </div>
@@ -450,11 +455,11 @@ const About = () => {
               >
                 {stat.icon}
               </motion.div>
-              <div className="font-luxury text-xl sm:text-2xl font-bold text-slate-800 mb-1 sm:mb-2">
+              <div className="font-luxury text-xl sm:text-2xl font-normal text-foreground mb-1 sm:mb-2">
                 <span className="text-2xl sm:text-3xl md:text-4xl" style={{ fontFamily: 'EB Garamond, serif' }}>{stat.number}</span>
                 <span className="text-amber-500 text-2xl md:text-3xl">{stat.suffix}</span>
               </div>
-              <div className="text-xs sm:text-sm text-slate-600 font-medium">
+              <div className="text-xs sm:text-sm text-foreground font-medium">
                 {stat.label}
               </div>
             </motion.div>
@@ -477,7 +482,7 @@ const About = () => {
             }}
             className="text-center mb-10 sm:mb-12 md:mb-16"
           >
-            <h2 className="font-luxury text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-slate-900 mb-3 sm:mb-4 px-2">
+            <h2 className="font-luxury text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-normal text-foreground mb-3 sm:mb-4 px-2" style={{ letterSpacing: '-0.02em' }}>
               Our Core Values
             </h2>
             <div className="w-24 h-1 mx-auto bg-gradient-to-r from-transparent via-amber-400 to-transparent"></div>
@@ -573,7 +578,7 @@ const About = () => {
                   </motion.div>
                   
                   <motion.h3 
-                    className="font-luxury text-xl sm:text-2xl font-bold text-slate-900"
+                    className="font-luxury text-xl sm:text-2xl font-normal text-foreground"
                 whileHover={{ x: 5 }}
                 transition={{ duration: 0.2 }}
               >
@@ -583,8 +588,8 @@ const About = () => {
 
                 {/* Description */}
                 <motion.p 
-                  className="relative z-10 text-slate-600 leading-relaxed text-base"
-                  style={{ fontFamily: 'Inter, ui-sans-serif, system-ui' }}
+                  className="relative z-10 text-foreground leading-relaxed text-base"
+                  style={{ fontFamily: "'EB Garamond', serif" }}
                 >
                   {v.body}
                 </motion.p>
@@ -620,7 +625,7 @@ const About = () => {
           
           <div className="relative z-10 text-center p-6 sm:p-8 md:p-12 lg:p-16 rounded-2xl sm:rounded-3xl border-2 border-amber-100/60 backdrop-blur-sm">
             <motion.h2 
-              className="font-luxury text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-slate-900 mb-4 sm:mb-6 px-2"
+              className="font-luxury text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-4 sm:mb-6 px-2"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
@@ -630,7 +635,7 @@ const About = () => {
             </motion.h2>
             
             <motion.p 
-              className="text-slate-600 max-w-2xl mx-auto mb-6 sm:mb-8 md:mb-10 text-sm sm:text-base md:text-lg leading-relaxed px-4"
+              className="text-foreground max-w-2xl mx-auto mb-6 sm:mb-8 md:mb-10 text-sm sm:text-base md:text-lg leading-relaxed px-4"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
@@ -682,7 +687,7 @@ const About = () => {
               
             <motion.a 
               href="/contact" 
-                className="group relative px-6 sm:px-8 md:px-10 py-3 sm:py-4 bg-white/90 backdrop-blur-md border-2 border-amber-300 text-slate-800 font-semibold rounded-full shadow-lg overflow-hidden text-sm sm:text-base touch-target min-h-[44px] sm:min-h-[auto]"
+                className="group relative px-6 sm:px-8 md:px-10 py-3 sm:py-4 bg-white/90 backdrop-blur-md border-2 border-amber-300 text-foreground font-semibold rounded-full shadow-lg overflow-hidden text-sm sm:text-base touch-target min-h-[44px] sm:min-h-[auto]"
                 whileHover={{ 
                   scale: 1.05,
                   backgroundColor: 'rgba(255, 255, 255, 1)',

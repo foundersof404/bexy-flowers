@@ -59,7 +59,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => {
 
         {/* Product Details */}
         <div className="p-4 sm:p-6">
-          <h3 className="font-luxury text-lg sm:text-xl font-bold text-slate-800 mb-2 group-hover:text-amber-700 transition-colors duration-300">
+          <h3 className="font-luxury text-lg sm:text-xl font-normal mb-2 transition-colors duration-300" style={{ color: '#2c2d2a', letterSpacing: '-0.02em' }}>
             {product.title}
           </h3>
           
@@ -73,7 +73,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => {
           )}
           
           {'description' in product && product.description && (
-            <p className="text-slate-500 text-xs italic mb-3 line-clamp-2">
+            <p className="text-xs italic mb-3 line-clamp-2" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif" }}>
               "{product.description}"
             </p>
           )}
