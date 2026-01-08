@@ -488,16 +488,19 @@ export function buildAdvancedPrompt(options: PromptBuilderOptions): BuiltPrompt 
   const sortedFlowers = [...flowers].sort((a, b) => b.quantity - a.quantity);
   const flowerDescriptions: string[] = [];
   
-  // Track unique colors for strict color enforcement
+  // Track unique colors and flower types for strict enforcement
   const uniqueColors = new Set<string>();
+  const uniqueFlowerTypes = new Set<string>();
+  const isMixAndMatch = flowers.length > 1;
   
   sortedFlowers.forEach(f => {
     const colorName = f.flower.colorName.toLowerCase();
     const flowerFamily = f.flower.family.toLowerCase();
     const qty = f.quantity;
     
-    // Track this color
+    // Track this color and flower type
     uniqueColors.add(colorName);
+    uniqueFlowerTypes.add(flowerFamily);
     
     // Get detailed visual for this flower type
     const visual = FLOWER_VISUALS[flowerFamily];
@@ -505,10 +508,10 @@ export function buildAdvancedPrompt(options: PromptBuilderOptions): BuiltPrompt 
     
     if (visual && qty > 0) {
       // Include bloom shape and petal style for realistic rendering
-      // STRICT COLOR: Emphasize the exact color multiple times
-      flowerDescriptions.push(`exactly ${qty} ${colorVisual} colored ${flowerFamily} flowers only, all ${colorName} color`);
+      // STRICT: Emphasize exact quantity, color and flower type
+      flowerDescriptions.push(`exactly ${qty} ${colorVisual} ${flowerFamily} (${visual.bloomShape}, ${visual.petalStyle})`);
     } else if (qty > 0) {
-      flowerDescriptions.push(`exactly ${qty} ${colorVisual} colored ${flowerFamily} flowers only, all ${colorName} color`);
+      flowerDescriptions.push(`exactly ${qty} ${colorVisual} ${flowerFamily}`);
     }
   });
   
@@ -516,10 +519,22 @@ export function buildAdvancedPrompt(options: PromptBuilderOptions): BuiltPrompt 
   
   // Build strict color enforcement text
   const colorList = Array.from(uniqueColors);
+  const flowerTypeList = Array.from(uniqueFlowerTypes);
   const isSingleColor = colorList.length === 1;
-  const colorEnforcement = isSingleColor 
-    ? `IMPORTANT: ALL flowers must be exactly ${colorList[0]} color only, no other colors, no pink, no white, no variations, uniform ${colorList[0]} color throughout`
-    : `flowers in these exact colors only: ${colorList.join(', ')}, no other colors`;
+  
+  // Enhanced enforcement for mix & match - MUST include ALL selected flower types
+  let colorEnforcement: string;
+  if (isMixAndMatch) {
+    // MIX & MATCH: Strictly enforce ALL selected flower types and colors
+    const flowerBreakdown = sortedFlowers.map(f => 
+      `${f.quantity} ${f.flower.colorName.toLowerCase()} ${f.flower.family.toLowerCase()}`
+    ).join(', ');
+    colorEnforcement = `CRITICAL MIX & MATCH: arrangement MUST contain ALL of these flowers visible: ${flowerBreakdown}. Each flower type MUST be clearly visible and distinguishable. Do NOT substitute or omit any flower type.`;
+  } else if (isSingleColor) {
+    colorEnforcement = `IMPORTANT: ALL flowers must be exactly ${colorList[0]} color only, no other colors, no pink, no white, no variations, uniform ${colorList[0]} color throughout`;
+  } else {
+    colorEnforcement = `flowers in these exact colors only: ${colorList.join(', ')}, no other colors`;
+  }
   
   // Build PRECISE prompt focused on user inputs only
   // Pollinations Flux model works best with clear, structured descriptions

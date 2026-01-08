@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Box, Gift, Check, CheckCircle2, Wand2, Plus, Minus, X, Info, ChevronRight, Palette, ShoppingCart, Circle, Square, Heart, Download, MessageCircle, Sparkles, ArrowRight, Star, Crown, GraduationCap, Heart as HeartIcon, Candy, Eye, EyeOff, History, BookmarkPlus, Bookmark, RefreshCw, Loader2 } from "lucide-react";
+import { Box, Gift, Check, CheckCircle2, Wand2, Plus, Minus, X, Info, ChevronRight, Palette, ShoppingCart, Circle, Square, Heart, Download, MessageCircle, Sparkles, ArrowRight, Star, Crown, GraduationCap, Heart as HeartIcon, Candy, Eye, EyeOff, History, BookmarkPlus, Bookmark, RefreshCw, Loader2, Edit3 } from "lucide-react";
 import UltraNavigation from "@/components/UltraNavigation";
 import { useCart } from "@/contexts/CartContext";
 import { toast } from "sonner";
@@ -173,6 +173,10 @@ const Customize: React.FC = () => {
   const [favorites, setFavorites] = useState<PromptHistoryEntry[]>([]);
   const [variationIndex, setVariationIndex] = useState(0);
   const [lastGeneratedPrompt, setLastGeneratedPrompt] = useState<string | null>(null);
+  
+  // Editable prompt state
+  const [isEditingPrompt, setIsEditingPrompt] = useState(false);
+  const [customPrompt, setCustomPrompt] = useState<string>('');
 
   // Cleanup blob URLs
   useEffect(() => {
@@ -678,6 +682,55 @@ const Customize: React.FC = () => {
       setIsGenerating(false);
       setGenerationProgress(null);
     }
+  };
+
+  // Generate with custom edited prompt
+  const generateWithCustomPrompt = async () => {
+    if (!customPrompt.trim()) {
+      toast.error("Please enter a prompt");
+      return;
+    }
+
+    setIsGenerating(true);
+    setGeneratedImage(null);
+    setGenerationProgress(null);
+
+    try {
+      toast.loading("Generating with custom prompt...", { id: 'custom-generating-toast' });
+      
+      const result = await generateImage(customPrompt, {
+        width: 1024,
+        height: 1024,
+        enhancePrompt: true,
+        negativePrompt: currentPrompt?.negative || '',
+        useCache: false,
+        onProgress: (stage) => setGenerationProgress(stage)
+      });
+
+      if (generatedImage && generatedImage.startsWith('blob:')) {
+        URL.revokeObjectURL(generatedImage);
+      }
+      
+      setGeneratedImage(result.imageUrl);
+      setLastGeneratedPrompt(customPrompt);
+      setVariationIndex(0);
+      setIsEditingPrompt(false);
+      toast.success("Custom preview generated!", { id: 'custom-generating-toast' });
+    } catch (error) {
+      toast.dismiss('custom-generating-toast');
+      toast.error("Could not generate preview");
+    } finally {
+      setIsGenerating(false);
+      setGenerationProgress(null);
+    }
+  };
+
+  // Open prompt editor with current prompt
+  const openPromptEditor = () => {
+    if (currentPrompt) {
+      setCustomPrompt(currentPrompt.positive);
+    }
+    setIsEditingPrompt(true);
   };
 
   // Toggle favorite for current configuration
@@ -1793,6 +1846,65 @@ const Customize: React.FC = () => {
                 {isGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wand2 className="w-4 h-4" />}
                 {isGenerating ? (generationProgress ? progressLabels[generationProgress] : "Generating...") : generatedImage ? "Regenerate" : "Generate Preview"}
               </button>
+
+              {/* Edit Prompt Button */}
+              {step3Complete && !isGenerating && (
+                <button
+                  onClick={openPromptEditor}
+                  className="w-full py-2.5 rounded-xl font-medium text-sm transition-all mb-2 flex items-center justify-center gap-2 border border-gray-300 hover:border-[#C79E48] hover:bg-[#C79E48]/5 text-gray-700"
+                >
+                  <Edit3 className="w-4 h-4" />
+                  Edit Prompt
+                </button>
+              )}
+
+              {/* Editable Prompt Panel */}
+              <AnimatePresence>
+                {isEditingPrompt && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="mb-4 overflow-hidden"
+                  >
+                    <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-semibold text-sm text-gray-900">Custom Prompt</h4>
+                        <button
+                          onClick={() => setIsEditingPrompt(false)}
+                          className="text-gray-400 hover:text-gray-600"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                      <textarea
+                        value={customPrompt}
+                        onChange={(e) => setCustomPrompt(e.target.value)}
+                        placeholder="Enter your custom prompt..."
+                        className="w-full h-32 p-3 text-xs rounded-lg border border-gray-300 focus:border-[#C79E48] focus:ring-1 focus:ring-[#C79E48] resize-none"
+                      />
+                      <div className="flex gap-2 mt-3">
+                        <button
+                          onClick={() => {
+                            if (currentPrompt) setCustomPrompt(currentPrompt.positive);
+                          }}
+                          className="flex-1 py-2 text-xs font-medium rounded-lg border border-gray-300 hover:bg-gray-100 text-gray-600"
+                        >
+                          Reset to Original
+                        </button>
+                        <button
+                          onClick={generateWithCustomPrompt}
+                          disabled={isGenerating || !customPrompt.trim()}
+                          className="flex-1 py-2 text-xs font-bold rounded-lg bg-[#C79E48] text-white hover:bg-[#b08d45] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1"
+                        >
+                          <Wand2 className="w-3 h-3" />
+                          Generate
+                        </button>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
               {/* Variation Button */}
               {generatedImage && !isGenerating && (
