@@ -1,7 +1,67 @@
 # AI Image Generation Improvements - Summary
 
 ## Overview
-This document summarizes the improvements made to enhance the accuracy of AI-generated flower bouquet images using the Pollinations AI (Flux model) system.
+This document summarizes the improvements made to enhance the accuracy of AI-generated flower bouquet images using the Pollinations AI system.
+
+---
+
+## 🔴 CRITICAL UPDATE: Model Change (Jan 2026)
+
+### Problem Identified
+The `flux` model produced **3D render-like results** instead of photorealistic images. Results looked synthetic/CGI, not like real florist photos.
+
+### Solution: Changed Model + Simplified Prompts
+
+#### 1. New Default Model: `gptimage`
+```typescript
+// aiConfig.ts
+model: 'gptimage', // Changed from 'flux' for realistic results
+```
+
+**Model Comparison:**
+| Model | ID | Cost | Best For |
+|-------|-----|------|----------|
+| GPT Image 1.5 | `gptimage-large` | $$$ | Highest quality, best text/logos |
+| Seedream 4.5 Pro | `seedream-pro` | $$ | High quality product photos |
+| **GPT Image 1 Mini** | `gptimage` | $ | **RECOMMENDED** - Best balance |
+| Seedream 4.0 | `seedream` | $ | Good quality, affordable |
+| SDXL Turbo | `turbo` | ¢ | Fast, decent quality |
+| Flux Schnell | `flux` | ¢ | Fast but looks synthetic |
+
+#### 2. Simplified Prompt Structure
+**Before (Flux-style):** Complex weighted keywords confuse GPT models
+```
+(exactly 22 red roses:1.3), (ALL flowers must be red:1.4)...
+```
+
+**After (Natural English):** Clean prompts work better with GPT Image
+```
+Professional product photo of a luxury white round hatbox.
+Contains 22 fully bloomed real fresh flowers: 22 red roses.
+Box has "BEXY FLOWERS" logo printed in gold on the front.
+```
+
+#### 3. Added Branding
+- "BEXY FLOWERS" logo explicitly in prompts
+- Gold logo on box front
+- "BEXY" tag on ribbon for wraps
+
+#### 4. Files Changed
+- `src/lib/api/aiConfig.ts` - Model changed to `gptimage`
+- `src/lib/api/promptEngine.ts` - New simplified prompt builder
+- `netlify/functions/generate-image.ts` - Added new model support
+- `netlify/functions/generate-image-secure.ts` - Added new model support
+
+#### 5. To Switch Models
+Edit `aiConfig.ts`:
+```typescript
+params: {
+  model: 'gptimage',        // Recommended
+  // model: 'gptimage-large', // Highest quality (more expensive)
+  // model: 'seedream-pro',   // Alternative high quality
+  // model: 'turbo',          // Budget option
+}
+```
 
 ---
 

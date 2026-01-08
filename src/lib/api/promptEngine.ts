@@ -486,19 +486,24 @@ export function buildAdvancedPrompt(options: PromptBuilderOptions): BuiltPrompt 
     withRibbon = false,
     accessories,
     includeNegative = true,
-    seed = Date.now(), // Default to current timestamp for unique generation
-    // New arrangement preferences
+    seed = Date.now(),
     arrangementStyle = 'dome',
     densityPreference = 'tight',
     bloomStage = 'full',
     flowerPositions = {}
   } = options;
 
-  // NOTE: stylePreset and template are IGNORED to prevent unrealistic images
-  // We focus ONLY on exact user inputs for accurate generation
-
   const totalFlowers = flowers.reduce((sum, f) => sum + f.quantity, 0);
   const isMixFlowers = flowers.length > 1;
+  
+  // ========================================
+  // SIMPLIFIED PROMPT BUILDER FOR GPT IMAGE
+  // ========================================
+  // GPT Image models work better with natural, simple prompts
+  // Avoid weighted keywords - they don't work with GPT models
+  // Keep prompts concise (under 600 chars for best results)
+  
+  return buildSimplifiedPrompt(options, totalFlowers, isMixFlowers);
   
   // Generate variation phrases based on seed to ensure each generation is unique
   // This prevents API-side caching from returning identical images
@@ -916,6 +921,144 @@ export function buildAdvancedPrompt(options: PromptBuilderOptions): BuiltPrompt 
     negative: negativePrompt,
     preview: previewParts.join('\n'),
     hash: generatePromptHash(options)
+  };
+}
+
+/**
+ * SIMPLIFIED PROMPT BUILDER
+ * Creates clean, natural prompts optimized for GPT Image models
+ * Much shorter and more effective than complex weighted prompts
+ */
+function buildSimplifiedPrompt(
+  options: PromptBuilderOptions,
+  totalFlowers: number,
+  isMixFlowers: boolean
+): BuiltPrompt {
+  const {
+    packageType,
+    boxShape,
+    size,
+    color,
+    flowers,
+    withGlitter,
+    withRibbon = false,
+    accessories,
+    includeNegative = true,
+    seed = Date.now(),
+    arrangementStyle = 'dome',
+    densityPreference = 'tight',
+    bloomStage = 'full',
+    flowerPositions = {}
+  } = options;
+  
+  // Build simple flower description
+  const flowerList = flowers.map(f => {
+    const colorName = f.flower.colorName.toLowerCase();
+    const flowerType = f.flower.family.toLowerCase();
+    const position = flowerPositions[f.flower.id];
+    if (isMixFlowers && position) {
+      const posText = position === 'center' ? 'in center' : 
+                      position === 'edges' ? 'around edges' : 
+                      position === 'accent' ? 'as accents' : 'throughout';
+      return `${f.quantity} ${colorName} ${flowerType} ${posText}`;
+    }
+    return `${f.quantity} ${colorName} ${flowerType}`;
+  }).join(', ');
+  
+  // Simple style descriptions
+  const styleText = arrangementStyle === 'dome' ? 'dome-shaped' : 
+                    arrangementStyle === 'flat' ? 'flat-top' : 'cascading';
+  const densityText = densityPreference === 'tight' ? 'tightly packed' : 
+                      densityPreference === 'airy' ? 'loosely arranged' : 'well-spaced';
+  const bloomText = bloomStage === 'full' ? 'fully bloomed' : 
+                    bloomStage === 'semi' ? 'semi-open' : 'mixed blooms';
+  
+  let prompt = '';
+  
+  if (packageType === 'box') {
+    const shape = boxShape || 'round';
+    const shapeText = shape === 'round' ? 'round hatbox' : 
+                      shape === 'heart' ? 'heart-shaped box' : 
+                      shape === 'square' ? 'square box' : 'rectangular box';
+    
+    // Clean, simple prompt for box arrangements
+    prompt = `Professional product photo of a luxury ${color} ${shapeText} flower arrangement. `;
+    prompt += `Contains ${totalFlowers} ${bloomText} real fresh flowers: ${flowerList}. `;
+    prompt += `Flowers arranged in ${styleText} formation, ${densityText}, filling the entire box. `;
+    prompt += `Box has "BEXY FLOWERS" logo printed in gold on the front. `;
+    
+    if (withRibbon) {
+      prompt += `Elegant satin ribbon wrapped around the middle of the box with a bow on front. `;
+    }
+    
+    if (withGlitter) {
+      prompt += `Fine glitter sparkle on flower petals. `;
+    }
+    
+    prompt += `White studio background, soft natural lighting, high-end florist photography. `;
+    prompt += `Real photograph, not 3D render, photorealistic.`;
+    
+  } else {
+    // Wrap/bouquet
+    const isHeartShape = boxShape === 'heart';
+    
+    prompt = `Professional product photo of a ${isHeartShape ? 'heart-shaped' : 'hand-tied'} flower bouquet. `;
+    prompt += `Contains ${totalFlowers} ${bloomText} real fresh flowers: ${flowerList}. `;
+    prompt += `Wrapped in elegant ${color} paper${isHeartShape ? ' arranged in heart shape' : ''}. `;
+    prompt += `Flowers ${densityText} in ${styleText} arrangement. `;
+    prompt += `Small "BEXY" gold tag on ribbon. `;
+    
+    if (withGlitter) {
+      prompt += `Fine glitter on petals. `;
+    }
+    
+    prompt += `White background, professional florist photography, photorealistic.`;
+  }
+  
+  // Add accessory mention if selected
+  if (accessories.length > 0) {
+    const accText = accessories.map(a => 
+      a === 'crown' ? 'small golden crown' : 
+      a === 'graduation-hat' ? 'tiny graduation cap' : 
+      a === 'bear' ? 'small teddy bear' : 'chocolate box'
+    ).join(', ');
+    prompt = prompt.replace('White', `With ${accText}. White`);
+  }
+  
+  // Simple negative prompt for GPT Image
+  const negativePrompt = includeNegative ? 
+    'blurry, low quality, 3D render, CGI, illustration, cartoon, anime, artificial flowers, fake flowers, plastic, synthetic, wilted, dead flowers, watermark, text overlay' : '';
+  
+  // Build preview
+  const flowerListSimple = flowers.map(f => `${f.quantity} ${f.flower.colorName} ${f.flower.family}`).join(', ');
+  const wrapShapeDisplay = packageType === 'wrap' && boxShape === 'heart' ? 'Heart-Shaped Bouquet' : 'Wrapped Bouquet';
+  const boxDisplay = packageType === 'box' ? `${boxShape || 'Round'} Box${withRibbon ? ' with Ribbon' : ''}` : wrapShapeDisplay;
+  const previewParts: string[] = [
+    `📦 ${boxDisplay} (${size}, ${color})`,
+    `🌸 ${totalFlowers} flowers: ${flowerListSimple}`,
+    `🎨 Style: ${styleText}, ${densityText}`,
+  ];
+  if (withGlitter) previewParts.push('✨ With glitter');
+  if (accessories.length > 0) previewParts.push(`🎁 Accessories: ${accessories.join(', ')}`);
+  
+  // Generate hash
+  const hashData = JSON.stringify({
+    packageType, boxShape, size, color,
+    flowers: flowers.map(f => ({ id: f.flower.id, qty: f.quantity })),
+    withGlitter, withRibbon, accessories: accessories.sort(),
+    arrangementStyle, densityPreference, bloomStage, flowerPositions, seed
+  });
+  let hash = 0;
+  for (let i = 0; i < hashData.length; i++) {
+    hash = ((hash << 5) - hash) + hashData.charCodeAt(i);
+    hash = hash & hash;
+  }
+  
+  return {
+    positive: prompt,
+    negative: negativePrompt,
+    preview: previewParts.join('\n'),
+    hash: Math.abs(hash).toString(16).padStart(8, '0')
   };
 }
 
