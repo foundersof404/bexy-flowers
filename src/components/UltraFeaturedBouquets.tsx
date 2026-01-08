@@ -236,10 +236,15 @@ const UltraFeaturedBouquets = () => {
         >
           {/* Luxury Typography with Gold Accent */}
           <h2 
-            className="font-luxury text-2xl sm:text-3xl md:text-5xl lg:text-6xl xl:text-8xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 bg-clip-text text-transparent relative px-2"
+            className="font-luxury text-2xl sm:text-3xl md:text-5xl lg:text-6xl xl:text-8xl font-normal mb-4 sm:mb-6 relative px-2"
             style={{
+              background: 'linear-gradient(135deg, #2c2d2a 0%, #3D3027 50%, #2c2d2a 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
               filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))',
-              letterSpacing: '0.05em'
+              letterSpacing: '-0.02em',
+              lineHeight: '1.2em'
             }}
           >
             SIGNATURE COLLECTION
@@ -260,7 +265,8 @@ const UltraFeaturedBouquets = () => {
 
           {/* Enhanced Description */}
           <p 
-            className="font-body text-sm sm:text-base md:text-lg lg:text-xl text-slate-600 max-w-4xl mx-auto leading-relaxed font-light px-2"
+            className="font-body text-sm sm:text-base md:text-lg lg:text-xl max-w-4xl mx-auto leading-relaxed font-light px-2"
+            style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}
           >
             Discover our curated selection of premium floral arrangements designed to elevate any space.
           </p>
@@ -275,11 +281,11 @@ const UltraFeaturedBouquets = () => {
             {loading ? (
               <div className="text-center py-20">
                 <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-amber-500"></div>
-                <p className="mt-4 text-slate-600">Loading signature collection...</p>
+                <p className="mt-4" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif" }}>Loading signature collection...</p>
               </div>
             ) : bouquets.length === 0 ? (
               <div className="text-center py-20">
-                <p className="text-slate-600">No signature collection items available.</p>
+                <p style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif" }}>No signature collection items available.</p>
               </div>
             ) : (
             <div 
@@ -475,10 +481,12 @@ const UltraFeaturedBouquets = () => {
                       style={{
                         textTransform: 'capitalize',
                         fontSize: isMobile ? 'clamp(0.75rem, 3vw, 1rem)' : 'clamp(1rem, 4vw, 1.8rem)',
-                        color: '#111',
-                        fontWeight: '700',
+                        color: '#2c2d2a',
+                        fontFamily: "'EB Garamond', serif",
+                        fontWeight: '400',
                         lineHeight: '1.2',
-                        marginBottom: isMobile ? '0.25rem' : '0.375rem'
+                        marginBottom: isMobile ? '0.25rem' : '0.375rem',
+                        letterSpacing: '-0.02em'
                       }}
                     >
                     {bouquet.name}
@@ -486,13 +494,15 @@ const UltraFeaturedBouquets = () => {
                     <p 
                       style={{
                         marginBottom: isMobile ? '0.5rem' : '0.75rem',
-                        color: '#565656',
+                        color: '#2c2d2a',
+                        fontFamily: "'EB Garamond', serif",
                         fontSize: isMobile ? 'clamp(0.625rem, 2vw, 0.75rem)' : 'clamp(0.875rem, 2.5vw, 1rem)',
                         lineHeight: '1.5',
                         display: '-webkit-box',
                         WebkitLineClamp: isMobile ? 1 : 2,
                         WebkitBoxOrient: 'vertical',
-                        overflow: 'hidden'
+                        overflow: 'hidden',
+                        letterSpacing: '-0.02em'
                       }}
                     >
                       Fill out the form and the algorithm will offer the right team of experts
@@ -517,12 +527,13 @@ const UltraFeaturedBouquets = () => {
                              textTransform: 'uppercase',
                              background: '#f0f0f0',
                              color: tag.color,
-                             fontWeight: '700',
+                             fontFamily: "'EB Garamond', serif",
+                             fontWeight: '400',
                              fontSize: isMobile ? 'clamp(0.5rem, 1.5vw, 0.625rem)' : 'clamp(0.625rem, 2vw, 0.75rem)',
                              padding: isMobile ? '0.125rem 0.375rem' : '0.25rem 0.5rem',
                              borderRadius: '0.25rem',
                              whiteSpace: 'nowrap',
-                             letterSpacing: '0.05em'
+                             letterSpacing: '-0.02em'
                            }}
                          >
                            {tag.text}
@@ -550,7 +561,7 @@ const UltraFeaturedBouquets = () => {
          bg-gradient-to-r from-[rgb(160,120,40)] via-[rgb(199,158,72)] to-[rgb(240,210,150)]
          text-white
          rounded-xl sm:rounded-2xl
-         font-semibold text-xs sm:text-sm tracking-wide uppercase
+         font-normal text-xs sm:text-sm uppercase
          shadow-md shadow-yellow-600/30
          transition-all duration-300 ease-out
          hover:shadow-lg hover:shadow-yellow-500/40 hover:scale-[1.02]
@@ -558,6 +569,7 @@ const UltraFeaturedBouquets = () => {
          group
          w-full sm:w-auto
        "
+       style={{ fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}
        whileHover={{ scale: 1.03 }}
        whileTap={{ scale: 0.97 }}
             onClick={() => {

@@ -66,7 +66,7 @@ const QuantitySelector = ({
   onQuantityChange: (qty: number) => void;
 }) => (
   <div className="flex items-center gap-3">
-    <span className="text-sm font-medium text-gray-700">Quantity</span>
+    <span className="text-sm font-normal" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif" }}>Quantity</span>
     <div className="flex items-center border border-gray-300 rounded-md">
       <button
         className="p-2 hover:bg-gray-50 transition-colors disabled:opacity-50"
@@ -99,7 +99,7 @@ const SizeSelector = ({
   basePrice: number;
 }) => (
   <div className="space-y-3">
-    <span className="text-sm font-medium text-gray-700">Size</span>
+    <span className="text-sm font-normal" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif" }}>Size</span>
     <div className="grid grid-cols-3 gap-3">
       {sizeOptions.map((option) => {
         const isSelected = selectedSize === option.id;
@@ -110,14 +110,14 @@ const SizeSelector = ({
             className={`p-3 rounded-md border-2 transition-all ${
               isSelected
                 ? 'border-[#C79E48] bg-[#C79E48]/5 text-[#C79E48]'
-                : 'border-gray-300 hover:border-gray-400 text-gray-700'
+                : 'border-gray-300 hover:border-gray-400'
             }`}
             onClick={() => onSizeChange(option.id)}
           >
             <div className="text-center">
               <div className="font-medium text-sm">{option.name}</div>
               {option.priceModifier > 0 && (
-                <div className="text-xs text-gray-600">+€{option.priceModifier}</div>
+                <div className="text-xs" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif" }}>+€{option.priceModifier}</div>
               )}
             </div>
           </button>
@@ -175,7 +175,7 @@ const ImageGallery = ({
 // Price Display Component
 const PriceDisplay = ({ price }: { price: number }) => (
   <div className="flex items-baseline gap-1">
-    <span className="text-3xl font-bold text-black">€{price}</span>
+    <span className="text-3xl font-bold text-foreground">€{price}</span>
   </div>
 );
 
@@ -355,7 +355,8 @@ const ProductDetailPage = () => {
       {/* Back Button */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
         <button
-          className="flex items-center gap-2 text-gray-600 hover:text-black transition-colors"
+          className="flex items-center gap-2 transition-colors"
+          style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif" }}
           onClick={() => navigate(-1)}
         >
           <ArrowLeft className="w-5 h-5" />
@@ -381,12 +382,12 @@ const ProductDetailPage = () => {
             {/* Product Header */}
             <div className="space-y-4">
               {productData.category && (
-                <p className="text-xs text-gray-600 uppercase tracking-wide">
+                <p className="text-xs uppercase" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>
                   {productData.category}
                 </p>
               )}
 
-              <h1 className="font-luxury text-3xl lg:text-4xl font-normal text-black">
+              <h1 className="font-luxury text-3xl lg:text-4xl font-normal text-foreground">
                 {productData.title}
               </h1>
 
@@ -395,7 +396,7 @@ const ProductDetailPage = () => {
 
             {/* Description */}
             <div>
-              <p className="text-gray-700 leading-relaxed text-base">
+              <p className="leading-relaxed text-base" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>
                 {productData.description}
               </p>
             </div>
@@ -447,10 +448,10 @@ const ProductDetailPage = () => {
         <section className="py-16 bg-gray-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6">
             <div className="text-center mb-12">
-              <h2 className="font-luxury text-3xl font-normal text-black mb-2">
+              <h2 className="font-luxury text-3xl font-normal text-foreground mb-2">
                 You Might Also Like
               </h2>
-              <p className="text-gray-600 text-base">
+              <p className="text-base" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>
                 Similar products you may be interested in
               </p>
             </div>
@@ -472,13 +473,13 @@ const ProductDetailPage = () => {
                       />
                     </div>
                     <div className="p-3">
-                      <p className="text-xs text-gray-600 mb-1">
+                      <p className="text-xs mb-1" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif" }}>
                         {bouquet.displayCategory || bouquet.category}
                       </p>
-                      <h3 className="font-luxury text-sm font-normal text-black mb-2 line-clamp-1">
+                      <h3 className="font-luxury text-sm font-normal text-foreground mb-2 line-clamp-1">
                         {bouquet.name}
                       </h3>
-                      <p className="text-sm font-medium text-black">
+                      <p className="text-sm font-medium text-foreground">
                         €{bouquet.price}
                       </p>
                     </div>

@@ -129,11 +129,16 @@ const ZodiacBouquetQuiz = () => {
           
           {/* Luxury Typography with Gold Accent */}
           <h1 
-            className="font-luxury text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 bg-clip-text text-transparent relative"
+            className="font-luxury text-5xl md:text-7xl font-normal mb-6 relative"
             style={{
               fontFamily: 'EB Garamond, serif',
+              background: 'linear-gradient(135deg, #2c2d2a 0%, #3D3027 50%, #2c2d2a 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
               filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))',
-              letterSpacing: '0.05em'
+              letterSpacing: '-0.02em',
+              lineHeight: '1.2em'
             }}
           >
             FIND YOUR

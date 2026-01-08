@@ -122,16 +122,21 @@ const ProfessionalCustomSection = React.memo(() => {
               className="inline-flex items-center gap-1.5 sm:gap-2 px-4 sm:px-6 py-2 sm:py-3 rounded-full bg-gradient-to-r from-slate-800/10 to-slate-700/10 backdrop-blur-xl border border-slate-600/20 mb-6 sm:mb-8"
             >
               <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 animate-pulse" />
-              <span className="text-xs sm:text-sm font-medium text-slate-700 tracking-wider uppercase">Professional Customization</span>
+              <span className="text-xs sm:text-sm font-normal uppercase" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>Professional Customization</span>
             </div>
           )}
 
           {/* Main Title - Luxury Typography with Gold Accent */}
           <h2
-            className={`font-luxury ${isMobile ? 'text-xl' : 'text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-8xl'} font-bold ${isMobile ? 'mb-2' : 'mb-4 sm:mb-6'} bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 bg-clip-text text-transparent relative`}
+            className={`font-luxury ${isMobile ? 'text-xl' : 'text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-8xl'} font-normal ${isMobile ? 'mb-2' : 'mb-4 sm:mb-6'} relative`}
             style={{
+              background: 'linear-gradient(135deg, #2c2d2a 0%, #3D3027 50%, #2c2d2a 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
               filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))',
-              letterSpacing: '0.05em'
+              letterSpacing: '-0.02em',
+              lineHeight: '1.2em'
             }}
           >
             DESIGN YOUR
@@ -154,7 +159,8 @@ const ProfessionalCustomSection = React.memo(() => {
 
           {/* Subtitle - Enhanced Description - Simplified on mobile */}
           <p
-            className={`font-body ${isMobile ? 'text-xs mb-0' : 'text-sm sm:text-base md:text-lg lg:text-xl'} text-slate-600 max-w-4xl mx-auto ${isMobile ? 'leading-tight' : 'leading-relaxed'} font-light px-2`}
+            className={`font-body ${isMobile ? 'text-xs mb-0' : 'text-sm sm:text-base md:text-lg lg:text-xl'} max-w-4xl mx-auto ${isMobile ? 'leading-tight' : 'leading-relaxed'} font-light px-2`}
+            style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}
           >
             {isMobile ? (
               'Create a bespoke floral masterpiece with unlimited creative freedom.'
@@ -237,15 +243,15 @@ const ProfessionalCustomSection = React.memo(() => {
                     </motion.div>
 
                     <h3
-                      className={`${isMobile ? 'text-[0.5rem] mb-0.5' : 'text-[0.6rem] sm:text-[0.65rem]'} font-bold ${isMobile ? 'tracking-[0.1em]' : 'tracking-[0.15em] sm:tracking-[0.2em]'} uppercase`}
-                      style={{ color: '#B88A44', letterSpacing: isMobile ? '0.1em' : '0.15em' }}
+                      className={`${isMobile ? 'text-[0.5rem] mb-0.5' : 'text-[0.6rem] sm:text-[0.65rem]'} font-normal uppercase`}
+                      style={{ color: '#B88A44', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}
                     >
                       {feature.title}
                     </h3>
 
                     <motion.h4
-                      className={`${isMobile ? 'text-sm mb-1' : 'text-base sm:text-lg mb-2'} font-bold transition-all duration-300`}
-                      style={{ color: '#0a0a0a', letterSpacing: '-0.01em', fontFamily: 'Inter, sans-serif' }}
+                      className={`${isMobile ? 'text-sm mb-1' : 'text-base sm:text-lg mb-2'} font-normal transition-all duration-300`}
+                      style={{ color: '#2c2d2a', letterSpacing: '-0.02em', fontFamily: "'EB Garamond', serif" }}
                       whileHover={!isMobile ? { color: '#B88A44' } : {}}
                     >
                       {feature.subtitle}
@@ -348,7 +354,8 @@ const ProfessionalCustomSection = React.memo(() => {
             {/* CTA Button */}
             <motion.a
               href="/customize"
-              className={`group inline-flex items-center ${isMobile ? 'gap-2 px-4 py-2.5' : 'gap-2 sm:gap-3 md:gap-4 px-4 sm:px-6 md:px-8 lg:px-10 py-2.5 sm:py-3 md:py-4 lg:py-5'} rounded-lg sm:rounded-xl md:rounded-2xl font-bold text-white relative overflow-hidden ${isMobile ? 'w-full' : 'w-full sm:w-auto'} touch-target min-h-[44px] ${isMobile ? 'text-xs' : 'text-xs sm:text-sm md:text-base'}`}
+              className={`group inline-flex items-center ${isMobile ? 'gap-2 px-4 py-2.5' : 'gap-2 sm:gap-3 md:gap-4 px-4 sm:px-6 md:px-8 lg:px-10 py-2.5 sm:py-3 md:py-4 lg:py-5'} rounded-lg sm:rounded-xl md:rounded-2xl font-normal text-white relative overflow-hidden ${isMobile ? 'w-full' : 'w-full sm:w-auto'} touch-target min-h-[44px] ${isMobile ? 'text-xs' : 'text-xs sm:text-sm md:text-base'}`}
+              style={{ fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}
               style={{
                 background: 'linear-gradient(90deg, #B88A44 0%, #D4A85A 50%, #CFA340 100%)',
                 boxShadow: '0 8px 32px rgba(184, 138, 68, 0.4)',

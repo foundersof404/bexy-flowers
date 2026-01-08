@@ -124,13 +124,13 @@ export const FeaturedCarousel = ({ bouquets, onBouquetClick }: FeaturedCarouselP
                       <p className="text-xs text-gray-600 font-normal mb-1">
                         {bouquet.displayCategory || bouquet.category || "Collection"}
                       </p>
-                      <h3 className="font-luxury text-base md:text-lg font-normal text-black mb-2 leading-tight">
+                      <h3 className="font-luxury text-base md:text-lg font-normal text-foreground mb-2 leading-tight">
                         {bouquet.name}
                       </h3>
                       <div className="flex items-center gap-2">
                         {bouquet.discount_percentage && bouquet.discount_percentage > 0 ? (
                           <>
-                            <span className="text-base md:text-lg font-medium text-black">
+                            <span className="text-base md:text-lg font-medium text-foreground">
                               €{(bouquet.price * (1 - bouquet.discount_percentage / 100)).toFixed(0)}
                             </span>
                             <span className="text-sm text-gray-400 line-through">
@@ -138,7 +138,7 @@ export const FeaturedCarousel = ({ bouquets, onBouquetClick }: FeaturedCarouselP
                             </span>
                           </>
                         ) : (
-                          <span className="text-base md:text-lg font-medium text-black">
+                          <span className="text-base md:text-lg font-medium text-foreground">
                             €{bouquet.price.toFixed(0)}
                           </span>
                         )}

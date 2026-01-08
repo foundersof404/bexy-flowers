@@ -86,15 +86,20 @@ const FlowerCareGuide = () => {
             className="inline-flex items-center gap-1.5 sm:gap-2 px-4 sm:px-6 py-2 sm:py-3 rounded-full bg-gradient-to-r from-slate-800/10 to-slate-700/10 backdrop-blur-xl border border-slate-600/20 mb-6 sm:mb-8"
           >
             <div className="w-2 h-2 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 animate-pulse" />
-            <span className="text-sm font-medium text-slate-700 tracking-wider uppercase">EXPERT GUIDANCE</span>
+            <span className="text-sm font-normal uppercase" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>EXPERT GUIDANCE</span>
           </div>
 
           <h2 
-            className="font-luxury text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 bg-clip-text text-transparent relative inline-block px-2"
+            className="font-luxury text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-normal mb-4 sm:mb-6 relative inline-block px-2"
             style={{
               fontFamily: 'EB Garamond, serif',
+              background: 'linear-gradient(135deg, #2c2d2a 0%, #3D3027 50%, #2c2d2a 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
               filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))',
-              letterSpacing: '0.05em'
+              letterSpacing: '-0.02em',
+              lineHeight: '1.2em'
             }}
           >
             MASTER FLOWER CARE
@@ -111,7 +116,7 @@ const FlowerCareGuide = () => {
             <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-[#C79E48] rotate-45 shadow-lg shadow-[#C79E48]/50" />
           </div>
 
-          <p className="text-slate-600 max-w-2xl mx-auto text-sm sm:text-base md:text-lg lg:text-xl font-light leading-relaxed px-4">
+          <p className="max-w-2xl mx-auto text-sm sm:text-base md:text-lg lg:text-xl font-light leading-relaxed px-4" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>
             Simple steps to keep your flowers fresh and beautiful for longer
           </p>
         </div>
@@ -141,12 +146,12 @@ const FlowerCareGuide = () => {
                     {activeStep === step.id ? <CheckCircle className="w-5 h-5" /> : step.icon}
                   </div>
                   <div className="flex-1">
-                    <h3 className={`font-bold text-base transition-colors duration-300 ${
-                      activeStep === step.id ? 'text-[#C79E48]' : 'text-slate-700'
-                    }`}>
+                    <h3 className={`font-normal text-base transition-colors duration-300 ${
+                      activeStep === step.id ? 'text-[#C79E48]' : ''
+                    }`} style={{ color: activeStep === step.id ? '#C79E48' : '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>
                       {step.title}
                     </h3>
-                    <p className="text-xs text-slate-500 line-clamp-1">{step.description}</p>
+                    <p className="text-xs line-clamp-1" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif" }}>{step.description}</p>
                   </div>
                   {activeStep === step.id && (
                     <motion.div
@@ -177,7 +182,7 @@ const FlowerCareGuide = () => {
                      {activeStep === 1 ? '💧' : activeStep === 2 ? '✂️' : activeStep === 3 ? '🌞' : '💖'}
                   </div>
                   <div>
-                    <h3 className="text-xl sm:text-2xl font-bold text-slate-800 font-luxury">
+                    <h3 className="text-xl sm:text-2xl font-normal font-luxury" style={{ color: '#2c2d2a', letterSpacing: '-0.02em' }}>
                       {careSteps[activeStep - 1].title} Guide
                     </h3>
                     <div className="h-1 w-10 sm:w-12 bg-gradient-to-r from-[#C79E48] to-[#D4A85A] rounded-full mt-1" />
@@ -191,9 +196,10 @@ const FlowerCareGuide = () => {
                       initial={{ opacity: 0, x: 10 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.1 }}
-                      className="flex items-start gap-3 text-sm sm:text-base text-slate-700 bg-white/50 p-3 rounded-lg hover:bg-white transition-colors duration-200"
+                      className="flex items-start gap-3 text-sm sm:text-base bg-white/50 p-3 rounded-lg hover:bg-white transition-colors duration-200"
+                      style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}
                     >
-                      <div className="w-5 h-5 rounded-full bg-[#C79E48]/10 flex items-center justify-center flex-shrink-0 mt-0.5 text-[#C79E48] font-bold text-xs">
+                      <div className="w-5 h-5 rounded-full bg-[#C79E48]/10 flex items-center justify-center flex-shrink-0 mt-0.5 text-[#C79E48] font-normal text-xs" style={{ fontFamily: "'EB Garamond', serif" }}>
                         {index + 1}
                       </div>
                       {tip}

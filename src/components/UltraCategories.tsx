@@ -131,10 +131,11 @@ const UltraCategories = () => {
     }
   }, []);
 
-  // Seamless auto-scroll effect for desktop (single row)
+  // Seamless auto-scroll effect for desktop (single row) - FIXED: pauses when not visible
   useEffect(() => {
     const container = containerRef.current;
-    if (!container) return;
+    const section = sectionRef.current;
+    if (!container || !section) return;
 
     // Auto scroll - infinite seamless loop
     const cardWidth = 352; // Card width (w-80 = 320px + gap-8 = 32px = 352px)
@@ -143,13 +144,17 @@ const UltraCategories = () => {
     // Set initial position
     gsap.set(container, { x: 0 });
 
-    const tween = gsap.to(container, {
+    let tween: gsap.core.Tween | null = null;
+    
+    // Create animation
+    tween = gsap.to(container, {
       x: -singleSetWidth,
       duration: 30,
       ease: "none",
       force3D: true,
       repeat: -1,
       repeatDelay: 0,
+      paused: true, // Start paused, observer will resume when visible
       modifiers: {
         x: (x) => {
           const val = parseFloat(x);
@@ -162,11 +167,35 @@ const UltraCategories = () => {
       }
     });
 
-    // Start auto-scroll immediately and keep it running continuously
-    tween.play();
+    // Use IntersectionObserver to pause/resume animations when component is visible
+    // This prevents the animation from running continuously in the background
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && tween) {
+            // Resume animation when visible
+            tween.resume();
+          } else if (tween) {
+            // Pause animation when not visible to save resources
+            tween.pause();
+          }
+        });
+      },
+      { threshold: 0.1, rootMargin: '100px' } // Start animation slightly before it's fully visible
+    );
+
+    observer.observe(section);
+    
+    // Start animation if section is already visible
+    if (tween && section.getBoundingClientRect().top < window.innerHeight + 100) {
+      tween.resume();
+    }
 
     return () => {
-      tween.kill();
+      observer.disconnect();
+      if (tween) {
+        tween.kill();
+      }
       gsap.killTweensOf(container);
     };
   }, []);
@@ -325,10 +354,15 @@ const UltraCategories = () => {
           {/* Luxury Typography with Gold Accent */}
           <h2 
             ref={titleRef}
-            className="font-luxury text-2xl sm:text-3xl md:text-5xl lg:text-6xl xl:text-8xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 bg-clip-text text-transparent relative"
+            className="font-luxury text-2xl sm:text-3xl md:text-5xl lg:text-6xl xl:text-8xl font-normal mb-4 sm:mb-6 relative"
             style={{
+              background: 'linear-gradient(135deg, #2c2d2a 0%, #3D3027 50%, #2c2d2a 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
               filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))',
-              letterSpacing: '0.05em'
+              letterSpacing: '-0.02em',
+              lineHeight: '1.2em'
             }}
           >
             LUXURY COLLECTIONS

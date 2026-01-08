@@ -107,11 +107,12 @@ const Checkout = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <ShoppingCart className="w-16 h-16 text-slate-400 mx-auto" />
-          <h1 className="text-2xl font-bold text-slate-800">Your cart is empty</h1>
-          <p className="text-slate-600">Add some beautiful flowers to get started!</p>
+          <ShoppingCart className="w-16 h-16 mx-auto" style={{ color: '#2c2d2a' }} />
+          <h1 className="text-2xl font-normal" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>Your cart is empty</h1>
+          <p style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>Add some beautiful flowers to get started!</p>
           <motion.button
-            className="px-6 py-3 bg-amber-500 text-white rounded-lg font-semibold hover:bg-amber-600 transition-colors"
+            className="px-6 py-3 bg-amber-500 text-white rounded-lg font-normal hover:bg-amber-600 transition-colors"
+            style={{ fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}
             onClick={() => navigate('/collection')}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -135,7 +136,8 @@ const Checkout = () => {
       {/* Header */}
       <div className="max-w-7xl mx-auto px-4 py-6">
         <motion.button
-          className="flex items-center space-x-2 text-slate-600 hover:text-slate-800 transition-colors"
+          className="flex items-center space-x-2 transition-colors"
+          style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif" }}
           onClick={() => navigate(-1)}
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -156,22 +158,27 @@ const Checkout = () => {
           {/* Page Title */}
           <div className="text-center space-y-4">
             <h1 
-              className="font-luxury text-5xl md:text-7xl font-bold bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 bg-clip-text text-transparent relative uppercase"
+              className="font-luxury text-5xl md:text-7xl font-normal relative uppercase"
               style={{
+                background: 'linear-gradient(135deg, #2c2d2a 0%, #3D3027 50%, #2c2d2a 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
                 filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))',
-                letterSpacing: '0.05em'
+                letterSpacing: '-0.02em',
+                lineHeight: '1.2em'
               }}
             >
               COMPLETE YOUR ORDER
             </h1>
-            <p className="text-slate-600 text-lg">
+            <p className="text-lg" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>
               Review your selections and proceed to checkout
             </p>
           </div>
 
           {/* Order Summary */}
           <div className="bg-white/60 backdrop-blur-sm rounded-2xl border border-amber-100/60 p-8">
-            <h2 className="text-2xl font-semibold text-slate-800 mb-6">Order Summary</h2>
+            <h2 className="text-2xl font-normal mb-6" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>Order Summary</h2>
             
             {/* Items */}
             <div className="space-y-4 mb-8">
@@ -189,22 +196,22 @@ const Checkout = () => {
                     className="w-16 h-16 object-cover rounded-lg"
                   />
                   <div className="flex-1">
-                    <h3 className="font-semibold text-slate-800">{item.title}</h3>
+                    <h3 className="font-normal" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>{item.title}</h3>
                     {item.size && (
                       <p className="text-sm text-amber-600 font-medium">Size: {item.size}</p>
                     )}
                     {item.personalNote && (
                       <div className="mt-2 p-2 bg-amber-50/60 rounded-lg border border-amber-200/60">
-                        <p className="text-xs text-slate-500 mb-1">Personal Note:</p>
-                        <p className="text-sm text-slate-700 leading-relaxed font-medium">
+                        <p className="text-xs mb-1" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif" }}>Personal Note:</p>
+                        <p className="text-sm leading-relaxed font-normal" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>
                           "{item.personalNote}"
                         </p>
                       </div>
                     )}
                   </div>
                   <div className="text-right">
-                    <p className="font-semibold text-slate-800">Qty: {item.quantity}</p>
-                    <p className="text-amber-600 font-semibold">${(item.price * item.quantity).toFixed(2)}</p>
+                    <p className="font-normal" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>Qty: {item.quantity}</p>
+                    <p className="font-normal" style={{ color: '#C79E48', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>${(item.price * item.quantity).toFixed(2)}</p>
                   </div>
                 </motion.div>
               ))}
@@ -213,15 +220,15 @@ const Checkout = () => {
             {/* Totals */}
             <div className="space-y-3 pt-6 border-t border-amber-200">
               <div className="flex justify-between">
-                <span className="text-slate-600">Subtotal</span>
-                <span className="font-semibold">${subtotal.toFixed(2)}</span>
+                <span style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif" }}>Subtotal</span>
+                <span className="font-normal" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>${subtotal.toFixed(2)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-600">Delivery Fee</span>
-                <span className="font-semibold">${deliveryFee.toFixed(2)}</span>
+                <span style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif" }}>Delivery Fee</span>
+                <span className="font-normal" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>${deliveryFee.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between text-lg font-bold pt-3 border-t border-amber-200">
-                <span className="text-slate-800">Total</span>
+              <div className="flex justify-between text-lg font-normal pt-3 border-t border-amber-200" style={{ fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>
+                <span style={{ color: '#2c2d2a' }}>Total</span>
                 <span className="text-amber-600">${total.toFixed(2)}</span>
               </div>
             </div>
@@ -229,22 +236,22 @@ const Checkout = () => {
 
           {/* Delivery Information */}
           <div className="bg-white/60 backdrop-blur-sm rounded-2xl border border-amber-100/60 p-8">
-            <h2 className="text-2xl font-semibold text-slate-800 mb-6">Delivery Information</h2>
+            <h2 className="text-2xl font-normal mb-6" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>Delivery Information</h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="flex items-center space-x-3">
                 <MapPin className="w-6 h-6 text-amber-500" />
                 <div>
-                  <p className="font-semibold text-slate-800">Standard Delivery</p>
-                  <p className="text-slate-600">3-5 business days</p>
+                  <p className="font-normal" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>Standard Delivery</p>
+                  <p style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>3-5 business days</p>
                 </div>
               </div>
               
               <div className="flex items-center space-x-3">
                 <Clock className="w-6 h-6 text-amber-500" />
                 <div>
-                  <p className="font-semibold text-slate-800">Handcrafted Fresh</p>
-                  <p className="text-slate-600">Made to order</p>
+                  <p className="font-normal" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>Handcrafted Fresh</p>
+                  <p style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>Made to order</p>
                 </div>
               </div>
             </div>
@@ -252,17 +259,17 @@ const Checkout = () => {
 
           {/* Payment Method */}
           <div className="bg-white/60 backdrop-blur-sm rounded-2xl border border-amber-100/60 p-8">
-            <h2 className="text-2xl font-semibold text-slate-800 mb-6">Payment Options</h2>
+            <h2 className="text-2xl font-normal mb-6" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>Payment Options</h2>
             
             <div className="space-y-3">
               <div className="flex items-center space-x-3 p-4 bg-white/40 rounded-lg">
                 <CreditCard className="w-6 h-6 text-amber-500" />
                 <div>
-                  <p className="font-semibold text-slate-800">Multiple Payment Methods Available</p>
-                  <p className="text-slate-600 text-sm">Select your preferred option in WhatsApp</p>
+                  <p className="font-normal" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>Multiple Payment Methods Available</p>
+                  <p className="text-sm" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>Select your preferred option in WhatsApp</p>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-3 text-sm text-slate-600">
+              <div className="grid grid-cols-2 gap-3 text-sm" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif" }}>
                 <div className="p-3 bg-amber-50/50 rounded-lg">✓ Whish Money</div>
                 <div className="p-3 bg-amber-50/50 rounded-lg">✓ Cash on Delivery</div>
                 <div className="p-3 bg-amber-50/50 rounded-lg">✓ Bank Transfer</div>
@@ -273,7 +280,8 @@ const Checkout = () => {
 
           {/* Place Order Button */}
           <motion.button
-            className="w-full py-4 bg-gradient-to-r from-amber-500 to-amber-600 text-white font-semibold text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+            className="w-full py-4 bg-gradient-to-r from-amber-500 to-amber-600 text-white font-normal text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+            style={{ fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}
             onClick={handlePlaceOrder}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}

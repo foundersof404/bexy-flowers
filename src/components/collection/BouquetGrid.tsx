@@ -175,7 +175,7 @@ const BouquetCard = memo(({
           onClick={handleFavoriteClick}
         >
           <Heart 
-            className={`w-4 h-4 ${isFav ? 'fill-[#dc267f] text-[#dc267f]' : 'text-black'}`} 
+            className={`w-4 h-4 ${isFav ? 'fill-[#dc267f] text-[#dc267f]' : 'text-foreground'}`} 
             strokeWidth={1.5} 
           />
         </button>
@@ -187,7 +187,7 @@ const BouquetCard = memo(({
           disabled={bouquet.is_out_of_stock}
         >
           <ShoppingCart 
-            className="w-4 h-4 text-black" 
+            className="w-4 h-4 text-foreground" 
             strokeWidth={1.5} 
           />
         </button>
@@ -202,7 +202,7 @@ const BouquetCard = memo(({
         
         {/* Name and Price on same line */}
         <div className="flex items-start justify-between gap-2">
-          <h3 className="font-luxury text-xs font-normal text-black leading-tight flex-1">
+          <h3 className="font-luxury text-xs font-normal text-foreground leading-tight flex-1">
             {bouquet.name}
           </h3>
           
@@ -210,7 +210,7 @@ const BouquetCard = memo(({
           <div className="flex items-center gap-1 flex-shrink-0">
             {bouquet.discount_percentage && bouquet.discount_percentage > 0 ? (
               <>
-                <p className="text-xs font-medium text-black">
+                <p className="text-xs font-medium text-foreground">
                   €{finalPrice.toFixed(0)}
                 </p>
                 <p className="text-[10px] text-gray-400 line-through">
@@ -218,7 +218,7 @@ const BouquetCard = memo(({
                 </p>
               </>
             ) : (
-              <p className="text-xs font-medium text-black">
+              <p className="text-xs font-medium text-foreground">
                 €{bouquet.price.toFixed(0)}
               </p>
             )}

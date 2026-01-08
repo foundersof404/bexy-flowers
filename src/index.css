@@ -57,8 +57,8 @@ All colors MUST be HSL. No rounded corners - sharp and architectural.
     /* Ultra-Premium Color Palette */
     --background: 47 3% 90%;
     /* Platinum Silver #E5E4E2 */
-    --foreground: 0 0% 7%;
-    /* Deep Charcoal #111111 */
+    --foreground: 20 8% 16%;
+    /* Dark Brown #2c2d2a - Matching hero title color */
 
     --card: 47 3% 93%;
     /* Slightly lighter platinum */

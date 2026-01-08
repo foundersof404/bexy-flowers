@@ -25,6 +25,8 @@ export const useWeddingCreations = (filters?: {
   featured?: boolean;
   isActive?: boolean;
 }) => {
+  const queryClient = useQueryClient();
+  
   return useQuery({
     queryKey: weddingQueryKeys.list(filters),
     queryFn: () => getWeddingCreations(filters),
@@ -35,7 +37,6 @@ export const useWeddingCreations = (filters?: {
     // Pre-warm individual creations for better navigation performance
     onSuccess: (data) => {
       if (data && data.length > 0) {
-        const queryClient = useQueryClient();
         // Pre-load first 3 wedding creations (most likely to be viewed)
         data.slice(0, 3).forEach((creation) => {
           queryClient.prefetchQuery({

@@ -34,18 +34,18 @@ const slides: SlideData[] = [
     id: 'romantic',
     title: 'Romantic',
     price: '$49.90',
-    contentTitle: 'Express your love with timeless elegance.',
-    contentSubtitle: 'Our romantic collection features premium roses and delicate blooms, carefully arranged to convey your deepest emotions. Perfect for anniversaries, proposals, and special moments.',
+    contentTitle: 'Where emotions bloom into timeless elegance.',
+    contentSubtitle: 'Every arrangement is a masterpiece of passion and artistry. Handcrafted by master florists, our premium collections transform moments into unforgettable memories.',
     bgImage: getImagePath('image1-bg.webp'),
     productImage: getImagePath('image1.webp'),
-    bgColor: '#ff0000'
+    bgColor: 'rgb(143, 5, 36)'
   },
   {
     id: 'elegant',
     title: 'Elegant',
     price: '$59.90',
-    contentTitle: 'Sophisticated arrangements for refined occasions.',
-    contentSubtitle: 'Discover our elegant collection of premium florals, handcrafted by master florists. Each arrangement tells a story of luxury and sophistication, perfect for corporate events and formal celebrations.',
+    contentTitle: 'Sophistication meets artistic excellence.',
+    contentSubtitle: 'Discover the art of luxury floristry. Each creation is meticulously designed to reflect your refined taste and celebrate life\'s most distinguished occasions.',
     bgImage: getImagePath('image2-bg.webp'),
     productImage: getImagePath('image2.webp'),
     bgColor: '#e9bf8b'
@@ -54,8 +54,8 @@ const slides: SlideData[] = [
     id: 'luxury',
     title: 'Luxury',
     price: '$79.90',
-    contentTitle: 'Exquisite blooms for the most discerning tastes.',
-    contentSubtitle: 'Our luxury collection features rare and exotic flowers, arranged with artistic precision. Each piece is a masterpiece, designed to make a statement and create unforgettable impressions.',
+    contentTitle: 'Exquisite artistry for the most discerning.',
+    contentSubtitle: 'Experience the pinnacle of floral design. Our exclusive collections feature rare blooms and artistic arrangements that make a statement of unparalleled elegance.',
     bgImage: getImagePath('image3-bg.webp'),
     productImage: getImagePath('image3.webp'),
     bgColor: '#b6d6c8'
@@ -64,8 +64,8 @@ const slides: SlideData[] = [
     id: 'celebration',
     title: 'Celebration',
     price: '$69.90',
-    contentTitle: 'Vibrant arrangements to brighten every celebration.',
-    contentSubtitle: 'Celebrate life\'s special moments with our vibrant collection. From birthdays to graduations, our celebration bouquets bring joy and color to any occasion, crafted with care and attention to detail.',
+    contentTitle: 'Celebrate every moment with extraordinary beauty.',
+    contentSubtitle: 'Life\'s milestones deserve exceptional arrangements. Our celebration collections bring vibrant elegance to every occasion, crafted with passion and attention to detail.',
     bgImage: getImagePath('image4-bg.webp'),
     productImage: getImagePath('image4.webp'),
     bgColor: '#e86357'
@@ -288,7 +288,7 @@ const CarouselHero = () => {
                 <div className="main-wrapper">
                   <h3 className="main-header">Bexy Flowers</h3>
                   <h1 className="main-title">{slide.title}</h1>
-                  <h2 className="main-subtitle">{slide.price}</h2>
+                  {isMobile && <h2 className="main-subtitle">{slide.price}</h2>}
                 </div>
                 <div className="main-content">
                   <div className="main-content__title">{slide.contentTitle}</div>

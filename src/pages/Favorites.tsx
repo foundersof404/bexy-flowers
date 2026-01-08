@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, memo, useCallback, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { collectionQueryKeys } from '@/hooks/useCollectionProducts';
 import { gsap } from 'gsap';
@@ -79,11 +79,11 @@ const Favorites = memo(() => {
               transition={{ duration: 0.5, delay: 0.2 }}
             >
               <p 
-                className="text-xs sm:text-sm font-bold tracking-[0.3em] uppercase mb-2"
+                className="font-luxury text-xs sm:text-sm font-normal uppercase mb-2"
                 style={{
-                  color: '#1a1a1a',
+                  color: '#2c2d2a',
                   textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)',
-                  letterSpacing: '0.3em'
+                  letterSpacing: '-0.02em'
                 }}
               >
                 YOUR CURATED COLLECTION
@@ -103,11 +103,15 @@ const Favorites = memo(() => {
               transition={{ duration: 0.6, delay: 0.3 }}
             >
               <h1 
-                className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-[0.3em] uppercase mb-2"
+                className="font-luxury text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-normal mb-2"
                 style={{
-                  color: '#1a1a1a',
-                  textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)',
-                  letterSpacing: '0.3em'
+                  background: 'linear-gradient(135deg, #2c2d2a 0%, #3D3027 50%, #2c2d2a 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                  filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))',
+                  letterSpacing: '-0.02em',
+                  lineHeight: '1.2em'
                 }}
               >
                 MY FAVORITES
@@ -121,11 +125,11 @@ const Favorites = memo(() => {
             
             {/* Description Text */}
             <motion.p 
-              className="text-xs sm:text-sm font-bold tracking-[0.3em] uppercase mb-8"
+              className="font-luxury text-xs sm:text-sm font-normal uppercase mb-8"
               style={{
-                color: '#1a1a1a',
+                color: '#2c2d2a',
                 textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)',
-                letterSpacing: '0.3em'
+                letterSpacing: '-0.02em'
               }}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -150,11 +154,11 @@ const Favorites = memo(() => {
               >
                 <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
                 <span 
-                  className="text-xs sm:text-sm font-bold tracking-[0.3em] uppercase"
+                  className="font-luxury text-xs sm:text-sm font-normal uppercase"
                   style={{
-                    color: '#1a1a1a',
+                    color: '#2c2d2a',
                     textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)',
-                    letterSpacing: '0.3em'
+                    letterSpacing: '-0.02em'
                   }}
                 >
                   BACK TO COLLECTION
@@ -183,24 +187,28 @@ const Favorites = memo(() => {
                 }}
                 className="inline-block mb-8"
               >
-                <Heart className="w-20 h-20 text-slate-300 mx-auto" strokeWidth={1} />
+                <Heart className="w-20 h-20 text-foreground mx-auto" strokeWidth={1} />
               </motion.div>
               <h2 
-                className="text-2xl sm:text-3xl font-bold tracking-[0.3em] uppercase mb-4"
+                className="font-luxury text-2xl sm:text-3xl font-normal uppercase mb-4"
                 style={{
-                  color: '#1a1a1a',
-                  textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)',
-                  letterSpacing: '0.3em'
+                  background: 'linear-gradient(135deg, #2c2d2a 0%, #3D3027 50%, #2c2d2a 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                  filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))',
+                  letterSpacing: '-0.02em',
+                  lineHeight: '1.2em'
                 }}
               >
                 NO FAVORITES YET
               </h2>
               <p 
-                className="text-xs sm:text-sm font-bold tracking-[0.3em] uppercase mb-8"
+                className="font-luxury text-xs sm:text-sm font-normal uppercase mb-8"
                 style={{
-                  color: '#1a1a1a',
+                  color: '#2c2d2a',
                   textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)',
-                  letterSpacing: '0.3em'
+                  letterSpacing: '-0.02em'
                 }}
               >
                 START EXPLORING AND ADD ITEMS YOU LOVE TO YOUR FAVORITES
@@ -214,9 +222,9 @@ const Favorites = memo(() => {
                 }}
               >
                 <span 
-                  className="text-xs sm:text-sm font-bold tracking-[0.3em] uppercase text-white"
+                  className="font-luxury text-xs sm:text-sm font-normal uppercase text-white"
                   style={{
-                    letterSpacing: '0.3em'
+                    letterSpacing: '-0.02em'
                   }}
                 >
                   EXPLORE COLLECTION
@@ -363,7 +371,7 @@ const Favorites = memo(() => {
                               }}
                             >
                               <Heart 
-                                className={`w-3 h-3 sm:w-4 sm:h-4 ${isFav ? 'fill-white text-white' : 'text-slate-700'}`} 
+                                className={`w-3 h-3 sm:w-4 sm:h-4 ${isFav ? 'fill-white text-white' : 'text-foreground'}`} 
                                 strokeWidth={2.5} 
                               />
                             </motion.button>
@@ -372,7 +380,8 @@ const Favorites = memo(() => {
                           {/* Featured Badge */}
                           {favorite.featured && (
                             <span 
-                              className="absolute top-4 left-4 px-3 py-1 rounded-full text-[10px] font-semibold tracking-wide text-white shadow-lg flex items-center gap-1"
+                              className="absolute top-4 left-4 px-3 py-1 rounded-full text-[10px] font-normal text-white shadow-lg flex items-center gap-1"
+                              style={{ fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}
                               style={{
                                 background: 'linear-gradient(90deg, #C79E48 0%, #D4A85A 100%)'
                               }}
@@ -386,11 +395,11 @@ const Favorites = memo(() => {
                         {/* Content Section - Sharper Typography */}
                         <div className="p-4 sm:p-5 lg:p-7 bg-gradient-to-b from-white to-slate-50/50">
                           <h3 
-                            className="text-[10px] sm:text-xs lg:text-sm font-bold tracking-[0.3em] uppercase mb-2 sm:mb-3 line-clamp-1"
+                            className="font-luxury text-[10px] sm:text-xs lg:text-sm font-normal uppercase mb-2 sm:mb-3 line-clamp-1"
                             style={{
-                              color: '#1a1a1a',
+                              color: '#2c2d2a',
                               textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)',
-                              letterSpacing: '0.3em'
+                              letterSpacing: '-0.02em'
                             }}
                           >
                             {favorite.title || favorite.name}
@@ -403,7 +412,7 @@ const Favorites = memo(() => {
                           />
 
                           <p 
-                            className="font-serif text-xs sm:text-sm lg:text-base font-normal mb-4 sm:mb-6 line-clamp-2 sm:line-clamp-3 min-h-[3rem] sm:min-h-[4rem] leading-relaxed text-slate-700" 
+                            className="font-luxury text-xs sm:text-sm lg:text-base font-normal mb-4 sm:mb-6 line-clamp-2 sm:line-clamp-3 min-h-[3rem] sm:min-h-[4rem] leading-relaxed text-foreground" 
                             style={{
                               letterSpacing: '0.02em'
                             }}
@@ -415,11 +424,11 @@ const Favorites = memo(() => {
                           <div className="flex items-end justify-between pt-2 border-t border-slate-200/60">
                             <div className="flex-1 min-w-0">
                               <div className="flex items-baseline gap-1 flex-wrap">
-                                <span className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-bold bg-gradient-to-r from-[#C79E48] via-[#D4A85A] to-[#E5C17A] bg-clip-text text-transparent leading-none">
+                                <span className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-normal bg-gradient-to-r from-[#C79E48] via-[#D4A85A] to-[#E5C17A] bg-clip-text text-transparent leading-none" style={{ fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>
                                   ${favorite.price}
                                 </span>
                                 <span 
-                                  className="font-serif text-[10px] sm:text-xs lg:text-sm font-normal mb-0.5 text-slate-600"
+                                  className="font-luxury text-[10px] sm:text-xs lg:text-sm font-normal mb-0.5 text-foreground"
                                   style={{
                                     letterSpacing: '0.05em'
                                   }}
@@ -428,7 +437,7 @@ const Favorites = memo(() => {
                                 </span>
                               </div>
                               <p 
-                                className="font-serif text-[10px] sm:text-xs lg:text-sm font-normal mt-1 text-slate-600"
+                                className="font-luxury text-[10px] sm:text-xs lg:text-sm font-normal mt-1 text-foreground"
                                 style={{
                                   letterSpacing: '0.05em'
                                 }}

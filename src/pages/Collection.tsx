@@ -174,7 +174,7 @@ const Collection = () => {
             {/* Category count - Always visible for LCP optimization */}
             <div className="mb-4 sm:mb-6 md:mb-8 text-center">
               <p className="text-xs sm:text-sm text-[#6B5D52] font-medium">
-                Showing <span className="font-bold text-[#C79E48]">
+                Showing <span className="font-normal" style={{ color: '#C79E48', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>
                   {loading ? '...' : filteredBouquets.length}
                 </span> beautiful bouquet{(!loading && filteredBouquets.length !== 1) ? 's' : 's'}
               </p>
