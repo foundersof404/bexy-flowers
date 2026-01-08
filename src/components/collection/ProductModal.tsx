@@ -1,33 +1,62 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, useMotionValue, useTransform, PanInfo } from "framer-motion";
 import { gsap } from "gsap";
-import { X, Heart, ShoppingCart, Star } from "lucide-react";
+import { X, Heart, ShoppingCart, Star, Save, DollarSign, Percent, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { OptimizedImage } from "@/components/OptimizedImage";
+import { ImageUpload } from "@/components/admin/ImageUpload";
 import type { Bouquet } from "@/types/bouquet";
 import { useCartWithToast } from "@/hooks/useCartWithToast";
 import { useFavorites } from "@/contexts/FavoritesContext";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useToast } from "@/hooks/use-toast";
+import { generatedCategories } from "@/data/generatedBouquets";
+import { useUpdateCollectionProduct } from "@/hooks/useCollectionProducts";
 
 interface ProductModalProps {
   bouquet: Bouquet;
   onClose: () => void;
+  onSave?: () => void;
 }
 
-export const ProductModal = ({ bouquet, onClose }: ProductModalProps) => {
+export const ProductModal = ({ bouquet, onClose, onSave }: ProductModalProps) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const { addToCart } = useCartWithToast();
   const { toggleFavorite, isFavorite } = useFavorites();
   const isMobile = useIsMobile();
+  const { toast } = useToast();
+  const updateProductMutation = useUpdateCollectionProduct();
   
   // Swipe-to-close functionality for mobile
   const y = useMotionValue(0);
   const opacity = useTransform(y, [0, 100], [1, 0]);
   const scale = useTransform(y, [0, 100], [1, 0.95]);
   const [isDragging, setIsDragging] = useState(false);
+  const [saving, setSaving] = useState(false);
+  
+  // Form state
+  const [formData, setFormData] = useState({
+    title: bouquet.name,
+    description: bouquet.description,
+    price: bouquet.price,
+    category: bouquet.category,
+    display_category: bouquet.displayCategory || "",
+    featured: bouquet.featured || false,
+    image_urls: [bouquet.image],
+    is_active: true,
+    is_out_of_stock: bouquet.is_out_of_stock || false,
+    discount_percentage: bouquet.discount_percentage || null,
+  });
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [imagesToDelete, setImagesToDelete] = useState<string[]>([]);
 
   useEffect(() => {
     const scrollY = window.scrollY;
@@ -167,17 +196,60 @@ export const ProductModal = ({ bouquet, onClose }: ProductModalProps) => {
     }
     
     // Add to cart logic
-    const numericPrice = bouquet.price;
-    const finalPrice = bouquet.discount_percentage && bouquet.discount_percentage > 0
-      ? numericPrice * (1 - bouquet.discount_percentage / 100)
+    const numericPrice = formData.price;
+    const finalPrice = formData.discount_percentage && formData.discount_percentage > 0
+      ? numericPrice * (1 - formData.discount_percentage / 100)
       : numericPrice;
     
     addToCart({
       id: parseInt(bouquet.id),
-      title: bouquet.name,
+      title: formData.title,
       price: finalPrice,
-      image: bouquet.image
+      image: formData.image_urls[0]
     });
+  };
+
+  const handleSave = async () => {
+    if (!formData.title || !formData.price || formData.image_urls.length === 0) {
+      toast({
+        title: "Validation Error",
+        description: "Please fill in all required fields (title, price, at least one image).",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setSaving(true);
+      await updateProductMutation.mutateAsync({
+        id: bouquet.id,
+        updates: formData,
+        newImages: imageFiles,
+        imagesToDelete,
+      });
+      toast({
+        title: "Product Updated",
+        description: `${formData.title} has been updated successfully.`,
+      });
+      if (onSave) onSave();
+      handleClose();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to save product",
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleImagesChange = (images: string[]) => {
+    setFormData({ ...formData, image_urls: images });
+  };
+
+  const handleFilesChange = (files: File[]) => {
+    setImageFiles(files);
   };
 
   return (
@@ -245,252 +317,264 @@ export const ProductModal = ({ bouquet, onClose }: ProductModalProps) => {
           <X className="w-6 h-6 sm:w-5 sm:h-5" strokeWidth={2.5} />
         </Button>
 
-        {/* Mobile Layout: Stacked | Desktop Layout: Side-by-Side */}
-        <div className={`flex flex-1 min-h-0 ${isMobile ? 'flex-col' : 'lg:grid lg:grid-cols-2'} gap-0 h-full max-h-[95vh] sm:max-h-[90vh] overflow-hidden`}>
-          {/* Image Section - Responsive Height */}
-          <div 
-            ref={imageRef}
-            className={`relative ${
-              isMobile 
-                ? 'h-[220px] sm:h-[280px]' 
-                : 'h-64 md:h-[400px] lg:h-auto lg:min-h-[500px]'
-            } bg-gradient-to-b from-primary/5 to-transparent flex-shrink-0`}
-          >
-            <OptimizedImage
-              src={bouquet.image}
-              alt={bouquet.name}
-              width={isMobile ? 400 : 500}
-              height={isMobile ? 225 : 625}
-              className="w-full h-full object-cover"
-              priority={true}
-            />
-            
-            {/* Image Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/10 to-transparent" />
-            
-            {/* Floating Elements - Responsive Positioning */}
-            <div className="absolute top-3 left-3 sm:top-4 sm:left-4 md:top-6 md:left-6 flex flex-col gap-2 z-20">
-              {/* Out of Stock Badge - Priority */}
-              {bouquet.is_out_of_stock && (
-                <Badge className="bg-red-600 text-white text-xs sm:text-sm px-3 py-1.5 font-bold border-2 border-white/50 shadow-lg">
-                  OUT OF STOCK
-                </Badge>
-              )}
-              
-              {/* In Stock Badge */}
-              {!bouquet.is_out_of_stock && (
-                <Badge className="bg-green-600 text-white text-xs sm:text-sm px-3 py-1.5 font-bold border-2 border-white/50 shadow-lg">
-                  IN STOCK
-                </Badge>
-              )}
-
-              {/* Featured Badge */}
-              {bouquet.featured && !bouquet.is_out_of_stock && (
-                <Badge className="bg-primary text-primary-foreground text-xs sm:text-sm px-2 py-1">
-                  Featured
-                </Badge>
-              )}
-
-              {/* Discount Badge */}
-              {bouquet.discount_percentage && bouquet.discount_percentage > 0 && (
-                <Badge className="bg-red-500 text-white text-xs sm:text-sm px-3 py-1.5 font-bold border-2 border-white/50 shadow-lg">
-                  {bouquet.discount_percentage}% OFF
-                </Badge>
-              )}
-            </div>
-
-            {/* Rating Stars - Responsive Size */}
-            <div className="absolute bottom-3 left-3 sm:bottom-4 sm:left-4 md:bottom-6 md:left-6 flex items-center gap-0.5 sm:gap-1">
-              {Array.from({ length: 5 }, (_, i) => (
-                <Star 
-                  key={i} 
-                  className="w-3 h-3 sm:w-4 sm:h-4 fill-primary text-primary" 
-                />
-              ))}
-              <span className="ml-1.5 sm:ml-2 text-white text-xs sm:text-sm font-body">5.0 (124)</span>
-            </div>
-          </div>
-
-          {/* Content Section - Scrollable on Mobile */}
+        {/* Full-Width Form Layout */}
+        <div className="flex flex-col h-full max-h-[95vh] sm:max-h-[90vh] overflow-hidden">
+          {/* Scrollable Form Content */}
           <div 
             ref={contentRef}
-            className={`modal-content ${
-              isMobile 
-                ? 'p-4 sm:p-5 flex flex-col flex-1 min-h-0 overflow-y-auto' 
-                : 'p-6 sm:p-8 lg:p-12 flex flex-col justify-center'
-            }`}
+            className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6"
             style={{
-              // Smooth scrolling on iOS
               WebkitOverflowScrolling: 'touch',
-              // Custom scrollbar styling
               scrollbarWidth: 'thin',
               scrollbarColor: 'rgba(194, 154, 67, 0.5) transparent',
             }}
           >
-            <style>{`
-              .modal-content::-webkit-scrollbar {
-                width: 4px;
-              }
-              .modal-content::-webkit-scrollbar-track {
-                background: transparent;
-              }
-              .modal-content::-webkit-scrollbar-thumb {
-                background-color: rgba(194, 154, 67, 0.5);
-                border-radius: 2px;
-              }
-            `}</style>
-            
-            <div className={`space-y-4 sm:space-y-5 md:space-y-6 ${isMobile ? 'pb-4' : ''}`}>
-              {/* Header - Responsive Typography */}
-              <div>
-                <motion.h1 
-                  className="text-2xl sm:text-3xl md:text-4xl font-luxury text-foreground mb-1.5 sm:mb-2 leading-tight"
-                  layoutId={`bouquet-title-${bouquet.id}`}
-                >
-                  {bouquet.name}
-                </motion.h1>
-                
-                {/* Price Display with Discount */}
-                <div className="flex items-baseline gap-2 sm:gap-3">
-                  {bouquet.discount_percentage && bouquet.discount_percentage > 0 ? (
-                    <>
-                      <motion.span 
-                        className="text-xl sm:text-2xl font-luxury text-gray-400 line-through"
-                        layoutId={`bouquet-price-original-${bouquet.id}`}
-                      >
-                        ${bouquet.price.toFixed(2)}
-                      </motion.span>
-                      <motion.p 
-                        className="text-3xl sm:text-4xl font-luxury text-red-600 leading-tight"
-                        layoutId={`bouquet-price-${bouquet.id}`}
-                      >
-                        ${(bouquet.price * (1 - bouquet.discount_percentage / 100)).toFixed(2)}
-                      </motion.p>
-                      <Badge className="bg-red-500 text-white text-sm sm:text-base px-2 py-1">
-                        {bouquet.discount_percentage}% OFF
-                      </Badge>
-                    </>
-                  ) : (
-                    <motion.p 
-                      className="text-3xl sm:text-4xl font-luxury text-primary leading-tight"
-                      layoutId={`bouquet-price-${bouquet.id}`}
-                    >
-                      ${bouquet.price.toFixed(2)}
-                    </motion.p>
+
+            {/* Basic Information */}
+            <div className="space-y-4">
+              <h3 className="text-base font-semibold text-gray-700 border-b pb-2">
+                Basic Information
+              </h3>
+              
+              <div className="space-y-2">
+                <Label htmlFor="title" className="text-sm">
+                  Product Name <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="title"
+                  value={formData.title}
+                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  placeholder="Enter product name"
+                  className="text-sm"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="description" className="text-sm">Description</Label>
+                <Textarea
+                  id="description"
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  placeholder="Enter product description"
+                  rows={3}
+                  className="text-sm"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="category" className="text-sm">Category</Label>
+                  <Select
+                    value={formData.category}
+                    onValueChange={(value) => {
+                      const selectedCat = generatedCategories.find(c => c.id === value);
+                      setFormData({
+                        ...formData,
+                        category: value,
+                        display_category: selectedCat?.name || "",
+                      });
+                    }}
+                  >
+                    <SelectTrigger className="text-sm">
+                      <SelectValue placeholder="Select category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {generatedCategories
+                        .filter((c) => c.id !== "all")
+                        .map((category) => (
+                          <SelectItem key={category.id} value={category.id}>
+                            {category.name}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="price" className="text-sm">
+                    Price ($) <span className="text-red-500">*</span>
+                  </Label>
+                  <div className="relative">
+                    <DollarSign className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <Input
+                      id="price"
+                      type="number"
+                      step="0.01"
+                      value={formData.price}
+                      onChange={(e) =>
+                        setFormData({ ...formData, price: parseFloat(e.target.value) || 0 })
+                      }
+                      className="pl-10 text-sm"
+                      placeholder="0.00"
+                    />
+                  </div>
+                  {formData.discount_percentage && formData.discount_percentage > 0 && (
+                    <div className="text-xs text-gray-600 mt-1">
+                      <span className="line-through">${formData.price.toFixed(2)}</span>
+                      <span className="ml-2 font-bold text-red-600">
+                        ${(formData.price * (1 - formData.discount_percentage / 100)).toFixed(2)}
+                      </span>
+                      <span className="ml-2 text-red-600">
+                        ({formData.discount_percentage}% off)
+                      </span>
+                    </div>
                   )}
                 </div>
+              </div>
+            </div>
 
-                {/* Stock Status Alert */}
-                {bouquet.is_out_of_stock && (
-                  <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
-                    <p className="text-sm text-red-800 font-medium">
-                      ⚠️ This product is currently out of stock
-                    </p>
+            {/* Images Section */}
+            <div className="space-y-4">
+              <h3 className="text-base font-semibold text-gray-700 border-b pb-2">
+                Product Images
+              </h3>
+              <ImageUpload
+                images={formData.image_urls}
+                onImagesChange={handleImagesChange}
+                onFilesChange={handleFilesChange}
+                maxImages={10}
+                multiple={true}
+                label="Upload product images (first image is primary)"
+              />
+            </div>
+
+            {/* Stock & Pricing */}
+            <div className="space-y-4">
+              <h3 className="text-base font-semibold text-gray-700 border-b pb-2">
+                Stock & Pricing
+              </h3>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="discount_percentage" className="text-sm">Discount (%)</Label>
+                  <div className="relative">
+                    <Percent className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <Input
+                      id="discount_percentage"
+                      type="number"
+                      min="0"
+                      max="100"
+                      step="5"
+                      value={formData.discount_percentage || ""}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          discount_percentage: e.target.value ? parseFloat(e.target.value) : null,
+                        })
+                      }
+                      className="pl-10 text-sm"
+                      placeholder="0"
+                    />
                   </div>
-                )}
-              </div>
-
-              {/* Description - Responsive Text */}
-              <div className="space-y-3 sm:space-y-4">
-                <p className="text-sm sm:text-base text-muted-foreground leading-relaxed font-body">
-                  {bouquet.description}
-                </p>
-                
-                <p className="text-sm sm:text-base text-muted-foreground leading-relaxed font-body">
-                  Each bouquet is carefully handcrafted using premium flowers sourced from the finest growers. 
-                  Our master florists ensure every arrangement meets our exacting standards for beauty and longevity.
-                </p>
-              </div>
-
-              {/* Features - Responsive Grid */}
-              <div className={`grid ${isMobile ? 'grid-cols-1 gap-3' : 'grid-cols-2 gap-4'} sm:gap-4`}>
-                <div className="space-y-1.5 sm:space-y-2">
-                  <h3 className="font-luxury text-foreground text-base sm:text-lg">Includes:</h3>
-                  <ul className="text-xs sm:text-sm text-muted-foreground space-y-1 font-body">
-                    <li>• Premium flower selection</li>
-                    <li>• Elegant gift wrapping</li>
-                    <li>• Care instructions card</li>
-                  </ul>
-                </div>
-                <div className="space-y-1.5 sm:space-y-2">
-                  <h3 className="font-luxury text-foreground text-base sm:text-lg">Care:</h3>
-                  <ul className="text-xs sm:text-sm text-muted-foreground space-y-1 font-body">
-                    <li>• Fresh water daily</li>
-                    <li>• Trim stems every 2-3 days</li>
-                    <li>• Keep away from direct sunlight</li>
-                  </ul>
+                  <p className="text-xs text-gray-500">Enter discount (0-100)</p>
                 </div>
               </div>
 
-              {/* Actions - Stack on Mobile, Side-by-Side on Desktop */}
-              <div className={`flex ${isMobile ? 'flex-col gap-3' : 'gap-4'} pt-2 sm:pt-4`}>
-                <Button
-                  className={`add-to-cart-btn flex-1 h-14 sm:h-12 text-base sm:text-lg font-medium touch-target active:scale-95 transition-transform ${
-                    bouquet.is_out_of_stock 
-                      ? 'bg-gray-400 hover:bg-gray-400 cursor-not-allowed text-white' 
-                      : 'bg-primary hover:bg-primary-dark text-primary-foreground'
-                  }`}
-                  onClick={handleAddToCart}
-                  disabled={bouquet.is_out_of_stock}
-                  style={{
-                    WebkitTapHighlightColor: 'transparent',
-                    touchAction: 'manipulation',
-                    minHeight: '56px', // Minimum touch target
-                  }}
-                >
-                  <ShoppingCart className="w-5 h-5 mr-2" />
-                  {bouquet.is_out_of_stock ? 'Out of Stock' : 'Add to Cart'}
-                </Button>
-                
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className={`${
-                    isMobile ? 'w-full h-14' : 'h-12 w-12'
-                  } border-primary/30 hover:border-primary hover:bg-primary/10 touch-target active:scale-95 transition-transform ${
-                    isFavorite(bouquet.id) ? 'bg-pink-50 border-pink-300' : ''
-                  }`}
-                  onClick={() => {
-                    toggleFavorite({
-                      id: bouquet.id,
-                      title: bouquet.name,
-                      price: bouquet.price,
-                      image: bouquet.image,
-                      description: bouquet.description,
-                      featured: bouquet.featured
-                    });
-                  }}
-                  style={{
-                    WebkitTapHighlightColor: 'transparent',
-                    touchAction: 'manipulation',
-                    minHeight: isMobile ? '56px' : '48px',
-                  }}
-                >
-                  <Heart 
-                    className={`w-5 h-5 ${isFavorite(bouquet.id) ? 'fill-[#dc267f] text-[#dc267f]' : 'text-primary'}`} 
-                    strokeWidth={2}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 border rounded-lg bg-white">
+                  <div>
+                    <Label htmlFor="is_out_of_stock" className="font-medium cursor-pointer text-sm">
+                      Out of Stock
+                    </Label>
+                    <p className="text-xs text-gray-500">Mark as unavailable</p>
+                  </div>
+                  <Switch
+                    id="is_out_of_stock"
+                    checked={formData.is_out_of_stock}
+                    onCheckedChange={(checked) => setFormData({ ...formData, is_out_of_stock: checked })}
                   />
-                  {isMobile && (
-                    <span className="ml-2 text-sm font-medium">
-                      {isFavorite(bouquet.id) ? 'Saved' : 'Save'}
-                    </span>
-                  )}
-                </Button>
-              </div>
+                </div>
 
-              {/* Additional Info - Responsive Grid */}
-              <div className="border-t border-border/20 pt-4 sm:pt-6">
-                <div className={`grid ${isMobile ? 'grid-cols-1 gap-3' : 'grid-cols-2 gap-4'} text-xs sm:text-sm`}>
+                <div className="flex items-center justify-between p-3 border rounded-lg bg-white">
                   <div>
-                    <span className="text-muted-foreground font-body">Delivery:</span>
-                    <span className="ml-2 text-foreground font-body">Same day available</span>
+                    <Label htmlFor="is_active" className="font-medium cursor-pointer text-sm">
+                      Active
+                    </Label>
+                    <p className="text-xs text-gray-500">Show on website</p>
                   </div>
+                  <Switch
+                    id="is_active"
+                    checked={formData.is_active}
+                    onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between p-3 border rounded-lg bg-white">
                   <div>
-                    <span className="text-muted-foreground font-body">Guarantee:</span>
-                    <span className="ml-2 text-foreground font-body">7-day freshness</span>
+                    <Label htmlFor="featured" className="font-medium cursor-pointer text-sm">
+                      Featured Product
+                    </Label>
+                    <p className="text-xs text-gray-500">Display prominently</p>
                   </div>
+                  <Switch
+                    id="featured"
+                    checked={formData.featured}
+                    onCheckedChange={(checked) => setFormData({ ...formData, featured: checked })}
+                  />
                 </div>
               </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t">
+              <Button
+                className="add-to-cart-btn flex-1 h-12 text-base font-medium"
+                onClick={handleAddToCart}
+                disabled={formData.is_out_of_stock}
+                variant="outline"
+              >
+                <ShoppingCart className="w-5 h-5 mr-2" />
+                {formData.is_out_of_stock ? 'Out of Stock' : 'Add to Cart'}
+              </Button>
+              
+              <Button
+                variant="outline"
+                className="flex-1 h-12"
+                onClick={() => {
+                  toggleFavorite({
+                    id: bouquet.id,
+                    title: formData.title,
+                    price: formData.price,
+                    image: formData.image_urls[0],
+                    description: formData.description,
+                    featured: formData.featured
+                  });
+                }}
+              >
+                <Heart 
+                  className={`w-5 h-5 mr-2 ${isFavorite(bouquet.id) ? 'fill-[#dc267f] text-[#dc267f]' : 'text-primary'}`} 
+                  strokeWidth={2}
+                />
+                {isFavorite(bouquet.id) ? 'Saved' : 'Save to Favorites'}
+              </Button>
+            </div>
+
+            {/* Save Button */}
+            <div className="flex justify-end gap-3 pt-4 border-t">
+              <Button
+                variant="outline"
+                onClick={handleClose}
+                className="w-full sm:w-auto"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSave}
+                disabled={saving}
+                className="w-full sm:w-auto gap-2 bg-primary hover:bg-primary-dark text-primary-foreground"
+              >
+                {saving ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4 h-4" />
+                    Save Changes
+                  </>
+                )}
+              </Button>
             </div>
           </div>
         </div>

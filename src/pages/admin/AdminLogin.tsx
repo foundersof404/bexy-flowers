@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,31 +10,43 @@ import { useToast } from "@/hooks/use-toast";
 
 const GOLD_COLOR = "rgb(199, 158, 72)";
 
-const ADMIN_USERNAME = "admin";
-const ADMIN_PASSWORD = "admin123";
+// Admin accounts
+const ADMIN_ACCOUNTS = [
+  { username: "admin", password: "admin123", displayName: "Admin" },
+  { username: "Rebecca", password: "Rebecca1020@#", displayName: "Rebecca" },
+];
 
 const AdminLogin = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
+  
+  // Get the page user was trying to access before being redirected to login
+  const from = (location.state as any)?.from || "/admin/dashboard";
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Check credentials
-    if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+    // Check credentials against all admin accounts
+    const account = ADMIN_ACCOUNTS.find(
+      (acc) => acc.username === username && acc.password === password
+    );
+
+    if (account) {
       setTimeout(() => {
         localStorage.setItem("adminAuthenticated", "true");
-        localStorage.setItem("adminUsername", username);
+        localStorage.setItem("adminUsername", account.displayName);
         setIsLoading(false);
         toast({
           title: "Welcome back!",
           description: "You've successfully logged in.",
         });
-        navigate("/admin/dashboard");
+        // Redirect to the page they were trying to access, or dashboard by default
+        navigate(from, { replace: true });
       }, 1000);
     } else {
       setIsLoading(false);

@@ -132,242 +132,100 @@ const BouquetCard = memo(({
   }, [bouquet, finalPrice, addToCart]);
 
   return (
-    <motion.div
+    <div
       ref={cardRef}
-      initial={{ opacity: 0, y: 100 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-100px" }}
-      transition={{
-        duration: 1.2,
-        delay: index * 0.2,
-        ease: [0.22, 1, 0.36, 1]
-      }}
       className="group relative cursor-pointer"
       onClick={handleClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      style={{ willChange: 'transform, opacity' }}
     >
-      <div className="relative aspect-[3/4] overflow-hidden rounded-sm bg-black">
-        <motion.div
-          className="absolute inset-0"
-          animate={{
-            scale: isHovered ? 1.08 : 1,
-          }}
-          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-          style={{ willChange: 'transform' }}
-        >
-          <OptimizedImage
-            src={bouquet.image}
-            alt={bouquet.name}
-            width={400}
-            height={500}
-            className="w-full h-full object-cover"
-            loading="lazy"
-            decoding="async"
-            priority={index < 4}
-            style={{ willChange: 'transform' }}
-          />
-        </motion.div>
+      {/* Badge - Top Left (only if not out of stock) */}
+      {badge && !bouquet.is_out_of_stock && (
+        <div className="absolute top-2 left-2 z-10 bg-white px-2 py-0.5 text-[9px] sm:text-[10px] font-semibold tracking-wide">
+          {badge}
+        </div>
+      )}
 
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent opacity-80" />
+      {/* Image Container - Clean with light background */}
+      <div className="relative aspect-[3/4] overflow-hidden bg-[#F5F5F5]">
+        <OptimizedImage
+          src={bouquet.image}
+          alt={bouquet.name}
+          className={`w-full h-full object-cover object-center ${bouquet.is_out_of_stock ? 'grayscale' : ''}`}
+          loading="lazy"
+          decoding="async"
+          priority={index < 4}
+        />
 
-        {/* Badge */}
-        {badge && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.2 + 0.4 }}
-            className="absolute top-2 sm:top-3 md:top-4 right-2 sm:right-3 md:right-4 z-10"
-            style={{ willChange: 'transform, opacity' }}
-          >
-            <div className="px-1.5 sm:px-2 md:px-3 py-0.5 sm:py-1 bg-white/10 backdrop-blur-md border border-white/20 rounded-sm">
-              <span className="text-white text-[8px] sm:text-[10px] md:text-xs font-bold tracking-wider md:tracking-widest">
-                {badge}
-              </span>
-            </div>
-          </motion.div>
-        )}
-
-        {/* Out of Stock Badge */}
+        {/* Out of Stock Overlay */}
         {bouquet.is_out_of_stock && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.2 + 0.4 }}
-            className="absolute top-2 sm:top-3 md:top-4 right-2 sm:right-3 md:right-4 z-10"
-            style={{ willChange: 'transform, opacity' }}
-          >
-            <div className="px-1.5 sm:px-2 md:px-3 py-0.5 sm:py-1 bg-red-600/90 backdrop-blur-md border border-red-400/50 rounded-sm">
-              <span className="text-white text-[8px] sm:text-[10px] md:text-xs font-bold tracking-wider md:tracking-widest">
+          <div className="absolute inset-0 bg-gray-500/40 flex items-center justify-center z-10">
+            <div className="bg-white/95 px-4 py-2 rounded-sm shadow-lg">
+              <span className="text-gray-800 text-xs sm:text-sm font-bold tracking-wider">
                 OUT OF STOCK
               </span>
             </div>
-          </motion.div>
+          </div>
         )}
 
-        {/* Favorite Button */}
-        <motion.button
+        {/* Favorite Button - Hidden by default, shows on hover */}
+        <button
           ref={heartButtonRef}
-          className="absolute top-2 sm:top-3 md:top-4 left-2 sm:left-3 md:left-4 z-10 w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center"
-          style={{
-            background: isFav ? 'rgba(220, 38, 127, 0.2)' : 'rgba(255, 255, 255, 0.1)',
-            backdropFilter: 'blur(8px)',
-            border: '1px solid rgba(255, 255, 255, 0.2)'
-          }}
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-          transition={{ duration: 0.3 }}
+          className="absolute top-2 right-2 z-10 w-8 h-8 rounded-full bg-white/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200"
           onClick={handleFavoriteClick}
         >
           <Heart 
-            className={`w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 ${isFav ? 'fill-[#dc267f] text-[#dc267f]' : 'text-white'}`} 
-            strokeWidth={2} 
+            className={`w-4 h-4 ${isFav ? 'fill-[#dc267f] text-[#dc267f]' : 'text-black'}`} 
+            strokeWidth={1.5} 
           />
-        </motion.button>
+        </button>
 
-        {/* Quick View Button */}
-        <motion.button
-          className="absolute top-10 sm:top-12 md:top-16 left-2 sm:left-3 md:left-4 z-10 w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center"
-          style={{
-            background: 'rgba(255, 255, 255, 0.1)',
-            backdropFilter: 'blur(8px)',
-            border: '1px solid rgba(255, 255, 255, 0.2)'
-          }}
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-          transition={{ duration: 0.3 }}
-          onClick={(e) => {
-            e.stopPropagation();
-            onBouquetClick(bouquet);
-          }}
+        {/* Add to Cart Button - Under favorite button */}
+        <button
+          className="absolute top-12 right-2 z-10 w-8 h-8 rounded-full bg-white/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+          onClick={handleAddToCart}
+          disabled={bouquet.is_out_of_stock}
         >
-          <Eye className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 text-white" strokeWidth={2} />
-        </motion.button>
-
-        {/* Hover Overlay with Description */}
-        <motion.div
-          className="absolute inset-0 flex flex-col justify-end p-6 md:p-8"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: isHovered ? 1 : 0 }}
-          transition={{ duration: 0.4 }}
-          style={{ willChange: 'opacity' }}
-        >
-          <motion.div
-            initial={{ y: 20, opacity: 0 }}
-            animate={{
-              y: isHovered ? 0 : 20,
-              opacity: isHovered ? 1 : 0
-            }}
-            transition={{ duration: 0.4, delay: 0.1 }}
-            className="space-y-2"
-            style={{ willChange: 'transform, opacity' }}
-          >
-            <p className="text-white/80 text-xs tracking-widest uppercase">
-              {bouquet.displayCategory || bouquet.category || "Collection"}
-            </p>
-            <p className="text-white/60 text-sm leading-relaxed max-w-xs line-clamp-2">
-              {bouquet.description}
-            </p>
-          </motion.div>
-        </motion.div>
-
-        {/* Decorative Corner Borders */}
-        <motion.div
-          className="absolute top-0 left-0 w-12 h-12 border-t-2 border-l-2 border-white/30"
-          initial={{ opacity: 0, scale: 0 }}
-          animate={{
-            opacity: isHovered ? 1 : 0,
-            scale: isHovered ? 1 : 0
-          }}
-          transition={{ duration: 0.4 }}
-          style={{ willChange: 'transform, opacity' }}
-        />
-        <motion.div
-          className="absolute bottom-0 right-0 w-12 h-12 border-b-2 border-r-2 border-white/30"
-          initial={{ opacity: 0, scale: 0 }}
-          animate={{
-            opacity: isHovered ? 1 : 0,
-            scale: isHovered ? 1 : 0
-          }}
-          transition={{ duration: 0.4 }}
-          style={{ willChange: 'transform, opacity' }}
-        />
+          <ShoppingCart 
+            className="w-4 h-4 text-black" 
+            strokeWidth={1.5} 
+          />
+        </button>
       </div>
 
-      {/* Card Info Below Image */}
-      <motion.div
-        className="mt-2 sm:mt-4 md:mt-6 space-y-1 sm:space-y-2"
-        initial={{ opacity: 0, y: 10 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ delay: index * 0.2 + 0.5, duration: 0.6 }}
-        style={{ willChange: 'transform, opacity' }}
-      >
-        <div className="flex items-start justify-between gap-1">
-          <div className="flex-1 min-w-0">
-            <h3 className="text-[10px] sm:text-sm md:text-xl lg:text-2xl font-black tracking-wide md:tracking-ultra-wide text-foreground truncate">
-              {bouquet.name.toUpperCase()}
-            </h3>
-            <p className="text-[8px] sm:text-[10px] md:text-xs tracking-wider md:tracking-widest uppercase text-muted-foreground mt-0.5">
-              {bouquet.displayCategory || bouquet.category || "Collection"}
-            </p>
-          </div>
-          <div className="text-right flex-shrink-0">
+      {/* Card Info Below Image - Minimal Style */}
+      <div className="mt-2 space-y-0.5">
+        {/* Category */}
+        <p className="text-[10px] text-gray-600 font-normal">
+          {bouquet.displayCategory || bouquet.category || "Collection"}
+        </p>
+        
+        {/* Name and Price on same line */}
+        <div className="flex items-start justify-between gap-2">
+          <h3 className="font-luxury text-xs font-normal text-black leading-tight flex-1">
+            {bouquet.name}
+          </h3>
+          
+          {/* Price */}
+          <div className="flex items-center gap-1 flex-shrink-0">
             {bouquet.discount_percentage && bouquet.discount_percentage > 0 ? (
-              <div>
-                <p className="text-[8px] sm:text-xs line-through text-muted-foreground">
-                  ${bouquet.price.toFixed(2)}
+              <>
+                <p className="text-xs font-medium text-black">
+                  €{finalPrice.toFixed(0)}
                 </p>
-                <p className="text-xs sm:text-sm md:text-lg font-bold tracking-wider text-foreground">
-                  ${finalPrice.toFixed(2)}
+                <p className="text-[10px] text-gray-400 line-through">
+                  €{bouquet.price.toFixed(0)}
                 </p>
-              </div>
+              </>
             ) : (
-              <p className="text-xs sm:text-sm md:text-lg font-bold tracking-wider text-foreground">
-                ${bouquet.price.toFixed(2)}
+              <p className="text-xs font-medium text-black">
+                €{bouquet.price.toFixed(0)}
               </p>
             )}
           </div>
         </div>
-
-        {/* Add to Cart Button */}
-        <motion.button
-          className={`w-full h-8 sm:h-10 md:h-12 rounded-sm font-semibold text-white flex items-center justify-center gap-1 sm:gap-2 relative overflow-hidden transition-all duration-200 ${
-            bouquet.is_out_of_stock ? 'opacity-50 cursor-not-allowed' : ''
-          }`}
-          style={{
-            background: bouquet.is_out_of_stock 
-              ? 'linear-gradient(90deg, #9CA3AF 0%, #D1D5DB 100%)'
-              : 'linear-gradient(90deg, #B88A44 0%, #F6E3B5 100%)',
-            boxShadow: bouquet.is_out_of_stock 
-              ? '0 4px 12px rgba(156, 163, 175, 0.3)'
-              : '0 4px 12px rgba(184, 138, 68, 0.3)'
-          }}
-          whileHover={bouquet.is_out_of_stock ? {} : { scale: 1.02 }}
-          whileTap={bouquet.is_out_of_stock ? {} : { scale: 0.98 }}
-          disabled={bouquet.is_out_of_stock}
-          onClick={handleAddToCart}
-        >
-          <ShoppingCart className="w-3 h-3 sm:w-4 sm:h-4 relative z-10" strokeWidth={2} />
-          <span className="relative z-10 text-[10px] sm:text-xs md:text-sm">
-            {bouquet.is_out_of_stock ? 'Out of Stock' : 'Add to Cart'}
-          </span>
-        </motion.button>
-
-        {/* Animated Underline */}
-        <motion.div
-          className="h-px bg-gradient-to-r from-foreground via-foreground/50 to-transparent"
-          initial={{ scaleX: 0 }}
-          animate={{ scaleX: isHovered ? 1 : 0 }}
-          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-          style={{
-            originX: 0,
-            willChange: 'transform'
-          }}
-        />
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 });
 
@@ -378,7 +236,7 @@ const BouquetGridComponent = ({ bouquets, onBouquetClick, selectedCategory }: Bo
   const visibleBouquets = bouquets;
 
   return (
-    <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-3 lg:gap-12 w-full">
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6 w-full">
       {visibleBouquets.map((bouquet, index) => (
         <BouquetCard
           key={bouquet.id}

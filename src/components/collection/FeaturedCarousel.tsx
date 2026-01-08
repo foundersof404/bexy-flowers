@@ -45,26 +45,11 @@ export const FeaturedCarousel = ({ bouquets, onBouquetClick }: FeaturedCarouselP
   }, []);
 
   return (
-    <section className="py-12 sm:py-16 md:py-20 relative overflow-hidden">
+    <section className="py-8 sm:py-12 md:py-16 lg:py-20 relative overflow-hidden">
       <div 
         ref={carouselRef}
         className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
       >
-        {/* Section Header */}
-        <motion.div
-          className="text-center mb-8 sm:mb-12 md:mb-16"
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-        >
-          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-luxury text-foreground mb-3 sm:mb-4 px-2">
-            Featured <span className="text-primary">Masterpieces</span>
-          </h2>
-          <p className="text-muted-foreground text-sm sm:text-base md:text-lg max-w-2xl mx-auto font-body px-4">
-            Our most coveted designs, crafted with rare flowers and premium materials
-          </p>
-        </motion.div>
 
         {/* Carousel Container */}
         <div className="relative">
@@ -105,7 +90,7 @@ export const FeaturedCarousel = ({ bouquets, onBouquetClick }: FeaturedCarouselP
             {bouquets.map((bouquet, index) => (
               <SwiperSlide
                 key={bouquet.id}
-                className="!w-[280px] sm:!w-80 !h-[360px] sm:!h-96"
+                className="!w-[280px] sm:!w-80 md:!w-[400px] lg:!w-[450px] !h-[360px] sm:!h-96 md:!h-[500px] lg:!h-[550px]"
               >
                 <motion.div
                   className="relative h-full group cursor-pointer"
@@ -114,103 +99,51 @@ export const FeaturedCarousel = ({ bouquets, onBouquetClick }: FeaturedCarouselP
                   onClick={() => onBouquetClick(bouquet)}
                 >
                   {/* Card */}
-                  <div className="relative h-full bg-card/30 backdrop-blur-sm border border-border/20 overflow-hidden shadow-2xl">
+                  <div className="relative h-full bg-white border border-gray-200 overflow-hidden shadow-xl hover:shadow-2xl transition-shadow duration-300">
                     {/* Image */}
-                    <div className="relative h-2/3 overflow-hidden">
+                    <div className="relative h-2/3 overflow-hidden bg-[#F5F5F5]">
                       <OptimizedImage
                         src={bouquet.image}
                         alt={bouquet.name}
-                        width={400}
-                        height={300}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        width={450}
+                        height={550}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                         priority={true}
                       />
                       
-                      {/* Overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                      
-                      {/* Stock & Discount Badges */}
-                      <div className="absolute top-3 left-3 flex flex-col gap-2 z-10">
-                        {bouquet.is_out_of_stock && (
-                          <Badge className="bg-red-600 text-white text-xs sm:text-sm px-2 py-1 font-bold border-2 border-white/50 shadow-lg">
-                            OUT OF STOCK
-                          </Badge>
-                        )}
-                        {!bouquet.is_out_of_stock && (
-                          <Badge className="bg-green-600 text-white text-xs sm:text-sm px-2 py-1 font-bold border-2 border-white/50 shadow-lg">
-                            IN STOCK
-                          </Badge>
-                        )}
-                        {bouquet.discount_percentage && bouquet.discount_percentage > 0 && (
-                          <Badge className="bg-red-500 text-white text-xs sm:text-sm px-2 py-1 font-bold border-2 border-white/50 shadow-lg">
-                            {bouquet.discount_percentage}% OFF
-                          </Badge>
-                        )}
-                      </div>
-
-                      {/* Action Buttons */}
-                      <div className={`absolute ${bouquet.discount_percentage && bouquet.discount_percentage > 0 ? 'top-20' : 'top-3'} right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-3 group-hover:translate-x-0 z-10`}>
-                        <Button
-                          size="icon"
-                          variant="secondary"
-                          className="w-8 h-8 bg-white/90 hover:bg-white text-black"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onBouquetClick(bouquet);
-                          }}
-                        >
-                          <Eye className="w-3 h-3" />
-                        </Button>
-                        <Button
-                          size="icon"
-                          variant="secondary"
-                          className={`w-8 h-8 text-white ${
-                            bouquet.is_out_of_stock 
-                              ? 'bg-gray-400 hover:bg-gray-400 cursor-not-allowed' 
-                              : 'bg-[#C79E48] hover:bg-[#8B6F3A]'
-                          }`}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (!bouquet.is_out_of_stock) {
-                              // Add to cart logic
-                            }
-                          }}
-                          disabled={bouquet.is_out_of_stock}
-                        >
-                          <ShoppingCart className="w-3 h-3" />
-                        </Button>
-                      </div>
+                      {/* Badge - Top Left */}
+                      {bouquet.discount_percentage && bouquet.discount_percentage > 0 && (
+                        <div className="absolute top-3 left-3 z-10 bg-white px-3 py-1 text-xs font-semibold tracking-wide shadow-md">
+                          {bouquet.discount_percentage}% OFF
+                        </div>
+                      )}
                     </div>
                     
-                    {/* Content */}
-                    <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-card/95 to-transparent backdrop-blur-sm">
-                      <h3 className="text-lg font-luxury text-foreground mb-2">
+                    {/* Content - Below Image */}
+                    <div className="p-4 md:p-6 bg-white">
+                      <p className="text-xs text-gray-600 font-normal mb-1">
+                        {bouquet.displayCategory || bouquet.category || "Collection"}
+                      </p>
+                      <h3 className="font-luxury text-base md:text-lg font-normal text-black mb-2 leading-tight">
                         {bouquet.name}
                       </h3>
-                      <p className="text-sm text-muted-foreground mb-3 line-clamp-2 font-body">
-                        {bouquet.description}
-                      </p>
-                      <div className="flex flex-col gap-1">
+                      <div className="flex items-center gap-2">
                         {bouquet.discount_percentage && bouquet.discount_percentage > 0 ? (
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm line-through text-gray-400">
-                              ${bouquet.price.toFixed(2)}
+                          <>
+                            <span className="text-base md:text-lg font-medium text-black">
+                              €{(bouquet.price * (1 - bouquet.discount_percentage / 100)).toFixed(0)}
                             </span>
-                            <span className="text-xl font-luxury text-red-600">
-                              ${(bouquet.price * (1 - bouquet.discount_percentage / 100)).toFixed(2)}
+                            <span className="text-sm text-gray-400 line-through">
+                              €{bouquet.price.toFixed(0)}
                             </span>
-                          </div>
+                          </>
                         ) : (
-                          <span className="text-xl font-luxury text-[#C79E48]">
-                            ${bouquet.price.toFixed(2)}
+                          <span className="text-base md:text-lg font-medium text-black">
+                            €{bouquet.price.toFixed(0)}
                           </span>
                         )}
                       </div>
                     </div>
-                    
-                    {/* Gold accent lines */}
-                    <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-[#C79E48] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                    <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-[#C79E48] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                   </div>
                 </motion.div>
               </SwiperSlide>
