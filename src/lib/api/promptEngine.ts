@@ -461,10 +461,16 @@ export function buildAdvancedPrompt(options: PromptBuilderOptions): BuiltPrompt 
   const sortedFlowers = [...flowers].sort((a, b) => b.quantity - a.quantity);
   const flowerDescriptions: string[] = [];
   
+  // Track unique colors for strict color enforcement
+  const uniqueColors = new Set<string>();
+  
   sortedFlowers.forEach(f => {
     const colorName = f.flower.colorName.toLowerCase();
     const flowerFamily = f.flower.family.toLowerCase();
     const qty = f.quantity;
+    
+    // Track this color
+    uniqueColors.add(colorName);
     
     // Get detailed visual for this flower type
     const visual = FLOWER_VISUALS[flowerFamily];
@@ -472,13 +478,21 @@ export function buildAdvancedPrompt(options: PromptBuilderOptions): BuiltPrompt 
     
     if (visual && qty > 0) {
       // Include bloom shape and petal style for realistic rendering
-      flowerDescriptions.push(`${qty} fresh ${colorVisual} ${flowerFamily} with ${visual.bloomShape}, ${visual.petalStyle}`);
+      // STRICT COLOR: Emphasize the exact color multiple times
+      flowerDescriptions.push(`exactly ${qty} ${colorVisual} colored ${flowerFamily} flowers only, all ${colorName} color`);
     } else if (qty > 0) {
-      flowerDescriptions.push(`${qty} fresh ${colorVisual} ${flowerFamily} flowers`);
+      flowerDescriptions.push(`exactly ${qty} ${colorVisual} colored ${flowerFamily} flowers only, all ${colorName} color`);
     }
   });
   
   const flowersText = flowerDescriptions.join(', ');
+  
+  // Build strict color enforcement text
+  const colorList = Array.from(uniqueColors);
+  const isSingleColor = colorList.length === 1;
+  const colorEnforcement = isSingleColor 
+    ? `IMPORTANT: ALL flowers must be exactly ${colorList[0]} color only, no other colors, no pink, no white, no variations, uniform ${colorList[0]} color throughout`
+    : `flowers in these exact colors only: ${colorList.join(', ')}, no other colors`;
   
   // Build PRECISE prompt focused on user inputs only
   // Pollinations Flux model works best with clear, structured descriptions
@@ -536,10 +550,17 @@ export function buildAdvancedPrompt(options: PromptBuilderOptions): BuiltPrompt 
     };
     const sizeDesc = sizeDescriptions[size.toLowerCase()] || 'medium-sized';
     
+    // Build strict shape enforcement for boxes
+    const allBoxShapes = ['round', 'square', 'heart', 'rectangle', 'circular', 'cylinder'];
+    const excludedShapes = allBoxShapes.filter(s => s !== shape.toLowerCase() && !shapeConfig.shape.toLowerCase().includes(s));
+    const shapeEnforcement = `IMPORTANT: box must be exactly ${shape} shape only, not ${excludedShapes.join(', not ')}`;
+    
     // Build detailed box prompt - 3/4 angle view like reference images
     parts.push(`${sizeDesc} ${shapeConfig.shape} made of ${boxMaterial} material`);
+    parts.push(`${shapeEnforcement}`);
     parts.push(`box is open with lid removed`);
     parts.push(`${totalFlowers} real fresh flowers inside: ${flowersText}`);
+    parts.push(`${colorEnforcement}`);
     parts.push(`${shapeConfig.arrangement}`);
     parts.push(`all flower heads facing upward showing full beautiful blooms`);
     parts.push(`flowers creating a lush dome shape rising above the box rim`);
@@ -572,7 +593,9 @@ export function buildAdvancedPrompt(options: PromptBuilderOptions): BuiltPrompt 
     if (wrapShape === 'heart') {
       // Heart-shaped wrapped bouquet - like Image 1 reference
       parts.push(`${sizeDesc} heart-shaped flower bouquet arrangement`);
+      parts.push(`IMPORTANT: bouquet must be arranged in heart shape only, not round, not oval, not traditional bouquet shape`);
       parts.push(`${totalFlowers} real fresh flowers: ${flowersText}`);
+      parts.push(`${colorEnforcement}`);
       parts.push(`flowers arranged in a perfect heart shape when viewed from above`);
       parts.push(`roses densely packed to form a romantic heart silhouette`);
       parts.push(`wrapped in ${wrapMaterial} with decorative pleated ruffled border around the heart`);
@@ -583,7 +606,9 @@ export function buildAdvancedPrompt(options: PromptBuilderOptions): BuiltPrompt 
     } else {
       // Classic wrapped bouquet
       parts.push(`${sizeDesc} hand-tied flower bouquet`);
+      parts.push(`IMPORTANT: traditional round dome-shaped bouquet, not heart-shaped, not box arrangement`);
       parts.push(`${totalFlowers} real fresh flowers: ${flowersText}`);
+      parts.push(`${colorEnforcement}`);
       parts.push(`flowers arranged in cascading dome shape with focal flowers in center`);
       parts.push(`professionally wrapped in ${wrapMaterial}`);
       parts.push(`paper gathered and tied with matching satin ribbon bow`);
@@ -621,8 +646,42 @@ export function buildAdvancedPrompt(options: PromptBuilderOptions): BuiltPrompt 
   
   const positivePrompt = parts.join(', ');
   
-  // Build negative prompt
-  const negativePrompt = includeNegative ? buildNegativePrompt() : '';
+  // Build negative prompt with color exclusions for single-color arrangements
+  let negativePrompt = includeNegative ? buildNegativePrompt() : '';
+  
+  // Add strict color exclusions when only one flower color is selected
+  if (isSingleColor && includeNegative) {
+    const selectedColor = colorList[0].toLowerCase();
+    const allColors = ['red', 'pink', 'white', 'yellow', 'blue', 'purple', 'orange', 'peach', 'burgundy', 'cream', 'lavender', 'coral'];
+    const excludedColors = allColors.filter(c => c !== selectedColor);
+    const colorExclusions = excludedColors.map(c => `${c} flowers, ${c} roses, ${c} petals`).join(', ');
+    negativePrompt = `${negativePrompt}, mixed colors, multicolored flowers, different colored flowers, color variations, ${colorExclusions}`;
+  }
+  
+  // Add strict shape exclusions for boxes
+  if (packageType === 'box' && includeNegative) {
+    const selectedShape = (boxShape || 'square').toLowerCase();
+    const shapeExclusions: Record<string, string> = {
+      'round': 'square box, rectangular box, heart-shaped box, sharp corners, angular box',
+      'square': 'round box, circular box, cylinder box, heart-shaped box, curved edges',
+      'heart': 'square box, round box, rectangular box, circular box, sharp corners',
+      'rectangle': 'square box, round box, circular box, heart-shaped box'
+    };
+    const excludeShapes = shapeExclusions[selectedShape] || '';
+    if (excludeShapes) {
+      negativePrompt = `${negativePrompt}, ${excludeShapes}`;
+    }
+  }
+  
+  // Add strict wrap shape exclusions
+  if (packageType === 'wrap' && includeNegative) {
+    const wrapShape = (boxShape || 'classic').toLowerCase();
+    if (wrapShape === 'heart') {
+      negativePrompt = `${negativePrompt}, round bouquet, traditional bouquet, oval arrangement, circular arrangement`;
+    } else {
+      negativePrompt = `${negativePrompt}, heart-shaped bouquet, heart arrangement, box arrangement`;
+    }
+  }
   
   // Build simple flower list for preview
   const flowerListSimple = flowers.map(f => `${f.quantity} ${f.flower.colorName} ${f.flower.family}`).join(', ');
