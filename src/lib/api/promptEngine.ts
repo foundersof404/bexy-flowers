@@ -202,13 +202,19 @@ export const NEGATIVE_PROMPTS = {
   flowers: [
     'wilted flowers', 'dead flowers', 'brown petals', 'damaged petals',
     'messy arrangement', 'scattered petals', 'drooping stems',
-    'yellow leaves', 'brown leaves', 'insects', 'bugs'
+    'yellow leaves', 'brown leaves', 'insects', 'bugs',
+    'artificial flowers', 'fake flowers', 'plastic flowers', 'silk flowers',
+    'eternal flowers', 'preserved flowers', 'foam flowers', 'paper flowers',
+    'synthetic flowers', 'fabric flowers', 'dried flowers', 'wax flowers',
+    'unrealistic flowers', 'cartoon flowers', '3d rendered flowers'
   ],
   packaging: [
     'torn paper', 'damaged box', 'dirty packaging', 'wrinkled ribbon',
     'cheap materials', 'plastic wrap visible', 'tape visible',
     'empty box', 'box without flowers', 'closed box', 'box lid on',
-    'cardboard texture visible', 'unfinished box edges', 'dented box'
+    'cardboard texture visible', 'unfinished box edges', 'dented box',
+    'loose ribbon', 'ribbon hanging down', 'untied ribbon', 'messy ribbon',
+    'ribbon at bottom', 'ribbon on floor', 'fallen ribbon', 'draped ribbon'
   ],
   composition: [
     'cluttered', 'busy background', 'distracting elements',
@@ -559,19 +565,26 @@ export function buildAdvancedPrompt(options: PromptBuilderOptions): BuiltPrompt 
     const shapeEnforcement = `IMPORTANT: box must be exactly ${shape} shape only, not ${excludedShapes.join(', not ')}`;
     
     // Build detailed box prompt - 3/4 angle view like reference images
+    // CRITICAL: Emphasize REAL FRESH flowers, not artificial
+    parts.push(`ultra realistic professional florist product photo`);
     parts.push(`${sizeDesc} ${shapeConfig.shape} made of ${boxMaterial} material`);
     parts.push(`${shapeEnforcement}`);
-    parts.push(`box is open with lid removed`);
-    parts.push(`${totalFlowers} real fresh flowers inside: ${flowersText}`);
+    parts.push(`luxury flower box arrangement, lid removed showing interior`);
+    
+    // STRONG emphasis on REAL FRESH flowers
+    parts.push(`${totalFlowers} REAL fresh-cut natural flowers from a florist shop: ${flowersText}`);
+    parts.push(`IMPORTANT: flowers must look 100% real and natural, freshly cut from garden`);
+    parts.push(`natural organic flower petals with realistic texture and subtle imperfections`);
+    parts.push(`visible natural petal veins, soft dewy appearance, lifelike colors`);
     parts.push(`${colorEnforcement}`);
     parts.push(`${shapeConfig.arrangement}`);
-    parts.push(`all flower heads facing upward showing full beautiful blooms`);
-    parts.push(`flowers creating a lush dome shape rising above the box rim`);
+    parts.push(`all ${totalFlowers} flowers clearly visible, densely packed, filling the entire box`);
+    parts.push(`flower heads facing upward showing full open blooms`);
+    parts.push(`flowers creating a lush overflowing dome shape rising above the box rim`);
     parts.push(`${shapeConfig.viewAngle}`);
     
-    // Add ribbon wrap if selected - matching flower color for elegant look
+    // Add ribbon wrap if selected - PRECISE placement instructions
     if (withRibbon) {
-      // Ribbon colors that complement the flower arrangement
       const ribbonColors: Record<string, string> = {
         'red': 'red satin',
         'pink': 'soft pink satin',
@@ -586,15 +599,16 @@ export function buildAdvancedPrompt(options: PromptBuilderOptions): BuiltPrompt 
         'lavender': 'lavender satin',
         'coral': 'coral satin'
       };
-      // Get first flower color for ribbon matching
       const firstFlowerColor = flowers[0]?.flower.colorName.toLowerCase() || 'gold';
       const ribbonColor = ribbonColors[firstFlowerColor] || 'satin';
-      parts.push(`elegant ${ribbonColor} ribbon wrapped horizontally around the middle of the box`);
-      parts.push(`ribbon tied in a beautiful decorative bow on the front of the box`);
+      // PRECISE ribbon placement - wrapped AROUND middle, bow on FRONT
+      parts.push(`IMPORTANT: elegant ${ribbonColor} ribbon wrapped tightly around the MIDDLE circumference of the box exterior`);
+      parts.push(`ribbon bow tied neatly on the FRONT CENTER of the box, NOT hanging loose, NOT at bottom`);
+      parts.push(`ribbon stays in place wrapped around box middle section`);
     }
     
-    parts.push(`elegant gold "Bexy Flowers" logo printed on the box side`);
-    parts.push(`box placed on a clean surface`);
+    parts.push(`elegant gold "Bexy Flowers" logo printed on the box front`);
+    parts.push(`box placed on clean white surface`);
     
   } else {
     // ENHANCED WRAP/BOUQUET DESCRIPTIONS - including heart shape option
@@ -619,11 +633,18 @@ export function buildAdvancedPrompt(options: PromptBuilderOptions): BuiltPrompt 
     
     // Check if heart-shaped wrap bouquet
     if (wrapShape === 'heart') {
-      // Heart-shaped wrapped bouquet - like Image 1 reference
+      // Heart-shaped wrapped bouquet
+      parts.push(`ultra realistic professional florist product photo`);
       parts.push(`${sizeDesc} heart-shaped flower bouquet arrangement`);
       parts.push(`IMPORTANT: bouquet must be arranged in heart shape only, not round, not oval, not traditional bouquet shape`);
-      parts.push(`${totalFlowers} real fresh flowers: ${flowersText}`);
+      
+      // STRONG emphasis on REAL FRESH flowers
+      parts.push(`${totalFlowers} REAL fresh-cut natural flowers from a florist shop: ${flowersText}`);
+      parts.push(`IMPORTANT: flowers must look 100% real and natural, freshly cut from garden`);
+      parts.push(`natural organic flower petals with realistic texture and subtle imperfections`);
+      parts.push(`visible natural petal veins, soft dewy appearance, lifelike colors`);
       parts.push(`${colorEnforcement}`);
+      parts.push(`all ${totalFlowers} flowers clearly visible in the arrangement`);
       parts.push(`flowers arranged in a perfect heart shape when viewed from above`);
       parts.push(`roses densely packed to form a romantic heart silhouette`);
       parts.push(`wrapped in ${wrapMaterial} with decorative pleated ruffled border around the heart`);
@@ -633,10 +654,17 @@ export function buildAdvancedPrompt(options: PromptBuilderOptions): BuiltPrompt 
       parts.push(`small gold "BEXY" brand tag on ribbon`);
     } else {
       // Classic wrapped bouquet
+      parts.push(`ultra realistic professional florist product photo`);
       parts.push(`${sizeDesc} hand-tied flower bouquet`);
       parts.push(`IMPORTANT: traditional round dome-shaped bouquet, not heart-shaped, not box arrangement`);
-      parts.push(`${totalFlowers} real fresh flowers: ${flowersText}`);
+      
+      // STRONG emphasis on REAL FRESH flowers
+      parts.push(`${totalFlowers} REAL fresh-cut natural flowers from a florist shop: ${flowersText}`);
+      parts.push(`IMPORTANT: flowers must look 100% real and natural, freshly cut from garden`);
+      parts.push(`natural organic flower petals with realistic texture and subtle imperfections`);
+      parts.push(`visible natural petal veins, soft dewy appearance, lifelike colors`);
       parts.push(`${colorEnforcement}`);
+      parts.push(`all ${totalFlowers} flowers clearly visible, densely arranged`);
       parts.push(`flowers arranged in cascading dome shape with focal flowers in center`);
       parts.push(`professionally wrapped in ${wrapMaterial}`);
       parts.push(`paper gathered and tied with matching satin ribbon bow`);
@@ -669,11 +697,13 @@ export function buildAdvancedPrompt(options: PromptBuilderOptions): BuiltPrompt 
     }
   }
   
-  // Technical quality - optimized for realistic product photography
-  parts.push(`professional florist product photography`);
-  parts.push(`pure white seamless background`);
-  parts.push(`soft diffused studio lighting with gentle shadows`);
-  parts.push(`sharp focus on flowers, 8K detail`);
+  // Technical quality - optimized for ULTRA REALISTIC product photography
+  parts.push(`photograph taken with professional DSLR camera`);
+  parts.push(`pure white seamless studio background`);
+  parts.push(`soft diffused natural studio lighting with gentle shadows`);
+  parts.push(`sharp focus on all flowers, ultra high resolution 8K detail`);
+  parts.push(`photorealistic, hyperrealistic, lifelike`);
+  parts.push(`real photograph, not illustration, not 3D render, not digital art`);
   
   const positivePrompt = parts.join(', ');
   
