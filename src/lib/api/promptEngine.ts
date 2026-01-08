@@ -403,6 +403,7 @@ export interface PromptBuilderOptions {
   color: string;
   flowers: Array<{ flower: EnhancedFlower; quantity: number }>;
   withGlitter: boolean;
+  withRibbon?: boolean;
   accessories: string[];
   stylePreset?: StylePreset;
   template?: string;
@@ -425,6 +426,7 @@ function generatePromptHash(options: PromptBuilderOptions): string {
     color: options.color,
     flowers: options.flowers.map(f => ({ id: f.flower.id, qty: f.quantity })),
     withGlitter: options.withGlitter,
+    withRibbon: options.withRibbon,
     accessories: options.accessories.sort(),
     stylePreset: options.stylePreset,
     template: options.template
@@ -448,6 +450,7 @@ export function buildAdvancedPrompt(options: PromptBuilderOptions): BuiltPrompt 
     color,
     flowers,
     withGlitter,
+    withRibbon = false,
     accessories,
     includeNegative = true
   } = options;
@@ -565,7 +568,32 @@ export function buildAdvancedPrompt(options: PromptBuilderOptions): BuiltPrompt 
     parts.push(`all flower heads facing upward showing full beautiful blooms`);
     parts.push(`flowers creating a lush dome shape rising above the box rim`);
     parts.push(`${shapeConfig.viewAngle}`);
-    parts.push(`elegant black "Bexy Flowers" logo printed on the box side`);
+    
+    // Add ribbon wrap if selected - matching flower color for elegant look
+    if (withRibbon) {
+      // Ribbon colors that complement the flower arrangement
+      const ribbonColors: Record<string, string> = {
+        'red': 'red satin',
+        'pink': 'soft pink satin',
+        'white': 'white satin',
+        'purple': 'lavender satin',
+        'blue': 'navy blue satin',
+        'yellow': 'gold satin',
+        'orange': 'coral satin',
+        'peach': 'champagne satin',
+        'burgundy': 'deep burgundy satin',
+        'cream': 'ivory satin',
+        'lavender': 'lavender satin',
+        'coral': 'coral satin'
+      };
+      // Get first flower color for ribbon matching
+      const firstFlowerColor = flowers[0]?.flower.colorName.toLowerCase() || 'gold';
+      const ribbonColor = ribbonColors[firstFlowerColor] || 'satin';
+      parts.push(`elegant ${ribbonColor} ribbon wrapped horizontally around the middle of the box`);
+      parts.push(`ribbon tied in a beautiful decorative bow on the front of the box`);
+    }
+    
+    parts.push(`elegant gold "Bexy Flowers" logo printed on the box side`);
     parts.push(`box placed on a clean surface`);
     
   } else {
@@ -623,19 +651,22 @@ export function buildAdvancedPrompt(options: PromptBuilderOptions): BuiltPrompt 
     parts.push(`subtle fine glitter dust sparkling on flower petals catching the light`);
   }
   
-  // Add accessories with exact descriptions
+  // Add accessories with MINIMAL descriptions to avoid affecting main flower arrangement
+  // Accessories should be subtle additions, not change the overall composition
   if (accessories.length > 0) {
     const accDescriptions: Record<string, string> = {
-      'crown': 'small decorative golden tiara crown placed on top center of flowers',
-      'graduation-hat': 'miniature black graduation mortarboard cap with gold tassel among flowers',
-      'bear': 'small cute plush teddy bear (10cm) sitting beside the arrangement',
-      'chocolate': 'elegant box of assorted chocolates placed next to flowers'
+      'crown': 'tiny golden crown accessory resting on flowers',
+      'graduation-hat': 'small graduation cap accessory placed on arrangement',
+      'bear': 'small plush bear toy placed beside the arrangement',
+      'chocolate': 'small chocolate box beside the flowers'
     };
-    accessories.forEach(acc => {
-      if (accDescriptions[acc]) {
-        parts.push(accDescriptions[acc]);
-      }
-    });
+    // Add accessories as a single grouped element to minimize prompt impact
+    const accessoryTexts = accessories
+      .map(acc => accDescriptions[acc])
+      .filter(Boolean);
+    if (accessoryTexts.length > 0) {
+      parts.push(`optional small accessories: ${accessoryTexts.join(', ')}`);
+    }
   }
   
   // Technical quality - optimized for realistic product photography
@@ -688,11 +719,13 @@ export function buildAdvancedPrompt(options: PromptBuilderOptions): BuiltPrompt 
   
   // Build human-readable preview
   const wrapShapeDisplay = packageType === 'wrap' && boxShape === 'heart' ? 'Heart-Shaped Bouquet' : 'Wrapped Bouquet';
+  const boxDisplay = packageType === 'box' ? `${boxShape || 'Square'} Box${withRibbon ? ' with Ribbon' : ''}` : wrapShapeDisplay;
   const previewParts: string[] = [
-    `📦 ${packageType === 'box' ? `${boxShape || 'Square'} Box` : wrapShapeDisplay} (${size}, ${color})`,
+    `📦 ${boxDisplay} (${size}, ${color})`,
     `🌸 ${totalFlowers} flowers: ${flowerListSimple}`,
   ];
   if (withGlitter) previewParts.push('✨ With glitter');
+  if (withRibbon && packageType === 'box') previewParts.push('🎀 With satin ribbon');
   if (accessories.length > 0) previewParts.push(`🎁 Accessories: ${accessories.join(', ')}`);
   
   return {
