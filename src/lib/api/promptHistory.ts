@@ -24,6 +24,7 @@ export interface PromptHistoryEntry {
     color: string;
     flowers: Array<{ id: string; name: string; quantity: number }>;
     withGlitter: boolean;
+    withRibbon?: boolean;
     accessories: string[];
     stylePreset?: string;
     template?: string;

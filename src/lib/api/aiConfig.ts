@@ -18,10 +18,13 @@ export const AI_CONFIG = {
     autoEnhancePrompts: true,
     
     // Maximum prompt length (characters)
-    // Increased to accommodate detailed prompts with branding, flower arrangements, and style presets
-    // Pollinations/Flux can handle longer prompts well (Flux has 12B parameters)
-    // Enhanced prompts with negative prompts and arrangement positions need more space
-    maxPromptLength: 800,
+    // Increased to accommodate highly detailed prompts with:
+    // - Flower-specific visual descriptions (petal shapes, bloom styles)
+    // - Size-aware composition rules
+    // - Accessory placement details
+    // - Style presets and templates
+    // Note: Serverless function enforces 1000 char limit for security
+    maxPromptLength: 1000,
   },
 
   /**
@@ -60,7 +63,22 @@ export const AI_CONFIG = {
       params: {
         // NOTE: Only basic parameters are supported in new API
         // enhance, nologo, seed may cause 400 errors - not including them
-        model: 'flux', // Using 'flux' model (confirmed to work)
+        // 
+        // Available Pollinations models (from pricing table):
+        // - 'flux': Flux Schnell - Fast, 5K images/pollen (tends to look 3D/synthetic)
+        // - 'turbo': SDXL Turbo - 3.3K images/pollen, good balance
+        // - 'gptimage': GPT Image 1 Mini - Best for photorealism, text generation
+        // - 'gptimage-large': GPT Image 1.5 - Higher quality, slower
+        // - 'seedream': Seedream 4.0 - Good quality, 35 images/pollen
+        // - 'seedream-pro': Seedream 4.5 Pro - Best quality, 25 images/pollen
+        // - 'kontext': FLUX.1 Kontext - Better context understanding
+        // - 'nanobanana': NanoBanana - Affordable option
+        // 
+        // RECOMMENDED for realistic flower photography:
+        // 'gptimage' - Best photorealism, understands text/logos well
+        // 'seedream-pro' - High quality, good for product photos
+        // 'turbo' - Good balance of quality and cost
+        model: 'gptimage', // Changed from 'flux' for more realistic results
         width: 1024, // High resolution for quality
         height: 1024, // High resolution for quality
       }

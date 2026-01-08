@@ -10,11 +10,30 @@ import { useToast } from "@/hooks/use-toast";
 
 const GOLD_COLOR = "rgb(199, 158, 72)";
 
-// Admin accounts
-const ADMIN_ACCOUNTS = [
-  { username: "admin", password: "admin123", displayName: "Admin" },
-  { username: "Rebecca", password: "Rebecca1020@#", displayName: "Rebecca" },
-];
+// Admin credentials from environment variables (secure)
+const getAdminAccounts = () => {
+  const accounts = [];
+  
+  // Primary admin account
+  if (import.meta.env.VITE_ADMIN_USERNAME && import.meta.env.VITE_ADMIN_PASSWORD) {
+    accounts.push({
+      username: import.meta.env.VITE_ADMIN_USERNAME,
+      password: import.meta.env.VITE_ADMIN_PASSWORD,
+      displayName: import.meta.env.VITE_ADMIN_DISPLAY_NAME || "Admin"
+    });
+  }
+  
+  // Secondary admin account
+  if (import.meta.env.VITE_ADMIN2_USERNAME && import.meta.env.VITE_ADMIN2_PASSWORD) {
+    accounts.push({
+      username: import.meta.env.VITE_ADMIN2_USERNAME,
+      password: import.meta.env.VITE_ADMIN2_PASSWORD,
+      displayName: import.meta.env.VITE_ADMIN2_DISPLAY_NAME || "Admin 2"
+    });
+  }
+  
+  return accounts;
+};
 
 const AdminLogin = () => {
   const [username, setUsername] = useState("");
@@ -31,8 +50,9 @@ const AdminLogin = () => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Check credentials against all admin accounts
-    const account = ADMIN_ACCOUNTS.find(
+    // Check credentials against all admin accounts from env vars
+    const adminAccounts = getAdminAccounts();
+    const account = adminAccounts.find(
       (acc) => acc.username === username && acc.password === password
     );
 

@@ -56,8 +56,22 @@ const ALLOWED_ORIGINS = [
   'http://localhost:5174', // Dev only
 ];
 
-// Allowed models
-const ALLOWED_MODELS = ['flux', 'flux-realism', 'flux-anime', 'flux-3d', 'turbo'];
+// Allowed models (from Pollinations pricing table)
+// See: https://pollinations.ai/pricing
+const ALLOWED_MODELS = [
+  // Flux variants (fast, affordable)
+  'flux', 'flux-realism', 'flux-anime', 'flux-3d',
+  // SDXL/Turbo (good balance)
+  'turbo', 'zimage',
+  // GPT Image models (best photorealism, text/logo support)
+  'gptimage', 'gptimage-large',
+  // Seedream models (high quality)
+  'seedream', 'seedream-pro',
+  // FLUX Kontext (better context understanding)
+  'kontext',
+  // NanoBanana (affordable)
+  'nanobanana', 'nanobanana-pro'
+];
 
 /**
  * Get client IP address
