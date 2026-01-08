@@ -206,48 +206,6 @@ const Collection = () => {
           </div>
         </section>
         
-        {/* Featured Collections Divider - Enhanced with smooth animations */}
-        <motion.div 
-          className="relative py-8 sm:py-12 md:py-16 text-center"
-          style={{ background: 'linear-gradient(180deg, #F5F1E8 0%, #FAF8F3 100%)' }}
-          initial={{ opacity: 0, y: 50 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: false, amount: 0.5 }}
-          transition={{ duration: 0.8, ease: [0.23, 1, 0.32, 1] }}
-        >
-          <motion.div 
-            className="absolute inset-0 flex items-center justify-center"
-            initial={{ scaleX: 0 }}
-            whileInView={{ scaleX: 1 }}
-            viewport={{ once: false, amount: 0.5 }}
-            transition={{ duration: 1.2, delay: 0.2, ease: "easeInOut" }}
-          >
-            <div className="h-px w-full bg-gradient-to-r from-transparent via-[#C79E48] to-transparent" />
-          </motion.div>
-          <motion.h2 
-            className="font-luxury text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold text-[#3D3027] relative z-10 px-3 sm:px-4 md:px-6 lg:px-8 inline-block"
-            style={{
-              background: 'linear-gradient(180deg, #FAF8F3 0%, #F5F1E8 100%)',
-              filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.05))',
-              letterSpacing: '0.05em'
-            }}
-            initial={{ scale: 0.8, opacity: 0 }}
-            whileInView={{ scale: 1, opacity: 1 }}
-            viewport={{ once: false, amount: 0.5 }}
-            transition={{ duration: 0.6, delay: 0.4, ease: [0.23, 1, 0.32, 1] }}
-          >
-            FEATURED COLLECTIONS
-          </motion.h2>
-        </motion.div>
-        
-        {/* Featured Carousel */}
-        {!loading && featuredBouquets.length > 0 && (
-          <FeaturedCarousel 
-            bouquets={featuredBouquets}
-            onBouquetClick={handleBouquetClick}
-          />
-        )}
-
         {/* Global stats for the collection (moved from hero) */}
         <CollectionStats />
 

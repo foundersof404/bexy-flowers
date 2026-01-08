@@ -11,10 +11,8 @@ export function register() {
         .then((registration) => {
           console.log('[SW] Service Worker registered successfully:', registration.scope);
 
-          // Check for updates periodically
-          setInterval(() => {
-            registration.update();
-          }, 60 * 60 * 1000); // Check every hour
+          // Service worker will check for updates automatically on page load
+          // No need for continuous background checking
 
           registration.onupdatefound = () => {
             const installingWorker = registration.installing;

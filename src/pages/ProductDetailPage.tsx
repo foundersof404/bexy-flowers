@@ -6,13 +6,7 @@ import {
   Heart,
   Plus,
   Minus,
-  Check,
-  ArrowLeft,
-  Star,
-  Crown,
-  Sparkles,
-  ArrowRight,
-  Eye
+  ArrowLeft
 } from 'lucide-react';
 import { useCartWithToast } from '@/hooks/useCartWithToast';
 import { useFavorites } from '@/contexts/FavoritesContext';
@@ -57,213 +51,11 @@ interface SizeOption {
 const sizeOptions: SizeOption[] = [
   { id: 'standard', name: 'Standard', priceModifier: 0 },
   { id: 'deluxe', name: 'Deluxe', priceModifier: 50 },
-  { id: 'grand', name: 'Grand', priceModifier: 100 }
+  { id: 'premium', name: 'Premium', priceModifier: 100 }
 ];
 
-// Suggested flowers data
-const suggestedFlowers = [
-  {
-    id: 'luxury-roses-collection',
-    title: 'Luxury Roses Collection',
-    price: 189,
-    image: bouquet2,
-    category: 'Premium Roses',
-    description: 'Exquisite collection of premium roses'
-  },
-  {
-    id: 'exotic-orchids',
-    title: 'Exotic Orchids',
-    price: 245,
-    image: bouquet3,
-    category: 'Exotic Flowers',
-    description: 'Rare orchids from tropical gardens'
-  },
-  {
-    id: 'spring-tulips',
-    title: 'Spring Tulips Symphony',
-    price: 165,
-    image: bouquet4,
-    category: 'Seasonal',
-    description: 'Fresh spring tulips in vibrant colors'
-  },
-  {
-    id: 'lavender-dreams',
-    title: 'Lavender Dreams',
-    price: 199,
-    image: bouquet5,
-    category: 'Aromatic',
-    description: 'Fragrant lavender with elegant arrangement'
-  }
-];
 
-// Real categories from UltraCategories component - using correct image paths
-// Note: Paths with special characters work fine with Vite - no encoding needed
-const allCategories = [
-  {
-    id: 1,
-    name: "WEDDINGS",
-    description: "Architectural bridal arrangements",
-    image: "/assets/wedding-events/wedding/IMG-20251126-WA0021.webp",
-    gradient: "from-rose-200/20 via-amber-100/30 to-yellow-200/20",
-    color: "from-rose-400/80 to-amber-300/90",
-    filterValue: "wedding-percent-events"
-  },
-  {
-    id: 2,
-    name: "VALENTINE'S",
-    description: "Romantic luxury collections",
-    image: "/assets/valentine/IMG_4172.webp",
-    gradient: "from-red-200/20 via-pink-100/30 to-rose-200/20",
-    color: "from-red-400/80 to-pink-300/90",
-    filterValue: "valentine"
-  },
-  {
-    id: 3,
-    name: "MOTHER'S DAY",
-    description: "Elegant tribute arrangements",
-    image: "/assets/mother day/IMG_8394.webp",
-    gradient: "from-pink-200/20 via-rose-100/30 to-lavender-200/20",
-    color: "from-pink-400/80 to-rose-300/90",
-    filterValue: "mother-day"
-  },
-  {
-    id: 4,
-    name: "BIRTHDAYS",
-    description: "Celebration masterpieces",
-    image: "/assets/birthday/IMG_3730 (1).webp",
-    gradient: "from-purple-200/20 via-violet-100/30 to-indigo-200/20",
-    color: "from-purple-400/80 to-violet-300/90",
-    filterValue: "birthday"
-  },
-  {
-    id: 5,
-    name: "ANNIVERSARIES",
-    description: "Timeless love expressions",
-    image: "/assets/red roses/red roses the letter J.webp",
-    gradient: "from-amber-200/20 via-yellow-100/30 to-gold-200/20",
-    color: "from-amber-400/80 to-yellow-300/90",
-    filterValue: "red-roses"
-  },
-  {
-    id: 6,
-    name: "CORPORATE",
-    description: "Professional luxury designs",
-    image: "/assets/wedding-events/events/IMG-20251126-WA0022.webp",
-    gradient: "from-slate-200/20 via-gray-100/30 to-zinc-200/20",
-    color: "from-slate-400/80 to-gray-300/90",
-    filterValue: "wedding-percent-events"
-  },
-  {
-    id: 8,
-    name: "SEASONAL",
-    description: "Limited edition collections",
-    image: "/assets/hand band/IMG_5392.webp",
-    gradient: "from-emerald-200/20 via-green-100/30 to-teal-200/20",
-    color: "from-emerald-400/80 to-green-300/90",
-    filterValue: "hand-band"
-  },
-  {
-    id: 9,
-    name: "GRADUATION",
-    description: "Achievement celebrations",
-    image: "/assets/graduation/IMG_0295.webp",
-    gradient: "from-blue-200/20 via-indigo-100/30 to-purple-200/20",
-    color: "from-blue-400/80 to-indigo-300/90",
-    filterValue: "graduation"
-  },
-  {
-    id: 10,
-    name: "LUXURY GIFTS",
-    description: "Premium gift arrangements",
-    image: "/assets/red roses/large red roses flower bouquet with gliter.webp",
-    gradient: "from-orange-200/20 via-amber-100/30 to-yellow-200/20",
-    color: "from-orange-400/80 to-amber-300/90",
-    filterValue: "red-roses"
-  }
-];
 
-// Function to get random 4 categories (with seed for consistency during same product view)
-const getRandomCategories = (seed?: string): typeof allCategories => {
-  // Use a seeded random if seed is provided to ensure same product shows same categories
-  // But different products will get different seeds
-  let array = [...allCategories];
-  
-  if (seed) {
-    // Simple seeded shuffle based on seed string
-    let hash = 0;
-    for (let i = 0; i < seed.length; i++) {
-      const char = seed.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
-      hash = hash & hash; // Convert to 32bit integer
-    }
-    
-    // Use hash to create consistent shuffling
-    for (let i = array.length - 1; i > 0; i--) {
-      const j = Math.abs(hash) % (i + 1);
-      [array[i], array[j]] = [array[j], array[i]];
-      hash = hash >>> 1; // Shift hash for next iteration
-    }
-  } else {
-    // Pure random shuffle
-    array.sort(() => Math.random() - 0.5);
-  }
-  
-  return array.slice(0, 4);
-};
-
-// Animation variants for page transitions
-const pageVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      duration: 0.8,
-      ease: [0.25, 0.46, 0.45, 0.94],
-      staggerChildren: 0.2
-    }
-  }
-};
-
-const columnVariants = {
-  hidden: {
-    opacity: 0,
-    x: (index: number) => index === 0 ? -100 : 100
-  },
-  visible: {
-    opacity: 1,
-    x: 0,
-    transition: {
-      duration: 1,
-      ease: [0.25, 0.46, 0.45, 0.94]
-    }
-  }
-};
-
-const imageVariants = {
-  hidden: { scale: 1.1, opacity: 0 },
-  visible: {
-    scale: 1,
-    opacity: 1,
-    transition: {
-      duration: 1.2,
-      ease: [0.25, 0.46, 0.45, 0.94]
-    }
-  }
-};
-
-const buttonVariants = {
-  rest: { scale: 1, y: 0 },
-  hover: {
-    scale: 1.05,
-    y: -2,
-    transition: {
-      type: "spring",
-      stiffness: 300,
-      damping: 20
-    }
-  },
-  tap: { scale: 0.95 }
-};
 
 // Quantity Selector Component
 const QuantitySelector = ({
@@ -273,31 +65,25 @@ const QuantitySelector = ({
   quantity: number;
   onQuantityChange: (qty: number) => void;
 }) => (
-  <div className="flex items-center space-x-3">
-    <span className="text-sm font-medium text-slate-600">Quantity</span>
-    <div className="flex items-center border border-amber-200 rounded-lg overflow-hidden">
-      <motion.button
-        className="p-2 hover:bg-amber-50 transition-colors"
+  <div className="flex items-center gap-3">
+    <span className="text-sm font-medium text-gray-700">Quantity</span>
+    <div className="flex items-center border border-gray-300 rounded-md">
+      <button
+        className="p-2 hover:bg-gray-50 transition-colors disabled:opacity-50"
         onClick={() => onQuantityChange(Math.max(1, quantity - 1))}
-        variants={buttonVariants}
-        whileHover="hover"
-        whileTap="tap"
         disabled={quantity <= 1}
       >
         <Minus className="w-4 h-4" />
-      </motion.button>
-      <span className="px-4 py-2 text-lg font-semibold min-w-[3rem] text-center">
+      </button>
+      <span className="px-4 py-2 text-base font-medium min-w-[3rem] text-center">
         {quantity}
       </span>
-      <motion.button
-        className="p-2 hover:bg-amber-50 transition-colors"
+      <button
+        className="p-2 hover:bg-gray-50 transition-colors"
         onClick={() => onQuantityChange(quantity + 1)}
-        variants={buttonVariants}
-        whileHover="hover"
-        whileTap="tap"
       >
         <Plus className="w-4 h-4" />
-      </motion.button>
+      </button>
     </div>
   </div>
 );
@@ -313,31 +99,28 @@ const SizeSelector = ({
   basePrice: number;
 }) => (
   <div className="space-y-3">
-    <span className="text-sm font-medium text-slate-600">Size</span>
-    <div className="grid grid-cols-3 gap-2">
+    <span className="text-sm font-medium text-gray-700">Size</span>
+    <div className="grid grid-cols-3 gap-3">
       {sizeOptions.map((option) => {
         const isSelected = selectedSize === option.id;
-        const totalPrice = basePrice + option.priceModifier;
 
         return (
-          <motion.button
+          <button
             key={option.id}
-            className={`p-3 rounded-lg border-2 transition-all duration-300 ${isSelected
-              ? 'border-amber-400 bg-amber-50 text-amber-800'
-              : 'border-amber-200 hover:border-amber-300 text-slate-600'
-              }`}
+            className={`p-3 rounded-md border-2 transition-all ${
+              isSelected
+                ? 'border-[#C79E48] bg-[#C79E48]/5 text-[#C79E48]'
+                : 'border-gray-300 hover:border-gray-400 text-gray-700'
+            }`}
             onClick={() => onSizeChange(option.id)}
-            variants={buttonVariants}
-            whileHover="hover"
-            whileTap="tap"
           >
             <div className="text-center">
-              <div className="font-semibold text-sm">{option.name}</div>
+              <div className="font-medium text-sm">{option.name}</div>
               {option.priceModifier > 0 && (
-                <div className="text-xs text-amber-600">+${option.priceModifier}</div>
+                <div className="text-xs text-gray-600">+€{option.priceModifier}</div>
               )}
             </div>
-          </motion.button>
+          </button>
         );
       })}
     </div>
@@ -356,215 +139,46 @@ const ImageGallery = ({
 }) => (
   <div className="space-y-4">
     {/* Main Image */}
-    <motion.div
-      className="relative overflow-hidden rounded-2xl bg-slate-100 aspect-[4/5]"
-      variants={imageVariants}
-      key={currentImageIndex}
-    >
+    <div className="relative overflow-hidden rounded-lg bg-[#F5F5F5] aspect-[3/4]">
       <img
         src={encodeImageUrl(images[currentImageIndex])}
         alt="Product detail"
-        className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+        className="w-full h-full object-cover"
       />
-      {/* Image overlay with luxury badge */}
-      <div className="absolute top-4 right-4">
-        <div className="bg-white/90 backdrop-blur-sm rounded-full px-3 py-1 flex items-center gap-1">
-          <Crown className="w-4 h-4 text-amber-600" />
-          <span className="text-xs font-semibold text-slate-800">Luxury</span>
-        </div>
-      </div>
-    </motion.div>
+    </div>
 
     {/* Thumbnail Gallery */}
     {images.length > 1 && (
-      <div className="flex space-x-3">
+      <div className="flex gap-3">
         {images.map((image, index) => (
-          <motion.button
+          <button
             key={index}
-            className={`relative overflow-hidden rounded-lg aspect-square w-20 border-2 transition-all duration-300 ${index === currentImageIndex
-              ? 'border-amber-400'
-              : 'border-amber-200 hover:border-amber-300'
-              }`}
+            className={`relative overflow-hidden rounded-md aspect-square w-20 border-2 transition-all ${
+              index === currentImageIndex
+                ? 'border-[#C79E48]'
+                : 'border-gray-300 hover:border-gray-400'
+            }`}
             onClick={() => onImageChange(index)}
-            variants={buttonVariants}
-            whileHover="hover"
-            whileTap="tap"
           >
             <img
               src={encodeImageUrl(image)}
               alt={`View ${index + 1}`}
               className="w-full h-full object-cover"
             />
-            {index === currentImageIndex && (
-              <motion.div
-                className="absolute inset-0 bg-amber-400/20"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.2 }}
-              />
-            )}
-          </motion.button>
+          </button>
         ))}
       </div>
     )}
   </div>
 );
 
-// Price Display Component with Animation
+// Price Display Component
 const PriceDisplay = ({ price }: { price: number }) => (
-  <motion.div
-    className="flex items-baseline space-x-2"
-    key={price}
-    initial={{ opacity: 0, scale: 0.8 }}
-    animate={{ opacity: 1, scale: 1 }}
-    transition={{
-      type: "spring",
-      stiffness: 300,
-      damping: 30,
-      duration: 0.5
-    }}
-  >
-    <span className="text-4xl font-bold text-slate-800">${price}</span>
-    <span className="text-lg text-slate-500">USD</span>
-  </motion.div>
+  <div className="flex items-baseline gap-1">
+    <span className="text-3xl font-bold text-black">€{price}</span>
+  </div>
 );
 
-// Suggested Flower Card Component
-const SuggestedFlowerCard = ({
-  flower,
-  index,
-  queryClient
-}: {
-  flower: typeof suggestedFlowers[0];
-  index: number;
-  queryClient: ReturnType<typeof useQueryClient>;
-}) => {
-  const navigate = useNavigate();
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 60, scale: 0.95 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{
-        delay: index * 0.1,
-        duration: 0.6,
-        ease: "easeOut"
-      }}
-      whileHover={{ y: -8, scale: 1.02 }}
-      className="group cursor-pointer"
-      onClick={() => {
-        // Prefetch before navigation for instant load
-        queryClient.prefetchQuery({
-          queryKey: collectionQueryKeys.detail(flower.id),
-          queryFn: async () => {
-            const { getCollectionProduct } = await import('@/lib/api/collection-products');
-            return getCollectionProduct(flower.id);
-          },
-          staleTime: 5 * 60 * 1000,
-        });
-        navigate(`/product/${flower.id}`);
-      }}
-    >
-      <div className="bg-white/80 backdrop-blur-sm rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 border border-amber-100/60">
-        {/* Image Container */}
-        <div className="relative aspect-[4/5] overflow-hidden">
-          <img
-            src={encodeImageUrl(flower.image)}
-            alt={flower.title}
-            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-          />
-
-          {/* Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
-          {/* Category Badge */}
-          <div className="absolute top-4 left-4">
-            <span className="bg-white/90 backdrop-blur-sm text-xs font-semibold text-slate-700 px-3 py-1 rounded-full">
-              {flower.category}
-            </span>
-          </div>
-
-          {/* Quick View Button */}
-          <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
-            <div className="w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg">
-              <Eye className="w-4 h-4 text-slate-700" />
-            </div>
-          </div>
-
-          {/* Price Tag */}
-          <div className="absolute bottom-4 left-4">
-            <div className="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-3 py-1 rounded-lg font-bold text-sm shadow-lg">
-              ${flower.price}
-            </div>
-          </div>
-        </div>
-
-        {/* Content */}
-        <div className="p-5">
-          <h3 className="font-luxury text-lg font-bold text-slate-800 mb-2 group-hover:text-amber-600 transition-colors duration-300">
-            {flower.title}
-          </h3>
-          <p className="text-slate-600 text-sm leading-relaxed">
-            {flower.description}
-          </p>
-        </div>
-      </div>
-    </motion.div>
-  );
-};
-
-// Category Card Component
-const CategoryCard = ({
-  category,
-  index
-}: {
-  category: typeof allCategories[0];
-  index: number;
-}) => {
-  const navigate = useNavigate();
-
-  return (
-    <div
-      className="group cursor-pointer"
-      onClick={() => navigate('/collection', { state: { filter: category.filterValue } })}
-    >
-      <div className="relative overflow-hidden rounded-2xl bg-white/60 backdrop-blur-sm shadow-lg hover:shadow-2xl transition-all duration-500 border border-amber-100/60">
-        {/* Background Image */}
-        <div className="relative aspect-[16/10] overflow-hidden">
-          <img
-            src={encodeImageUrl(category.image)}
-            alt={category.name}
-            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-            loading="lazy"
-          />
-
-          {/* Gradient Overlay */}
-          <div className={`absolute inset-0 bg-gradient-to-br ${category.color} opacity-80`} />
-
-          {/* Content */}
-          <div className="absolute inset-0 flex flex-col justify-center items-center text-white p-6 text-center">
-            <h3 className="font-luxury text-2xl font-bold mb-2">
-              {category.name}
-            </h3>
-            <p className="text-white/90 text-sm mb-4 leading-relaxed">
-              {category.description}
-            </p>
-            <div className="bg-white/20 backdrop-blur-sm rounded-full px-4 py-2 text-xs font-semibold">
-              Explore Collection
-            </div>
-          </div>
-
-          {/* Arrow Icon */}
-          <div className="absolute bottom-6 right-6 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
-            <div className="w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg">
-              <ArrowRight className="w-4 h-4 text-slate-700" />
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 // Main Product Detail Page Component
 const ProductDetailPage = () => {
@@ -575,8 +189,6 @@ const ProductDetailPage = () => {
   const { isFavorite, toggleFavorite } = useFavorites();
   const isMobile = useIsMobile();
 
-  // Get random 4 categories that update when product changes
-  const [displayCategories, setDisplayCategories] = useState(() => getRandomCategories());
 
   // Fetch product data using React Query (single source of truth)
   const { data: product, isLoading: isLoadingProduct, error } = useCollectionProduct(id);
@@ -619,8 +231,6 @@ const ProductDetailPage = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [selectedSize, setSelectedSize] = useState('standard');
   const [quantity, setQuantity] = useState(1);
-  const [personalNote, setPersonalNote] = useState('');
-  const [isAddedToCart, setIsAddedToCart] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   // Calculate current price based on selected size
@@ -678,14 +288,6 @@ const ProductDetailPage = () => {
     return uniqueBouquets.slice(0, 4);
   }, [allProducts, product, productData]);
 
-  // Update categories when product changes (different categories for each product)
-  useEffect(() => {
-    // Get new random categories whenever the product ID changes
-    // Use product ID as seed to ensure same product shows same categories (but different from other products)
-    const productIdForSeed = id || productData.id || String(Date.now());
-    const newCategories = getRandomCategories(productIdForSeed);
-    setDisplayCategories(newCategories);
-  }, [id, productData.id]);
 
   // Prefetch recommended products for faster navigation
   useEffect(() => {
@@ -714,8 +316,7 @@ const ProductDetailPage = () => {
       title: productData.title,
       price: currentPrice,
       image: productData.imageUrl,
-      size: selectedSizeOption?.name || 'Standard',
-      personalNote: personalNote.trim()
+      size: selectedSizeOption?.name || 'Standard'
     }));
 
     try {
@@ -723,13 +324,6 @@ const ProductDetailPage = () => {
       for (const item of cartItems) {
         await addToCart(item);
       }
-      
-      setIsAddedToCart(true);
-
-      // Reset after 2.5 seconds
-      setTimeout(() => {
-        setIsAddedToCart(false);
-      }, 2500);
     } catch (error) {
       console.error('Failed to add to cart:', error);
     } finally {
@@ -752,104 +346,47 @@ const ProductDetailPage = () => {
     });
   };
 
-  // Handle checkout
-  const handleCheckout = () => {
-    navigate('/checkout');
-  };
-
-  // Handle continue shopping
-  const handleContinueShopping = () => {
-    navigate('/collection');
-  };
 
   return (
-    <motion.div
-      className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-amber-50/30"
-      variants={pageVariants}
-      initial="hidden"
-      animate="visible"
-      style={{
-        // Ensure page is scrollable on mobile
-        overflowX: 'hidden',
-        position: 'relative',
-        minHeight: '100vh',
-      }}
-    >
+    <div className="min-h-screen bg-white">
       {/* Navigation Bar */}
       <UltraNavigation />
 
-      {/* Success Toast */}
-      <AnimatePresence>
-        {isAddedToCart && (
-          <motion.div
-            initial={{ opacity: 0, y: -100, scale: 0.9 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -100, scale: 0.9 }}
-            transition={{ type: "spring", stiffness: 300, damping: 25 }}
-            className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 bg-green-500 text-white px-6 py-3 rounded-xl shadow-lg flex items-center space-x-2"
-          >
-            <Check className="w-5 h-5" />
-            <span className="font-semibold">Added to Cart Successfully!</span>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {/* Back Button */}
-      <div className="max-w-7xl mx-auto px-4 py-6">
-        <motion.button
-          className="flex items-center space-x-2 text-slate-600 hover:text-slate-800 transition-colors"
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+        <button
+          className="flex items-center gap-2 text-gray-600 hover:text-black transition-colors"
           onClick={() => navigate(-1)}
-          variants={buttonVariants}
-          whileHover="hover"
-          whileTap="tap"
         >
           <ArrowLeft className="w-5 h-5" />
-          <span>Back to Collection</span>
-        </motion.button>
+          <span>Back</span>
+        </button>
       </div>
 
       {/* Main Content */}
-      <div
-        className="max-w-7xl mx-auto px-4 pb-16"
-        style={{
-          // Ensure content is scrollable on mobile
-          touchAction: 'pan-y',
-          WebkitOverflowScrolling: 'touch',
-        }}
-      >
-        <div className={`grid grid-cols-1 ${isMobile ? 'gap-6' : 'lg:grid-cols-[1.2fr_1fr] gap-12 lg:gap-16'}`}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-16">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
 
           {/* Left Column - Image Gallery */}
-          <motion.div
-            className="space-y-6"
-            variants={columnVariants}
-            custom={0}
-          >
+          <div className="max-w-md mx-auto lg:mx-0">
             <ImageGallery
               images={productData.images || [productData.imageUrl]}
               currentImageIndex={currentImageIndex}
               onImageChange={setCurrentImageIndex}
             />
-          </motion.div>
+          </div>
 
           {/* Right Column - Product Details */}
-          <motion.div
-            className="space-y-8"
-            variants={columnVariants}
-            custom={1}
-          >
+          <div className="space-y-6">
             {/* Product Header */}
             <div className="space-y-4">
               {productData.category && (
-                <div className="flex items-center space-x-2">
-                  <Sparkles className="w-4 h-4 text-amber-500" />
-                  <span className="text-sm font-medium text-amber-600 uppercase tracking-wider">
-                    {productData.category}
-                  </span>
-                </div>
+                <p className="text-xs text-gray-600 uppercase tracking-wide">
+                  {productData.category}
+                </p>
               )}
 
-              <h1 className="font-luxury text-4xl lg:text-5xl font-bold text-slate-800 leading-tight">
+              <h1 className="font-luxury text-3xl lg:text-4xl font-normal text-black">
                 {productData.title}
               </h1>
 
@@ -857,15 +394,14 @@ const ProductDetailPage = () => {
             </div>
 
             {/* Description */}
-            <div className="space-y-4">
-              <h2 className="text-lg font-semibold text-slate-800">About This Arrangement</h2>
-              <p className="text-slate-600 leading-relaxed text-lg">
+            <div>
+              <p className="text-gray-700 leading-relaxed text-base">
                 {productData.description}
               </p>
             </div>
 
             {/* Customization Options */}
-            <div className="space-y-6 p-6 bg-white/60 backdrop-blur-sm rounded-2xl border border-amber-100/60">
+            <div className="space-y-6 p-6 bg-gray-50 rounded-lg">
               <SizeSelector
                 selectedSize={selectedSize}
                 onSizeChange={setSelectedSize}
@@ -876,200 +412,85 @@ const ProductDetailPage = () => {
                 quantity={quantity}
                 onQuantityChange={setQuantity}
               />
-
-              {/* Personal Note */}
-              <div className="space-y-3">
-                <label className="text-sm font-medium text-slate-600">
-                  Personal Note (Optional)
-                </label>
-                <textarea
-                  value={personalNote}
-                  onChange={(e) => setPersonalNote(e.target.value)}
-                  placeholder="Add a heartfelt message for your recipient..."
-                  className="w-full p-4 border border-amber-200 rounded-lg resize-none focus:ring-2 focus:ring-amber-400 focus:border-transparent transition-all duration-200"
-                  rows={3}
-                  maxLength={200}
-                />
-                <div className="text-xs text-slate-500 text-right">
-                  {personalNote.length}/200 characters
-                </div>
-              </div>
             </div>
 
             {/* Add to Cart Section */}
-            <div className="space-y-4">
-              <motion.button
-                className="w-full py-4 bg-gradient-to-r from-amber-500 to-amber-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center space-x-2"
+            <div className="space-y-3">
+              <button
+                className="w-full py-4 bg-[#C79E48] hover:bg-[#B88A44] text-white font-medium rounded-md transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
                 onClick={handleAddToCart}
-                disabled={isLoading || isLoadingProduct}
-                variants={buttonVariants}
-                whileHover="hover"
-                whileTap="tap"
+                disabled={isLoading || isLoadingProduct || !productData.inStock}
               >
                 <ShoppingCart className="w-5 h-5" />
-                <span>{isLoading || isLoadingProduct ? 'Loading...' : 'Add to Cart'}</span>
-              </motion.button>
+                <span>{isLoading || isLoadingProduct ? 'Loading...' : !productData.inStock ? 'Out of Stock' : 'Add to Cart'}</span>
+              </button>
 
               {/* Favorite Button */}
-              <motion.button
-                className={`w-full py-3 border-2 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center space-x-2 ${
+              <button
+                className={`w-full py-3 border-2 rounded-md font-medium transition-all flex items-center justify-center gap-2 ${
                   isFavorite(productData.id)
                     ? 'bg-pink-50 border-pink-300 text-pink-600'
-                    : 'bg-white border-amber-200 text-slate-700 hover:border-amber-300'
+                    : 'bg-white border-gray-300 text-gray-700 hover:border-gray-400'
                 }`}
                 onClick={handleToggleFavorite}
-                variants={buttonVariants}
-                whileHover="hover"
-                whileTap="tap"
               >
                 <Heart className={`w-5 h-5 ${isFavorite(productData.id) ? 'fill-pink-600' : ''}`} />
-                <span>{isFavorite(productData.id) ? 'Remove from Favorites' : 'Add to Favorites'}</span>
-              </motion.button>
+                <span>{isFavorite(productData.id) ? 'Saved' : 'Save'}</span>
+              </button>
             </div>
-
-            {/* Additional Features */}
-            <div className="grid grid-cols-2 gap-4 pt-6 border-t border-amber-100">
-              <div className="flex items-center space-x-2 text-slate-600">
-                <Star className="w-4 h-4 text-amber-500" />
-                <span className="text-sm">Premium Quality</span>
-              </div>
-              <div className="flex items-center space-x-2 text-slate-600">
-                <Heart className="w-4 h-4 text-amber-500" />
-                <span className="text-sm">Handcrafted</span>
-              </div>
-            </div>
-          </motion.div>
+          </div>
         </div>
       </div>
 
       {/* Suggested Flowers Section */}
-      <motion.section
-        className="py-16 bg-gradient-to-b from-white/50 to-amber-50/30"
-        initial={{ opacity: 0, y: 100 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-        viewport={{ once: true }}
-      >
-        <div className="max-w-7xl mx-auto px-4">
-          <motion.div
-            className="text-center mb-12"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            viewport={{ once: true }}
-          >
-            <h2 className="font-luxury text-4xl font-bold text-slate-800 mb-4">
-              You Might Also Love
-            </h2>
-            <p className="text-slate-600 text-lg max-w-2xl mx-auto">
-              Discover more exquisite arrangements crafted with the same attention to detail and luxury
-            </p>
-          </motion.div>
+      {recommendedBouquets.length > 0 && (
+        <section className="py-16 bg-gray-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6">
+            <div className="text-center mb-12">
+              <h2 className="font-luxury text-3xl font-normal text-black mb-2">
+                You Might Also Like
+              </h2>
+              <p className="text-gray-600 text-base">
+                Similar products you may be interested in
+              </p>
+            </div>
 
-          <div className="flex overflow-x-auto pb-8 gap-4 snap-x snap-mandatory sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:gap-8 -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-hide">
-            {recommendedBouquets.map((bouquet, index) => (
-              <Link
-                key={bouquet.id}
-                to={`/product/${bouquet.id}`}
-                onMouseEnter={() => {
-                  // Prefetch product data on hover for instant navigation
-                  queryClient.prefetchQuery({
-                    queryKey: collectionQueryKeys.detail(bouquet.id),
-                    queryFn: async () => {
-                      const { getCollectionProduct } = await import('@/lib/api/collection-products');
-                      return getCollectionProduct(bouquet.id);
-                    },
-                    staleTime: 5 * 60 * 1000,
-                  });
-                }}
-                className="block min-w-[280px] sm:min-w-0 snap-center"
-              >
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                viewport={{ once: true }}
-                className="group cursor-pointer"
-              >
-                <div className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
-                  <div className="relative overflow-hidden h-64">
-                    <img
-                      src={bouquet.image}
-                      alt={bouquet.name}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                      loading="lazy"
-                    />
-                    {bouquet.featured && (
-                      <span className="absolute top-3 left-3 px-2 py-1 bg-gradient-to-r from-amber-400 to-amber-600 text-white text-xs font-semibold rounded-full">
-                        Featured
-                      </span>
-                    )}
-                  </div>
-                  <div className="p-5">
-                    <h3 className="font-serif text-lg font-bold text-slate-800 mb-2 line-clamp-1">
-                      {bouquet.name}
-                    </h3>
-                    <p className="text-slate-600 text-sm mb-3 line-clamp-2">
-                      {bouquet.description}
-                    </p>
-                    <div className="flex items-center justify-between">
-                      <span className="text-2xl font-bold bg-gradient-to-r from-amber-600 to-amber-400 bg-clip-text text-transparent">
-                        ${bouquet.price}
-                      </span>
-                      <motion.span
-                        className="px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-white text-sm font-semibold rounded-lg hover:shadow-lg transition-all inline-block"
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                      >
-                        View Details
-                      </motion.span>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+              {recommendedBouquets.map((bouquet) => (
+                <Link
+                  key={bouquet.id}
+                  to={`/product/${bouquet.id}`}
+                  className="group"
+                >
+                  <div className="bg-white rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
+                    <div className="relative overflow-hidden aspect-[3/4] bg-[#F5F5F5]">
+                      <img
+                        src={bouquet.image}
+                        alt={bouquet.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        loading="lazy"
+                      />
+                    </div>
+                    <div className="p-3">
+                      <p className="text-xs text-gray-600 mb-1">
+                        {bouquet.displayCategory || bouquet.category}
+                      </p>
+                      <h3 className="font-luxury text-sm font-normal text-black mb-2 line-clamp-1">
+                        {bouquet.name}
+                      </h3>
+                      <p className="text-sm font-medium text-black">
+                        €{bouquet.price}
+                      </p>
                     </div>
                   </div>
-                </div>
-              </motion.div>
-              </Link>
-            ))}
+                </Link>
+              ))}
+            </div>
           </div>
-        </div>
-      </motion.section>
-
-      {/* Categories Section */}
-      <motion.section
-        className="py-16 bg-gradient-to-b from-amber-50/30 to-white/50"
-        initial={{ opacity: 0, y: 100 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-        viewport={{ once: true }}
-      >
-        <div className="max-w-7xl mx-auto px-4">
-          <motion.div
-            className="text-center mb-12"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            viewport={{ once: true }}
-          >
-            <h2 className="font-luxury text-4xl font-bold text-slate-800 mb-4">
-              Explore Our Collections
-            </h2>
-            <p className="text-slate-600 text-lg max-w-2xl mx-auto">
-              Each category represents our commitment to excellence and the art of floral design
-            </p>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {displayCategories.map((category, index) => (
-              <CategoryCard
-                key={category.id}
-                category={category}
-                index={index}
-              />
-            ))}
-          </div>
-        </div>
-      </motion.section>
+        </section>
+      )}
       <BackToTop />
-    </motion.div>
+    </div>
   );
 };
 

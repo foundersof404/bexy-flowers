@@ -7,6 +7,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import ScrollToTop from "@/components/ScrollToTop";
 import RouteLoader from "@/components/RouteLoader";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { CartProvider } from "@/contexts/CartContext";
 import { FavoritesProvider } from "@/contexts/FavoritesContext";
@@ -65,6 +66,7 @@ const AdminAccessories = lazy(() => import("./pages/admin/AdminAccessories"));
 const AdminFlowers = lazy(() => import("./pages/admin/AdminFlowers"));
 const AdminLuxuryBoxes = lazy(() => import("./pages/admin/AdminLuxuryBoxes"));
 const AdminWeddingCreations = lazy(() => import("./pages/admin/AdminWeddingCreations"));
+const AdminSettings = lazy(() => import("./pages/admin/AdminSettings"));
 
 // ⚡ PERFORMANCE OPTIMIZATION: Enhanced QueryClient with aggressive caching for returning users
 const queryClient = new QueryClient({
@@ -113,17 +115,18 @@ const AppRouter = () => {
           <Route path="/favorites" element={<Favorites />} />
           <Route path="/cart" element={<CartPage />} />
           <Route path="/cart-test" element={<CartTest />} />
-          {/* Admin Routes */}
+          {/* Admin Routes - Protected */}
           <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          <Route path="/admin/products" element={<AdminProducts />} />
-          <Route path="/admin/products/:id" element={<AdminProducts />} />
-          <Route path="/admin/products/new" element={<AdminProducts />} />
-          <Route path="/admin/signature-collection" element={<AdminSignatureCollection />} />
-          <Route path="/admin/accessories" element={<AdminAccessories />} />
-          <Route path="/admin/flowers" element={<AdminFlowers />} />
-          <Route path="/admin/boxes" element={<AdminLuxuryBoxes />} />
-          <Route path="/admin/wedding-creations" element={<AdminWeddingCreations />} />
+          <Route path="/admin/dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+          <Route path="/admin/products" element={<ProtectedRoute><AdminProducts /></ProtectedRoute>} />
+          <Route path="/admin/products/:id" element={<ProtectedRoute><AdminProducts /></ProtectedRoute>} />
+          <Route path="/admin/products/new" element={<ProtectedRoute><AdminProducts /></ProtectedRoute>} />
+          <Route path="/admin/signature-collection" element={<ProtectedRoute><AdminSignatureCollection /></ProtectedRoute>} />
+          <Route path="/admin/accessories" element={<ProtectedRoute><AdminAccessories /></ProtectedRoute>} />
+          <Route path="/admin/flowers" element={<ProtectedRoute><AdminFlowers /></ProtectedRoute>} />
+          <Route path="/admin/boxes" element={<ProtectedRoute><AdminLuxuryBoxes /></ProtectedRoute>} />
+          <Route path="/admin/wedding-creations" element={<ProtectedRoute><AdminWeddingCreations /></ProtectedRoute>} />
+          <Route path="/admin/settings" element={<ProtectedRoute><AdminSettings /></ProtectedRoute>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

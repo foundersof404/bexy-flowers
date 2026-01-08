@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useNavigate, useParams } from "react-router-dom";
+import { AdminLayout } from "@/components/admin/AdminLayout";
 import {
   Plus,
   Edit,
@@ -146,7 +147,7 @@ const AdminProducts = () => {
 
 
   // Filter products (exclude signature collection products from main list)
-  const signatureProductIds = new Set(signatureProducts.map(p => p.id));
+  const signatureProductIds = new Set(signatureProducts.map(p => p.product_id));
   const collectionProducts = products.filter(p => !signatureProductIds.has(p.id));
   
   const filteredProducts = collectionProducts.filter((product) => {
@@ -314,9 +315,10 @@ const AdminProducts = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <AdminLayout>
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Mobile-Friendly Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
         <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-3 sm:py-4">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
             <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto">
@@ -364,7 +366,7 @@ const AdminProducts = () => {
                   navigate("/admin/products/new");
                   setShowProductForm(true);
                 }}
-                className="gap-2 flex-1 sm:flex-none"
+                className="gap-2 flex-1 sm:flex-none shadow-md hover:shadow-lg transition-shadow"
                 style={{
                   background: `linear-gradient(135deg, ${GOLD_COLOR} 0%, rgba(199, 158, 72, 0.9) 100%)`,
                   color: "white",
@@ -384,7 +386,7 @@ const AdminProducts = () => {
           <>
             {/* Quick Actions Section */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
-              <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate("/collection")}>
+              <Card className="cursor-pointer hover:shadow-md transition-shadow border-l-4 border-l-blue-500" onClick={() => navigate("/collection")}>
                 <CardContent className="p-4 sm:p-6">
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-blue-100 rounded-lg">
@@ -563,11 +565,11 @@ const AdminProducts = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
-                    {signatureProducts.map((product, index) => (
+                    {signatureProducts.map((item, index) => (
                       <motion.div
-                        key={product.id}
+                        key={item.id}
                         className="group cursor-pointer"
-                        onClick={() => navigate(`/admin/products/${product.id}`)}
+                        onClick={() => navigate(`/admin/products/${item.product_id}`)}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.05 }}
@@ -582,10 +584,10 @@ const AdminProducts = () => {
                           </div>
                           
                           <div className="aspect-square relative">
-                            {product.image_urls?.[0] ? (
+                            {item.product?.image_urls?.[0] ? (
                               <img
-                                src={encodeImageUrl(product.image_urls[0])}
-                                alt={product.title}
+                                src={encodeImageUrl(item.product.image_urls[0])}
+                                alt={item.product.title}
                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                               />
                             ) : (
@@ -596,32 +598,32 @@ const AdminProducts = () => {
                             
                             {/* Stock & Discount Badges */}
                             <div className="absolute bottom-2 left-2 right-2 flex flex-col gap-1">
-                              {product.is_out_of_stock && (
+                              {item.product?.is_out_of_stock && (
                                 <Badge variant="destructive" className="text-xs font-bold w-fit">Out</Badge>
                               )}
-                              {!product.is_out_of_stock && (
+                              {!item.product?.is_out_of_stock && (
                                 <Badge className="bg-green-600 text-white text-xs font-bold w-fit">In Stock</Badge>
                               )}
-                              {product.discount_percentage && product.discount_percentage > 0 && (
+                              {item.product?.discount_percentage && item.product.discount_percentage > 0 && (
                                 <Badge className="bg-red-500 text-white text-xs font-bold w-fit">
-                                  {product.discount_percentage}% OFF
+                                  {item.product.discount_percentage}% OFF
                                 </Badge>
                               )}
                             </div>
                           </div>
                           
                           <div className="p-2 sm:p-3">
-                            <p className="text-xs sm:text-sm font-medium truncate mb-1">{product.title}</p>
+                            <p className="text-xs sm:text-sm font-medium truncate mb-1">{item.product?.title}</p>
                             <div className="flex flex-col gap-1">
-                              {product.discount_percentage && product.discount_percentage > 0 && product.price ? (
+                              {item.product?.discount_percentage && item.product.discount_percentage > 0 && item.product.price ? (
                                 <div>
-                                  <span className="text-xs line-through text-gray-400">${product.price.toFixed(2)}</span>
+                                  <span className="text-xs line-through text-gray-400">${item.product.price.toFixed(2)}</span>
                                   <span className="text-xs sm:text-sm font-bold text-red-600 ml-1">
-                                    ${(product.price * (1 - product.discount_percentage / 100)).toFixed(2)}
+                                    ${(item.product.price * (1 - item.product.discount_percentage / 100)).toFixed(2)}
                                   </span>
                                 </div>
                               ) : (
-                                <span className="text-xs sm:text-sm font-semibold">${(product.price || 0).toFixed(2)}</span>
+                                <span className="text-xs sm:text-sm font-semibold">${(item.product?.price || 0).toFixed(2)}</span>
                               )}
                             </div>
                           </div>
@@ -1178,6 +1180,7 @@ const AdminProducts = () => {
         </Dialog>
       </div>
     </div>
+    </AdminLayout>
   );
 };
 

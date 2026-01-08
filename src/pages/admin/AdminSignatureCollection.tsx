@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { AdminLayout } from '@/components/admin/AdminLayout';
 import {
   ArrowLeft,
   Plus,
@@ -369,6 +370,7 @@ const AdminSignatureCollection = () => {
       : (item.product?.image_urls || []);
 
   return (
+    <AdminLayout>
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Header */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
@@ -890,6 +892,7 @@ const AdminSignatureCollection = () => {
         </Dialog>
       </div>
     </div>
+    </AdminLayout>
   );
 };
 

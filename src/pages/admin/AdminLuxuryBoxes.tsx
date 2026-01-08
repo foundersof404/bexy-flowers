@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { AdminLayout } from '@/components/admin/AdminLayout';
 import {
   ArrowLeft,
   Plus,
@@ -382,6 +383,7 @@ const AdminLuxuryBoxes = () => {
   };
 
   return (
+    <AdminLayout>
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
@@ -1116,8 +1118,8 @@ const AdminLuxuryBoxes = () => {
         </DialogContent>
       </Dialog>
     </div>
+    </AdminLayout>
   );
 };
 
 export default AdminLuxuryBoxes;
-

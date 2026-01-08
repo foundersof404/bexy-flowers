@@ -177,13 +177,8 @@ export const CACHE_DURATION = {
 
 // Initialize cache cleanup on load
 if (typeof window !== 'undefined') {
-  // Clear expired items on page load
+  // Clear expired items on page load only
+  // This is sufficient - no need for continuous background cleanup
   localCache.clearExpired();
   sessionCache.clearExpired();
-
-  // Set up periodic cleanup (every 5 minutes)
-  setInterval(() => {
-    localCache.clearExpired();
-    sessionCache.clearExpired();
-  }, 5 * 60 * 1000);
 }

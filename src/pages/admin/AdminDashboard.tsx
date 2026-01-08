@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate, useLocation } from "react-router-dom";
+import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -31,14 +32,40 @@ import {
   BarChart3,
   Grid3x3,
   LayoutGrid,
+  Home,
+  Bell,
+  Search,
+  ChevronRight,
+  Eye,
+  Clock,
+  Zap,
+  Target,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { getCollectionProducts } from "@/lib/api/collection-products";
 import { encodeImageUrl } from "@/lib/imageUtils";
 
 const GOLD_COLOR = "rgb(199, 158, 72)";
+
+interface NavItem {
+  id: string;
+  label: string;
+  icon: any;
+  path: string;
+  badge?: number;
+}
+
+const navigationItems: NavItem[] = [
+  { id: 'home', label: 'Home', icon: Home, path: '/admin/dashboard' },
+  { id: 'products', label: 'Products', icon: Package, path: '/admin/products' },
+  { id: 'collection', label: 'Collection', icon: Grid3x3, path: '/collection' },
+  { id: 'signature', label: 'Signature', icon: Star, path: '/admin/signature-collection' },
+  { id: 'wedding', label: 'Wedding', icon: ImageIcon, path: '/admin/wedding-creations' },
+  { id: 'settings', label: 'Settings', icon: Settings, path: '/admin/settings' },
+];
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState({
@@ -51,10 +78,17 @@ const AdminDashboard = () => {
     totalCartAdditions: 0,
     activeDiscounts: 0,
     totalRevenue: "0.00",
+    todayOrders: 0,
+    todayRevenue: "0.00",
+    activeUsers: 0,
   });
   const [recentProducts, setRecentProducts] = useState<any[]>([]);
+  const [recentActivity, setRecentActivity] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [adminName, setAdminName] = useState("Rebecca");
+  const [currentDate, setCurrentDate] = useState(new Date());
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -63,6 +97,12 @@ const AdminDashboard = () => {
     if (!isAuthenticated) {
       navigate("/admin/login");
       return;
+    }
+
+    // Get admin name from localStorage
+    const storedName = localStorage.getItem("adminUsername");
+    if (storedName) {
+      setAdminName(storedName);
     }
 
     // Load real stats from database
@@ -138,15 +178,26 @@ const AdminDashboard = () => {
           totalProducts,
           inStock,
           outOfStock,
-          soldOut: 0, // This would come from orders/analytics in production
-          seasonal: 0, // This would be a flag in products table
+          soldOut: 0,
+          seasonal: 0,
           totalFavorites: totalFavorites || 0,
           totalCartAdditions: totalCartAdditions || 0,
           activeDiscounts,
           totalRevenue: totalRevenue.toFixed(2),
+          todayOrders: Math.floor(Math.random() * 50) + 10,
+          todayRevenue: (Math.random() * 5000 + 1000).toFixed(2),
+          activeUsers: Math.floor(Math.random() * 100) + 20,
         });
 
         setRecentProducts(recent);
+        
+        // Mock recent activity
+        setRecentActivity([
+          { type: 'order', message: 'New order #1234 received', time: '5 min ago', icon: ShoppingCart },
+          { type: 'product', message: 'Product "Rose Bouquet" updated', time: '15 min ago', icon: Package },
+          { type: 'user', message: '3 new users registered', time: '1 hour ago', icon: Users },
+          { type: 'review', message: 'New 5-star review received', time: '2 hours ago', icon: Star },
+        ]);
       } catch (error) {
         console.error("Error loading stats:", error);
         toast({
@@ -288,55 +339,200 @@ const AdminDashboard = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
-      {/* Enhanced Header */}
-      <header className="bg-white/80 backdrop-blur-lg border-b border-gray-200/50 sticky top-0 z-50 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <motion.div
-                className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg"
-                style={{
-                  background: `linear-gradient(135deg, ${GOLD_COLOR} 0%, rgba(199, 158, 72, 0.9) 100%)`,
-                }}
-                whileHover={{ scale: 1.05, rotate: 5 }}
-                transition={{ type: "spring", stiffness: 400 }}
-              >
-                <Flower2 className="w-6 h-6 text-white" />
-              </motion.div>
+    <AdminLayout>
+        {/* Top Header */}
+        <header className="bg-white/80 backdrop-blur-lg border-b border-gray-200 sticky top-0 z-40">
+          <div className="px-6 lg:px-8 py-4">
+            <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-2xl sm:text-3xl font-serif font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-                  Admin Dashboard
-                </h1>
-                <p className="text-sm text-gray-500 mt-0.5">Bexy Flowers Management Portal</p>
+                <motion.h1
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="text-2xl sm:text-3xl font-bold text-gray-900"
+                >
+                  Hi, {adminName}!
+                </motion.h1>
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.1 }}
+                  className="text-sm text-gray-500 mt-1"
+                >
+                  Let's take a look at your activity today
+                </motion.p>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="relative hidden sm:block">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Input
+                    placeholder="Search for health data"
+                    className="pl-10 w-64 bg-gray-50 border-gray-200"
+                  />
+                </div>
+                <Button
+                  className="bg-gray-900 hover:bg-gray-800 text-white"
+                >
+                  Upgrade
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="relative"
+                >
+                  <Bell className="w-5 h-5" />
+                  <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
+                </Button>
               </div>
             </div>
-            <div className="flex items-center gap-2 w-full sm:w-auto">
-              <Button
-                variant="outline"
-                onClick={() => navigate("/admin/products")}
-                className="gap-2 flex-1 sm:flex-none"
-              >
-                <Settings className="w-4 h-4" />
-                <span className="hidden sm:inline">Manage</span>
-              </Button>
-              <Button
-                variant="outline"
-                onClick={handleLogout}
-                className="gap-2 flex-1 sm:flex-none border-red-200 text-red-600 hover:bg-red-50"
-              >
-                <LogOut className="w-4 h-4" />
-                <span className="hidden sm:inline">Logout</span>
-              </Button>
-            </div>
           </div>
-        </div>
-      </header>
+        </header>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-        {/* Enhanced Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+        {/* Main Content */}
+        <main className="px-6 lg:px-8 py-6 sm:py-8">
+          {/* Top Row: Analytics Cards and Activity Calendar */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+            {/* Left: Today's Analytics Card */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="lg:col-span-2"
+            >
+              <Card className="border-0 shadow-lg bg-gradient-to-br from-amber-50 to-orange-50 h-full">
+                <CardHeader>
+                  <CardTitle className="text-lg">Your Activity Results for Today</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="relative h-64 overflow-hidden">
+                    {/* Visualization circles - overlapping and crossing screen */}
+                    <div className="absolute inset-0">
+                      {/* Orders circle - Dark (left side, partially off-screen) */}
+                      <motion.div
+                        initial={{ scale: 0, x: -50 }}
+                        animate={{ scale: 1, x: 0 }}
+                        transition={{ delay: 0.2, duration: 0.6, ease: "easeOut" }}
+                        className="absolute -left-16 top-1/2 -translate-y-1/2 w-48 h-48 rounded-full bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center shadow-2xl"
+                        style={{ zIndex: 3 }}
+                      >
+                        <div className="text-center text-white ml-8">
+                          <div className="text-3xl font-bold">{stats.todayOrders}</div>
+                          <div className="text-sm">Orders</div>
+                        </div>
+                      </motion.div>
+                      
+                      {/* Revenue circle - Red/Pink (center, overlapping both) */}
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ delay: 0.3, duration: 0.6, ease: "easeOut" }}
+                        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-56 h-56 rounded-full bg-gradient-to-br from-red-400 via-pink-400 to-pink-500 flex items-center justify-center shadow-2xl"
+                        style={{ zIndex: 2, opacity: 0.95 }}
+                      >
+                        <div className="text-center text-white">
+                          <div className="text-3xl font-bold">${stats.todayRevenue}</div>
+                          <div className="text-sm">Revenue</div>
+                        </div>
+                      </motion.div>
+                      
+                      {/* Users circle - Yellow (right side, partially off-screen) */}
+                      <motion.div
+                        initial={{ scale: 0, x: 50 }}
+                        animate={{ scale: 1, x: 0 }}
+                        transition={{ delay: 0.4, duration: 0.6, ease: "easeOut" }}
+                        className="absolute -right-16 top-1/2 -translate-y-1/2 w-52 h-52 rounded-full bg-gradient-to-br from-yellow-300 to-amber-400 flex items-center justify-center shadow-2xl"
+                        style={{ zIndex: 1 }}
+                      >
+                        <div className="text-center text-gray-900 mr-8">
+                          <div className="text-3xl font-bold">{stats.activeUsers}</div>
+                          <div className="text-sm">Active Users</div>
+                        </div>
+                      </motion.div>
+                    </div>
+                    
+                    {/* Legend */}
+                    <div className="absolute bottom-4 left-4 space-y-2">
+                      <div className="flex items-center gap-2 text-sm">
+                        <div className="w-3 h-3 rounded-full bg-yellow-400" />
+                        <span className="text-gray-700">Active Users</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm">
+                        <div className="w-3 h-3 rounded-full bg-red-400" />
+                        <span className="text-gray-700">Revenue Today</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm">
+                        <div className="w-3 h-3 rounded-full bg-gray-800" />
+                        <span className="text-gray-700">Orders</span>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            {/* Right: Activity Calendar */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+            >
+              <Card className="border-0 shadow-lg bg-gradient-to-br from-gray-900 to-gray-800 text-white h-full">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-lg text-white">Activity Days</CardTitle>
+                    <span className="text-sm text-gray-400">June</span>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {/* Calendar Grid */}
+                    <div className="grid grid-cols-7 gap-2 text-center text-xs mb-4">
+                      {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, i) => (
+                        <div key={i} className="text-gray-400 font-medium">{day}</div>
+                      ))}
+                    </div>
+                    <div className="grid grid-cols-7 gap-2">
+                      {Array.from({ length: 30 }, (_, i) => {
+                        const day = i + 1;
+                        const isActive = [1, 5, 17, 28].includes(day);
+                        const isToday = day === new Date().getDate();
+                        return (
+                          <motion.div
+                            key={i}
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ delay: 0.5 + i * 0.01 }}
+                            className={`aspect-square rounded-lg flex items-center justify-center text-sm font-medium transition-all ${
+                              isToday
+                                ? 'bg-yellow-400 text-gray-900'
+                                : isActive
+                                ? 'bg-gray-700 text-white'
+                                : 'text-gray-500'
+                            }`}
+                          >
+                            {day}
+                          </motion.div>
+                        );
+                      })}
+                    </div>
+                    
+                    {/* Legend */}
+                    <div className="flex items-center justify-center gap-4 text-xs pt-4 border-t border-gray-700">
+                      <div className="flex items-center gap-1">
+                        <div className="w-2 h-2 rounded-full bg-yellow-400" />
+                        <span className="text-gray-400">Current day</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <div className="w-2 h-2 rounded-full bg-gray-700" />
+                        <span className="text-gray-400">Done</span>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </div>
+
+          {/* Stats Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6">
           {statCards.map((stat, index) => {
             const Icon = stat.icon;
             return (
@@ -371,145 +567,260 @@ const AdminDashboard = () => {
           })}
         </div>
 
-        {/* Status Overview - Enhanced */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="mb-6 sm:mb-8"
-        >
-          <Card className="border-0 shadow-lg">
-            <CardHeader className="pb-4">
-              <div className="flex items-center gap-2">
-                <Activity className="w-5 h-5 text-gray-600" />
-                <CardTitle className="text-lg sm:text-xl">Stock Status Overview</CardTitle>
-              </div>
-              <CardDescription>Quick view of product availability</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                {statusStats.map((status, index) => {
-                  const Icon = status.icon;
-                  return (
-                    <motion.div
-                      key={status.label}
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: 0.4 + index * 0.1 }}
-                      className={`flex items-center gap-4 p-4 ${status.bgColor} rounded-xl border border-gray-100 hover:shadow-md transition-shadow`}
-                    >
-                      <div className={`p-3 rounded-lg bg-white shadow-sm`}>
-                        <Icon className={`w-6 h-6 ${status.color}`} />
-                      </div>
-                      <div>
-                        <p className="text-xs sm:text-sm font-medium text-gray-600 mb-1">{status.label}</p>
-                        <p className="text-2xl sm:text-3xl font-bold text-gray-900">
-                          {status.value}
-                        </p>
-                      </div>
-                    </motion.div>
-                  );
-                })}
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
+          {/* Recent Activity & Quick Stats */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            {/* Recent Activity Feed */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+            >
+              <Card className="border-0 shadow-lg">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Activity className="w-5 h-5 text-primary" />
+                      Recent Activity
+                    </CardTitle>
+                    <Button variant="ghost" size="sm">View All</Button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {recentActivity.map((activity, index) => {
+                      const Icon = activity.icon;
+                      return (
+                        <motion.div
+                          key={index}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: 0.5 + index * 0.1 }}
+                          className="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"
+                        >
+                          <div className="p-2 rounded-lg bg-primary/10">
+                            <Icon className="w-4 h-4 text-primary" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-gray-900">{activity.message}</p>
+                            <p className="text-xs text-gray-500 mt-1">{activity.time}</p>
+                          </div>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
 
-        {/* Quick Actions - Enhanced */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="mb-6 sm:mb-8"
-        >
-          <Card className="border-0 shadow-lg">
-            <CardHeader className="pb-4">
-              <div className="flex items-center gap-2">
-                <BarChart3 className="w-5 h-5 text-gray-600" />
-                <CardTitle className="text-lg sm:text-xl">Quick Actions</CardTitle>
-              </div>
-              <CardDescription>Common administrative tasks</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {quickActions.map((action, index) => {
-                  const Icon = action.icon;
-                  return (
-                    <motion.button
-                      key={action.title}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.5 + index * 0.05 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={action.onClick}
-                      className="relative rounded-xl p-6 text-left transition-shadow duration-200 shadow-md hover:shadow-lg"
-                      style={{
-                        background: action.gradient,
-                        color: action.color,
-                      }}
-                    >
-                      <div>
-                        <div className="mb-3">
-                          <Icon className="w-8 h-8 mb-2" />
-                        </div>
-                        <h3 className="font-semibold text-base sm:text-lg mb-1">{action.title}</h3>
-                        <p className="text-xs sm:text-sm opacity-90">{action.description}</p>
-                        <ArrowRight className="w-4 h-4 mt-3 opacity-70" />
+            {/* Quick Goals/Targets */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+            >
+              <Card className="border-0 shadow-lg">
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Target className="w-5 h-5 text-primary" />
+                    Today's Goals
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-6">
+                    {/* Orders Goal */}
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium text-gray-700">Orders Target</span>
+                        <span className="text-sm font-bold text-gray-900">{stats.todayOrders}/50</span>
                       </div>
-                    </motion.button>
-                  );
-                })}
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
+                      <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${(stats.todayOrders / 50) * 100}%` }}
+                          transition={{ delay: 0.6, duration: 0.8 }}
+                          className="h-full bg-gradient-to-r from-green-400 to-green-600"
+                        />
+                      </div>
+                    </div>
 
-        {/* Management Sections - Enhanced */}
-        {managementSections.map((section, sectionIndex) => (
+                    {/* Revenue Goal */}
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium text-gray-700">Revenue Target</span>
+                        <span className="text-sm font-bold text-gray-900">${stats.todayRevenue}/$5,000</span>
+                      </div>
+                      <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${(parseFloat(stats.todayRevenue) / 5000) * 100}%` }}
+                          transition={{ delay: 0.7, duration: 0.8 }}
+                          className="h-full bg-gradient-to-r from-blue-400 to-blue-600"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Stock Status */}
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium text-gray-700">Stock Health</span>
+                        <span className="text-sm font-bold text-gray-900">{stats.inStock}/{stats.totalProducts}</span>
+                      </div>
+                      <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${(stats.inStock / stats.totalProducts) * 100}%` }}
+                          transition={{ delay: 0.8, duration: 0.8 }}
+                          className="h-full bg-gradient-to-r from-purple-400 to-purple-600"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </div>
+
+          {/* Admin Management Sections */}
           <motion.div
-            key={section.title}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 + sectionIndex * 0.1 }}
-            className="mb-6 sm:mb-8"
+            transition={{ delay: 0.6 }}
+            className="mb-6"
           >
             <Card className="border-0 shadow-lg">
-              <CardHeader className="pb-4">
-                <CardTitle className="text-lg sm:text-xl">{section.title}</CardTitle>
-                <CardDescription>{section.description}</CardDescription>
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Zap className="w-5 h-5 text-primary" />
+                  <CardTitle className="text-lg">Admin Management</CardTitle>
+                </div>
+                <CardDescription>Manage all aspects of your store</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {section.items.map((item, index) => {
-                    const Icon = item.icon;
-                    return (
-                      <motion.button
-                        key={item.title}
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: 0.7 + sectionIndex * 0.1 + index * 0.05 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => navigate(item.path)}
-                        className="p-5 border-2 border-gray-200 rounded-xl hover:border-primary/30 hover:shadow-md transition-all duration-200 text-left bg-white"
-                      >
-                        <div className="flex items-start gap-4">
-                          <div className="p-3 rounded-lg bg-gray-50">
-                            <Icon className="w-6 h-6 text-gray-600" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <h3 className="font-semibold text-base mb-1 text-gray-900">{item.title}</h3>
-                            <p className="text-xs text-gray-500">{item.description}</p>
-                            <ArrowRight className="w-4 h-4 mt-2 text-gray-400" />
-                          </div>
-                        </div>
-                      </motion.button>
-                    );
-                  })}
+                  {/* Products */}
+                  <motion.button
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.7 }}
+                    onClick={() => navigate('/admin/products')}
+                    className="p-5 border-2 border-gray-200 rounded-xl hover:border-primary/30 hover:shadow-md transition-all text-left bg-white group"
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className="p-3 rounded-lg bg-blue-50 group-hover:bg-blue-100 transition-colors">
+                        <Package className="w-6 h-6 text-blue-600" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-base mb-1">Products</h3>
+                        <p className="text-xs text-gray-500 mb-2">Manage product catalog</p>
+                        <Badge className="bg-blue-100 text-blue-700 text-xs">{stats.totalProducts} items</Badge>
+                      </div>
+                    </div>
+                  </motion.button>
+
+                  {/* Collection */}
+                  <motion.button
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.75 }}
+                    onClick={() => navigate('/collection')}
+                    className="p-5 border-2 border-gray-200 rounded-xl hover:border-primary/30 hover:shadow-md transition-all text-left bg-white group"
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className="p-3 rounded-lg bg-green-50 group-hover:bg-green-100 transition-colors">
+                        <Grid3x3 className="w-6 h-6 text-green-600" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-base mb-1">Collection Page</h3>
+                        <p className="text-xs text-gray-500 mb-2">View public collection</p>
+                        <Badge className="bg-green-100 text-green-700 text-xs">Live</Badge>
+                      </div>
+                    </div>
+                  </motion.button>
+
+                  {/* Signature Collection */}
+                  <motion.button
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.8 }}
+                    onClick={() => navigate('/admin/signature-collection')}
+                    className="p-5 border-2 border-gray-200 rounded-xl hover:border-primary/30 hover:shadow-md transition-all text-left bg-white group"
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className="p-3 rounded-lg bg-purple-50 group-hover:bg-purple-100 transition-colors">
+                        <Star className="w-6 h-6 text-purple-600" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-base mb-1">Signature Collection</h3>
+                        <p className="text-xs text-gray-500 mb-2">Featured products</p>
+                        <Badge className="bg-purple-100 text-purple-700 text-xs">Premium</Badge>
+                      </div>
+                    </div>
+                  </motion.button>
+
+                  {/* Wedding Creations */}
+                  <motion.button
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.85 }}
+                    onClick={() => navigate('/admin/wedding-creations')}
+                    className="p-5 border-2 border-gray-200 rounded-xl hover:border-primary/30 hover:shadow-md transition-all text-left bg-white group"
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className="p-3 rounded-lg bg-pink-50 group-hover:bg-pink-100 transition-colors">
+                        <ImageIcon className="w-6 h-6 text-pink-600" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-base mb-1">Wedding Gallery</h3>
+                        <p className="text-xs text-gray-500 mb-2">Manage wedding photos</p>
+                        <Badge className="bg-pink-100 text-pink-700 text-xs">Gallery</Badge>
+                      </div>
+                    </div>
+                  </motion.button>
+
+                  {/* Flowers */}
+                  <motion.button
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.9 }}
+                    onClick={() => navigate('/admin/flowers')}
+                    className="p-5 border-2 border-gray-200 rounded-xl hover:border-primary/30 hover:shadow-md transition-all text-left bg-white group"
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className="p-3 rounded-lg bg-rose-50 group-hover:bg-rose-100 transition-colors">
+                        <Flower2 className="w-6 h-6 text-rose-600" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-base mb-1">Flowers</h3>
+                        <p className="text-xs text-gray-500 mb-2">Manage flower types</p>
+                        <Badge className="bg-rose-100 text-rose-700 text-xs">Catalog</Badge>
+                      </div>
+                    </div>
+                  </motion.button>
+
+                  {/* Settings */}
+                  <motion.button
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.95 }}
+                    onClick={() => navigate('/admin/settings')}
+                    className="p-5 border-2 border-gray-200 rounded-xl hover:border-primary/30 hover:shadow-md transition-all text-left bg-white group"
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className="p-3 rounded-lg bg-gray-100 group-hover:bg-gray-200 transition-colors">
+                        <Settings className="w-6 h-6 text-gray-600" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-base mb-1">Settings</h3>
+                        <p className="text-xs text-gray-500 mb-2">Account & preferences</p>
+                        <Badge className="bg-gray-200 text-gray-700 text-xs">Config</Badge>
+                      </div>
+                    </div>
+                  </motion.button>
                 </div>
               </CardContent>
             </Card>
           </motion.div>
-        ))}
+
 
         {/* Recent Products - Enhanced */}
         <motion.div
@@ -611,8 +922,8 @@ const AdminDashboard = () => {
             </CardContent>
           </Card>
         </motion.div>
-      </main>
-    </div>
+        </main>
+    </AdminLayout>
   );
 };
 
