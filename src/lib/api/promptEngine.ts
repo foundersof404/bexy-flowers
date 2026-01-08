@@ -414,6 +414,7 @@ export interface PromptBuilderOptions {
   stylePreset?: StylePreset;
   template?: string;
   includeNegative?: boolean;
+  seed?: number; // Random seed for generating variations - each seed produces different image
 }
 
 export interface BuiltPrompt {
@@ -423,7 +424,7 @@ export interface BuiltPrompt {
   hash: string; // For caching
 }
 
-// Generate hash for caching
+// Generate hash for caching - includes seed for unique variations
 function generatePromptHash(options: PromptBuilderOptions): string {
   const hashData = JSON.stringify({
     packageType: options.packageType,
@@ -435,7 +436,8 @@ function generatePromptHash(options: PromptBuilderOptions): string {
     withRibbon: options.withRibbon,
     accessories: options.accessories.sort(),
     stylePreset: options.stylePreset,
-    template: options.template
+    template: options.template,
+    seed: options.seed // Include seed so different seeds = different hashes
   });
   
   // Simple hash function
@@ -458,13 +460,29 @@ export function buildAdvancedPrompt(options: PromptBuilderOptions): BuiltPrompt 
     withGlitter,
     withRibbon = false,
     accessories,
-    includeNegative = true
+    includeNegative = true,
+    seed = Date.now() // Default to current timestamp for unique generation
   } = options;
 
   // NOTE: stylePreset and template are IGNORED to prevent unrealistic images
   // We focus ONLY on exact user inputs for accurate generation
 
   const totalFlowers = flowers.reduce((sum, f) => sum + f.quantity, 0);
+  
+  // Generate variation phrases based on seed to ensure each generation is unique
+  // This prevents API-side caching from returning identical images
+  const variationPhrases = [
+    'unique artistic composition',
+    'distinctive arrangement style', 
+    'creative floral design',
+    'original presentation',
+    'fresh artistic interpretation',
+    'elegant variation',
+    'beautiful unique styling',
+    'distinctive composition'
+  ];
+  const variationIndex = seed % variationPhrases.length;
+  const variationPhrase = variationPhrases[variationIndex];
   
   // Build DETAILED flower descriptions with exact quantities and visual characteristics
   const sortedFlowers = [...flowers].sort((a, b) => b.quantity - a.quantity);
@@ -704,6 +722,9 @@ export function buildAdvancedPrompt(options: PromptBuilderOptions): BuiltPrompt 
   parts.push(`sharp focus on all flowers, ultra high resolution 8K detail`);
   parts.push(`photorealistic, hyperrealistic, lifelike`);
   parts.push(`real photograph, not illustration, not 3D render, not digital art`);
+  
+  // Add variation phrase and seed to ensure unique generation each time
+  parts.push(`${variationPhrase}, variation seed ${seed}`);
   
   const positivePrompt = parts.join(', ');
   

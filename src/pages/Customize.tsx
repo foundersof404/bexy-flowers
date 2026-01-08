@@ -559,12 +559,34 @@ const Customize: React.FC = () => {
     setGenerationProgress(null);
     
     try {
-      const prompt = buildCurrentPrompt();
-      if (!prompt) {
+      // Generate a unique seed for this generation - ensures different image each time
+      const generationSeed = Date.now();
+      
+      // Build prompt with unique seed
+      if (!selectedPackage || !selectedSize || !selectedColor || Object.keys(selectedFlowers).length === 0) {
         toast.error("Please complete all selections first");
         setIsGenerating(false);
         return;
       }
+
+      const flowerData = Object.values(selectedFlowers).map(({ flower, quantity }) => ({
+        flower,
+        quantity
+      }));
+
+      // Build prompt with unique seed for this generation
+      const prompt = buildAdvancedPrompt({
+        packageType: selectedPackage.type,
+        boxShape: selectedBoxShape?.name.toLowerCase(),
+        size: selectedSize.name.toLowerCase(),
+        color: selectedColor.name.toLowerCase(),
+        flowers: flowerData,
+        withGlitter,
+        withRibbon: selectedPackage.type === 'box' ? withRibbon : false,
+        accessories: selectedAccessories,
+        includeNegative: true,
+        seed: generationSeed // Unique seed ensures different image each time
+      });
 
       setLastGeneratedPrompt(prompt.positive);
 
@@ -591,7 +613,7 @@ const Customize: React.FC = () => {
         height: 1024,
         enhancePrompt: true,
         negativePrompt: prompt.negative,
-        useCache: true,
+        useCache: false, // Disabled - always generate fresh image
         cacheHash: prompt.hash,
         onProgress: (stage) => setGenerationProgress(stage),
         configuration
