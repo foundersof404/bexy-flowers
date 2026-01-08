@@ -191,13 +191,28 @@ export const STYLE_PRESETS: Record<StylePreset, StylePresetConfig> = {
 };
 
 // Negative Prompts - things to avoid in generation
+// Optimized for Flux model with Flux-specific exclusions
 export const NEGATIVE_PROMPTS = {
+  // Flux-specific general negatives (based on Flux model best practices)
   general: [
-    'blurry', 'low quality', 'distorted', 'deformed', 'ugly',
-    'bad anatomy', 'bad proportions', 'extra limbs', 'duplicate',
-    'watermark', 'text overlay', 'signature', 'logo overlay',
-    'dark shadows', 'overexposed', 'underexposed', 'noise', 'grain',
-    'compression artifacts', 'pixelated', 'cropped', 'out of frame'
+    'lowres', 'bad anatomy', 'bad hands', 'text', 'error', 'missing fingers',
+    'extra digit', 'fewer digits', 'cropped', 'worst quality', 'low quality',
+    'normal quality', 'jpeg artifacts', 'signature', 'watermark', 'username',
+    'blurry', 'bad feet', 'blur', 'bad proportions', 'gross proportions',
+    'missing arms', 'missing legs', 'extra arms', 'extra legs', 'fused fingers',
+    'too many fingers', 'long neck', 'duplicate', 'morbid', 'mutilated',
+    'out of frame', 'ugly', 'bad anatomy', 'bad proportions', 'deformed',
+    'disfigured', 'mutated', 'malformed', 'extra limbs', 'missing limbs',
+    'floating limbs', 'disconnected limbs', 'malformed hands', 'out of focus',
+    'long body', 'long neck', 'jpeg artifacts', 'compression artifacts',
+    'dark shadows', 'overexposed', 'underexposed', 'noise', 'grain'
+  ],
+  // Flux-specific style exclusions
+  style: [
+    '3d render', '3d model', 'illustration', 'cartoon', 'anime', 'manga',
+    'painting', 'drawing', 'sketch', 'digital art', 'vector art', 'cg art',
+    'unreal engine', 'blender', 'maya', '3ds max', 'rendered', 'cgi',
+    'computer graphics', 'synthetic', 'artificial', 'fake', 'unrealistic'
   ],
   flowers: [
     'wilted flowers', 'dead flowers', 'brown petals', 'damaged petals',
@@ -206,7 +221,9 @@ export const NEGATIVE_PROMPTS = {
     'artificial flowers', 'fake flowers', 'plastic flowers', 'silk flowers',
     'eternal flowers', 'preserved flowers', 'foam flowers', 'paper flowers',
     'synthetic flowers', 'fabric flowers', 'dried flowers', 'wax flowers',
-    'unrealistic flowers', 'cartoon flowers', '3d rendered flowers'
+    'unrealistic flowers', 'cartoon flowers', '3d rendered flowers',
+    'too few flowers', 'sparse arrangement', 'empty spaces', 'gaps in arrangement',
+    'incomplete bouquet', 'missing flowers', 'wrong flower count'
   ],
   packaging: [
     'torn paper', 'damaged box', 'dirty packaging', 'wrinkled ribbon',
@@ -214,20 +231,23 @@ export const NEGATIVE_PROMPTS = {
     'empty box', 'box without flowers', 'closed box', 'box lid on',
     'cardboard texture visible', 'unfinished box edges', 'dented box',
     'loose ribbon', 'ribbon hanging down', 'untied ribbon', 'messy ribbon',
-    'ribbon at bottom', 'ribbon on floor', 'fallen ribbon', 'draped ribbon'
+    'ribbon at bottom', 'ribbon on floor', 'fallen ribbon', 'draped ribbon',
+    'wrong box shape', 'incorrect packaging', 'mismatched packaging'
   ],
   composition: [
     'cluttered', 'busy background', 'distracting elements',
-    'multiple products', 'hands visible', 'people visible'
+    'multiple products', 'hands visible', 'people visible',
+    'wrong background', 'colored background', 'patterned background'
   ]
 };
 
-// Build negative prompt string
-export function buildNegativePrompt(categories: (keyof typeof NEGATIVE_PROMPTS)[] = ['general', 'flowers', 'packaging', 'composition']): string {
+// Build negative prompt string optimized for Flux model
+export function buildNegativePrompt(categories: (keyof typeof NEGATIVE_PROMPTS)[] = ['general', 'style', 'flowers', 'packaging', 'composition']): string {
   const negatives: string[] = [];
   categories.forEach(cat => {
     negatives.push(...NEGATIVE_PROMPTS[cat]);
   });
+  // Flux model responds well to comma-separated negative prompts
   return negatives.join(', ');
 }
 
@@ -508,10 +528,12 @@ export function buildAdvancedPrompt(options: PromptBuilderOptions): BuiltPrompt 
     
     if (visual && qty > 0) {
       // Include bloom shape and petal style for realistic rendering
-      // STRICT: Emphasize exact quantity, color and flower type
-      flowerDescriptions.push(`exactly ${qty} ${colorVisual} ${flowerFamily} (${visual.bloomShape}, ${visual.petalStyle})`);
+      // STRICT: Use weighted keywords for Flux model emphasis
+      // Flux format: (keyword:weight) where weight > 1.0 increases emphasis
+      flowerDescriptions.push(`(exactly ${qty} ${colorVisual} ${flowerFamily}:1.3), ${visual.bloomShape}, ${visual.petalStyle}`);
     } else if (qty > 0) {
-      flowerDescriptions.push(`exactly ${qty} ${colorVisual} ${flowerFamily}`);
+      // Use weighted emphasis for quantity accuracy
+      flowerDescriptions.push(`(exactly ${qty} ${colorVisual} ${flowerFamily}:1.3)`);
     }
   });
   
@@ -523,22 +545,29 @@ export function buildAdvancedPrompt(options: PromptBuilderOptions): BuiltPrompt 
   const isSingleColor = colorList.length === 1;
   
   // Enhanced enforcement for mix & match - MUST include ALL selected flower types
+  // Use weighted keywords for Flux model to emphasize importance
   let colorEnforcement: string;
   if (isMixAndMatch) {
     // MIX & MATCH: Strictly enforce ALL selected flower types and colors
     const flowerBreakdown = sortedFlowers.map(f => 
       `${f.quantity} ${f.flower.colorName.toLowerCase()} ${f.flower.family.toLowerCase()}`
     ).join(', ');
-    colorEnforcement = `CRITICAL MIX & MATCH: arrangement MUST contain ALL of these flowers visible: ${flowerBreakdown}. Each flower type MUST be clearly visible and distinguishable. Do NOT substitute or omit any flower type.`;
+    colorEnforcement = `(CRITICAL MIX & MATCH: arrangement MUST contain ALL of these flowers visible: ${flowerBreakdown}:1.4), (each flower type MUST be clearly visible and distinguishable:1.3), (do NOT substitute or omit any flower type:1.3)`;
   } else if (isSingleColor) {
-    colorEnforcement = `IMPORTANT: ALL flowers must be exactly ${colorList[0]} color only, no other colors, no pink, no white, no variations, uniform ${colorList[0]} color throughout`;
+    // Use weighted emphasis for single color enforcement
+    const selectedColor = colorList[0];
+    colorEnforcement = `(ALL flowers must be exactly ${selectedColor} color only:1.4), (no other colors:1.3), (uniform ${selectedColor} color throughout:1.3), (no pink, no white, no variations:1.2)`;
   } else {
-    colorEnforcement = `flowers in these exact colors only: ${colorList.join(', ')}, no other colors`;
+    colorEnforcement = `(flowers in these exact colors only: ${colorList.join(', ')}:1.3), (no other colors:1.2)`;
   }
   
   // Build PRECISE prompt focused on user inputs only
   // Pollinations Flux model works best with clear, structured descriptions
+  // Flux prompt structure: [main subject], [composition], [packaging], [quality], [style], [technical]
   const parts: string[] = [];
+  
+  // Start with Flux quality boosters (most important first for Flux)
+  parts.push(`masterpiece, best quality, highly detailed`);
   
   if (packageType === 'box') {
     const shape = boxShape || 'square';
@@ -599,19 +628,20 @@ export function buildAdvancedPrompt(options: PromptBuilderOptions): BuiltPrompt 
     
     // Build detailed box prompt - 3/4 angle view like reference images
     // CRITICAL: Emphasize REAL FRESH flowers, not artificial
+    // Use weighted keywords for Flux model emphasis
     parts.push(`ultra realistic professional florist product photo`);
     parts.push(`${sizeDesc} ${shapeConfig.shape} made of ${boxMaterial} material`);
-    parts.push(`${shapeEnforcement}`);
+    parts.push(`(${shapeEnforcement}:1.3)`);
     parts.push(`luxury flower box arrangement, lid removed showing interior`);
     
-    // STRONG emphasis on REAL FRESH flowers
-    parts.push(`${totalFlowers} REAL fresh-cut natural flowers from a florist shop: ${flowersText}`);
-    parts.push(`IMPORTANT: flowers must look 100% real and natural, freshly cut from garden`);
+    // STRONG emphasis on REAL FRESH flowers with weighted keywords
+    parts.push(`(${totalFlowers} REAL fresh-cut natural flowers from a florist shop: ${flowersText}:1.4)`);
+    parts.push(`(flowers must look 100% real and natural, freshly cut from garden:1.3)`);
     parts.push(`natural organic flower petals with realistic texture and subtle imperfections`);
     parts.push(`visible natural petal veins, soft dewy appearance, lifelike colors`);
     parts.push(`${colorEnforcement}`);
     parts.push(`${shapeConfig.arrangement}`);
-    parts.push(`all ${totalFlowers} flowers clearly visible, densely packed, filling the entire box`);
+    parts.push(`(all ${totalFlowers} flowers clearly visible:1.3), (densely packed:1.2), (filling the entire box:1.2)`);
     parts.push(`flower heads facing upward showing full open blooms`);
     parts.push(`flowers creating a lush overflowing dome shape rising above the box rim`);
     parts.push(`${shapeConfig.viewAngle}`);
@@ -671,14 +701,14 @@ export function buildAdvancedPrompt(options: PromptBuilderOptions): BuiltPrompt 
       parts.push(`${sizeDesc} heart-shaped flower bouquet arrangement`);
       parts.push(`IMPORTANT: bouquet must be arranged in heart shape only, not round, not oval, not traditional bouquet shape`);
       
-      // STRONG emphasis on REAL FRESH flowers
-      parts.push(`${totalFlowers} REAL fresh-cut natural flowers from a florist shop: ${flowersText}`);
-      parts.push(`IMPORTANT: flowers must look 100% real and natural, freshly cut from garden`);
+      // STRONG emphasis on REAL FRESH flowers with weighted keywords
+      parts.push(`(${totalFlowers} REAL fresh-cut natural flowers from a florist shop: ${flowersText}:1.4)`);
+      parts.push(`(flowers must look 100% real and natural, freshly cut from garden:1.3)`);
       parts.push(`natural organic flower petals with realistic texture and subtle imperfections`);
       parts.push(`visible natural petal veins, soft dewy appearance, lifelike colors`);
       parts.push(`${colorEnforcement}`);
-      parts.push(`all ${totalFlowers} flowers clearly visible in the arrangement`);
-      parts.push(`flowers arranged in a perfect heart shape when viewed from above`);
+      parts.push(`(all ${totalFlowers} flowers clearly visible in the arrangement:1.3)`);
+      parts.push(`(flowers arranged in a perfect heart shape when viewed from above:1.3)`);
       parts.push(`roses densely packed to form a romantic heart silhouette`);
       parts.push(`wrapped in ${wrapMaterial} with decorative pleated ruffled border around the heart`);
       parts.push(`the wrapping paper forms an elegant frame around the heart-shaped flowers`);
@@ -691,13 +721,13 @@ export function buildAdvancedPrompt(options: PromptBuilderOptions): BuiltPrompt 
       parts.push(`${sizeDesc} hand-tied flower bouquet`);
       parts.push(`IMPORTANT: traditional round dome-shaped bouquet, not heart-shaped, not box arrangement`);
       
-      // STRONG emphasis on REAL FRESH flowers
-      parts.push(`${totalFlowers} REAL fresh-cut natural flowers from a florist shop: ${flowersText}`);
-      parts.push(`IMPORTANT: flowers must look 100% real and natural, freshly cut from garden`);
+      // STRONG emphasis on REAL FRESH flowers with weighted keywords
+      parts.push(`(${totalFlowers} REAL fresh-cut natural flowers from a florist shop: ${flowersText}:1.4)`);
+      parts.push(`(flowers must look 100% real and natural, freshly cut from garden:1.3)`);
       parts.push(`natural organic flower petals with realistic texture and subtle imperfections`);
       parts.push(`visible natural petal veins, soft dewy appearance, lifelike colors`);
       parts.push(`${colorEnforcement}`);
-      parts.push(`all ${totalFlowers} flowers clearly visible, densely arranged`);
+      parts.push(`(all ${totalFlowers} flowers clearly visible:1.3), (densely arranged:1.2)`);
       parts.push(`flowers arranged in cascading dome shape with focal flowers in center`);
       parts.push(`professionally wrapped in ${wrapMaterial}`);
       parts.push(`paper gathered and tied with matching satin ribbon bow`);
@@ -730,7 +760,10 @@ export function buildAdvancedPrompt(options: PromptBuilderOptions): BuiltPrompt 
     }
   }
   
-  // Technical quality - optimized for ULTRA REALISTIC product photography
+  // Technical quality - optimized for Flux model with Flux-specific quality keywords
+  // Flux responds well to these specific quality boosters
+  parts.push(`masterpiece, best quality, highly detailed, 8k uhd, dslr, soft lighting, high quality, film grain`);
+  parts.push(`Fujifilm XT3, professional photography`);
   parts.push(`photograph taken with professional DSLR camera`);
   parts.push(`pure white seamless studio background`);
   parts.push(`soft diffused natural studio lighting with gentle shadows`);
@@ -747,37 +780,48 @@ export function buildAdvancedPrompt(options: PromptBuilderOptions): BuiltPrompt 
   let negativePrompt = includeNegative ? buildNegativePrompt() : '';
   
   // Add strict color exclusions when only one flower color is selected
+  // Flux model responds well to explicit color exclusions
   if (isSingleColor && includeNegative) {
     const selectedColor = colorList[0].toLowerCase();
-    const allColors = ['red', 'pink', 'white', 'yellow', 'blue', 'purple', 'orange', 'peach', 'burgundy', 'cream', 'lavender', 'coral'];
+    const allColors = ['red', 'pink', 'white', 'yellow', 'blue', 'purple', 'orange', 'peach', 'burgundy', 'cream', 'lavender', 'coral', 'fushia', 'terracotta', 'dark blue'];
     const excludedColors = allColors.filter(c => c !== selectedColor);
-    const colorExclusions = excludedColors.map(c => `${c} flowers, ${c} roses, ${c} petals`).join(', ');
-    negativePrompt = `${negativePrompt}, mixed colors, multicolored flowers, different colored flowers, color variations, ${colorExclusions}`;
+    // More comprehensive color exclusions for Flux
+    const colorExclusions = excludedColors.map(c => 
+      `${c} flowers, ${c} roses, ${c} petals, ${c} color, ${c} tint, ${c} hue, ${c} shade`
+    ).join(', ');
+    negativePrompt = `${negativePrompt}, mixed colors, multicolored flowers, different colored flowers, color variations, color mixing, ${colorExclusions}`;
   }
   
   // Add strict shape exclusions for boxes
+  // Flux model benefits from explicit shape exclusions
   if (packageType === 'box' && includeNegative) {
     const selectedShape = (boxShape || 'square').toLowerCase();
     const shapeExclusions: Record<string, string> = {
-      'round': 'square box, rectangular box, heart-shaped box, sharp corners, angular box',
-      'square': 'round box, circular box, cylinder box, heart-shaped box, curved edges',
-      'heart': 'square box, round box, rectangular box, circular box, sharp corners',
-      'rectangle': 'square box, round box, circular box, heart-shaped box'
+      'round': 'square box, rectangular box, heart-shaped box, sharp corners, angular box, octagonal box',
+      'square': 'round box, circular box, cylinder box, heart-shaped box, curved edges, oval box',
+      'heart': 'square box, round box, rectangular box, circular box, sharp corners, angular box',
+      'rectangle': 'square box, round box, circular box, heart-shaped box, cylinder box'
     };
     const excludeShapes = shapeExclusions[selectedShape] || '';
     if (excludeShapes) {
-      negativePrompt = `${negativePrompt}, ${excludeShapes}`;
+      negativePrompt = `${negativePrompt}, wrong box shape, incorrect shape, ${excludeShapes}`;
     }
   }
   
   // Add strict wrap shape exclusions
+  // Flux model benefits from explicit shape exclusions
   if (packageType === 'wrap' && includeNegative) {
     const wrapShape = (boxShape || 'classic').toLowerCase();
     if (wrapShape === 'heart') {
-      negativePrompt = `${negativePrompt}, round bouquet, traditional bouquet, oval arrangement, circular arrangement`;
+      negativePrompt = `${negativePrompt}, round bouquet, traditional bouquet, oval arrangement, circular arrangement, wrong shape, incorrect shape`;
     } else {
-      negativePrompt = `${negativePrompt}, heart-shaped bouquet, heart arrangement, box arrangement`;
+      negativePrompt = `${negativePrompt}, heart-shaped bouquet, heart arrangement, box arrangement, wrong shape, incorrect shape`;
     }
+  }
+  
+  // Add quantity-related negatives for Flux
+  if (includeNegative) {
+    negativePrompt = `${negativePrompt}, too few flowers, sparse arrangement, empty spaces, gaps in arrangement, incomplete bouquet, missing flowers, wrong flower count, incorrect quantity`;
   }
   
   // Build simple flower list for preview

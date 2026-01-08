@@ -63,7 +63,15 @@ export const AI_CONFIG = {
       params: {
         // NOTE: Only basic parameters are supported in new API
         // enhance, nologo, seed may cause 400 errors - not including them
+        // 
+        // Available Flux models:
+        // - 'flux': General purpose, balanced quality and speed (default)
+        // - 'flux-realism': Optimized for photorealistic results (recommended for product photography)
+        // - 'flux-anime': Stylized anime/cartoon style
+        // - 'flux-3d': Better 3D rendering and depth
+        // - 'turbo': Faster generation, slightly lower quality
         model: 'flux', // Using 'flux' model (confirmed to work)
+        // Consider 'flux-realism' for more photorealistic flower product photos
         width: 1024, // High resolution for quality
         height: 1024, // High resolution for quality
       }
