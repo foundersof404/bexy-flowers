@@ -381,8 +381,9 @@ const Favorites = memo(() => {
                           {favorite.featured && (
                             <span 
                               className="absolute top-4 left-4 px-3 py-1 rounded-full text-[10px] font-normal text-white shadow-lg flex items-center gap-1"
-                              style={{ fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}
                               style={{
+                                fontFamily: "'EB Garamond', serif",
+                                letterSpacing: '-0.02em',
                                 background: 'linear-gradient(90deg, #C79E48 0%, #D4A85A 100%)'
                               }}
                             >

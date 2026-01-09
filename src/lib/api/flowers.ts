@@ -20,10 +20,9 @@ export interface FlowerTypeWithColors extends FlowerType {
  * Get all flower types
  */
 export async function getFlowerTypes(): Promise<FlowerType[]> {
-  const { data, error } = await supabase
-    .from('flower_types')
-    .select('*')
-    .order('name', { ascending: true });
+  const { data, error } = await db.query('flower_types', {
+    orderBy: { column: 'name', ascending: true }
+  });
 
   if (error) {
     throw new Error(`Failed to fetch flower types: ${error.message}`);
@@ -31,6 +30,14 @@ export async function getFlowerTypes(): Promise<FlowerType[]> {
 
   return data;
 }
+
+// Alias for backwards compatibility
+export const getFlowers = getFlowerTypes;
+
+/**
+ * Get single flower type by ID
+ */
+export const getFlower = getFlowerTypeWithColors;
 
 /**
  * Get flower type with colors
@@ -165,15 +172,13 @@ export async function deleteFlowerType(id: string): Promise<void> {
     }
   }
 
-  const { error } = await supabase
-    .from('flower_types')
-    .delete()
-    .eq('id', id);
-
-  if (error) {
-    throw new Error(`Failed to delete flower type: ${error.message}`);
-  }
+  await db.delete('flower_types', { id });
 }
+
+// Aliases for backwards compatibility
+export const createFlower = createFlowerType;
+export const updateFlower = updateFlowerType;
+export const deleteFlower = deleteFlowerType;
 
 // ==================== Flower Colors ====================
 
