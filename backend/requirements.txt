@@ -1,0 +1,33 @@
+# Bexy Flowers AI Backend - Python Dependencies
+# =============================================
+# Install with: pip install -r requirements.txt
+
+# Web Framework
+flask==3.0.0
+flask-cors==4.0.0
+
+# AI/ML Libraries
+# torch and torchvision installed separately with CUDA support
+# pip install torch torchvision --index-url https://download.pytorch.org/whl/cu118
+diffusers>=0.25.0
+transformers>=4.36.2
+accelerate>=0.25.0
+
+# Image Processing
+Pillow>=10.2.0
+pillow-heif>=1.0.0  # For HEIC image conversion
+
+# Utilities
+numpy>=1.26.3
+requests>=2.31.0
+
+# Training Dependencies (only needed for fine-tuning)
+datasets==2.16.1
+evaluate==0.4.1
+peft>=0.18.0  # For LoRA training
+
+# Optional: For faster loading and better performance
+# xformers==0.0.23  # Uncomment for faster attention (GPU only, requires compilation)
+# bitsandbytes==0.41.3  # Uncomment for 8-bit optimization (reduces VRAM usage)
+
+
