@@ -124,13 +124,19 @@ export const useNavigationPredictor = () => {
    * Pre-load predicted routes
    */
   const preloadPredictedRoutes = useCallback((predictedRoutes: string[]) => {
+    const createdLinks: HTMLLinkElement[] = [];
+    
     predictedRoutes.forEach(route => {
-      // Pre-load route chunk
-      const link = document.createElement('link');
-      link.rel = 'prefetch';
-      link.as = 'document';
-      link.href = route;
-      document.head.appendChild(link);
+      // Pre-load route chunk - but track created elements for cleanup
+      const existingLink = document.querySelector(`link[rel="prefetch"][href="${route}"]`);
+      if (!existingLink) {
+        const link = document.createElement('link');
+        link.rel = 'prefetch';
+        link.as = 'document';
+        link.href = route;
+        document.head.appendChild(link);
+        createdLinks.push(link);
+      }
 
       // Pre-load route-specific data
       if (route.startsWith('/collection')) {
@@ -138,7 +144,7 @@ export const useNavigationPredictor = () => {
           queryKey: ['collection-products', 'list', { isActive: true }],
           queryFn: () => import('@/lib/api/collection-products').then(m => m.getCollectionProducts({ isActive: true })),
           staleTime: 5 * 60 * 1000,
-        });
+        }).catch(() => {}); // Silence errors
       }
 
       if (route.startsWith('/wedding-and-events')) {
@@ -146,7 +152,7 @@ export const useNavigationPredictor = () => {
           queryKey: ['wedding-creations', 'list', { isActive: true }],
           queryFn: () => import('@/lib/api/wedding-creations').then(m => m.getWeddingCreations({ isActive: true })),
           staleTime: 5 * 60 * 1000,
-        });
+        }).catch(() => {}); // Silence errors
       }
 
       if (route === '/favorites') {
@@ -154,7 +160,7 @@ export const useNavigationPredictor = () => {
           queryKey: ['visitor-favorites'],
           queryFn: () => import('@/lib/api/visitor-favorites').then(m => m.getVisitorFavorites()),
           staleTime: 2 * 60 * 1000, // Favorites change more frequently
-        });
+        }).catch(() => {}); // Silence errors
       }
 
       if (route === '/cart') {
@@ -162,9 +168,18 @@ export const useNavigationPredictor = () => {
           queryKey: ['visitor-cart'],
           queryFn: () => import('@/lib/api/visitor-cart').then(m => m.getVisitorCart()),
           staleTime: 1 * 60 * 1000, // Cart changes frequently
-        });
+        }).catch(() => {}); // Silence errors
       }
     });
+    
+    // Return cleanup function for created links
+    return () => {
+      createdLinks.forEach(link => {
+        if (link.parentNode) {
+          link.parentNode.removeChild(link);
+        }
+      });
+    };
   }, [queryClient]);
 
   /**
@@ -222,9 +237,13 @@ export const useNavigationPredictor = () => {
     // Predict and pre-load likely next routes
     const predictedRoutes = getPredictedRoutes(currentPath);
     let preloadTimeoutId: NodeJS.Timeout | null = null;
+    let cleanupPrefetchLinks: (() => void) | null = null;
+    
     if (predictedRoutes.length > 0) {
       // Delay pre-loading slightly to avoid blocking current navigation
-      preloadTimeoutId = setTimeout(() => preloadPredictedRoutes(predictedRoutes), 300);
+      preloadTimeoutId = setTimeout(() => {
+        cleanupPrefetchLinks = preloadPredictedRoutes(predictedRoutes);
+      }, 300);
     }
 
     // Set up session end handlers
@@ -261,6 +280,10 @@ export const useNavigationPredictor = () => {
       }
       if (visibilityTimeoutId) {
         clearTimeout(visibilityTimeoutId);
+      }
+      // Clean up prefetch link elements to prevent memory leaks
+      if (cleanupPrefetchLinks) {
+        cleanupPrefetchLinks();
       }
     };
   }, [location.pathname, startSession, endSession, recordNavigation, getPredictedRoutes, preloadPredictedRoutes]);

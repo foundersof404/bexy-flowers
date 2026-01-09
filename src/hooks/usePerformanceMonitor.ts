@@ -23,6 +23,8 @@ export const usePerformanceMonitor = () => {
   const location = useLocation();
   const navigationStartRef = useRef<number>(0);
   const routeStartRef = useRef<number>(0);
+  const saveMetricsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const pendingMetricsRef = useRef<PerformanceMetrics[] | null>(null);
 
   /**
    * Load stored performance metrics
@@ -37,14 +39,28 @@ export const usePerformanceMonitor = () => {
   }, []);
 
   /**
-   * Save performance metrics
+   * Save performance metrics - throttled to prevent excessive localStorage writes
    */
   const saveMetrics = useCallback((metrics: PerformanceMetrics[]) => {
-    try {
-      localStorage.setItem(PERFORMANCE_STORAGE_KEY, JSON.stringify(metrics));
-    } catch (error) {
-      console.warn('Failed to save performance metrics:', error);
+    // Batch localStorage writes to prevent performance issues
+    pendingMetricsRef.current = metrics;
+    
+    if (saveMetricsTimeoutRef.current) {
+      clearTimeout(saveMetricsTimeoutRef.current);
     }
+    
+    saveMetricsTimeoutRef.current = setTimeout(() => {
+      try {
+        if (pendingMetricsRef.current) {
+          localStorage.setItem(PERFORMANCE_STORAGE_KEY, JSON.stringify(pendingMetricsRef.current));
+          pendingMetricsRef.current = null;
+        }
+      } catch (error) {
+        console.warn('Failed to save performance metrics:', error);
+        pendingMetricsRef.current = null;
+      }
+      saveMetricsTimeoutRef.current = null;
+    }, 500); // Throttle to max once per 500ms
   }, []);
 
   /**
@@ -158,7 +174,14 @@ export const usePerformanceMonitor = () => {
       endTiming();
     }, 100);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      // Clean up pending localStorage writes
+      if (saveMetricsTimeoutRef.current) {
+        clearTimeout(saveMetricsTimeoutRef.current);
+        saveMetricsTimeoutRef.current = null;
+      }
+    };
   }, [location.pathname, startNavigationTiming, startRouteTiming, endTiming]);
 
   return {

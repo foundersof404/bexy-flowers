@@ -25,6 +25,8 @@ export const useFlowers = (filters?: {
   featured?: boolean;
   isActive?: boolean;
 }) => {
+  const queryClient = useQueryClient();
+  
   return useQuery({
     queryKey: flowersQueryKeys.list(filters),
     queryFn: () => getFlowers(filters),
@@ -35,7 +37,6 @@ export const useFlowers = (filters?: {
     // Pre-warm individual flowers for better navigation performance
     onSuccess: (data) => {
       if (data && data.length > 0) {
-        const queryClient = useQueryClient();
         // Pre-load first 3 flowers (most likely to be viewed)
         data.slice(0, 3).forEach((flower) => {
           queryClient.prefetchQuery({

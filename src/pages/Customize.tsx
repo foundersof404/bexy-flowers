@@ -181,9 +181,9 @@ const ProgressStepper = ({ currentStep, steps }: { currentStep: number, steps: A
               >
                 {isCompleted ? <Check className="w-6 h-6" /> : <Icon className="w-6 h-6" />}
               </motion.div>
-              <span className={`mt-3 text-xs font-bold tracking-wider uppercase transition-colors ${
-                isActive || isCompleted ? 'text-[#C79E48]' : 'text-gray-400'
-              }`}>
+              <span className={`mt-3 text-xs font-normal uppercase transition-colors ${
+                isActive || isCompleted ? 'text-[#C79E48]' : ''
+              }`} style={{ color: isActive || isCompleted ? '#C79E48' : '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>
                 {step.title}
               </span>
             </div>
@@ -910,7 +910,7 @@ const Customize: React.FC = () => {
     summer: { label: "Summer", icon: "☀️", color: "bg-yellow-100 text-yellow-700 border-yellow-300" },
     fall: { label: "Fall", icon: "🍂", color: "bg-orange-100 text-orange-700 border-orange-300" },
     winter: { label: "Winter", icon: "❄️", color: "bg-blue-100 text-blue-700 border-blue-300" },
-    "all-year": { label: "All Year", icon: "🌿", color: "bg-gray-100 text-gray-700 border-gray-300" }
+    "all-year": { label: "All Year", icon: "🌿", color: "bg-gray-100 border-gray-300", style: { color: '#2c2d2a', fontFamily: "'EB Garamond', serif" } }
   };
 
   // Flower categories mapping - maps filter categories to flower families
@@ -1042,7 +1042,7 @@ const Customize: React.FC = () => {
         {/* Hero Content */}
         <div className="absolute inset-0 flex items-center justify-center z-10">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h1 className={`text-3xl md:text-5xl lg:text-6xl font-luxury font-bold mb-4 ${isMobile ? 'text-white' : 'text-white'}`} style={{ textShadow: '0 2px 8px rgba(0, 0, 0, 0.7), 0 1px 3px rgba(0, 0, 0, 0.4)' }}>
+            <h1 className={`text-3xl md:text-5xl lg:text-6xl font-luxury font-normal mb-4 ${isMobile ? 'text-white' : 'text-white'}`} style={{ textShadow: '0 2px 8px rgba(0, 0, 0, 0.7), 0 1px 3px rgba(0, 0, 0, 0.4)', letterSpacing: '-0.02em' }}>
               Design Your Masterpiece
             </h1>
             <p className={`text-base md:text-lg lg:text-xl ${isMobile ? 'text-white/90' : 'text-white/90'}`} style={{ textShadow: '0 2px 8px rgba(0, 0, 0, 0.7), 0 1px 3px rgba(0, 0, 0, 0.4)' }}>
@@ -1076,8 +1076,8 @@ const Customize: React.FC = () => {
                   <Box className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-lg text-gray-900">Choose Presentation</h3>
-                  <p className="text-xs text-gray-500">Select your base style</p>
+                  <h3 className="font-normal text-lg" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>Choose Presentation</h3>
+                  <p className="text-xs" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>Select your base style</p>
                 </div>
               </div>
 
@@ -1093,9 +1093,9 @@ const Customize: React.FC = () => {
                     }`}
                   >
                     <pkg.icon className={`w-8 h-8 mb-3 ${selectedPackage?.id === pkg.id ? 'text-[#C79E48]' : 'text-gray-400'}`} />
-                    <h4 className="font-bold text-gray-900 mb-1">{pkg.name}</h4>
-                    <p className="text-xs text-gray-500">{pkg.description}</p>
-                    <div className="mt-2 text-sm font-bold text-[#C79E48]">${pkg.basePrice}</div>
+                    <h4 className="font-normal mb-1" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>{pkg.name}</h4>
+                    <p className="text-xs" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>{pkg.description}</p>
+                    <div className="mt-2 text-sm font-normal" style={{ color: '#C79E48', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>${pkg.basePrice}</div>
                   </button>
                 ))}
               </div>
@@ -1110,7 +1110,7 @@ const Customize: React.FC = () => {
                     exit={{ opacity: 0, height: 0 }}
                     className="mt-6 pt-6 border-t border-gray-200"
                   >
-                    <h4 className="font-semibold text-gray-900 mb-4">Box Shape</h4>
+                    <h4 className="font-normal mb-4" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>Box Shape</h4>
                     <div className="grid grid-cols-3 gap-3">
                       {boxShapes.map(shape => {
                         const ShapeIcon = shape.icon;
@@ -1125,7 +1125,7 @@ const Customize: React.FC = () => {
                             }`}
                           >
                             <ShapeIcon className={`w-6 h-6 mx-auto mb-2 ${selectedBoxShape?.id === shape.id ? 'text-[#C79E48]' : 'text-gray-400'}`} />
-                            <span className="text-xs font-medium text-gray-700">{shape.name}</span>
+                            <span className="text-xs font-normal" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>{shape.name}</span>
                           </button>
                         );
                       })}
@@ -1143,7 +1143,7 @@ const Customize: React.FC = () => {
                     exit={{ opacity: 0, height: 0 }}
                     className="mt-6 pt-6 border-t border-gray-200"
                   >
-                    <h4 className="font-semibold text-gray-900 mb-4">Bouquet Shape</h4>
+                    <h4 className="font-normal mb-4" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>Bouquet Shape</h4>
                     <div className="grid grid-cols-2 gap-3">
                       <button
                         onClick={() => setSelectedBoxShape(null)}
@@ -1154,8 +1154,8 @@ const Customize: React.FC = () => {
                         }`}
                       >
                         <Circle className={`w-6 h-6 mx-auto mb-2 ${!selectedBoxShape || selectedBoxShape.id !== 'heart' ? 'text-[#C79E48]' : 'text-gray-400'}`} />
-                        <span className="text-xs font-medium text-gray-700">Classic Round</span>
-                        <p className="text-[10px] text-gray-400 mt-1">Traditional dome shape</p>
+                        <span className="text-xs font-normal" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>Classic Round</span>
+                        <p className="text-[10px] mt-1" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif" }}>Traditional dome shape</p>
                       </button>
                       <button
                         onClick={() => setSelectedBoxShape({ id: 'heart', name: 'Heart', icon: Heart })}
@@ -1166,8 +1166,8 @@ const Customize: React.FC = () => {
                         }`}
                       >
                         <Heart className={`w-6 h-6 mx-auto mb-2 ${selectedBoxShape?.id === 'heart' ? 'text-[#C79E48]' : 'text-gray-400'}`} />
-                        <span className="text-xs font-medium text-gray-700">Heart Shape</span>
-                        <p className="text-[10px] text-gray-400 mt-1">Romantic heart arrangement</p>
+                        <span className="text-xs font-normal" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>Heart Shape</span>
+                        <p className="text-[10px] mt-1" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif" }}>Romantic heart arrangement</p>
                       </button>
                     </div>
                   </motion.div>
@@ -1183,7 +1183,7 @@ const Customize: React.FC = () => {
                     exit={{ opacity: 0, height: 0 }}
                     className="mt-6 pt-6 border-t border-gray-200"
                   >
-                    <h4 className="font-semibold text-gray-900 mb-4">Box Decoration</h4>
+                    <h4 className="font-normal mb-4" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>Box Decoration</h4>
                     <button
                       onClick={() => setWithRibbon(!withRibbon)}
                       className={`w-full p-4 rounded-lg border-2 transition-all flex items-center gap-4 ${
@@ -1196,8 +1196,8 @@ const Customize: React.FC = () => {
                         <Gift className="w-5 h-5" />
                       </div>
                       <div className="text-left flex-1">
-                        <span className="text-sm font-medium text-gray-900">Satin Ribbon Wrap</span>
-                        <p className="text-[10px] text-gray-400">Elegant satin ribbon with bow around the box</p>
+                        <span className="text-sm font-normal" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>Satin Ribbon Wrap</span>
+                        <p className="text-[10px]" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif" }}>Elegant satin ribbon with bow around the box</p>
                       </div>
                       <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${withRibbon ? 'border-[#C79E48] bg-[#C79E48]' : 'border-gray-300'}`}>
                         {withRibbon && <Check className="w-4 h-4 text-white" />}
@@ -1221,15 +1221,15 @@ const Customize: React.FC = () => {
                     <Palette className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-lg text-gray-900">Size & Color</h3>
-                    <p className="text-xs text-gray-500">Refine the details</p>
+                    <h3 className="font-normal text-lg" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>Size & Color</h3>
+                    <p className="text-xs" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>Refine the details</p>
                   </div>
                 </div>
 
                 <div className="space-y-6">
                   {/* Sizes */}
                   <div>
-                    <h4 className="text-sm font-semibold text-gray-700 mb-3">Size</h4>
+                    <h4 className="text-sm font-normal mb-3" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>Size</h4>
                     <div className="grid grid-cols-3 gap-3">
                       {sizes.map(size => (
                         <button
@@ -1241,8 +1241,8 @@ const Customize: React.FC = () => {
                               : 'border-gray-200 hover:border-[#C79E48]/50'
                           }`}
                         >
-                          <div className="font-bold text-gray-900">{size.name}</div>
-                          <div className="text-xs text-gray-500 mt-1">{size.description}</div>
+                          <div className="font-normal" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>{size.name}</div>
+                          <div className="text-xs mt-1" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif" }}>{size.description}</div>
                         </button>
                       ))}
                     </div>
@@ -1250,7 +1250,7 @@ const Customize: React.FC = () => {
 
                   {/* Colors */}
                   <div>
-                    <h4 className="text-sm font-semibold text-gray-700 mb-3">Color</h4>
+                    <h4 className="text-sm font-normal mb-3" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>Color</h4>
                     <div className="flex flex-wrap gap-3">
                       {colors.map(color => (
                         <button
@@ -1282,8 +1282,8 @@ const Customize: React.FC = () => {
                     <Sparkles className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-lg text-gray-900">Choose Your Blooms</h3>
-                    <p className="text-xs text-gray-500">
+                    <h3 className="font-normal text-lg" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>Choose Your Blooms</h3>
+                    <p className="text-xs" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>
                       {flowerMode === "specific" 
                         ? "Select one flower type" 
                         : selectedSize 
@@ -1300,16 +1300,16 @@ const Customize: React.FC = () => {
                       className="p-6 rounded-xl border-2 border-gray-200 hover:border-[#C79E48] hover:bg-[#C79E48]/5 transition-all text-left"
                     >
                       <div className="text-3xl mb-3">🌹</div>
-                      <h4 className="font-bold text-gray-900 mb-1">Specific Variety</h4>
-                      <p className="text-xs text-gray-500">Choose one flower type</p>
+                      <h4 className="font-normal mb-1" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>Specific Variety</h4>
+                      <p className="text-xs" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif" }}>Choose one flower type</p>
                     </button>
                     <button
                       onClick={() => setFlowerMode("mix")}
                       className="p-6 rounded-xl border-2 border-gray-200 hover:border-[#C79E48] hover:bg-[#C79E48]/5 transition-all text-left"
                     >
                       <div className="text-3xl mb-3">💐</div>
-                      <h4 className="font-bold text-gray-900 mb-1">Mix & Match</h4>
-                      <p className="text-xs text-gray-500">Create a mixed bouquet</p>
+                      <h4 className="font-normal mb-1" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>Mix & Match</h4>
+                      <p className="text-xs" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif" }}>Create a mixed bouquet</p>
                     </button>
                   </div>
                 ) : (
@@ -1317,11 +1317,12 @@ const Customize: React.FC = () => {
                     <div className="flex items-center justify-between">
                       <button
                         onClick={() => { setFlowerMode(null); setSelectedFamily(null); }}
-                        className="text-sm text-gray-500 hover:text-[#C79E48] flex items-center gap-1"
+                        className="text-sm hover:text-[#C79E48] flex items-center gap-1"
+                        style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif" }}
                       >
                         ← Back
                       </button>
-                      <span className="text-xs font-medium text-[#C79E48] uppercase tracking-wider">
+                      <span className="text-xs font-normal uppercase" style={{ color: '#C79E48', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>
                         {flowerMode === "specific" ? "Single Variety" : "Mixed Bouquet"}
                       </span>
                     </div>
@@ -1341,7 +1342,7 @@ const Customize: React.FC = () => {
                             className="p-4 rounded-lg border-2 border-gray-200 hover:border-[#C79E48] hover:bg-[#C79E48]/5 transition-all text-center"
                           >
                             <span className="text-2xl block mb-2">{fam.icon}</span>
-                            <span className="text-xs font-medium text-gray-700">{fam.name}</span>
+                            <span className="text-xs font-normal" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>{fam.name}</span>
                           </motion.button>
                         ))}
                       </motion.div>
@@ -1350,10 +1351,11 @@ const Customize: React.FC = () => {
                     {flowerMode === "specific" && selectedFamily && (
                       <div className="flex items-center gap-2 mb-2">
                         <span className="text-xl">{flowerFamilies.find(f => f.id === selectedFamily)?.icon}</span>
-                        <h4 className="font-bold text-gray-900">{flowerFamilies.find(f => f.id === selectedFamily)?.name}</h4>
+                        <h4 className="font-normal" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>{flowerFamilies.find(f => f.id === selectedFamily)?.name}</h4>
                         <button
                           onClick={() => setSelectedFamily(null)}
-                          className="ml-auto text-xs text-gray-500 hover:text-[#C79E48]"
+                          className="ml-auto text-xs hover:text-[#C79E48]"
+                          style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif" }}
                         >
                           Change
                         </button>
@@ -1376,11 +1378,12 @@ const Customize: React.FC = () => {
                             <button
                               key={filter.id}
                               onClick={() => setFlowerFilter(filter.id as any)}
-                              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                              className={`px-3 py-1.5 rounded-full text-xs font-normal transition-all ${
                                 flowerFilter === filter.id
                                   ? 'bg-[#C79E48] text-white shadow-sm'
-                                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                  : 'bg-gray-100 hover:bg-gray-200'
                               }`}
+                              style={{ color: flowerFilter === filter.id ? 'white' : '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}
                             >
                               {filter.label}
                             </button>
@@ -1390,7 +1393,7 @@ const Customize: React.FC = () => {
                         {/* Seasonal Filter - Only show when "seasonal" category is selected */}
                         {flowerFilter === "seasonal" && (
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-xs font-medium text-gray-600">Season:</span>
+                            <span className="text-xs font-normal" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>Season:</span>
                             {[
                               { id: "all-seasons", label: "All Seasons" },
                               { id: "spring", label: "Spring", icon: "🌸" },
@@ -1403,18 +1406,19 @@ const Customize: React.FC = () => {
                                 onClick={() => {
                                   setSeasonFilter(seasonFilterOption.id === "all-seasons" ? "all-seasons" : seasonFilterOption.id as Season);
                                 }}
-                                className={`px-2.5 py-1 rounded-full text-xs font-medium transition-all flex items-center gap-1 ${
+                                className={`px-2.5 py-1 rounded-full text-xs font-normal transition-all flex items-center gap-1 ${
                                   (seasonFilterOption.id === "all-seasons" && seasonFilter === "all-seasons") ||
                                   (seasonFilterOption.id !== "all-seasons" && seasonFilter === seasonFilterOption.id)
-                                    ? 'bg-[#C79E48]/20 text-[#C79E48] border border-[#C79E48]/30'
-                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                    ? 'bg-[#C79E48]/20 border border-[#C79E48]/30'
+                                    : 'bg-gray-100 hover:bg-gray-200'
                                 }`}
+                                style={{ color: (seasonFilterOption.id === "all-seasons" && seasonFilter === "all-seasons") || (seasonFilterOption.id !== "all-seasons" && seasonFilter === seasonFilterOption.id) ? '#C79E48' : '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}
                               >
                                 {seasonFilterOption.icon && <span>{seasonFilterOption.icon}</span>}
                                 {seasonFilterOption.label}
                               </button>
                             ))}
-                            <span className="text-[10px] text-gray-400 ml-auto">
+                            <span className="text-[10px] ml-auto" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif" }}>
                               Current: {seasonConfig[currentSeason].icon} {seasonConfig[currentSeason].label}
                             </span>
                           </div>
@@ -1432,14 +1436,16 @@ const Customize: React.FC = () => {
                           : 'bg-blue-50 border-blue-300'
                       }`}>
                         <div className="flex items-center justify-between">
-                          <span className="text-sm font-semibold text-gray-700">Flowers Selected:</span>
-                          <span className={`text-sm font-bold ${
-                            currentTotalFlowers >= maxFlowers 
-                              ? 'text-green-700' 
+                          <span className="text-sm font-normal" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>Flowers Selected:</span>
+                          <span className={`text-sm font-normal`} style={{ 
+                            color: currentTotalFlowers >= maxFlowers 
+                              ? '#059669' 
                               : currentTotalFlowers >= maxFlowers * 0.8
-                              ? 'text-yellow-700'
-                              : 'text-blue-700'
-                          }`}>
+                              ? '#d97706'
+                              : '#2563eb',
+                            fontFamily: "'EB Garamond', serif",
+                            letterSpacing: '-0.02em'
+                          }}>
                             {currentTotalFlowers} / {maxFlowers}
                           </span>
                         </div>
@@ -1457,8 +1463,8 @@ const Customize: React.FC = () => {
                       <div className="mb-4 p-4 bg-gradient-to-r from-[#C79E48]/5 to-[#C79E48]/10 rounded-xl border border-[#C79E48]/20">
                         <div className="flex items-center gap-2 mb-3">
                           <Sparkles className="w-4 h-4 text-[#C79E48]" />
-                          <span className="text-sm font-bold text-[#C79E48]">Florist's Choice</span>
-                          <span className="text-xs text-gray-500">Recommended for {selectedPackage?.name} {selectedSize?.name}</span>
+                          <span className="text-sm font-normal" style={{ color: '#C79E48', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>Florist's Choice</span>
+                          <span className="text-xs" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif" }}>Recommended for {selectedPackage?.name} {selectedSize?.name}</span>
                         </div>
                         <div className="flex flex-wrap gap-2">
                           {availableFlowers
@@ -1469,11 +1475,12 @@ const Customize: React.FC = () => {
                                 key={flower.id}
                                 onClick={() => handleAddFlower(flower)}
                                 disabled={flowerMode === "mix" && !canAddMore}
-                                className={`px-3 py-1.5 bg-white border rounded-lg text-xs font-medium transition-all ${
+                                className={`px-3 py-1.5 bg-white border rounded-lg text-xs font-normal transition-all ${
                                   flowerMode === "mix" && !canAddMore
-                                    ? 'border-gray-200 text-gray-400 cursor-not-allowed'
-                                    : 'border-[#C79E48]/30 text-gray-700 hover:bg-[#C79E48]/10 hover:border-[#C79E48]'
+                                    ? 'border-gray-200 cursor-not-allowed'
+                                    : 'border-[#C79E48]/30 hover:bg-[#C79E48]/10 hover:border-[#C79E48]'
                                 }`}
+                                style={{ color: flowerMode === "mix" && !canAddMore ? '#9ca3af' : '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}
                               >
                                 {flower.name}
                               </button>
@@ -1499,7 +1506,7 @@ const Customize: React.FC = () => {
                               }`}
                             >
                               {isRecommended && !isSelected && (
-                                <div className="absolute -top-1.5 -right-1.5 bg-[#C79E48] text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 z-10 shadow-md whitespace-nowrap">
+                                <div className="absolute -top-1.5 -right-1.5 bg-[#C79E48] text-white text-[10px] font-normal px-2 py-0.5 rounded-full flex items-center gap-1 z-10 shadow-md whitespace-nowrap" style={{ fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>
                                   <Sparkles className="w-2.5 h-2.5" />
                                   Choice
                                 </div>
@@ -1523,7 +1530,7 @@ const Customize: React.FC = () => {
                                  !flower.seasons.includes(currentSeason) && (
                                   <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center p-2 z-20">
                                     <div className="text-white text-center">
-                                      <div className="text-xs font-bold mb-1">Not This Season</div>
+                                      <div className="text-xs font-normal mb-1" style={{ fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>Not This Season</div>
                                       <div className="text-[10px] text-white/90">
                                         Available in {flower.seasons.map(s => seasonConfig[s].label).join(", ")}
                                       </div>
@@ -1541,16 +1548,16 @@ const Customize: React.FC = () => {
                                 )}
                               </div>
                               
-                              <div className="text-xs font-bold text-gray-900 mb-1">{flower.name}</div>
-                              <div className="text-xs text-[#C79E48] font-bold mb-2">${flower.price.toFixed(2)}</div>
+                              <div className="text-xs font-normal mb-1" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>{flower.name}</div>
+                              <div className="text-xs font-normal mb-2" style={{ color: '#C79E48', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>${flower.price.toFixed(2)}</div>
                               
                               {qty > 0 ? (
                                 flowerMode === "specific" ? (
                                   // Specific Variety: Show fixed quantity (no controls)
                                   <div className="text-center py-2">
-                                    <div className="text-xs text-gray-500 mb-1">Quantity</div>
-                                    <div className="font-bold text-lg text-[#C79E48]">{qty}</div>
-                                    <div className="text-[10px] text-gray-400 mt-1">Fixed for {selectedSize?.name} size</div>
+                                    <div className="text-xs mb-1" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif" }}>Quantity</div>
+                                    <div className="font-normal text-lg" style={{ color: '#C79E48', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>{qty}</div>
+                                    <div className="text-[10px] mt-1" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif" }}>Fixed for {selectedSize?.name} size</div>
                                   </div>
                                 ) : (
                                   // Mix & Match: Show controls with max limit
@@ -1561,7 +1568,7 @@ const Customize: React.FC = () => {
                                     >
                                       <Minus className="w-3 h-3" />
                                     </button>
-                                    <span className="font-bold text-sm">{qty}</span>
+                                    <span className="font-normal text-sm" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>{qty}</span>
                                     <button 
                                       onClick={() => handleAddFlower(flower)} 
                                       disabled={!canAddMore}
@@ -1579,11 +1586,12 @@ const Customize: React.FC = () => {
                                 <button
                                   onClick={() => handleAddFlower(flower)}
                                   disabled={flowerMode === "mix" && !canAddMore}
-                                  className={`w-full py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                                  className={`w-full py-1.5 rounded-lg text-xs font-normal transition-colors ${
                                     flowerMode === "mix" && !canAddMore
-                                      ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                      ? 'bg-gray-200 cursor-not-allowed'
                                       : 'bg-gray-100 hover:bg-[#C79E48] hover:text-white'
                                   }`}
+                                  style={{ color: flowerMode === "mix" && !canAddMore ? '#9ca3af' : '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}
                                 >
                                   {flowerMode === "specific" ? "Select" : canAddMore ? "Add" : "Max Reached"}
                                 </button>
@@ -1603,17 +1611,17 @@ const Customize: React.FC = () => {
                       >
                         <div className="flex items-center gap-2 mb-4">
                           <Sparkles className="w-5 h-5 text-[#C79E48]" />
-                          <h4 className="font-bold text-gray-900">Arrangement Preferences</h4>
-                          <span className="text-xs text-gray-500 ml-auto">Help AI create your perfect bouquet</span>
+                          <h4 className="font-normal" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>Arrangement Preferences</h4>
+                          <span className="text-xs ml-auto" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif" }}>Help AI create your perfect bouquet</span>
                         </div>
 
                         {/* Flower Positioning */}
                         <div className="bg-gradient-to-r from-[#C79E48]/5 to-[#C79E48]/10 rounded-xl p-4 border border-[#C79E48]/20">
-                          <h5 className="font-semibold text-sm text-gray-900 mb-3 flex items-center gap-2">
+                          <h5 className="font-normal text-sm mb-3 flex items-center gap-2" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>
                             <span className="text-lg">🎯</span>
                             Flower Positioning
                           </h5>
-                          <p className="text-xs text-gray-500 mb-3">Where should each flower type be placed?</p>
+                          <p className="text-xs mb-3" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif" }}>Where should each flower type be placed?</p>
                           <div className="space-y-3">
                             {Object.entries(selectedFlowers).map(([flowerId, { flower, quantity }]) => (
                               <div key={flowerId} className="flex items-center gap-3 bg-white rounded-lg p-3 border border-gray-200">
@@ -1621,7 +1629,7 @@ const Customize: React.FC = () => {
                                   <img src={flower.imageUrl} alt={flower.name} className="w-full h-full object-cover" />
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                  <div className="text-xs font-bold text-gray-900 truncate">{quantity}x {flower.name}</div>
+                                  <div className="text-xs font-normal truncate" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>{quantity}x {flower.name}</div>
                                   <select
                                     value={flowerPositions[flowerId] || 'scattered'}
                                     onChange={(e) => setFlowerPositions(prev => ({ ...prev, [flowerId]: e.target.value }))}
@@ -1639,7 +1647,7 @@ const Customize: React.FC = () => {
 
                         {/* Arrangement Style */}
                         <div>
-                          <h5 className="font-semibold text-sm text-gray-900 mb-3 flex items-center gap-2">
+                          <h5 className="font-normal text-sm mb-3 flex items-center gap-2" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>
                             <span className="text-lg">🌸</span>
                             Arrangement Style
                           </h5>
@@ -1655,8 +1663,8 @@ const Customize: React.FC = () => {
                                 }`}
                               >
                                 <span className="text-xl block mb-1">{style.icon}</span>
-                                <div className="text-xs font-bold text-gray-900">{style.name}</div>
-                                <div className="text-[10px] text-gray-500 mt-0.5">{style.description}</div>
+                                <div className="text-xs font-normal" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>{style.name}</div>
+                                <div className="text-[10px] mt-0.5" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif" }}>{style.description}</div>
                               </button>
                             ))}
                           </div>
@@ -1664,7 +1672,7 @@ const Customize: React.FC = () => {
 
                         {/* Density Preference */}
                         <div>
-                          <h5 className="font-semibold text-sm text-gray-900 mb-3 flex items-center gap-2">
+                          <h5 className="font-normal text-sm mb-3 flex items-center gap-2" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>
                             <span className="text-lg">📏</span>
                             Density & Spacing
                           </h5>
@@ -1679,8 +1687,8 @@ const Customize: React.FC = () => {
                                     : 'border-gray-200 hover:border-[#C79E48]/50'
                                 }`}
                               >
-                                <div className="text-xs font-bold text-gray-900">{density.name}</div>
-                                <div className="text-[10px] text-gray-500 mt-0.5">{density.description}</div>
+                                <div className="text-xs font-normal" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>{density.name}</div>
+                                <div className="text-[10px] mt-0.5" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif" }}>{density.description}</div>
                               </button>
                             ))}
                           </div>
@@ -1688,7 +1696,7 @@ const Customize: React.FC = () => {
 
                         {/* Bloom Stage */}
                         <div>
-                          <h5 className="font-semibold text-sm text-gray-900 mb-3 flex items-center gap-2">
+                          <h5 className="font-normal text-sm mb-3 flex items-center gap-2" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>
                             <span className="text-lg">🌷</span>
                             Bloom Stage
                           </h5>
@@ -1703,8 +1711,8 @@ const Customize: React.FC = () => {
                                     : 'border-gray-200 hover:border-[#C79E48]/50'
                                 }`}
                               >
-                                <div className="text-xs font-bold text-gray-900">{stage.name}</div>
-                                <div className="text-[10px] text-gray-500 mt-0.5">{stage.description}</div>
+                                <div className="text-xs font-normal" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>{stage.name}</div>
+                                <div className="text-[10px] mt-0.5" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif" }}>{stage.description}</div>
                               </button>
                             ))}
                           </div>
@@ -1728,8 +1736,8 @@ const Customize: React.FC = () => {
                     <Star className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-lg text-gray-900">Add Glitter</h3>
-                    <p className="text-xs text-gray-500">Make it sparkle! (+$2)</p>
+                    <h3 className="font-normal text-lg" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>Add Glitter</h3>
+                    <p className="text-xs" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif" }}>Make it sparkle! (+$2)</p>
                   </div>
                 </div>
 
@@ -1743,8 +1751,8 @@ const Customize: React.FC = () => {
                     }`}
                   >
                     <div className="text-3xl mb-3">✨</div>
-                    <h4 className="font-bold text-gray-900 mb-1">Without Glitter</h4>
-                    <p className="text-xs text-gray-500">Classic and elegant</p>
+                    <h4 className="font-normal mb-1" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>Without Glitter</h4>
+                    <p className="text-xs" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif" }}>Classic and elegant</p>
                   </button>
                   <button
                     onClick={() => setWithGlitter(true)}
@@ -1755,8 +1763,8 @@ const Customize: React.FC = () => {
                     }`}
                   >
                     <div className="text-3xl mb-3">⭐</div>
-                    <h4 className="font-bold text-gray-900 mb-1">With Glitter</h4>
-                    <p className="text-xs text-gray-500">Sparkle and shine (+$2)</p>
+                    <h4 className="font-normal mb-1" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>With Glitter</h4>
+                    <p className="text-xs" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif" }}>Sparkle and shine (+$2)</p>
                   </button>
                 </div>
               </motion.div>
@@ -1774,8 +1782,8 @@ const Customize: React.FC = () => {
                     <Gift className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-lg text-gray-900">Add Accessories</h3>
-                    <p className="text-xs text-gray-500">Optional extras to personalize</p>
+                    <h3 className="font-normal text-lg" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>Add Accessories</h3>
+                    <p className="text-xs" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif" }}>Optional extras to personalize</p>
                   </div>
                 </div>
 
@@ -1800,8 +1808,8 @@ const Customize: React.FC = () => {
                         }`}
                       >
                         <Icon className={`w-8 h-8 mx-auto mb-2 ${isSelected ? 'text-[#C79E48]' : 'text-gray-400'}`} />
-                        <div className="font-bold text-sm text-gray-900 mb-1">{accessory.name}</div>
-                        <div className="text-xs text-[#C79E48] font-semibold">+${accessory.price}</div>
+                        <div className="font-normal text-sm mb-1" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>{accessory.name}</div>
+                        <div className="text-xs font-normal" style={{ color: '#C79E48', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>+${accessory.price}</div>
                       </button>
                     );
                   })}
@@ -1844,10 +1852,10 @@ const Customize: React.FC = () => {
                         }}
                       >
                         <Wand2 className="w-16 h-16 text-gray-300 mb-4" />
-                        <p className="text-sm font-medium text-gray-600 mb-1">
+                        <p className="text-sm font-normal mb-1" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>
                           Ready to Preview
                         </p>
-                        <p className="text-xs text-gray-400">
+                        <p className="text-xs" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif" }}>
                           Generate your custom design
                         </p>
                       </motion.div>
@@ -1861,7 +1869,7 @@ const Customize: React.FC = () => {
                           <div className="absolute inset-0 border-4 border-[#C79E48]/30 rounded-full" />
                           <div className="absolute inset-0 border-4 border-[#C79E48] border-t-transparent rounded-full animate-spin" />
                         </div>
-                        <p className="font-bold text-sm">
+                        <p className="font-normal text-sm" style={{ fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>
                           {generationProgress ? progressLabels[generationProgress] : 'Creating Your Bouquet'}
                         </p>
                       </div>
@@ -1873,11 +1881,12 @@ const Customize: React.FC = () => {
                 <button
                   onClick={generateBouquetImage}
                   disabled={!step3Complete || isGenerating}
-                  className={`w-full py-3.5 rounded-xl font-bold text-sm transition-all mb-2 flex items-center justify-center gap-2 ${
+                  className={`w-full py-3.5 rounded-xl font-normal text-sm transition-all mb-2 flex items-center justify-center gap-2 ${
                     step3Complete && !isGenerating
                       ? 'bg-gradient-to-r from-[#C79E48] to-[#d4af4a] text-white hover:shadow-lg hover:scale-[1.02]'
-                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                      : 'bg-gray-300 cursor-not-allowed'
                   }`}
+                  style={{ color: step3Complete && !isGenerating ? 'white' : '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}
                 >
                   {isGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wand2 className="w-4 h-4" />}
                   {isGenerating ? (generationProgress ? progressLabels[generationProgress] : "Generating...") : generatedImage ? "Regenerate" : "Generate Preview"}
@@ -1887,7 +1896,8 @@ const Customize: React.FC = () => {
                 {generatedImage && !isGenerating && (
                   <button
                     onClick={generateVariation}
-                    className="w-full py-2.5 rounded-xl font-medium text-sm transition-all mb-4 flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700"
+                    className="w-full py-2.5 rounded-xl font-normal text-sm transition-all mb-4 flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200"
+                    style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}
                   >
                     <RefreshCw className="w-4 h-4" />
                     Create Variation {variationIndex > 0 && `(${variationIndex})`}
@@ -1898,14 +1908,16 @@ const Customize: React.FC = () => {
                   <div className="flex gap-2 mb-4">
                     <button
                       onClick={handleDownloadImage}
-                      className="flex-1 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                      className="flex-1 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-normal transition-colors flex items-center justify-center gap-2"
+                      style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}
                     >
                       <Download className="w-4 h-4" />
                       Download
                     </button>
                     <button
                       onClick={handleDownloadAndShareWhatsApp}
-                      className="flex-1 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                      className="flex-1 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-normal transition-colors flex items-center justify-center gap-2"
+                      style={{ fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}
                     >
                       <MessageCircle className="w-4 h-4" />
                       WhatsApp
@@ -1916,30 +1928,30 @@ const Customize: React.FC = () => {
                 {/* Summary */}
                 <div className="border-t border-gray-200 pt-4 space-y-3">
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-500">Base</span>
-                    <span className="font-medium text-gray-900">
-                      {selectedPackage?.name || <span className="text-gray-400">—</span>}
+                    <span style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif" }}>Base</span>
+                    <span className="font-normal" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>
+                      {selectedPackage?.name || <span style={{ color: '#2c2d2a' }}>—</span>}
                       {selectedBoxShape && ` (${selectedBoxShape.name})`}
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-500">Size & Color</span>
-                    <span className="font-medium text-gray-900">
-                      {selectedSize?.name && selectedColor?.name ? `${selectedSize.name} / ${selectedColor.name}` : <span className="text-gray-400">—</span>}
+                    <span style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif" }}>Size & Color</span>
+                    <span className="font-normal" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>
+                      {selectedSize?.name && selectedColor?.name ? `${selectedSize.name} / ${selectedColor.name}` : <span style={{ color: '#2c2d2a' }}>—</span>}
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-500">Flowers</span>
-                    <span className="font-medium text-gray-900 text-right">
+                    <span style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif" }}>Flowers</span>
+                    <span className="font-normal text-right" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>
                       {Object.values(selectedFlowers).length > 0
                         ? Object.values(selectedFlowers).map(f => `${f.quantity}x ${f.flower.name}`).join(', ')
-                        : <span className="text-gray-400">—</span>}
+                        : <span style={{ color: '#2c2d2a' }}>—</span>}
                     </span>
                   </div>
                   <div className="pt-3 border-t border-gray-200">
                     <div className="flex justify-between items-center">
-                      <span className="font-bold text-gray-900">Total</span>
-                      <span className="text-xl font-bold text-[#C79E48]">${displayPrice.toFixed(2)}</span>
+                      <span className="font-normal" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>Total</span>
+                      <span className="text-xl font-normal" style={{ color: '#C79E48', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>${displayPrice.toFixed(2)}</span>
                     </div>
                   </div>
                 </div>
@@ -1948,7 +1960,8 @@ const Customize: React.FC = () => {
                 <button
                   onClick={handleAddToCart}
                   disabled={!step3Complete}
-                  className="w-full mt-4 py-4 bg-[#C79E48] text-white rounded-xl font-bold hover:bg-[#b08d45] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="w-full mt-4 py-4 bg-[#C79E48] text-white rounded-xl font-normal hover:bg-[#b08d45] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  style={{ fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}
                 >
                   <ShoppingCart className="w-5 h-5" />
                   Add to Cart
@@ -1996,10 +2009,10 @@ const Customize: React.FC = () => {
                       }}
                     >
                       <Wand2 className="w-16 h-16 text-gray-300 mb-4" />
-                      <p className="text-sm font-medium text-gray-600 mb-1">
+                      <p className="text-sm font-normal mb-1" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>
                         {step3Complete ? "Ready to Preview" : "Design Preview"}
                       </p>
-                      <p className="text-xs text-gray-400">
+                      <p className="text-xs" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif" }}>
                         {step3Complete ? "Generate your custom design" : "Complete selections to preview"}
                       </p>
                     </motion.div>
@@ -2013,7 +2026,7 @@ const Customize: React.FC = () => {
                         <div className="absolute inset-0 border-4 border-[#C79E48]/30 rounded-full" />
                         <div className="absolute inset-0 border-4 border-[#C79E48] border-t-transparent rounded-full animate-spin" />
                       </div>
-                      <p className="font-bold text-sm">
+                      <p className="font-normal text-sm" style={{ fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>
                         {generationProgress ? progressLabels[generationProgress] : 'Creating Your Bouquet'}
                       </p>
                     </div>
@@ -2025,11 +2038,12 @@ const Customize: React.FC = () => {
               <button
                 onClick={generateBouquetImage}
                 disabled={!step3Complete || isGenerating}
-                className={`w-full py-3.5 rounded-xl font-bold text-sm transition-all mb-2 flex items-center justify-center gap-2 ${
+                className={`w-full py-3.5 rounded-xl font-normal text-sm transition-all mb-2 flex items-center justify-center gap-2 ${
                   step3Complete && !isGenerating
                     ? 'bg-gradient-to-r from-[#C79E48] to-[#d4af4a] text-white hover:shadow-lg hover:scale-[1.02]'
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    : 'bg-gray-300 cursor-not-allowed'
                 }`}
+                style={{ color: step3Complete && !isGenerating ? 'white' : '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}
               >
                 {isGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wand2 className="w-4 h-4" />}
                 {isGenerating ? (generationProgress ? progressLabels[generationProgress] : "Generating...") : generatedImage ? "Regenerate" : "Generate Preview"}
@@ -2039,7 +2053,8 @@ const Customize: React.FC = () => {
               {step3Complete && !isGenerating && (
                 <button
                   onClick={openPromptEditor}
-                  className="w-full py-2.5 rounded-xl font-medium text-sm transition-all mb-2 flex items-center justify-center gap-2 border border-gray-300 hover:border-[#C79E48] hover:bg-[#C79E48]/5 text-gray-700"
+                  className="w-full py-2.5 rounded-xl font-normal text-sm transition-all mb-2 flex items-center justify-center gap-2 border border-gray-300 hover:border-[#C79E48] hover:bg-[#C79E48]/5"
+                  style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}
                 >
                   <Edit3 className="w-4 h-4" />
                   Edit Prompt
@@ -2057,10 +2072,10 @@ const Customize: React.FC = () => {
                   >
                     <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
                       <div className="flex items-center justify-between mb-3">
-                        <h4 className="font-semibold text-sm text-gray-900">Custom Prompt</h4>
+                        <h4 className="font-normal text-sm" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>Custom Prompt</h4>
                         <button
                           onClick={() => setIsEditingPrompt(false)}
-                          className="text-gray-400 hover:text-gray-600"
+                          style={{ color: '#2c2d2a' }}
                         >
                           <X className="w-4 h-4" />
                         </button>
@@ -2076,14 +2091,16 @@ const Customize: React.FC = () => {
                           onClick={() => {
                             if (currentPrompt) setCustomPrompt(currentPrompt.positive);
                           }}
-                          className="flex-1 py-2 text-xs font-medium rounded-lg border border-gray-300 hover:bg-gray-100 text-gray-600"
+                          className="flex-1 py-2 text-xs font-normal rounded-lg border border-gray-300 hover:bg-gray-100"
+                          style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}
                         >
                           Reset to Original
                         </button>
                         <button
                           onClick={generateWithCustomPrompt}
                           disabled={isGenerating || !customPrompt.trim()}
-                          className="flex-1 py-2 text-xs font-bold rounded-lg bg-[#C79E48] text-white hover:bg-[#b08d45] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1"
+                          className="flex-1 py-2 text-xs font-normal rounded-lg bg-[#C79E48] text-white hover:bg-[#b08d45] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1"
+                          style={{ fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}
                         >
                           <Wand2 className="w-3 h-3" />
                           Generate
