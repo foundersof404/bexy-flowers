@@ -5,6 +5,7 @@ import {
   removeFromSignatureCollection,
   updateSignatureCollection
 } from '@/lib/api/signature-collection';
+import { collectionQueryKeys } from './useCollectionProducts';
 
 // Query keys for better cache management
 export const signatureQueryKeys = {
@@ -48,6 +49,8 @@ export const useAddToSignatureCollection = () => {
     }) => addToSignatureCollection(productId, displayOrder),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: signatureQueryKeys.lists() });
+      // Also invalidate collection products since signature collection affects product display
+      queryClient.invalidateQueries({ queryKey: collectionQueryKeys.lists() });
     },
   });
 };
@@ -62,6 +65,8 @@ export const useRemoveFromSignatureCollection = () => {
     mutationFn: (productId: string) => removeFromSignatureCollection(productId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: signatureQueryKeys.lists() });
+      // Also invalidate collection products since signature collection affects product display
+      queryClient.invalidateQueries({ queryKey: collectionQueryKeys.lists() });
     },
   });
 };
@@ -79,6 +84,8 @@ export const useUpdateSignatureCollection = () => {
     }) => updateSignatureCollection(id, updates),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: signatureQueryKeys.lists() });
+      // Also invalidate collection products since signature collection changes affect product display
+      queryClient.invalidateQueries({ queryKey: collectionQueryKeys.lists() });
     },
   });
 };

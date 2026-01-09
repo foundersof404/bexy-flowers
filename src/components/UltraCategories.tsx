@@ -242,7 +242,7 @@ const UltraCategories = () => {
     observer.observe(container);
 
     // Row 1: Scrolls left (normal direction) - infinite seamless loop
-    // Force auto scroll always
+    // CRITICAL: Start paused to prevent running when not visible
     tween1 = gsap.to(row1, {
       x: -singleSetWidth1,
       duration: 15,
@@ -250,7 +250,7 @@ const UltraCategories = () => {
       force3D: true,
       repeat: -1,
       repeatDelay: 0,
-      paused: false, // Start paused, observer will resume
+      paused: true, // CRITICAL: Start paused, observer will resume when visible
       modifiers: {
         x: (x) => {
           const val = parseFloat(x);
@@ -269,7 +269,7 @@ const UltraCategories = () => {
       force3D: true,
       repeat: -1,
       repeatDelay: 0,
-      paused: false, // Start paused, observer will resume
+      paused: true, // CRITICAL: Start paused, observer will resume when visible
       modifiers: {
         x: (x) => {
           const val = parseFloat(x);
@@ -277,8 +277,27 @@ const UltraCategories = () => {
         }
       }
     });
+    
+    // CRITICAL: Also pause when page is hidden to prevent performance issues
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        if (tween1) tween1.pause();
+        if (tween2) tween2.pause();
+      } else if (container && observer) {
+        // Check if container is visible before resuming
+        const rect = container.getBoundingClientRect();
+        const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
+        if (isVisible) {
+          if (tween1) tween1.resume();
+          if (tween2) tween2.resume();
+        }
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
       observer.disconnect();
       if (tween1) tween1.kill();
       if (tween2) tween2.kill();

@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { AdminLayout } from '@/components/admin/AdminLayout';
+import { useQueryClient } from '@tanstack/react-query';
+import { luxuryBoxesQueryKeys } from '@/hooks/useLuxuryBoxes';
 import {
   ArrowLeft,
   Plus,
@@ -46,6 +48,7 @@ const GOLD_COLOR = 'rgb(199, 158, 72)';
 const AdminLuxuryBoxes = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [boxes, setBoxes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -168,12 +171,16 @@ const AdminLuxuryBoxes = () => {
 
       if (editingId) {
         await updateLuxuryBox(editingId, formData);
+        // Invalidate React Query cache so frontend sees changes immediately
+        queryClient.invalidateQueries({ queryKey: luxuryBoxesQueryKeys.lists() });
         toast({
           title: 'Success',
           description: 'Box updated successfully',
         });
       } else {
         await createLuxuryBox(formData);
+        // Invalidate React Query cache so frontend sees changes immediately
+        queryClient.invalidateQueries({ queryKey: luxuryBoxesQueryKeys.lists() });
         toast({
           title: 'Success',
           description: 'Box created successfully',
@@ -197,6 +204,9 @@ const AdminLuxuryBoxes = () => {
   const handleDelete = async (id: string) => {
     try {
       await deleteLuxuryBox(id);
+      // Invalidate React Query cache so frontend sees changes immediately
+      queryClient.invalidateQueries({ queryKey: luxuryBoxesQueryKeys.lists() });
+      queryClient.removeQueries({ queryKey: luxuryBoxesQueryKeys.detail(id) });
       toast({
         title: 'Success',
         description: 'Box deleted successfully',

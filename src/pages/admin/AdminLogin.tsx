@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 
 const GOLD_COLOR = "rgb(199, 158, 72)";
 
-// Admin credentials from environment variables (secure)
+// Admin credentials from environment variables (secure) with fallback to hardcoded defaults
 const getAdminAccounts = () => {
   const accounts = [];
   
@@ -20,6 +20,13 @@ const getAdminAccounts = () => {
       username: import.meta.env.VITE_ADMIN_USERNAME,
       password: import.meta.env.VITE_ADMIN_PASSWORD,
       displayName: import.meta.env.VITE_ADMIN_DISPLAY_NAME || "Admin"
+    });
+  } else {
+    // Fallback to default admin credentials
+    accounts.push({
+      username: "admin",
+      password: "admin",
+      displayName: "Admin"
     });
   }
   

@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { AdminLayout } from '@/components/admin/AdminLayout';
+import { useQueryClient } from '@tanstack/react-query';
+import { flowersQueryKeys } from '@/hooks/useFlowers';
 import {
   ArrowLeft,
   Plus,
@@ -43,6 +45,7 @@ const GOLD_COLOR = 'rgb(199, 158, 72)';
 const AdminFlowers = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [flowerTypes, setFlowerTypes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -163,12 +166,16 @@ const AdminFlowers = () => {
           imageFile || undefined,
           !!imageFile
         );
+        // Invalidate React Query cache so frontend sees changes immediately
+        queryClient.invalidateQueries({ queryKey: flowersQueryKeys.lists() });
         toast({
           title: 'Success',
           description: 'Flower type updated successfully',
         });
       } else {
         await createFlowerType(formData, imageFile || undefined);
+        // Invalidate React Query cache so frontend sees changes immediately
+        queryClient.invalidateQueries({ queryKey: flowersQueryKeys.lists() });
         toast({
           title: 'Success',
           description: 'Flower type created successfully',
@@ -193,6 +200,9 @@ const AdminFlowers = () => {
   const handleDelete = async (id: string) => {
     try {
       await deleteFlowerType(id);
+      // Invalidate React Query cache so frontend sees changes immediately
+      queryClient.invalidateQueries({ queryKey: flowersQueryKeys.lists() });
+      queryClient.removeQueries({ queryKey: flowersQueryKeys.detail(id) });
       toast({
         title: 'Success',
         description: 'Flower type deleted successfully',

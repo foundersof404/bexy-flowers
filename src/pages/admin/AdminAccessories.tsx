@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { AdminLayout } from '@/components/admin/AdminLayout';
+import { useQueryClient } from '@tanstack/react-query';
+import { accessoriesQueryKeys } from '@/hooks/useAccessories';
 import {
   ArrowLeft,
   Plus,
@@ -34,6 +36,7 @@ const GOLD_COLOR = 'rgb(199, 158, 72)';
 const AdminAccessories = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [accessories, setAccessories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -122,12 +125,16 @@ const AdminAccessories = () => {
 
       if (editingId) {
         await updateAccessory(editingId, formData, imageFile || undefined, !!imageFile);
+        // Invalidate React Query cache so frontend sees changes immediately
+        queryClient.invalidateQueries({ queryKey: accessoriesQueryKeys.lists() });
         toast({
           title: 'Success',
           description: 'Accessory updated successfully',
         });
       } else {
         await createAccessory(formData, imageFile || undefined);
+        // Invalidate React Query cache so frontend sees changes immediately
+        queryClient.invalidateQueries({ queryKey: accessoriesQueryKeys.lists() });
         toast({
           title: 'Success',
           description: 'Accessory created successfully',
@@ -152,6 +159,9 @@ const AdminAccessories = () => {
   const handleDelete = async (id: string) => {
     try {
       await deleteAccessory(id);
+      // Invalidate React Query cache so frontend sees changes immediately
+      queryClient.invalidateQueries({ queryKey: accessoriesQueryKeys.lists() });
+      queryClient.removeQueries({ queryKey: accessoriesQueryKeys.detail(id) });
       toast({
         title: 'Success',
         description: 'Accessory deleted successfully',

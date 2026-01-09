@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { AdminLayout } from '@/components/admin/AdminLayout';
+import { useQueryClient } from '@tanstack/react-query';
+import { weddingQueryKeys } from '@/hooks/useWeddingCreations';
 import {
   ArrowLeft,
   Plus,
@@ -39,6 +41,7 @@ const GOLD_COLOR = 'rgb(199, 158, 72)';
 const AdminWeddingCreations = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [creations, setCreations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -130,6 +133,8 @@ const AdminWeddingCreations = () => {
           imageFile || undefined,
           imageFile ? true : false
         );
+        // Invalidate React Query cache so frontend sees changes immediately
+        queryClient.invalidateQueries({ queryKey: weddingQueryKeys.lists() });
         toast({
           title: 'Success',
           description: 'Wedding creation updated successfully',
@@ -150,6 +155,8 @@ const AdminWeddingCreations = () => {
           },
           imageFile
         );
+        // Invalidate React Query cache so frontend sees changes immediately
+        queryClient.invalidateQueries({ queryKey: weddingQueryKeys.lists() });
         toast({
           title: 'Success',
           description: 'Wedding creation added successfully',
@@ -173,6 +180,9 @@ const AdminWeddingCreations = () => {
   const handleDelete = async (id: string) => {
     try {
       await deleteWeddingCreation(id);
+      // Invalidate React Query cache so frontend sees changes immediately
+      queryClient.invalidateQueries({ queryKey: weddingQueryKeys.lists() });
+      queryClient.removeQueries({ queryKey: weddingQueryKeys.detail(id) });
       toast({
         title: 'Success',
         description: 'Wedding creation deleted successfully',

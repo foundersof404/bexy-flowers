@@ -433,14 +433,39 @@ const ServiceSection = ({
       }
     });
 
-    const interval = setInterval(() => {
-      setCurrentImageIndex((prev) => {
-        const next = (prev + 1) % imageArray.length;
-        return next;
-      });
-    }, 4000); // 4 seconds between transitions
+    let interval: NodeJS.Timeout | null = null;
+    
+    const startInterval = () => {
+      if (interval) clearInterval(interval);
+      interval = setInterval(() => {
+        // CRITICAL: Don't update if page is hidden
+        if (document.hidden) return;
+        setCurrentImageIndex((prev) => {
+          const next = (prev + 1) % imageArray.length;
+          return next;
+        });
+      }, 4000); // 4 seconds between transitions
+    };
+    
+    // CRITICAL: Pause interval when page is hidden to prevent unnecessary updates
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        if (interval) {
+          clearInterval(interval);
+          interval = null;
+        }
+      } else {
+        startInterval();
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    startInterval();
 
-    return () => clearInterval(interval);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      if (interval) clearInterval(interval);
+    };
   }, [imageArray]); // Depend on memoized array - will only change when images prop actually changes
 
   useEffect(() => {
