@@ -138,37 +138,50 @@ export const useNavigationPredictor = () => {
         createdLinks.push(link);
       }
 
-      // Pre-load route-specific data
+      // Pre-load route-specific data - LIMITED to prevent memory buildup
+      // Only prefetch if query doesn't already exist in cache
+      const checkAndPrefetch = (queryKey: any[], queryFn: () => Promise<any>, staleTime: number) => {
+        const existingQuery = queryClient.getQueryCache().find({ queryKey });
+        if (!existingQuery || existingQuery.isStale()) {
+          queryClient.prefetchQuery({
+            queryKey,
+            queryFn,
+            staleTime,
+            gcTime: 3 * 60 * 1000, // 3 minutes - reduced cache time
+          }).catch(() => {}); // Silence errors
+        }
+      };
+
       if (route.startsWith('/collection')) {
-        queryClient.prefetchQuery({
-          queryKey: ['collection-products', 'list', { isActive: true }],
-          queryFn: () => import('@/lib/api/collection-products').then(m => m.getCollectionProducts({ isActive: true })),
-          staleTime: 5 * 60 * 1000,
-        }).catch(() => {}); // Silence errors
+        checkAndPrefetch(
+          ['collection-products', 'list', { isActive: true }],
+          () => import('@/lib/api/collection-products').then(m => m.getCollectionProducts({ isActive: true })),
+          2 * 60 * 1000 // 2 minutes
+        );
       }
 
       if (route.startsWith('/wedding-and-events')) {
-        queryClient.prefetchQuery({
-          queryKey: ['wedding-creations', 'list', { isActive: true }],
-          queryFn: () => import('@/lib/api/wedding-creations').then(m => m.getWeddingCreations({ isActive: true })),
-          staleTime: 5 * 60 * 1000,
-        }).catch(() => {}); // Silence errors
+        checkAndPrefetch(
+          ['wedding-creations', 'list', { isActive: true }],
+          () => import('@/lib/api/wedding-creations').then(m => m.getWeddingCreations({ isActive: true })),
+          2 * 60 * 1000 // 2 minutes
+        );
       }
 
       if (route === '/favorites') {
-        queryClient.prefetchQuery({
-          queryKey: ['visitor-favorites'],
-          queryFn: () => import('@/lib/api/visitor-favorites').then(m => m.getVisitorFavorites()),
-          staleTime: 2 * 60 * 1000, // Favorites change more frequently
-        }).catch(() => {}); // Silence errors
+        checkAndPrefetch(
+          ['visitor-favorites'],
+          () => import('@/lib/api/visitor-favorites').then(m => m.getVisitorFavorites()),
+          1 * 60 * 1000 // 1 minute - favorites change frequently
+        );
       }
 
       if (route === '/cart') {
-        queryClient.prefetchQuery({
-          queryKey: ['visitor-cart'],
-          queryFn: () => import('@/lib/api/visitor-cart').then(m => m.getVisitorCart()),
-          staleTime: 1 * 60 * 1000, // Cart changes frequently
-        }).catch(() => {}); // Silence errors
+        checkAndPrefetch(
+          ['visitor-cart'],
+          () => import('@/lib/api/visitor-cart').then(m => m.getVisitorCart()),
+          1 * 60 * 1000 // 1 minute - cart changes frequently
+        );
       }
     });
     

@@ -30,23 +30,11 @@ export const useLuxuryBoxes = (filters?: {
   return useQuery({
     queryKey: luxuryBoxesQueryKeys.list(filters),
     queryFn: () => getLuxuryBoxes(filters),
-    staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
+    staleTime: 2 * 60 * 1000, // 2 minutes - reduced
+    gcTime: 3 * 60 * 1000, // 3 minutes - reduced
     refetchOnWindowFocus: false,
     refetchOnMount: false,
-    // Pre-warm individual luxury boxes for better navigation performance
-    onSuccess: (data) => {
-      if (data && data.length > 0) {
-        // Pre-load first 3 luxury boxes (most likely to be viewed)
-        data.slice(0, 3).forEach((box) => {
-          queryClient.prefetchQuery({
-            queryKey: luxuryBoxesQueryKeys.detail(box.id),
-            queryFn: () => getLuxuryBox(box.id),
-            staleTime: 5 * 60 * 1000,
-          });
-        });
-      }
-    },
+    // REMOVED: Pre-warming to prevent memory buildup
   });
 };
 
@@ -58,8 +46,8 @@ export const useLuxuryBox = (id: string | undefined) => {
     queryKey: luxuryBoxesQueryKeys.detail(id!),
     queryFn: () => getLuxuryBox(id!),
     enabled: !!id,
-    staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
+    staleTime: 2 * 60 * 1000, // 2 minutes - reduced
+    gcTime: 3 * 60 * 1000, // 3 minutes - reduced
     refetchOnWindowFocus: false,
     refetchOnMount: false,
   });
