@@ -115,6 +115,9 @@ export async function deleteLuxuryBox(id: string): Promise<void> {
   await db.delete('luxury_boxes', { id });
 }
 
+// Alias for backwards compatibility
+export const getLuxuryBox = getLuxuryBoxWithDetails;
+
 // ==================== Box Colors ====================
 
 /**
