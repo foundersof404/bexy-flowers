@@ -16,6 +16,7 @@ import BackToTop from '@/components/BackToTop';
 import { useCollectionProduct, useCollectionProducts } from '@/hooks/useCollectionProducts';
 import { useQueryClient } from '@tanstack/react-query';
 import { collectionQueryKeys } from '@/hooks/useCollectionProducts';
+import { PriceDisplay } from '@/components/PriceDisplay';
 import type { Bouquet } from '@/types/bouquet';
 import { encodeImageUrl } from '@/lib/imageUtils';
 
@@ -171,14 +172,6 @@ const ImageGallery = ({
     )}
   </div>
 );
-
-// Price Display Component
-const PriceDisplay = ({ price }: { price: number }) => (
-  <div className="flex items-baseline gap-1">
-    <span className="text-3xl font-bold text-foreground">€{price}</span>
-  </div>
-);
-
 
 // Main Product Detail Page Component
 const ProductDetailPage = () => {
@@ -391,7 +384,11 @@ const ProductDetailPage = () => {
                 {productData.title}
               </h1>
 
-              <PriceDisplay price={currentPrice} />
+              <PriceDisplay 
+                price={currentPrice} 
+                discountPercentage={product?.discount_percentage || null}
+                size="lg"
+              />
             </div>
 
             {/* Description */}

@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { collectionQueryKeys } from "@/hooks/useCollectionProducts";
 import { OptimizedImage } from "@/components/OptimizedImage";
+import { PriceDisplay } from "@/components/PriceDisplay";
 import type { Bouquet } from "@/types/bouquet";
 
 interface BouquetGridProps {
@@ -139,8 +140,22 @@ const BouquetCard = memo(({
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      {/* Badge - Top Left (only if not out of stock) */}
-      {badge && !bouquet.is_out_of_stock && (
+      {/* Discount Badge - Top Left (only if discount and not out of stock) */}
+      {bouquet.discount_percentage && bouquet.discount_percentage > 0 && !bouquet.is_out_of_stock && (
+        <div 
+          className="absolute top-2 left-2 z-10 px-2 py-1 text-[9px] sm:text-[10px] font-bold text-white shadow-lg"
+          style={{
+            background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+            borderRadius: '4px',
+            boxShadow: '0 2px 8px rgba(239, 68, 68, 0.4)'
+          }}
+        >
+          {bouquet.discount_percentage}% OFF
+        </div>
+      )}
+      
+      {/* Other Badges - Top Left (only if not out of stock and no discount) */}
+      {badge && !bouquet.is_out_of_stock && !bouquet.discount_percentage && (
         <div className="absolute top-2 left-2 z-10 bg-white px-2 py-0.5 text-[9px] sm:text-[10px] font-semibold tracking-wide">
           {badge}
         </div>
@@ -206,22 +221,14 @@ const BouquetCard = memo(({
             {bouquet.name}
           </h3>
           
-          {/* Price */}
-          <div className="flex items-center gap-1 flex-shrink-0">
-            {bouquet.discount_percentage && bouquet.discount_percentage > 0 ? (
-              <>
-                <p className="text-xs font-medium text-foreground">
-                  €{finalPrice.toFixed(0)}
-                </p>
-                <p className="text-[10px] text-gray-400 line-through">
-                  €{bouquet.price.toFixed(0)}
-                </p>
-              </>
-            ) : (
-              <p className="text-xs font-medium text-foreground">
-                €{bouquet.price.toFixed(0)}
-              </p>
-            )}
+          {/* Price with Beautiful Discount Display */}
+          <div className="flex-shrink-0">
+            <PriceDisplay 
+              price={bouquet.price}
+              discountPercentage={bouquet.discount_percentage}
+              size="sm"
+              showDiscountBadge={false}
+            />
           </div>
         </div>
       </div>
