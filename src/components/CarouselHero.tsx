@@ -19,7 +19,6 @@ interface SlideData {
   price: string;
   contentTitle: string;
   contentSubtitle: string;
-  bgImage: string;
   productImage: string;
   bgColor: string;
 }
@@ -36,7 +35,6 @@ const slides: SlideData[] = [
     price: '$49.90',
     contentTitle: 'Where emotions bloom into timeless elegance.',
     contentSubtitle: 'Every arrangement is a masterpiece of passion and artistry. Handcrafted by master florists, our premium collections transform moments into unforgettable memories.',
-    bgImage: getImagePath('image1-bg.webp'),
     productImage: getImagePath('image1.webp'),
     bgColor: 'rgb(143, 5, 36)'
   },
@@ -46,7 +44,6 @@ const slides: SlideData[] = [
     price: '$59.90',
     contentTitle: 'Sophistication meets artistic excellence.',
     contentSubtitle: 'Discover the art of luxury floristry. Each creation is meticulously designed to reflect your refined taste and celebrate life\'s most distinguished occasions.',
-    bgImage: getImagePath('image2-bg.webp'),
     productImage: getImagePath('image2.webp'),
     bgColor: '#e9bf8b'
   },
@@ -56,7 +53,6 @@ const slides: SlideData[] = [
     price: '$79.90',
     contentTitle: 'Exquisite artistry for the most discerning.',
     contentSubtitle: 'Experience the pinnacle of floral design. Our exclusive collections feature rare blooms and artistic arrangements that make a statement of unparalleled elegance.',
-    bgImage: getImagePath('image3-bg.webp'),
     productImage: getImagePath('image3.webp'),
     bgColor: '#b6d6c8'
   },
@@ -66,7 +62,6 @@ const slides: SlideData[] = [
     price: '$69.90',
     contentTitle: 'Celebrate every moment with extraordinary beauty.',
     contentSubtitle: 'Life\'s milestones deserve exceptional arrangements. Our celebration collections bring vibrant elegance to every occasion, crafted with passion and attention to detail.',
-    bgImage: getImagePath('image4-bg.webp'),
     productImage: getImagePath('image4.webp'),
     bgColor: '#e86357'
   }
@@ -83,9 +78,9 @@ const CarouselHero = () => {
   const [isVideoVisible, setIsVideoVisible] = useState(false);
   const [shouldLoadVideo, setShouldLoadVideo] = useState(false);
 
-  // Collect all images for preloading
-  const allSlideImages = slides.flatMap(slide => [slide.productImage, slide.bgImage]);
-  const firstSlideImages = [slides[0].productImage, slides[0].bgImage];
+  // Collect all images for preloading (only productImage is actually used, bgImage is not rendered)
+  const allSlideImages = slides.map(slide => slide.productImage);
+  const firstSlideImages = [slides[0].productImage];
 
   // Preload all images
   useImagePreloader(allSlideImages);
@@ -119,15 +114,17 @@ const CarouselHero = () => {
     const targetElement = containerRef.current || videoRef.current;
     if (!targetElement) return;
 
+    // Early return if video already should load to prevent re-creating observer
+    if (shouldLoadVideo) return;
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             setIsVideoVisible(true);
-            // Load video source only when visible
-            if (!shouldLoadVideo) {
-              setShouldLoadVideo(true);
-            }
+            setShouldLoadVideo(true);
+            // Disconnect after triggering to prevent re-running
+            observer.disconnect();
           }
         });
       },
@@ -143,7 +140,8 @@ const CarouselHero = () => {
     return () => {
       observer.disconnect();
     };
-  }, [isMobile, shouldLoadVideo]);
+    // Removed shouldLoadVideo from dependencies to prevent observer recreation
+  }, [isMobile]);
 
   // Load and play video when it becomes visible
   useEffect(() => {
@@ -187,27 +185,47 @@ const CarouselHero = () => {
     };
   }, [isMobile, shouldLoadVideo]);
 
-  // Handle window resize to ensure video stays full width
+  // Handle window resize to ensure video stays full width - Throttled for performance
   useEffect(() => {
     if (!isMobile || !videoRef.current) return;
 
+    let resizeTimer: NodeJS.Timeout | null = null;
+    
     const handleResize = () => {
-      if (videoRef.current) {
-        videoRef.current.style.width = '100vw';
-        videoRef.current.style.maxWidth = '100vw';
-        videoRef.current.style.left = '0';
-        videoRef.current.style.right = '0';
-      }
+      if (!videoRef.current) return;
+      
+      // Use RAF for smoother updates
+      requestAnimationFrame(() => {
+        if (videoRef.current) {
+          videoRef.current.style.width = '100vw';
+          videoRef.current.style.maxWidth = '100vw';
+          videoRef.current.style.left = '0';
+          videoRef.current.style.right = '0';
+        }
+      });
     };
 
-    window.addEventListener('resize', handleResize);
-    window.addEventListener('orientationchange', handleResize);
+    // Throttled resize handler
+    const throttledResize = () => {
+      if (resizeTimer) return;
+      resizeTimer = setTimeout(() => {
+        handleResize();
+        resizeTimer = null;
+      }, 150); // Throttle to max once per 150ms
+    };
+
+    window.addEventListener('resize', throttledResize, { passive: true });
+    window.addEventListener('orientationchange', handleResize, { passive: true });
     
     // Force resize on mount
     setTimeout(handleResize, 100);
 
     return () => {
-      window.removeEventListener('resize', handleResize);
+      if (resizeTimer) {
+        clearTimeout(resizeTimer);
+        resizeTimer = null;
+      }
+      window.removeEventListener('resize', throttledResize);
       window.removeEventListener('orientationchange', handleResize);
     };
   }, [isMobile]);

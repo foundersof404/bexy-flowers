@@ -316,21 +316,41 @@ const Customize: React.FC = () => {
   useEffect(() => {
     if (!isMobile || !videoRef.current) return;
 
+    let resizeTimer: NodeJS.Timeout | null = null;
+    
     const handleResize = () => {
-      if (videoRef.current) {
-        videoRef.current.style.width = '100vw';
-        videoRef.current.style.maxWidth = '100vw';
-        videoRef.current.style.left = '0';
-        videoRef.current.style.right = '0';
-      }
+      if (!videoRef.current) return;
+      
+      // Use RAF for smoother updates
+      requestAnimationFrame(() => {
+        if (videoRef.current) {
+          videoRef.current.style.width = '100vw';
+          videoRef.current.style.maxWidth = '100vw';
+          videoRef.current.style.left = '0';
+          videoRef.current.style.right = '0';
+        }
+      });
     };
 
-    window.addEventListener('resize', handleResize);
-    window.addEventListener('orientationchange', handleResize);
+    // Throttled resize handler
+    const throttledResize = () => {
+      if (resizeTimer) return;
+      resizeTimer = setTimeout(() => {
+        handleResize();
+        resizeTimer = null;
+      }, 150); // Throttle to max once per 150ms
+    };
+
+    window.addEventListener('resize', throttledResize, { passive: true });
+    window.addEventListener('orientationchange', handleResize, { passive: true });
     setTimeout(handleResize, 100);
 
     return () => {
-      window.removeEventListener('resize', handleResize);
+      if (resizeTimer) {
+        clearTimeout(resizeTimer);
+        resizeTimer = null;
+      }
+      window.removeEventListener('resize', throttledResize);
       window.removeEventListener('orientationchange', handleResize);
     };
   }, [isMobile]);
@@ -354,8 +374,12 @@ const Customize: React.FC = () => {
   const [previewCardTop, setPreviewCardTop] = useState<number>(96);
   const [scrollY, setScrollY] = useState<number>(0);
 
-  // Calculate preview card position to align with step1
+  // Calculate preview card position to align with step1 - Optimized with throttling
   useEffect(() => {
+    let rafId: number | null = null;
+    let resizeTimer: NodeJS.Timeout | null = null;
+    let scrollTimer: NodeJS.Timeout | null = null;
+
     const updatePosition = () => {
       if (step1Ref.current) {
         const rect = step1Ref.current.getBoundingClientRect();
@@ -365,18 +389,47 @@ const Customize: React.FC = () => {
       setScrollY(window.scrollY);
     };
 
+    // Throttled scroll handler using RAF for smooth updates
     const handleScroll = () => {
-      setScrollY(window.scrollY);
+      // Cancel any pending RAF
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId);
+      }
+      
+      // Use RAF for smooth scroll updates (max 60fps)
+      rafId = requestAnimationFrame(() => {
+        setScrollY(window.scrollY);
+        rafId = null;
+      });
     };
 
+    // Throttled resize handler
+    const handleResize = () => {
+      if (resizeTimer) {
+        clearTimeout(resizeTimer);
+      }
+      resizeTimer = setTimeout(() => {
+        updatePosition();
+        resizeTimer = null;
+      }, 200); // Throttle resize to max once per 200ms
+    };
+
+    // Initial position update
     const timeoutId = setTimeout(updatePosition, 100);
+    
     window.addEventListener('scroll', handleScroll, { passive: true });
-    window.addEventListener('resize', updatePosition);
+    window.addEventListener('resize', handleResize, { passive: true });
 
     return () => {
       clearTimeout(timeoutId);
+      if (resizeTimer) {
+        clearTimeout(resizeTimer);
+      }
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId);
+      }
       window.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('resize', updatePosition);
+      window.removeEventListener('resize', handleResize);
     };
   }, []);
 
@@ -905,7 +958,14 @@ const Customize: React.FC = () => {
   const currentSeason = getCurrentSeason();
 
   // Season configuration for display
-  const seasonConfig: Record<Season, { label: string; icon: string; color: string }> = {
+  type SeasonConfig = {
+    label: string;
+    icon: string;
+    color: string;
+    style?: React.CSSProperties;
+  };
+  
+  const seasonConfig: Record<Season, SeasonConfig> = {
     spring: { label: "Spring", icon: "🌸", color: "bg-green-100 text-green-700 border-green-300" },
     summer: { label: "Summer", icon: "☀️", color: "bg-yellow-100 text-yellow-700 border-yellow-300" },
     fall: { label: "Fall", icon: "🍂", color: "bg-orange-100 text-orange-700 border-orange-300" },
