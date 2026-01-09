@@ -51,8 +51,8 @@ const UltraFeaturedBouquets = () => {
     };
   }).filter(Boolean) || [];
 
-  // Show only 3 cards on mobile, all cards on desktop
-  const bouquets = isMobile ? allBouquets.slice(0, 3) : allBouquets;
+  // Show all 6 cards on both mobile and desktop (3 per row)
+  const bouquets = allBouquets;
 
 
   // Setup GSAP hover effects (no scroll animations)

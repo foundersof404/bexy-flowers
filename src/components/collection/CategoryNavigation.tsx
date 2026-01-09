@@ -1,6 +1,7 @@
 import { memo } from "react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Category {
   id: string;
@@ -19,9 +20,16 @@ const CategoryNavigationComponent = ({
   selectedCategory, 
   onCategoryChange 
 }: CategoryNavigationProps) => {
+  const isMobile = useIsMobile();
+  
   return (
     <nav
-      className="sticky top-0 z-40 bg-[#FAF8F3]/98 backdrop-blur-md border-b border-[#E5DCC8]/50 shadow-sm"
+      className="sticky top-0 z-40 border-b shadow-sm"
+      style={{
+        backgroundColor: isMobile ? '#FFFFFF' : 'rgba(250, 248, 243, 0.98)',
+        backdropFilter: isMobile ? 'none' : 'blur(12px)',
+        borderColor: isMobile ? 'rgba(229, 220, 200, 0.5)' : 'rgba(229, 220, 200, 0.5)'
+      }}
     >
       <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
         <div className="flex items-center justify-center py-3 sm:py-4 md:py-6">
