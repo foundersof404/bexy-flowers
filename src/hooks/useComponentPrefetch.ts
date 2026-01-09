@@ -44,6 +44,7 @@ export const useComponentPrefetch = () => {
   const queryClient = useQueryClient();
   const prefetchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const prefetchedComponentsRef = useRef<Set<string>>(new Set());
+  const MAX_PREFETCHED_SIZE = 50; // Limit prefetch cache size to prevent memory leaks
 
   /**
    * Get likely next routes based on current location
@@ -61,6 +62,12 @@ export const useComponentPrefetch = () => {
     // Prevent duplicate prefetching
     if (prefetchedComponentsRef.current.has(route)) {
       return;
+    }
+
+    // Limit cache size to prevent memory leaks - remove oldest entries if limit exceeded
+    if (prefetchedComponentsRef.current.size >= MAX_PREFETCHED_SIZE) {
+      const firstEntry = prefetchedComponentsRef.current.values().next().value;
+      prefetchedComponentsRef.current.delete(firstEntry);
     }
 
     prefetchedComponentsRef.current.add(route);

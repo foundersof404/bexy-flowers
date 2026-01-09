@@ -25,6 +25,8 @@ export const useLuxuryBoxes = (filters?: {
   featured?: boolean;
   isActive?: boolean;
 }) => {
+  const queryClient = useQueryClient();
+  
   return useQuery({
     queryKey: luxuryBoxesQueryKeys.list(filters),
     queryFn: () => getLuxuryBoxes(filters),
@@ -35,7 +37,6 @@ export const useLuxuryBoxes = (filters?: {
     // Pre-warm individual luxury boxes for better navigation performance
     onSuccess: (data) => {
       if (data && data.length > 0) {
-        const queryClient = useQueryClient();
         // Pre-load first 3 luxury boxes (most likely to be viewed)
         data.slice(0, 3).forEach((box) => {
           queryClient.prefetchQuery({

@@ -1,4 +1,4 @@
-import React, { Suspense, useEffect, useRef, useState } from "react";
+import React, { Suspense, useEffect, useRef, useState, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -400,7 +400,11 @@ const ServiceSection = ({
   const cardRef = useRef<HTMLDivElement>(null);
 
   // Use images array if provided, otherwise fall back to single image
-  const imageArray = images || (image ? [image] : []);
+  // Memoize to prevent recreating array on every render (fixes infinite loop)
+  const imageArray = useMemo(() => {
+    return images || (image ? [image] : []);
+  }, [images, image]);
+  
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   // Debug: Log image array to console
@@ -408,35 +412,36 @@ const ServiceSection = ({
     if (imageArray.length === 0) {
       console.warn(`ServiceSection "${title}": No images provided`);
     }
-  }, [imageArray, title]);
+  }, [imageArray.length, title]);
 
   // Auto-rotate images every 4 seconds if multiple images provided
   // Seamless loop - no blank/blink between transitions
   // Preload all images to ensure smooth transitions
-  const imageArrayLengthRef = React.useRef(imageArray.length);
+  const preloadedImagesRef = React.useRef<Set<string>>(new Set());
   
   useEffect(() => {
-    imageArrayLengthRef.current = imageArray.length;
-  }, [imageArray.length]);
-
-  useEffect(() => {
-    if (imageArrayLengthRef.current <= 1) return;
+    if (imageArray.length <= 1) return;
 
     // Preload all images for smooth transitions (no blank moments)
+    // Track preloaded images to avoid repeated preloading
     imageArray.forEach((imgSrc) => {
-      const img = new Image();
-      img.src = encodeImageUrl(imgSrc);
+      const encodedSrc = encodeImageUrl(imgSrc);
+      if (!preloadedImagesRef.current.has(encodedSrc)) {
+        const img = new Image();
+        img.src = encodedSrc;
+        preloadedImagesRef.current.add(encodedSrc);
+      }
     });
 
     const interval = setInterval(() => {
       setCurrentImageIndex((prev) => {
-        const next = (prev + 1) % imageArrayLengthRef.current;
+        const next = (prev + 1) % imageArray.length;
         return next;
       });
     }, 4000); // 4 seconds between transitions
 
     return () => clearInterval(interval);
-  }, [imageArray]); // Only restart if imageArray reference changes
+  }, [imageArray]); // Depend on memoized array - will only change when images prop actually changes
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -1570,6 +1575,9 @@ const ImageGallery = () => {
   }, [weddingCreationsQuery.isLoading, weddingCreationsQuery.data]);
 
   useEffect(() => {
+    // Only animate when images are loaded and gallery ref is ready
+    if (loadingImages || weddingImages.length === 0 || !galleryRef.current) return;
+
     const ctx = gsap.context(() => {
       // Animate gallery items - reduced on mobile
       gsap.utils.toArray(galleryRef.current?.querySelectorAll('.gallery-item') || []).forEach((item: any, index: number) => {
@@ -1595,7 +1603,7 @@ const ImageGallery = () => {
     }, sectionRef);
 
     return () => ctx.revert();
-  }, [isMobile]);
+  }, [isMobile, loadingImages, weddingImages.length]); // Add dependencies to prevent re-animation loops
 
   // Prevent body scroll when modal is open and restore scroll position
   useEffect(() => {
@@ -2067,12 +2075,17 @@ const WeddingAndEvents = () => {
     nav.style.transition = 'background-color 0.3s ease';
 
     // Update on scroll - keep semi-transparent but more opaque when scrolled
-    // Use requestAnimationFrame to throttle scroll events
+    // Use requestAnimationFrame to throttle scroll events (throttled to max 60fps)
     let rafId: number | null = null;
     let isMounted = true; // Track if component is still mounted
+    let lastScrollTime = 0;
+    const throttleMs = 16; // ~60fps max
     
     const handleScroll = () => {
-      if (rafId || !isMounted) return; // Skip if already scheduled or unmounted
+      const now = Date.now();
+      
+      // Skip if already scheduled, unmounted, or too soon since last update
+      if (rafId || !isMounted || (now - lastScrollTime < throttleMs)) return;
       
       rafId = requestAnimationFrame(() => {
         // Double-check mounted state and nav existence
@@ -2081,6 +2094,7 @@ const WeddingAndEvents = () => {
           return;
         }
         
+        lastScrollTime = Date.now();
         const scrolled = window.scrollY > 50;
         nav.style.backgroundColor = scrolled
           ? `rgba(0, 0, 0, ${scrolledOpacity})`

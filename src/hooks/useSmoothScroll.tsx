@@ -11,6 +11,7 @@ let globalLenis: Lenis | null = null;
 export const useSmoothScroll = () => {
   const rafIdRef = useRef<number | null>(null);
   const lenisRef = useRef<Lenis | null>(null);
+  const isActiveRef = useRef<boolean>(true);
 
   useEffect(() => {
     // ⚡ PERFORMANCE: Configure ScrollTrigger for better performance
@@ -31,6 +32,7 @@ export const useSmoothScroll = () => {
 
     lenisRef.current = lenis;
     globalLenis = lenis; // Set global for scrollTo function
+    isActiveRef.current = true; // Reset active flag
 
     // ⚡ PERFORMANCE: Throttle ScrollTrigger updates to reduce frame drops
     let lastUpdate = 0;
@@ -45,11 +47,21 @@ export const useSmoothScroll = () => {
     // Integrate Lenis with GSAP ScrollTrigger for better performance
     lenis.on('scroll', updateScrollTrigger);
 
-    // Animation loop for Lenis
+    // Animation loop for Lenis - with proper cleanup checks
     function raf(time: number) {
-      if (lenisRef.current) {
+      if (!isActiveRef.current || !lenisRef.current) {
+        // Stop if component unmounted or lenis destroyed
+        rafIdRef.current = null;
+        return;
+      }
+      
+      try {
         lenisRef.current.raf(time);
         rafIdRef.current = requestAnimationFrame(raf);
+      } catch (error) {
+        console.error('Lenis RAF error:', error);
+        rafIdRef.current = null;
+        isActiveRef.current = false;
       }
     }
 
@@ -74,19 +86,34 @@ export const useSmoothScroll = () => {
     });
 
     return () => {
+      isActiveRef.current = false; // Stop the RAF loop
+      
       if (rafIdRef.current !== null) {
         cancelAnimationFrame(rafIdRef.current);
         rafIdRef.current = null;
       }
+      
+      // Remove scroll listener before destroying
       if (lenisRef.current) {
-        lenisRef.current.destroy();
+        try {
+          lenisRef.current.off('scroll', updateScrollTrigger);
+          lenisRef.current.destroy();
+        } catch (error) {
+          console.error('Error destroying Lenis:', error);
+        }
         lenisRef.current = null;
       }
+      
       if (globalLenis === lenis) {
         globalLenis = null;
       }
-      // Don't kill all ScrollTriggers here as they're managed by components
-      // ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+      
+      // Clean up ScrollTrigger proxy
+      try {
+        ScrollTrigger.scrollerProxy(document.body, null);
+      } catch (error) {
+        // Ignore if already cleaned up
+      }
     };
   }, []);
 

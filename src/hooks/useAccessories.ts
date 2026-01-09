@@ -25,6 +25,8 @@ export const useAccessories = (filters?: {
   featured?: boolean;
   isActive?: boolean;
 }) => {
+  const queryClient = useQueryClient();
+  
   return useQuery({
     queryKey: accessoriesQueryKeys.list(filters),
     queryFn: () => getAccessories(filters),
@@ -35,7 +37,6 @@ export const useAccessories = (filters?: {
     // Pre-warm individual accessories for better navigation performance
     onSuccess: (data) => {
       if (data && data.length > 0) {
-        const queryClient = useQueryClient();
         // Pre-load first 3 accessories (most likely to be viewed)
         data.slice(0, 3).forEach((accessory) => {
           queryClient.prefetchQuery({
