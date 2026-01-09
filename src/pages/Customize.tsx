@@ -5,7 +5,7 @@ import UltraNavigation from "@/components/UltraNavigation";
 import { useCart } from "@/contexts/CartContext";
 import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
-import heroBouquetMain from "@/assets/bouquet-4.jpg";
+import heroBouquetMain from "@/assets/bouquet-1.jpg";
 import { flowers, flowerFamilies, EnhancedFlower, Season } from "@/data/flowers";
 import { generateBouquetImage as generateImage, generateWithVariation, ProgressStage } from "@/lib/api/imageGeneration";
 import { buildAdvancedPrompt } from "@/lib/api/promptEngine";
@@ -996,17 +996,27 @@ const Customize: React.FC = () => {
     <div className="min-h-screen bg-white font-body" ref={containerRef}>
       <UltraNavigation />
 
-      {/* Hero Section at Top - Not Fixed */}
-      <section className={`relative w-full ${isMobile ? 'h-screen' : 'h-[70vh]'} overflow-hidden`} style={isMobile ? { marginTop: 0 } : {}}>
-        {/* Video background for mobile view */}
+      {/* Hero Section - Matching Home & Collection Page Style */}
+      <section 
+        className="relative min-h-[50vh] sm:min-h-[60vh] md:min-h-[70vh] flex items-center justify-center overflow-hidden pt-16 sm:pt-20 md:pt-24 pb-8 sm:pb-12 md:pb-16"
+        style={{
+          background: isMobile ? 'transparent' : 'linear-gradient(180deg, #FAF8F3 0%, #F5F1E8 50%, #EDE7D9 100%)',
+          minHeight: isMobile ? 'calc(100vh + 80px)' : '70vh',
+          height: isMobile ? 'calc(100vh + 80px)' : undefined,
+          marginTop: isMobile ? 0 : undefined,
+          paddingTop: isMobile ? '6rem' : undefined,
+          paddingBottom: isMobile ? '4rem' : undefined
+        }}
+      >
+        {/* Video background for mobile view - UNCHANGED */}
         {isMobile && (
           <video
             ref={videoRef}
             className="fixed left-0 right-0 w-full object-cover object-center pointer-events-none z-0"
             style={{
               width: '100vw',
-              height: 'calc(100vh + 50px)', // Increase height by 5cm (50px)
-              top: '-50px', // Move video 5cm to the top, behind header
+              height: 'calc(100vh + 50px)',
+              top: '-50px',
               left: 0,
               right: 0,
               marginLeft: 0,
@@ -1027,28 +1037,141 @@ const Customize: React.FC = () => {
           </video>
         )}
 
-        {/* Desktop background image */}
+        {/* Elegant Gradient Background Elements - Desktop Only */}
         {!isMobile && (
-          <div className="absolute inset-0 w-full h-full">
-            <img
-              src={heroBouquetMain}
-              alt="Floral Design"
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/60" />
+          <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
+            {/* Top-left golden glow */}
+            <motion.div
+              className="absolute w-48 h-48 sm:w-72 sm:h-72 md:w-96 md:h-96 -top-24 -left-24"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 0.3, scale: 1 }}
+              transition={{ duration: 1.5, ease: "easeOut" }}
+            >
+              <div 
+                className="w-full h-full rounded-full blur-3xl"
+                style={{
+                  background: 'radial-gradient(circle, rgba(199, 158, 72, 0.2) 0%, rgba(199, 158, 72, 0.1) 40%, transparent 70%)'
+                }}
+              />
+            </motion.div>
+            
+            {/* Bottom-right rose gold accent */}
+            <motion.div
+              className="absolute w-56 h-56 sm:w-80 sm:h-80 md:w-[28rem] md:h-[28rem] -bottom-20 -right-20"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 0.25, scale: 1 }}
+              transition={{ duration: 1.5, delay: 0.2, ease: "easeOut" }}
+            >
+              <div 
+                className="w-full h-full rounded-full blur-3xl"
+                style={{
+                  background: 'radial-gradient(circle, rgba(184, 138, 68, 0.15) 0%, rgba(184, 138, 68, 0.08) 40%, transparent 70%)'
+                }}
+              />
+            </motion.div>
+            
+            {/* Center soft glow */}
+            <motion.div
+              className="absolute w-64 h-64 sm:w-96 sm:h-96 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.15 }}
+              transition={{ duration: 1.5, delay: 0.4, ease: "easeOut" }}
+            >
+              <div 
+                className="w-full h-full rounded-full blur-3xl"
+                style={{
+                  background: 'radial-gradient(circle, rgba(245, 241, 232, 0.4) 0%, rgba(245, 241, 232, 0.2) 40%, transparent 70%)'
+                }}
+              />
+            </motion.div>
           </div>
         )}
 
-        {/* Hero Content */}
-        <div className="absolute inset-0 flex items-center justify-center z-10">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h1 className={`text-3xl md:text-5xl lg:text-6xl font-luxury font-normal mb-4 ${isMobile ? 'text-white' : 'text-white'}`} style={{ textShadow: '0 2px 8px rgba(0, 0, 0, 0.7), 0 1px 3px rgba(0, 0, 0, 0.4)', letterSpacing: '-0.02em' }}>
-              Design Your Masterpiece
-            </h1>
-            <p className={`text-base md:text-lg lg:text-xl ${isMobile ? 'text-white/90' : 'text-white/90'}`} style={{ textShadow: '0 2px 8px rgba(0, 0, 0, 0.7), 0 1px 3px rgba(0, 0, 0, 0.4)' }}>
-              Handcrafted by expert florists
-            </p>
-          </div>
+        {/* Hero Content - Elegant Design Matching Collection Page */}
+        <div
+          className="relative z-20 text-center max-w-4xl mx-auto px-3 xs:px-4 sm:px-6 lg:px-8"
+          style={isMobile ? {
+            paddingTop: '2rem',
+            paddingBottom: '2rem',
+            minHeight: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          } : undefined}
+        >
+          <motion.div
+            className="space-y-2 sm:space-y-4 md:space-y-6"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+            style={isMobile ? {
+              width: '100%',
+              maxWidth: '100%'
+            } : undefined}
+          >
+            {/* Brand Name - Desktop Only */}
+            {!isMobile && (
+              <motion.p 
+                className="uppercase tracking-[0.2em] sm:tracking-ultra-wide text-[10px] sm:text-xs md:text-sm text-[#8B7355] font-semibold"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.15, duration: 0.6 }}
+              >
+                BEXY SIGNATURE ATELIER
+              </motion.p>
+            )}
+
+            {/* Main Heading */}
+            <motion.h1 
+              className={`font-luxury text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold relative ${
+                isMobile ? 'text-white' : 'text-[#3D3027]'
+              }`}
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.8 }}
+              style={{
+                letterSpacing: '0.02em',
+                lineHeight: '1.15',
+                textShadow: isMobile ? '0 2px 8px rgba(0, 0, 0, 0.7), 0 1px 3px rgba(0, 0, 0, 0.4)' : 'none'
+              }}
+            >
+              <span className="block">Design Your</span>
+              <span className="block mt-1">Masterpiece</span>
+            </motion.h1>
+
+            {/* Golden Divider with Diamond */}
+            <motion.div 
+              className="relative flex items-center justify-center my-3 sm:my-4 md:my-6"
+              initial={{ opacity: 0, scaleX: 0 }}
+              animate={{ opacity: 1, scaleX: 1 }}
+              transition={{ delay: 0.6, duration: 0.8, ease: "easeOut" }}
+            >
+              <div className={`w-20 sm:w-24 md:w-32 h-px bg-gradient-to-r from-transparent ${
+                isMobile ? 'via-white/60' : 'via-[#C79E48]'
+              } to-transparent`} />
+              <div className={`absolute w-1.5 h-1.5 sm:w-2 sm:h-2 rotate-45 shadow-sm ${
+                isMobile ? 'bg-white/80' : 'bg-[#C79E48]'
+              }`} />
+            </motion.div>
+
+            {/* Description */}
+            <motion.p 
+              className={`text-xs sm:text-sm md:text-base lg:text-lg max-w-3xl mx-auto leading-relaxed font-body px-2 sm:px-0 ${
+                isMobile ? 'text-white/90' : 'text-[#6B5D52]'
+              }`}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.45, duration: 0.7 }}
+              style={{
+                textShadow: isMobile ? '0 2px 8px rgba(0, 0, 0, 0.7), 0 1px 3px rgba(0, 0, 0, 0.4)' : 'none'
+              }}
+            >
+              {isMobile 
+                ? 'Handcrafted by expert florists'
+                : 'Create bespoke floral arrangements tailored to your vision. Every detail crafted with precision and passion by our expert florists.'
+              }
+            </motion.p>
+          </motion.div>
         </div>
       </section>
 
