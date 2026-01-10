@@ -351,7 +351,7 @@ const CarouselHero = () => {
                       height="800"
                       loading={index === 0 ? "eager" : "lazy"}
                       decoding={index === 0 ? "sync" : "async"}
-                      fetchPriority={index === 0 ? "high" : "low"}
+                      fetchpriority={index === 0 ? "high" : "low"}
                       style={{
                         contentVisibility: index === 0 ? 'auto' : 'auto',
                       }}

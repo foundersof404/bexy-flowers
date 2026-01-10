@@ -1,4 +1,5 @@
 import { db } from './database-client';
+import { supabase } from '../supabase';
 import type { Database } from '../supabase';
 
 type LuxuryBox = Database['public']['Tables']['luxury_boxes']['Row'];

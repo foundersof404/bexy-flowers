@@ -16,6 +16,7 @@ import {
   Package,
   Palette,
   Ruler,
+  RefreshCw,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -42,6 +43,7 @@ import {
   updateBoxSize,
   deleteBoxSize,
 } from '@/lib/api/luxury-boxes';
+import { useLuxuryBoxes } from '@/hooks/useLuxuryBoxes';
 
 const GOLD_COLOR = 'rgb(199, 158, 72)';
 
@@ -49,8 +51,9 @@ const AdminLuxuryBoxes = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [boxes, setBoxes] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  
+  // Use React Query hook for cached data - fetch all luxury boxes
+  const { data: boxesData = [], isLoading: loadingBoxes, refetch: refetchBoxes } = useLuxuryBoxes();
   const [saving, setSaving] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -97,25 +100,11 @@ const AdminLuxuryBoxes = () => {
       navigate('/admin/login');
       return;
     }
-
-    loadBoxes();
   }, [navigate]);
 
-  const loadBoxes = async () => {
-    try {
-      setLoading(true);
-      const data = await getLuxuryBoxes();
-      setBoxes(data);
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to load luxury boxes',
-        variant: 'destructive',
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Use data directly from React Query instead of syncing to state
+  const boxes = boxesData;
+  const loading = loadingBoxes;
 
   const loadBoxDetails = async (boxId: string) => {
     try {
@@ -417,17 +406,35 @@ const AdminLuxuryBoxes = () => {
               </div>
             </div>
             {!showForm && !selectedBoxId && (
-              <Button
-                onClick={handleNew}
-                className="gap-2"
-                style={{
-                  background: `linear-gradient(135deg, ${GOLD_COLOR} 0%, rgba(199, 158, 72, 0.9) 100%)`,
-                  color: 'white',
-                }}
-              >
-                <Plus className="w-4 h-4" />
-                Add Box
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    refetchBoxes();
+                    toast({
+                      title: "Refreshing...",
+                      description: "Fetching latest luxury boxes from database",
+                    });
+                  }}
+                  disabled={loading}
+                  className="gap-2"
+                >
+                  <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                  Refresh
+                </Button>
+                <Button
+                  onClick={handleNew}
+                  className="gap-2"
+                  style={{
+                    background: `linear-gradient(135deg, ${GOLD_COLOR} 0%, rgba(199, 158, 72, 0.9) 100%)`,
+                    color: 'white',
+                  }}
+                >
+                  <Plus className="w-4 h-4" />
+                  Add Box
+                </Button>
+              </div>
             )}
           </div>
         </div>

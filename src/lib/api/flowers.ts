@@ -1,5 +1,6 @@
 import { db } from './database-client';
 import { uploadImage, deleteImage, extractPathFromUrl } from '../supabase-storage';
+import { supabase } from '../supabase';
 import type { Database } from '../supabase';
 
 type FlowerType = Database['public']['Tables']['flower_types']['Row'];
@@ -19,16 +20,24 @@ export interface FlowerTypeWithColors extends FlowerType {
 /**
  * Get all flower types
  */
-export async function getFlowerTypes(): Promise<FlowerType[]> {
-  const { data, error } = await db.query('flower_types', {
-    orderBy: { column: 'name', ascending: true }
-  });
+export async function getFlowerTypes(filters?: { category?: string; featured?: boolean; isActive?: boolean }): Promise<FlowerType[]> {
+  let query = supabase
+    .from('flower_types')
+    .select('*')
+    .order('name', { ascending: true });
+
+  // Apply filters if provided
+  if (filters?.isActive !== undefined) {
+    query = query.eq('is_active', filters.isActive);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     throw new Error(`Failed to fetch flower types: ${error.message}`);
   }
 
-  return data;
+  return data || [];
 }
 
 // Alias for backwards compatibility

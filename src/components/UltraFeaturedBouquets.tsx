@@ -402,7 +402,7 @@ const UltraFeaturedBouquets = () => {
                          className="transition-all duration-300 ease-out group-hover:scale-105"
                          loading={index < 3 ? "eager" : "lazy"}
                          decoding="async"
-                         fetchPriority={index === 0 ? "high" : "low"}
+                         fetchpriority={index === 0 ? "high" : "low"}
                          onError={(e) => {
                            console.error('Failed to load signature collection image:', bouquet.image, bouquet.name, e);
                            (e.target as HTMLImageElement).style.display = 'none';

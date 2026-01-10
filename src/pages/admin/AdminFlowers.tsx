@@ -15,6 +15,7 @@ import {
   DollarSign,
   Flower,
   Palette,
+  RefreshCw,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -39,6 +40,7 @@ import {
   updateFlowerColor,
   deleteFlowerColor,
 } from '@/lib/api/flowers';
+import { useFlowers } from '@/hooks/useFlowers';
 
 const GOLD_COLOR = 'rgb(199, 158, 72)';
 
@@ -46,8 +48,9 @@ const AdminFlowers = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [flowerTypes, setFlowerTypes] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  
+  // Use React Query hook for cached data - fetch all flower types (no filters for admin view)
+  const { data: flowerTypesData = [], isLoading: loadingFlowers, refetch: refetchFlowers } = useFlowers();
   const [saving, setSaving] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -85,25 +88,11 @@ const AdminFlowers = () => {
       navigate('/admin/login');
       return;
     }
-
-    loadFlowerTypes();
   }, [navigate]);
 
-  const loadFlowerTypes = async () => {
-    try {
-      setLoading(true);
-      const data = await getFlowerTypes();
-      setFlowerTypes(data);
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to load flower types',
-        variant: 'destructive',
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Use data directly from React Query instead of syncing to state
+  const flowerTypes = flowerTypesData;
+  const loading = loadingFlowers;
 
   const loadFlowerDetails = async (flowerId: string) => {
     try {
@@ -336,17 +325,35 @@ const AdminFlowers = () => {
                 <p className="text-sm text-gray-500">Manage flower types and their colors for custom bouquets</p>
               </div>
             </div>
-            <Button
-              onClick={handleNew}
-              className="gap-2"
-              style={{
-                background: `linear-gradient(135deg, ${GOLD_COLOR} 0%, rgba(199, 158, 72, 0.9) 100%)`,
-                color: 'white',
-              }}
-            >
-              <Plus className="w-4 h-4" />
-              Add Flower Type
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  refetchFlowers();
+                  toast({
+                    title: "Refreshing...",
+                    description: "Fetching latest flower types from database",
+                  });
+                }}
+                disabled={loading}
+                className="gap-2"
+              >
+                <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                Refresh
+              </Button>
+              <Button
+                onClick={handleNew}
+                className="gap-2"
+                style={{
+                  background: `linear-gradient(135deg, ${GOLD_COLOR} 0%, rgba(199, 158, 72, 0.9) 100%)`,
+                  color: 'white',
+                }}
+              >
+                <Plus className="w-4 h-4" />
+                Add Flower Type
+              </Button>
+            </div>
           </div>
         </div>
       </header>

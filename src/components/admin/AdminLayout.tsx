@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { motion } from "framer-motion";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   Home,
@@ -11,6 +11,8 @@ import {
   Settings,
   LogOut,
   Flower2,
+  Box,
+  Sparkles,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -27,9 +29,11 @@ interface NavItem {
 const navigationItems: NavItem[] = [
   { id: 'home', label: 'Home', icon: Home, path: '/admin/dashboard' },
   { id: 'products', label: 'Products', icon: Package, path: '/admin/products' },
-  { id: 'collection', label: 'Collection', icon: Grid3x3, path: '/collection' },
   { id: 'signature', label: 'Signature', icon: Star, path: '/admin/signature-collection' },
   { id: 'wedding', label: 'Wedding', icon: ImageIcon, path: '/admin/wedding-creations' },
+  { id: 'flowers', label: 'Flowers', icon: Flower2, path: '/admin/flowers' },
+  { id: 'boxes', label: 'Luxury Boxes', icon: Box, path: '/admin/boxes' },
+  { id: 'accessories', label: 'Accessories', icon: Sparkles, path: '/admin/accessories' },
   { id: 'settings', label: 'Settings', icon: Settings, path: '/admin/settings' },
 ];
 
@@ -53,9 +57,9 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   };
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50">
+    <div className="flex min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50 overflow-x-hidden">
       {/* Left Sidebar Navigation */}
-      <aside className="hidden lg:flex flex-col w-20 bg-white border-r border-gray-200 shadow-sm fixed h-screen z-50">
+      <aside className="hidden lg:flex flex-col w-20 bg-white border-r border-gray-200 shadow-sm fixed h-screen z-50 flex-shrink-0">
         {/* Logo */}
         <div className="flex items-center justify-center h-20 border-b border-gray-200">
           <div
@@ -73,17 +77,27 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
         <nav className="flex-1 flex flex-col items-center py-8 space-y-4">
           {navigationItems.map((item) => {
             const Icon = item.icon;
+            // Improved active state detection for all admin routes
             const isActive = location.pathname === item.path || 
-                           (item.path === '/admin/products' && location.pathname.startsWith('/admin/products'));
+                           (item.path === '/admin/products' && location.pathname.startsWith('/admin/products')) ||
+                           (item.path !== '/admin/products' && location.pathname.startsWith(item.path));
+            
             return (
-              <button
+              <Link
                 key={item.id}
-                onClick={() => navigate(item.path)}
-                className={`relative w-12 h-12 rounded-xl flex items-center justify-center transition-colors duration-200 group ${
+                to={item.path}
+                className={`relative w-12 h-12 rounded-xl flex items-center justify-center transition-colors duration-150 group ${
                   isActive
                     ? 'bg-gradient-to-br from-primary/20 to-primary/10 shadow-md'
-                    : 'hover:bg-gray-100'
+                    : 'hover:bg-gray-100 active:bg-gray-200'
                 }`}
+                onClick={(e) => {
+                  // Optimize navigation - prevent default only if needed
+                  // React Router Link handles prefetching automatically
+                  if (location.pathname === item.path) {
+                    e.preventDefault(); // Prevent navigation if already on that page
+                  }
+                }}
               >
                 <Icon
                   className={`w-5 h-5 ${
@@ -102,7 +116,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                 <div className="absolute left-full ml-4 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-200 whitespace-nowrap z-50">
                   {item.label}
                 </div>
-              </button>
+              </Link>
             );
           })}
         </nav>
@@ -122,8 +136,10 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
       </aside>
 
       {/* Main Content Area */}
-      <div className="flex-1 lg:ml-20">
-        {children}
+      <div className="flex-1 lg:ml-20 w-full min-w-0 overflow-x-hidden">
+        <div className="w-full h-full">
+          {children}
+        </div>
       </div>
     </div>
   );

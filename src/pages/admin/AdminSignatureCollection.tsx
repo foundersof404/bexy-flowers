@@ -528,7 +528,7 @@ const AdminSignatureCollection = () => {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 items-start">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 items-stretch">
             {collections.map((item, index) => {
               const displayTitle = getDisplayTitle(item);
               const displayPrice = getDisplayPrice(item);
@@ -543,9 +543,9 @@ const AdminSignatureCollection = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05 }}
-                  className="h-full"
+                  className="h-full flex"
                 >
-                  <Card className="h-full flex flex-col hover:shadow-lg transition-shadow">
+                  <Card className="h-full w-full flex flex-col hover:shadow-lg transition-shadow">
                     <CardHeader className="pb-3 flex-shrink-0">
                       <div className="flex items-start justify-between">
                         <div className="flex items-center gap-2">
@@ -582,7 +582,7 @@ const AdminSignatureCollection = () => {
                         </div>
                       </div>
                     </CardHeader>
-                    <CardContent className="flex-1 flex flex-col space-y-3">
+                    <CardContent className="flex-1 flex flex-col space-y-3 min-h-0">
                       {/* Image */}
                       <div className="aspect-square relative bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
                         {displayImages[0] ? (
@@ -604,7 +604,7 @@ const AdminSignatureCollection = () => {
                       </div>
 
                       {/* Title */}
-                      <h3 className="font-semibold text-sm sm:text-base line-clamp-2 flex-shrink-0">{displayTitle}</h3>
+                      <h3 className="font-semibold text-sm sm:text-base line-clamp-2 flex-shrink-0 min-h-[2.5rem]">{displayTitle}</h3>
 
                       {/* Price */}
                       <div className="flex items-center gap-2 flex-shrink-0">
@@ -622,8 +622,8 @@ const AdminSignatureCollection = () => {
                         )}
                       </div>
 
-                      {/* Tags */}
-                      <div className="flex-shrink-0">
+                      {/* Tags - Fixed height for alignment */}
+                      <div className="flex-shrink-0 min-h-[1.75rem]">
                         {item.tags && item.tags.length > 0 ? (
                           <div className="flex flex-wrap gap-1">
                             {item.tags.slice(0, 3).map((tag) => (
