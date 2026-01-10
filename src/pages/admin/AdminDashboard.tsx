@@ -45,8 +45,9 @@ import { useToast } from "@/hooks/use-toast";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { getCollectionProducts } from "@/lib/api/collection-products";
 import { encodeImageUrl } from "@/lib/imageUtils";
+import { useCollectionProducts } from "@/hooks/useCollectionProducts";
+import { useQueryClient } from "@tanstack/react-query";
 
 const GOLD_COLOR = "rgb(199, 158, 72)";
 
@@ -84,12 +85,15 @@ const AdminDashboard = () => {
   });
   const [recentProducts, setRecentProducts] = useState<any[]>([]);
   const [recentActivity, setRecentActivity] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
   const [adminName, setAdminName] = useState("Rebecca");
   const [currentDate, setCurrentDate] = useState(new Date());
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+  
+  // Use React Query hook for cached data - prevents refetching if data exists
+  const { data: products = [], isLoading: loadingProducts } = useCollectionProducts({ isActive: true });
 
   useEffect(() => {
     // Check authentication
@@ -104,114 +108,99 @@ const AdminDashboard = () => {
     if (storedName) {
       setAdminName(storedName);
     }
+  }, [navigate]);
 
-    // Load real stats from database
-    const loadStats = async () => {
-      try {
-        setLoading(true);
-        const products = await getCollectionProducts({ isActive: true });
-        
-        // Calculate real stats
-        const totalProducts = products.length;
-        const inStock = products.filter((p) => !p.is_out_of_stock).length;
-        const outOfStock = products.filter((p) => p.is_out_of_stock).length;
-        const activeDiscounts = products.filter((p) => p.discount_percentage && p.discount_percentage > 0).length;
-        
-        // Calculate total revenue (sum of all product prices - simplified calculation)
-        // In a real scenario, this would come from orders table
-        const totalRevenue = products.reduce((sum, p) => {
-          const price = p.discount_percentage && p.discount_percentage > 0
-            ? p.price * (1 - p.discount_percentage / 100)
-            : p.price;
-          // Estimate: assume each product has been viewed/purchased based on a simple calculation
-          // In production, this should come from actual orders/analytics
-          return sum + price;
-        }, 0);
+  // Calculate stats from cached products data - instant and uses cached data
+  useEffect(() => {
+    if (!products || products.length === 0) {
+      return; // Wait for data to load
+    }
 
-        // Get favorites and cart additions from localStorage (if available)
-        // These are estimates based on user interactions stored locally
-        const favoritesData = localStorage.getItem("favorites");
-        const cartData = localStorage.getItem("cart");
-        
-        let totalFavorites = 0;
-        let totalCartAdditions = 0;
-        
-        try {
-          if (favoritesData) {
-            const favorites = JSON.parse(favoritesData);
-            totalFavorites = Array.isArray(favorites) ? favorites.length : 0;
-          }
-        } catch (e) {
-          // If favorites data doesn't exist or is invalid, use 0
-        }
-        
-        try {
-          if (cartData) {
-            const cart = JSON.parse(cartData);
-            totalCartAdditions = Array.isArray(cart) ? cart.length : 0;
-          }
-        } catch (e) {
-          // If cart data doesn't exist or is invalid, use 0
-        }
+    // Calculate real stats from products - optimized
+    const totalProducts = products.length;
+    const inStock = products.filter((p) => !p.is_out_of_stock).length;
+    const outOfStock = products.filter((p) => p.is_out_of_stock).length;
+    const activeDiscounts = products.filter((p) => p.discount_percentage && p.discount_percentage > 0).length;
+    
+    // Calculate total revenue
+    const totalRevenue = products.reduce((sum, p) => {
+      const price = p.discount_percentage && p.discount_percentage > 0
+        ? p.price * (1 - p.discount_percentage / 100)
+        : p.price;
+      return sum + price;
+    }, 0);
 
-        // Get recent products (last 5)
-        const recent = [...products]
-          .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-          .slice(0, 5)
-          .map((p) => {
-            const imageUrl = p.image_urls?.[0];
-            return {
-              id: p.id,
-              name: p.title,
-              price: p.price,
-              image: imageUrl ? encodeImageUrl(imageUrl) : '',
-              category: p.category || '',
-              displayCategory: p.display_category || '',
-              discount: p.discount_percentage || null,
-              outOfStock: p.is_out_of_stock || false,
-              soldOut: false,
-              seasonal: false,
-            };
-          });
-
-        setStats({
-          totalProducts,
-          inStock,
-          outOfStock,
-          soldOut: 0,
-          seasonal: 0,
-          totalFavorites: totalFavorites || 0,
-          totalCartAdditions: totalCartAdditions || 0,
-          activeDiscounts,
-          totalRevenue: totalRevenue.toFixed(2),
-          todayOrders: Math.floor(Math.random() * 50) + 10,
-          todayRevenue: (Math.random() * 5000 + 1000).toFixed(2),
-          activeUsers: Math.floor(Math.random() * 100) + 20,
-        });
-
-        setRecentProducts(recent);
-        
-        // Mock recent activity
-        setRecentActivity([
-          { type: 'order', message: 'New order #1234 received', time: '5 min ago', icon: ShoppingCart },
-          { type: 'product', message: 'Product "Rose Bouquet" updated', time: '15 min ago', icon: Package },
-          { type: 'user', message: '3 new users registered', time: '1 hour ago', icon: Users },
-          { type: 'review', message: 'New 5-star review received', time: '2 hours ago', icon: Star },
-        ]);
-      } catch (error) {
-        console.error("Error loading stats:", error);
-        toast({
-          title: "Error",
-          description: "Failed to load dashboard statistics",
-          variant: "destructive",
-        });
-      } finally {
-        setLoading(false);
+    // Get favorites and cart additions from localStorage
+    let totalFavorites = 0;
+    let totalCartAdditions = 0;
+    
+    try {
+      const favoritesData = localStorage.getItem("favorites");
+      if (favoritesData) {
+        const favorites = JSON.parse(favoritesData);
+        totalFavorites = Array.isArray(favorites) ? favorites.length : 0;
       }
-    };
+    } catch (e) {
+      // Ignore errors
+    }
+    
+    try {
+      const cartData = localStorage.getItem("cart");
+      if (cartData) {
+        const cart = JSON.parse(cartData);
+        totalCartAdditions = Array.isArray(cart) ? cart.length : 0;
+      }
+    } catch (e) {
+      // Ignore errors
+    }
 
-    loadStats();
-  }, [navigate, toast]);
+    // Get recent products (last 5)
+    const recent = [...products]
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      .slice(0, 5)
+      .map((p) => {
+        const imageUrl = p.image_urls?.[0];
+        return {
+          id: p.id,
+          name: p.title,
+          price: p.price,
+          image: imageUrl ? encodeImageUrl(imageUrl) : '',
+          category: p.category || '',
+          displayCategory: p.display_category || '',
+          discount: p.discount_percentage || null,
+          outOfStock: p.is_out_of_stock || false,
+          soldOut: false,
+          seasonal: false,
+        };
+      });
+
+    setStats({
+      totalProducts,
+      inStock,
+      outOfStock,
+      soldOut: 0,
+      seasonal: 0,
+      totalFavorites: totalFavorites || 0,
+      totalCartAdditions: totalCartAdditions || 0,
+      activeDiscounts,
+      totalRevenue: totalRevenue.toFixed(2),
+      todayOrders: Math.floor(Math.random() * 50) + 10,
+      todayRevenue: (Math.random() * 5000 + 1000).toFixed(2),
+      activeUsers: Math.floor(Math.random() * 100) + 20,
+    });
+
+    setRecentProducts(recent);
+    
+    // Mock recent activity
+    setRecentActivity([
+      { type: 'order', message: 'New order #1234 received', time: '5 min ago', icon: ShoppingCart },
+      { type: 'product', message: 'Product "Rose Bouquet" updated', time: '15 min ago', icon: Package },
+      { type: 'user', message: '3 new users registered', time: '1 hour ago', icon: Users },
+      { type: 'review', message: 'New 5-star review received', time: '2 hours ago', icon: Star },
+    ]);
+  }, [products]);
+
+  const loading = loadingProducts;
 
   const handleLogout = () => {
     localStorage.removeItem("adminAuthenticated");
@@ -341,14 +330,14 @@ const AdminDashboard = () => {
   return (
     <AdminLayout>
         {/* Top Header */}
-        <header className="bg-white/80 backdrop-blur-lg border-b border-gray-200 sticky top-0 z-40">
-          <div className="px-6 lg:px-8 py-4">
-            <div className="flex items-center justify-between">
-              <div>
+        <header className="bg-white/80 backdrop-blur-lg border-b border-gray-200 sticky top-0 z-40 w-full">
+          <div className="px-4 sm:px-6 lg:px-8 py-4 w-full max-w-full overflow-x-hidden">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 w-full">
+              <div className="flex-1 min-w-0">
                 <motion.h1
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="text-2xl sm:text-3xl font-bold text-gray-900"
+                  className="text-2xl sm:text-3xl font-bold text-gray-900 truncate"
                 >
                   Hi, {adminName}!
                 </motion.h1>
@@ -361,16 +350,16 @@ const AdminDashboard = () => {
                   Let's take a look at your activity today
                 </motion.p>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
                 <div className="relative hidden sm:block">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <Input
                     placeholder="Search for health data"
-                    className="pl-10 w-64 bg-gray-50 border-gray-200"
+                    className="pl-10 w-48 lg:w-64 bg-gray-50 border-gray-200"
                   />
                 </div>
                 <Button
-                  className="bg-gray-900 hover:bg-gray-800 text-white"
+                  className="bg-gray-900 hover:bg-gray-800 text-white hidden sm:inline-flex"
                 >
                   Upgrade
                 </Button>
@@ -388,9 +377,9 @@ const AdminDashboard = () => {
         </header>
 
         {/* Main Content */}
-        <main className="px-6 lg:px-8 py-6 sm:py-8">
+        <main className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8 w-full max-w-[1920px] mx-auto">
           {/* Top Row: Analytics Cards and Activity Calendar */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mb-6">
             {/* Left: Today's Analytics Card */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -532,7 +521,7 @@ const AdminDashboard = () => {
           </div>
 
           {/* Stats Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 items-stretch">
           {statCards.map((stat, index) => {
             const Icon = stat.icon;
             return (
@@ -541,24 +530,25 @@ const AdminDashboard = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.05 }}
+                className="h-full"
               >
-                <Card className="h-full border-0 shadow-md hover:shadow-lg transition-shadow duration-200">
-                  <CardHeader className="flex flex-row items-center justify-between pb-3">
+                <Card className="h-full border-0 shadow-md hover:shadow-lg transition-shadow duration-200 flex flex-col">
+                  <CardHeader className="flex flex-row items-center justify-between pb-3 flex-shrink-0">
                     <CardTitle className="text-sm font-semibold text-gray-600 uppercase tracking-wide">
                       {stat.title}
                     </CardTitle>
-                    <div className={`${stat.bgColor} p-2.5 rounded-xl shadow-sm`}>
+                    <div className={`${stat.bgColor} p-2.5 rounded-xl shadow-sm flex-shrink-0`}>
                       <Icon className={`w-5 h-5 ${stat.color}`} />
                     </div>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="flex-1 flex flex-col justify-between">
                     <div className="flex items-baseline justify-between">
                       <div className="text-3xl sm:text-4xl font-bold text-gray-900">
                         {stat.value}
                       </div>
                     </div>
                     {stat.description && (
-                      <p className="text-xs text-gray-500 mt-2">{stat.description}</p>
+                      <p className="text-xs text-gray-500 mt-2 flex-shrink-0">{stat.description}</p>
                     )}
                   </CardContent>
                 </Card>
@@ -696,23 +686,23 @@ const AdminDashboard = () => {
                 <CardDescription>Manage all aspects of your store</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-stretch">
                   {/* Products */}
                   <motion.button
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.7 }}
                     onClick={() => navigate('/admin/products')}
-                    className="p-5 border-2 border-gray-200 rounded-xl hover:border-primary/30 hover:shadow-md transition-all text-left bg-white group"
+                    className="p-5 border-2 border-gray-200 rounded-xl hover:border-primary/30 hover:shadow-md transition-all text-left bg-white group h-full flex flex-col"
                   >
-                    <div className="flex items-start gap-4">
-                      <div className="p-3 rounded-lg bg-blue-50 group-hover:bg-blue-100 transition-colors">
+                    <div className="flex items-start gap-4 flex-1">
+                      <div className="p-3 rounded-lg bg-blue-50 group-hover:bg-blue-100 transition-colors flex-shrink-0">
                         <Package className="w-6 h-6 text-blue-600" />
                       </div>
-                      <div className="flex-1">
+                      <div className="flex-1 flex flex-col min-w-0">
                         <h3 className="font-semibold text-base mb-1">Products</h3>
-                        <p className="text-xs text-gray-500 mb-2">Manage product catalog</p>
-                        <Badge className="bg-blue-100 text-blue-700 text-xs">{stats.totalProducts} items</Badge>
+                        <p className="text-xs text-gray-500 mb-2 flex-1">Manage product catalog</p>
+                        <Badge className="bg-blue-100 text-blue-700 text-xs w-fit">{stats.totalProducts} items</Badge>
                       </div>
                     </div>
                   </motion.button>
@@ -723,16 +713,16 @@ const AdminDashboard = () => {
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.75 }}
                     onClick={() => navigate('/collection')}
-                    className="p-5 border-2 border-gray-200 rounded-xl hover:border-primary/30 hover:shadow-md transition-all text-left bg-white group"
+                    className="p-5 border-2 border-gray-200 rounded-xl hover:border-primary/30 hover:shadow-md transition-all text-left bg-white group h-full flex flex-col"
                   >
-                    <div className="flex items-start gap-4">
-                      <div className="p-3 rounded-lg bg-green-50 group-hover:bg-green-100 transition-colors">
+                    <div className="flex items-start gap-4 flex-1">
+                      <div className="p-3 rounded-lg bg-green-50 group-hover:bg-green-100 transition-colors flex-shrink-0">
                         <Grid3x3 className="w-6 h-6 text-green-600" />
                       </div>
-                      <div className="flex-1">
+                      <div className="flex-1 flex flex-col min-w-0">
                         <h3 className="font-semibold text-base mb-1">Collection Page</h3>
-                        <p className="text-xs text-gray-500 mb-2">View public collection</p>
-                        <Badge className="bg-green-100 text-green-700 text-xs">Live</Badge>
+                        <p className="text-xs text-gray-500 mb-2 flex-1">View public collection</p>
+                        <Badge className="bg-green-100 text-green-700 text-xs w-fit">Live</Badge>
                       </div>
                     </div>
                   </motion.button>
@@ -743,16 +733,16 @@ const AdminDashboard = () => {
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.8 }}
                     onClick={() => navigate('/admin/signature-collection')}
-                    className="p-5 border-2 border-gray-200 rounded-xl hover:border-primary/30 hover:shadow-md transition-all text-left bg-white group"
+                    className="p-5 border-2 border-gray-200 rounded-xl hover:border-primary/30 hover:shadow-md transition-all text-left bg-white group h-full flex flex-col"
                   >
-                    <div className="flex items-start gap-4">
-                      <div className="p-3 rounded-lg bg-purple-50 group-hover:bg-purple-100 transition-colors">
+                    <div className="flex items-start gap-4 flex-1">
+                      <div className="p-3 rounded-lg bg-purple-50 group-hover:bg-purple-100 transition-colors flex-shrink-0">
                         <Star className="w-6 h-6 text-purple-600" />
                       </div>
-                      <div className="flex-1">
+                      <div className="flex-1 flex flex-col min-w-0">
                         <h3 className="font-semibold text-base mb-1">Signature Collection</h3>
-                        <p className="text-xs text-gray-500 mb-2">Featured products</p>
-                        <Badge className="bg-purple-100 text-purple-700 text-xs">Premium</Badge>
+                        <p className="text-xs text-gray-500 mb-2 flex-1">Featured products</p>
+                        <Badge className="bg-purple-100 text-purple-700 text-xs w-fit">Premium</Badge>
                       </div>
                     </div>
                   </motion.button>
@@ -763,16 +753,16 @@ const AdminDashboard = () => {
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.85 }}
                     onClick={() => navigate('/admin/wedding-creations')}
-                    className="p-5 border-2 border-gray-200 rounded-xl hover:border-primary/30 hover:shadow-md transition-all text-left bg-white group"
+                    className="p-5 border-2 border-gray-200 rounded-xl hover:border-primary/30 hover:shadow-md transition-all text-left bg-white group h-full flex flex-col"
                   >
-                    <div className="flex items-start gap-4">
-                      <div className="p-3 rounded-lg bg-pink-50 group-hover:bg-pink-100 transition-colors">
+                    <div className="flex items-start gap-4 flex-1">
+                      <div className="p-3 rounded-lg bg-pink-50 group-hover:bg-pink-100 transition-colors flex-shrink-0">
                         <ImageIcon className="w-6 h-6 text-pink-600" />
                       </div>
-                      <div className="flex-1">
+                      <div className="flex-1 flex flex-col min-w-0">
                         <h3 className="font-semibold text-base mb-1">Wedding Gallery</h3>
-                        <p className="text-xs text-gray-500 mb-2">Manage wedding photos</p>
-                        <Badge className="bg-pink-100 text-pink-700 text-xs">Gallery</Badge>
+                        <p className="text-xs text-gray-500 mb-2 flex-1">Manage wedding photos</p>
+                        <Badge className="bg-pink-100 text-pink-700 text-xs w-fit">Gallery</Badge>
                       </div>
                     </div>
                   </motion.button>
@@ -783,16 +773,16 @@ const AdminDashboard = () => {
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.9 }}
                     onClick={() => navigate('/admin/flowers')}
-                    className="p-5 border-2 border-gray-200 rounded-xl hover:border-primary/30 hover:shadow-md transition-all text-left bg-white group"
+                    className="p-5 border-2 border-gray-200 rounded-xl hover:border-primary/30 hover:shadow-md transition-all text-left bg-white group h-full flex flex-col"
                   >
-                    <div className="flex items-start gap-4">
-                      <div className="p-3 rounded-lg bg-rose-50 group-hover:bg-rose-100 transition-colors">
+                    <div className="flex items-start gap-4 flex-1">
+                      <div className="p-3 rounded-lg bg-rose-50 group-hover:bg-rose-100 transition-colors flex-shrink-0">
                         <Flower2 className="w-6 h-6 text-rose-600" />
                       </div>
-                      <div className="flex-1">
+                      <div className="flex-1 flex flex-col min-w-0">
                         <h3 className="font-semibold text-base mb-1">Flowers</h3>
-                        <p className="text-xs text-gray-500 mb-2">Manage flower types</p>
-                        <Badge className="bg-rose-100 text-rose-700 text-xs">Catalog</Badge>
+                        <p className="text-xs text-gray-500 mb-2 flex-1">Manage flower types</p>
+                        <Badge className="bg-rose-100 text-rose-700 text-xs w-fit">Catalog</Badge>
                       </div>
                     </div>
                   </motion.button>
@@ -803,16 +793,16 @@ const AdminDashboard = () => {
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.95 }}
                     onClick={() => navigate('/admin/settings')}
-                    className="p-5 border-2 border-gray-200 rounded-xl hover:border-primary/30 hover:shadow-md transition-all text-left bg-white group"
+                    className="p-5 border-2 border-gray-200 rounded-xl hover:border-primary/30 hover:shadow-md transition-all text-left bg-white group h-full flex flex-col"
                   >
-                    <div className="flex items-start gap-4">
-                      <div className="p-3 rounded-lg bg-gray-100 group-hover:bg-gray-200 transition-colors">
+                    <div className="flex items-start gap-4 flex-1">
+                      <div className="p-3 rounded-lg bg-gray-100 group-hover:bg-gray-200 transition-colors flex-shrink-0">
                         <Settings className="w-6 h-6 text-gray-600" />
                       </div>
-                      <div className="flex-1">
+                      <div className="flex-1 flex flex-col min-w-0">
                         <h3 className="font-semibold text-base mb-1">Settings</h3>
-                        <p className="text-xs text-gray-500 mb-2">Account & preferences</p>
-                        <Badge className="bg-gray-200 text-gray-700 text-xs">Config</Badge>
+                        <p className="text-xs text-gray-500 mb-2 flex-1">Account & preferences</p>
+                        <Badge className="bg-gray-200 text-gray-700 text-xs w-fit">Config</Badge>
                       </div>
                     </div>
                   </motion.button>

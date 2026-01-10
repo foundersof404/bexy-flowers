@@ -146,15 +146,20 @@ const UltraOurStory = () => {
     const content = contentRef.current;
     const logo = logoRef.current;
 
+    // CRITICAL: Store ScrollTrigger references to only kill this component's triggers
+    const triggers: ScrollTrigger[] = [];
+    
     if (section && image && content && logo) {
       // Optimized parallax effect with reduced frequency
-      ScrollTrigger.create({
+      const parallaxTrigger = ScrollTrigger.create({
         trigger: section,
         start: "top bottom",
         end: "bottom top",
         scrub: 1,
         refreshPriority: -1, // Lower priority for better performance
         onUpdate: (self) => {
+          // CRITICAL: Don't update if page is hidden
+          if (document.hidden) return;
           const progress = self.progress;
           gsap.to(image, {
             duration: 0.1,
@@ -164,6 +169,7 @@ const UltraOurStory = () => {
           });
         }
       });
+      triggers.push(parallaxTrigger);
 
       // Optimized staggered reveal animation
       const tl = gsap.timeline({
@@ -175,6 +181,12 @@ const UltraOurStory = () => {
           refreshPriority: -1
         }
       });
+      
+      // Store the ScrollTrigger from the timeline (GSAP creates it automatically)
+      const revealTrigger = tl.scrollTrigger;
+      if (revealTrigger) {
+        triggers.push(revealTrigger);
+      }
 
       tl.fromTo(logo, 
         { scale: 0, rotation: -90, opacity: 0 },
@@ -191,7 +203,8 @@ const UltraOurStory = () => {
     }
 
     return () => {
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+      // CRITICAL: Only kill this component's triggers, not all triggers
+      triggers.forEach(trigger => trigger.kill());
     };
   }, []);
 

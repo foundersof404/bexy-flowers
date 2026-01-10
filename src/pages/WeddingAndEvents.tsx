@@ -274,7 +274,7 @@ const WeddingHero = () => {
             className="w-full h-full object-cover"
             loading="eager"
             decoding="sync"
-            fetchPriority="high"
+            fetchpriority="high"
             width="1920"
             height="1080"
             style={{

@@ -42,8 +42,9 @@ const ALLOWED_ORIGINS = [
   'http://localhost:5173',
   'http://localhost:5174',
   'http://localhost:8080',
+  'http://localhost:8888', // Netlify dev server port (common)
   'http://localhost:51635', // Netlify dev server port
-  'http://localhost:52933', // Current Netlify dev server port
+  'http://localhost:52933', // Netlify dev server port
 ];
 
 // Rate limiting store (in-memory - use Redis for production)

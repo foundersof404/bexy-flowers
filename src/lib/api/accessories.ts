@@ -1,4 +1,5 @@
 import { db } from './database-client';
+import { supabase } from '../supabase';
 import { uploadImage, deleteImage, extractPathFromUrl } from '../supabase-storage';
 import type { Database } from '../supabase';
 
@@ -9,17 +10,24 @@ type AccessoryUpdate = Database['public']['Tables']['accessories']['Update'];
 /**
  * Get all accessories
  */
-export async function getAccessories(): Promise<Accessory[]> {
-  const { data, error } = await supabase
+export async function getAccessories(filters?: { category?: string; featured?: boolean; isActive?: boolean }): Promise<Accessory[]> {
+  let query = supabase
     .from('accessories')
     .select('*')
     .order('name', { ascending: true });
+
+  // Apply filters if provided
+  if (filters?.isActive !== undefined) {
+    query = query.eq('is_active', filters.isActive);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     throw new Error(`Failed to fetch accessories: ${error.message}`);
   }
 
-  return data;
+  return data || [];
 }
 
 /**

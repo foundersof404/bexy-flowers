@@ -175,10 +175,18 @@ const UltraFeaturedBouquets = () => {
         card.removeEventListener('mouseenter', mouseenter);
         card.removeEventListener('mouseleave', mouseleave);
       });
-      // Clean up ScrollTriggers
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
-      // Kill any active GSAP animations
-      gsap.killTweensOf(cards);
+      // CRITICAL: Only kill ScrollTriggers created by this component to avoid killing others
+      // Store ScrollTrigger IDs instead of killing all
+      const triggers = ScrollTrigger.getAll();
+      triggers.forEach(trigger => {
+        // Only kill if it's related to this component's cards
+        const triggerVars = trigger.vars as any;
+        if (triggerVars && cards.some(card => card.contains(trigger.trigger as Node))) {
+          trigger.kill();
+        }
+      });
+      // Kill any active GSAP animations for these specific cards
+      cards.forEach(card => gsap.killTweensOf(card));
     };
   }, [loading, bouquets.length]);
 
@@ -394,7 +402,7 @@ const UltraFeaturedBouquets = () => {
                          className="transition-all duration-300 ease-out group-hover:scale-105"
                          loading={index < 3 ? "eager" : "lazy"}
                          decoding="async"
-                         fetchPriority={index === 0 ? "high" : "low"}
+                         fetchpriority={index === 0 ? "high" : "low"}
                          onError={(e) => {
                            console.error('Failed to load signature collection image:', bouquet.image, bouquet.name, e);
                            (e.target as HTMLImageElement).style.display = 'none';

@@ -7,6 +7,7 @@ import { ChevronLeft, ChevronRight, ShoppingCart, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { OptimizedImage } from "@/components/OptimizedImage";
+import { PriceDisplay } from "@/components/PriceDisplay";
 import { useImagePreloader } from "@/hooks/useImagePreloader";
 import type { Bouquet } from "@/types/bouquet";
 
@@ -111,9 +112,16 @@ export const FeaturedCarousel = ({ bouquets, onBouquetClick }: FeaturedCarouselP
                         priority={true}
                       />
                       
-                      {/* Badge - Top Left */}
+                      {/* Beautiful Discount Badge - Top Left */}
                       {bouquet.discount_percentage && bouquet.discount_percentage > 0 && (
-                        <div className="absolute top-3 left-3 z-10 bg-white px-3 py-1 text-xs font-semibold tracking-wide shadow-md">
+                        <div 
+                          className="absolute top-3 left-3 z-10 px-3 py-1.5 text-xs font-bold text-white shadow-lg"
+                          style={{
+                            background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+                            borderRadius: '6px',
+                            boxShadow: '0 4px 12px rgba(239, 68, 68, 0.4)'
+                          }}
+                        >
                           {bouquet.discount_percentage}% OFF
                         </div>
                       )}
@@ -127,22 +135,13 @@ export const FeaturedCarousel = ({ bouquets, onBouquetClick }: FeaturedCarouselP
                       <h3 className="font-luxury text-base md:text-lg font-normal text-foreground mb-2 leading-tight">
                         {bouquet.name}
                       </h3>
-                      <div className="flex items-center gap-2">
-                        {bouquet.discount_percentage && bouquet.discount_percentage > 0 ? (
-                          <>
-                            <span className="text-base md:text-lg font-medium text-foreground">
-                              €{(bouquet.price * (1 - bouquet.discount_percentage / 100)).toFixed(0)}
-                            </span>
-                            <span className="text-sm text-gray-400 line-through">
-                              €{bouquet.price.toFixed(0)}
-                            </span>
-                          </>
-                        ) : (
-                          <span className="text-base md:text-lg font-medium text-foreground">
-                            €{bouquet.price.toFixed(0)}
-                          </span>
-                        )}
-                      </div>
+                      {/* Beautiful Price Display with Discount */}
+                      <PriceDisplay 
+                        price={bouquet.price}
+                        discountPercentage={bouquet.discount_percentage}
+                        size="md"
+                        showDiscountBadge={false}
+                      />
                     </div>
                   </div>
                 </motion.div>
