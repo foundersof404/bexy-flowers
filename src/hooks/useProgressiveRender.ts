@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 /**
  * Progressive rendering hook for large lists
@@ -15,25 +15,51 @@ export const useProgressiveRender = (
   delay: number = 50
 ): number => {
   const [itemsToRender, setItemsToRender] = useState(Math.min(batchSize, totalItems));
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const isActiveRef = useRef(true);
 
   useEffect(() => {
-    // If we're already showing all items, no need to continue
-    if (itemsToRender >= totalItems) {
-      return;
+    isActiveRef.current = true;
+    
+    // Reset to initial batch when totalItems changes
+    setItemsToRender(Math.min(batchSize, totalItems));
+    
+    // Clear any existing timer
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
     }
 
-    // Schedule next batch
-    const timer = setTimeout(() => {
-      setItemsToRender((prev) => Math.min(prev + batchSize, totalItems));
-    }, delay);
+    // Progressive loading function using recursive setTimeout to avoid dependency issues
+    const loadNextBatch = () => {
+      if (!isActiveRef.current) return;
+      
+      setItemsToRender((prev) => {
+        const next = Math.min(prev + batchSize, totalItems);
+        
+        // Schedule next batch if we haven't reached the end
+        if (next < totalItems && isActiveRef.current) {
+          timerRef.current = setTimeout(loadNextBatch, delay);
+        }
+        
+        return next;
+      });
+    };
 
-    return () => clearTimeout(timer);
-  }, [itemsToRender, totalItems, batchSize, delay]);
+    // Start loading batches if we haven't reached the end
+    const initialCount = Math.min(batchSize, totalItems);
+    if (initialCount < totalItems) {
+      timerRef.current = setTimeout(loadNextBatch, delay);
+    }
 
-  // Reset when totalItems changes (e.g., category change)
-  useEffect(() => {
-    setItemsToRender(Math.min(batchSize, totalItems));
-  }, [totalItems, batchSize]);
+    return () => {
+      isActiveRef.current = false;
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+        timerRef.current = null;
+      }
+    };
+  }, [totalItems, batchSize, delay]);
 
   return itemsToRender;
 };

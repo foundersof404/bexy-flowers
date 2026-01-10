@@ -1,22 +1,101 @@
-import { useRef, memo } from "react";
+import { useRef, memo, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
+// Video for mobile hero background
+import video4Url from '@/assets/video/video4.webm?url';
 
 const CollectionHeroComponent = () => {
   const heroRef = useRef<HTMLElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const isMobile = useIsMobile();
+  const [shouldLoadVideo, setShouldLoadVideo] = useState(false);
+
+  // Intersection Observer for lazy loading video only when visible (mobile only)
+  useEffect(() => {
+    if (!isMobile || shouldLoadVideo) return; // Early return if already loading
+
+    const targetElement = heroRef.current || videoRef.current;
+    if (!targetElement) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setShouldLoadVideo(true);
+            // Disconnect observer once video should load to prevent re-triggering
+            observer.disconnect();
+          }
+        });
+      },
+      {
+        root: null,
+        rootMargin: '100px',
+        threshold: 0.01,
+      }
+    );
+
+    observer.observe(targetElement);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [isMobile, shouldLoadVideo]);
+
+  // Load and play video when it becomes visible
+  useEffect(() => {
+    if (!isMobile || !videoRef.current || !shouldLoadVideo) return;
+
+    const videoElement = videoRef.current;
+    
+    // Load the video
+    videoElement.load();
+    
+    // Attempt to play (may require user interaction on some browsers)
+    const playPromise = videoElement.play();
+    if (playPromise !== undefined) {
+      playPromise.catch(() => {
+        // Auto-play was prevented, video will play when user interacts
+      });
+    }
+  }, [isMobile, shouldLoadVideo]);
 
   return (
     <section 
       ref={heroRef}
-      className="relative min-h-[50vh] sm:min-h-[60vh] md:min-h-[70vh] flex items-center justify-center overflow-hidden pt-16 sm:pt-20 md:pt-24 pb-8 sm:pb-12 md:pb-16"
-      style={{
-        background: 'linear-gradient(180deg, #FAF8F3 0%, #F5F1E8 50%, #EDE7D9 100%)',
-        minHeight: isMobile ? '50vh' : '70vh'
-      }}
+      className={`relative ${isMobile ? 'h-screen' : 'min-h-[50vh] sm:min-h-[60vh] md:min-h-[70vh]'} flex items-center justify-center overflow-hidden ${isMobile ? 'bg-transparent' : 'bg-gradient-to-b from-[#FAF8F3] to-white'}`}
+      style={isMobile ? { marginTop: 0 } : { marginTop: '-12.3rem', paddingTop: '50' }}
     >
-      {/* Elegant Gradient Background Elements */}
-      <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
+      {/* Video background for mobile view - Fixed behind header like wedding page */}
+      {isMobile && (
+        <video
+          ref={videoRef}
+          className="fixed left-0 right-0 w-full object-cover object-center z-0 pointer-events-none"
+          style={{
+            width: '100vw',
+            height: 'calc(100vh + 50px)', // Increase height by 5cm (50px)
+            top: '-50px', // Move video 5cm to the top, behind header
+            left: 0,
+            right: 0,
+            marginLeft: 0,
+            marginRight: 0,
+            paddingLeft: 0,
+            paddingRight: 0,
+          }}
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="none"
+          aria-label="Hero background video"
+        >
+          {shouldLoadVideo && (
+            <source src={video4Url} type="video/webm" />
+          )}
+        </video>
+      )}
+      {/* Elegant Gradient Background Elements - Hidden on mobile when video is shown */}
+      {!isMobile && (
+        <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
         {/* Top-left golden glow */}
         <motion.div
           className="absolute w-48 h-48 sm:w-72 sm:h-72 md:w-96 md:h-96 -top-24 -left-24"
@@ -61,11 +140,13 @@ const CollectionHeroComponent = () => {
             }}
           />
         </motion.div>
-      </div>
+        </div>
+      )}
 
       {/* Hero Content - Elegant Design Matching Product Layout */}
       <div
-        className="relative z-20 text-center max-w-4xl mx-auto px-3 xs:px-4 sm:px-6 lg:px-8"
+        className={`relative ${isMobile ? 'z-10' : 'z-20'} text-center max-w-4xl mx-auto ${isMobile ? 'px-4 sm:px-6 lg:px-8 py-8 sm:py-12 md:py-16' : 'px-3 xs:px-4 sm:px-6 lg:px-8'}`}
+        style={isMobile ? {} : { marginTop: '12rem', transform: 'scale(0.85)' }}
       >
         <motion.div
           className="space-y-2 sm:space-y-4 md:space-y-6"
@@ -75,23 +156,29 @@ const CollectionHeroComponent = () => {
         >
           {/* Brand Name */}
           <motion.p 
-            className="uppercase tracking-[0.2em] sm:tracking-ultra-wide text-[10px] sm:text-xs md:text-sm text-[#8B7355] font-semibold"
+            className={`uppercase tracking-[0.2em] sm:tracking-ultra-wide text-[10px] sm:text-xs md:text-sm font-semibold ${isMobile ? 'text-white' : 'text-[#8B7355]'}`}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15, duration: 0.6 }}
+            style={isMobile ? {
+              textShadow: '0 3px 12px rgba(0, 0, 0, 0.8), 0 2px 6px rgba(0, 0, 0, 0.6), 0 1px 3px rgba(0, 0, 0, 0.4)'
+            } : {}}
           >
             BEXY SIGNATURE ATELIER
           </motion.p>
 
           {/* Main Heading */}
           <motion.h1 
-            className="font-luxury text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-[#3D3027] relative"
+            className={`font-luxury text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold relative ${isMobile ? 'text-white' : 'text-[#3D3027]'}`}
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.8 }}
             style={{
               letterSpacing: '0.02em',
-              lineHeight: '1.15'
+              lineHeight: '1.15',
+              ...(isMobile ? {
+                textShadow: '0 3px 12px rgba(0, 0, 0, 0.8), 0 2px 6px rgba(0, 0, 0, 0.6), 0 1px 3px rgba(0, 0, 0, 0.4)'
+              } : {})
             }}
           >
             <span className="block">Our Complete</span>
@@ -105,16 +192,19 @@ const CollectionHeroComponent = () => {
             animate={{ opacity: 1, scaleX: 1 }}
             transition={{ delay: 0.6, duration: 0.8, ease: "easeOut" }}
           >
-            <div className="w-20 sm:w-24 md:w-32 h-px bg-gradient-to-r from-transparent via-[#C79E48] to-transparent" />
-            <div className="absolute w-1.5 h-1.5 sm:w-2 sm:h-2 bg-[#C79E48] rotate-45 shadow-sm" />
+            <div className={`w-20 sm:w-24 md:w-32 h-px bg-gradient-to-r ${isMobile ? 'from-transparent via-white/90 to-transparent' : 'from-transparent via-[#C79E48] to-transparent'}`} />
+            <div className={`absolute w-1.5 h-1.5 sm:w-2 sm:h-2 rotate-45 shadow-sm ${isMobile ? 'bg-white/90' : 'bg-[#C79E48]'}`} />
           </motion.div>
 
           {/* Description */}
           <motion.p 
-            className="text-xs sm:text-sm md:text-base lg:text-lg text-[#6B5D52] max-w-3xl mx-auto leading-relaxed font-body px-2 sm:px-0"
+            className={`text-xs sm:text-sm md:text-base lg:text-lg max-w-3xl mx-auto leading-relaxed font-body px-2 sm:px-0 ${isMobile ? 'text-white' : 'text-[#6B5D52]'}`}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.45, duration: 0.7 }}
+            style={isMobile ? {
+              textShadow: '0 3px 12px rgba(0, 0, 0, 0.8), 0 2px 6px rgba(0, 0, 0, 0.6), 0 1px 3px rgba(0, 0, 0, 0.4)'
+            } : {}}
           >
             Discover Lebanon&apos;s most luxurious floral portfolio — curated themes, couture arrangements, and limited editions designed to celebrate every exquisite moment.
           </motion.p>

@@ -47,17 +47,74 @@ export const useImagePreloader = (imageUrls: string[], options: PreloadOptions =
       }
     };
 
-    // Start preloading
-    imageUrls.forEach((url) => {
-      const img = new Image();
-      
-      img.onload = handleImageLoad;
-      img.onerror = () => handleImageError(url);
-      
-      // Set src to start loading
-      img.src = url;
-      imageElements.push(img);
-    });
+    // Filter out invalid URLs first
+    const validUrls = imageUrls.filter(url => url && url.trim() !== '');
+    
+    if (validUrls.length === 0) {
+      setIsLoading(false);
+      return;
+    }
+
+    // Load images sequentially to prevent overwhelming the browser
+    let currentIndex = 0;
+    const maxConcurrent = 2; // Load max 2 images at once
+    let activeLoads = 0;
+
+    const loadNextBatch = () => {
+      if (!mounted || currentIndex >= validUrls.length) {
+        return;
+      }
+
+      // Load next batch if we have capacity
+      while (activeLoads < maxConcurrent && currentIndex < validUrls.length) {
+        const url = validUrls[currentIndex++];
+        activeLoads++;
+
+        const img = new Image();
+        
+        // Set timeout to handle hanging requests (reduced to 5s)
+        const timeout = setTimeout(() => {
+          if (!img.complete && mounted) {
+            activeLoads--;
+            handleImageError(url);
+            // Continue loading next batch
+            loadNextBatch();
+          }
+        }, 5000); // 5 second timeout
+        
+        img.onload = () => {
+          clearTimeout(timeout);
+          if (!mounted) return;
+          activeLoads--;
+          handleImageLoad();
+          // Continue loading next batch
+          loadNextBatch();
+        };
+        
+        img.onerror = () => {
+          clearTimeout(timeout);
+          if (!mounted) return;
+          activeLoads--;
+          handleImageError(url);
+          // Continue loading next batch
+          loadNextBatch();
+        };
+        
+        // Set src to start loading
+        try {
+          img.src = url;
+          imageElements.push(img);
+        } catch (error) {
+          clearTimeout(timeout);
+          activeLoads--;
+          handleImageError(url);
+          loadNextBatch();
+        }
+      }
+    };
+
+    // Start loading first batch
+    loadNextBatch();
 
     return () => {
       mounted = false;

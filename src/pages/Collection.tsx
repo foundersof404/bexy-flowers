@@ -149,7 +149,14 @@ const Collection = () => {
   }, []);
 
   return (
-    <div ref={containerRef} className="relative min-h-screen" style={{ background: 'linear-gradient(180deg, #FAF8F3 0%, #FFFFFF 100%)', touchAction: 'pan-y' }}>
+    <div 
+      ref={containerRef} 
+      className="relative min-h-screen" 
+      style={{ 
+        background: isMobile ? '#FFFFFF' : 'linear-gradient(180deg, #FAF8F3 0%, #FFFFFF 100%)', 
+        touchAction: 'pan-y' 
+      }}
+    >
       {/* Ultra Navigation */}
       <UltraNavigation />
       
@@ -169,7 +176,17 @@ const Collection = () => {
         />
         
         {/* Main Bouquet Grid - With Smooth Category Transitions */}
-        <section id="main-collection-grid" className="py-6 sm:py-8 md:py-12 lg:py-16 px-3 sm:px-4 md:px-6 lg:px-8 w-full" style={{ background: 'linear-gradient(180deg, #FFFFFF 0%, #FAF8F3 50%, #F5F1E8 100%)' }}>
+        <section 
+          id="main-collection-grid" 
+          className="relative py-6 sm:py-8 md:py-12 lg:py-16 px-3 sm:px-4 md:px-6 lg:px-8 w-full" 
+          style={{ 
+            background: isMobile 
+              ? '#FFFFFF' 
+              : 'linear-gradient(180deg, #FFFFFF 0%, #FAF8F3 50%, #F5F1E8 100%)',
+            zIndex: isMobile ? 1 : 'auto',
+            position: 'relative'
+          }}
+        >
           <div className="max-w-7xl mx-auto w-full">
             {/* Category count - Always visible for LCP optimization */}
             <div className="mb-4 sm:mb-6 md:mb-8 text-center">
