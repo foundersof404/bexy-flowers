@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Box, Gift, Check, CheckCircle2, Wand2, Plus, Minus, X, Info, ChevronRight, Palette, ShoppingCart, Circle, Square, Heart, Download, MessageCircle, Sparkles, ArrowRight, Star, Crown, GraduationCap, Heart as HeartIcon, Candy, Eye, EyeOff, History, BookmarkPlus, Bookmark, RefreshCw, Loader2, Edit3 } from "lucide-react";
 import UltraNavigation from "@/components/UltraNavigation";
@@ -248,6 +248,7 @@ const Customize: React.FC = () => {
   }, [generatedImage]);
 
   // Intersection Observer for lazy loading video only when visible (mobile only)
+  // PERFORMANCE FIX: Keep observer active to pause/resume video
   useEffect(() => {
     if (!isMobile) return;
 
@@ -257,8 +258,19 @@ const Customize: React.FC = () => {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting && !shouldLoadVideo) {
+          if (entry.isIntersecting) {
             setShouldLoadVideo(true);
+            // PERFORMANCE FIX: Play video when visible
+            if (videoRef.current && shouldLoadVideo) {
+              videoRef.current.play().catch(() => {
+                // Auto-play prevented
+              });
+            }
+          } else {
+            // PERFORMANCE FIX: Pause video when not visible to save resources
+            if (videoRef.current && shouldLoadVideo) {
+              videoRef.current.pause();
+            }
           }
         });
       },
@@ -519,9 +531,12 @@ const Customize: React.FC = () => {
 
   // Get max flowers for current size
   const maxFlowers = selectedSize?.maxFlowers || 10;
-  
-  // Calculate current total flowers
-  const currentTotalFlowers = Object.values(selectedFlowers).reduce((acc, curr) => acc + curr.quantity, 0);
+
+  // Calculate current total flowers - PERFORMANCE FIX: Memoized
+  const currentTotalFlowers = useMemo(() => 
+    Object.values(selectedFlowers).reduce((acc, curr) => acc + curr.quantity, 0),
+    [selectedFlowers]
+  );
   const canAddMore = currentTotalFlowers < maxFlowers;
   const remainingSlots = maxFlowers - currentTotalFlowers;
 
@@ -973,6 +988,8 @@ const Customize: React.FC = () => {
     "all-year": { label: "All Year", icon: "🌿", color: "bg-gray-100 border-gray-300", style: { color: '#2c2d2a', fontFamily: "'EB Garamond', serif" } }
   };
 
+  
+
   // Flower categories mapping - maps filter categories to flower families
   // Popular: Most commonly requested flowers
   // Romantic: Red, pink, white roses (not blue/yellow), peonies, lilies, pink/red/white tulips, pink/white orchids
@@ -1000,16 +1017,22 @@ const Customize: React.FC = () => {
 
   const recommendedFlowerIds = getRecommendedFlowers();
 
-  // Filter flowers by family (specific variety mode)
-  const filteredFlowers = flowerMode === "specific" && selectedFamily
-    ? flowers.filter(f => f.family === selectedFamily)
-    : flowers;
+  // Filter flowers by family (specific variety mode) - PERFORMANCE FIX: Memoized
+  const filteredFlowers = useMemo(() => {
+    if (flowerMode === "specific" && selectedFamily) {
+      return flowers.filter(f => f.family === selectedFamily);
+    }
+    return flowers;
+  }, [flowerMode, selectedFamily]);
 
-  // Filter by category (popular, romantic, minimal, luxury, seasonal)
-  let categoryFiltered = filteredFlowers;
-  if (flowerFilter !== "all" && flowerFilter !== "seasonal") {
+  // Filter by category (popular, romantic, minimal, luxury, seasonal) - PERFORMANCE FIX: Memoized
+  const categoryFiltered = useMemo(() => {
+    if (flowerFilter === "all" || flowerFilter === "seasonal") {
+      return filteredFlowers;
+    }
+    
     const families = flowerCategories[flowerFilter] || [];
-    categoryFiltered = filteredFlowers.filter(f => {
+    return filteredFlowers.filter(f => {
       if (!families.includes(f.family)) return false;
       
       // Additional color-based filtering for specific categories
@@ -1030,19 +1053,21 @@ const Customize: React.FC = () => {
       
       return true;
     });
-  }
+  }, [filteredFlowers, flowerFilter]);
 
-  // Filter by season if seasonal category is selected
-  // When "seasonal" is selected, show ALL flowers (not filtered by families), then filter by season if specific season is chosen
-  const availableFlowers = flowerFilter === "seasonal"
-    ? seasonFilter === "all-seasons"
-      ? filteredFlowers // Show ALL flowers when "all-seasons" is selected (not categoryFiltered)
-      : filteredFlowers.filter(f => {
-          // Filter by specific season - if flower has seasons data, filter by it
-          if (!f.seasons || f.seasons.length === 0) return false; // Exclude flowers without season data
-          return f.seasons.includes(seasonFilter);
-        })
-    : categoryFiltered;
+  // Filter by season if seasonal category is selected - PERFORMANCE FIX: Memoized
+  const availableFlowers = useMemo(() => {
+    if (flowerFilter === "seasonal") {
+      if (seasonFilter === "all-seasons") {
+        return filteredFlowers;
+      }
+      return filteredFlowers.filter(f => {
+        if (!f.seasons || f.seasons.length === 0) return false;
+        return f.seasons.includes(seasonFilter);
+      });
+    }
+    return categoryFiltered;
+  }, [flowerFilter, seasonFilter, filteredFlowers, categoryFiltered]);
 
   const steps = [
     { id: 1, title: "Base", icon: Box },

@@ -131,161 +131,37 @@ const UltraCategories = () => {
     }
   }, []);
 
-  // Seamless auto-scroll effect for desktop (single row) - FIXED: pauses when not visible
+  // Seamless auto-scroll effect for desktop (single row) - PERFORMANCE FIX: DISABLED
   useEffect(() => {
-    const container = containerRef.current;
-    const section = sectionRef.current;
-    if (!container || !section) return;
-
-    // Auto scroll - infinite seamless loop
-    const cardWidth = 352; // Card width (w-80 = 320px + gap-8 = 32px = 352px)
-    const singleSetWidth = categories.length * cardWidth;
-
-    // Set initial position
-    gsap.set(container, { x: 0 });
-
-    let tween: gsap.core.Tween | null = null;
+    // ⚡ PERFORMANCE FIX: DISABLE GSAP INFINITE SCROLL TO STOP PERFORMANCE ISSUES
+    // This was causing continuous GPU usage and contributing to "Page Unresponsive" errors
+    console.log('⚠️ Desktop GSAP infinite scroll is DISABLED for performance');
     
-    // Create animation
-    tween = gsap.to(container, {
-      x: -singleSetWidth,
-      duration: 30,
-      ease: "none",
-      force3D: true,
-      repeat: -1,
-      repeatDelay: 0,
-      paused: true, // Start paused, observer will resume when visible
-      modifiers: {
-        x: (x) => {
-          const val = parseFloat(x);
-          // Seamless loop: when we reach the end of first set, reset to start position
-          if (val <= -singleSetWidth) {
-            return `${val % singleSetWidth}px`;
-          }
-          return `${val}px`;
-        }
-      }
-    });
-
-    // Use IntersectionObserver to pause/resume animations when component is visible
-    // This prevents the animation from running continuously in the background
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting && tween) {
-            // Resume animation when visible
-            tween.resume();
-          } else if (tween) {
-            // Pause animation when not visible to save resources
-            tween.pause();
-          }
-        });
-      },
-      { threshold: 0.1, rootMargin: '100px' } // Start animation slightly before it's fully visible
-    );
-
-    observer.observe(section);
-    
-    // Start animation if section is already visible
-    if (tween && section.getBoundingClientRect().top < window.innerHeight + 100) {
-      tween.resume();
-    }
-
+    // The categories are still visible, just not auto-scrolling
     return () => {
-      observer.disconnect();
-      if (tween) {
-        tween.kill();
+      // Cleanup is still good practice
+      const container = containerRef.current;
+      if (container) {
+        gsap.killTweensOf(container);
       }
-      gsap.killTweensOf(container);
     };
   }, []);
 
-  // Mobile: Two rows with opposite scroll directions
+  // Mobile: Two rows with opposite scroll directions - PERFORMANCE FIX: DISABLED
   useEffect(() => {
-    const row1 = mobileRow1Ref.current;
-    const row2 = mobileRow2Ref.current;
-    const container = sectionRef.current;
+    // ⚡ PERFORMANCE FIX: DISABLE MOBILE GSAP INFINITE SCROLL TO STOP PERFORMANCE ISSUES
+    // This was causing continuous GPU usage and contributing to "Page Unresponsive" errors
+    console.log('⚠️ Mobile GSAP infinite scroll is DISABLED for performance');
     
-    if (!row1 || !row2 || !container) return;
-
-    const cardWidth = 196; // Reduced by 30% (280 * 0.7 = 196)
-    const gap = 12; // gap-3 = 12px
-    const cardTotalWidth = cardWidth + gap;
-    const row1Cards = 5; // First 5 categories
-    const row2Cards = 4; // Last 4 categories
-    
-    // Calculate the exact width of one complete set
-    const singleSetWidth1 = row1Cards * cardTotalWidth;
-    const singleSetWidth2 = row2Cards * cardTotalWidth;
-
-    let tween1: gsap.core.Tween | null = null;
-    let tween2: gsap.core.Tween | null = null;
-
-    // Use IntersectionObserver to pause animations when not visible
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            // Resume animations when visible
-            if (tween1) tween1.resume();
-            if (tween2) tween2.resume();
-          } else {
-            // Pause animations when not visible to save resources
-            if (tween1) tween1.pause();
-            if (tween2) tween2.pause();
-          }
-        });
-      },
-      { threshold: 0.1 }
-    );
-
-    observer.observe(container);
-
-    // Row 1: Scrolls left (normal direction) - infinite seamless loop
-    // Force auto scroll always
-    tween1 = gsap.to(row1, {
-      x: -singleSetWidth1,
-      duration: 15,
-      ease: "none",
-      force3D: true,
-      repeat: -1,
-      repeatDelay: 0,
-      paused: false, // Start paused, observer will resume
-      modifiers: {
-        x: (x) => {
-          const val = parseFloat(x);
-          return `${val % singleSetWidth1}px`;
-        }
-      }
-    });
-
-    // Row 2: Scrolls right (opposite direction) - infinite seamless loop
-    // Start from negative position for right scroll
-    gsap.set(row2, { x: -singleSetWidth2 });
-    tween2 = gsap.to(row2, {
-      x: 0,
-      duration: 25,
-      ease: "none",
-      force3D: true,
-      repeat: -1,
-      repeatDelay: 0,
-      paused: false, // Start paused, observer will resume
-      modifiers: {
-        x: (x) => {
-          const val = parseFloat(x);
-          return `${val % singleSetWidth2}px`;
-        }
-      }
-    });
-
+    // The categories are still visible, just not auto-scrolling
     return () => {
-      observer.disconnect();
-      if (tween1) tween1.kill();
-      if (tween2) tween2.kill();
-      gsap.killTweensOf(row1);
-      gsap.killTweensOf(row2);
+      // Cleanup is still good practice
+      const row1 = mobileRow1Ref.current;
+      const row2 = mobileRow2Ref.current;
+      if (row1) gsap.killTweensOf(row1);
+      if (row2) gsap.killTweensOf(row2);
     };
-  }, []); // Empty dependency array to run once and keep running
+  }, []);
 
   const scrollLeft = () => {
     const container = containerRef.current;
