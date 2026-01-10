@@ -25,15 +25,28 @@ export const useFlowers = (filters?: {
   featured?: boolean;
   isActive?: boolean;
 }) => {
+  const queryClient = useQueryClient();
+  
   return useQuery({
     queryKey: flowersQueryKeys.list(filters),
     queryFn: () => getFlowers(filters),
-    staleTime: 2 * 60 * 1000, // 2 minutes - reduced
-    gcTime: 3 * 60 * 1000, // 3 minutes - reduced
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
-    // REMOVED: Pre-warming to prevent memory buildup
-    // onSuccess causes memory accumulation - queries will load on demand instead
+    // Pre-warm individual flowers for better navigation performance
+    onSuccess: (data) => {
+      if (data && data.length > 0) {
+        // Pre-load first 3 flowers (most likely to be viewed)
+        data.slice(0, 3).forEach((flower) => {
+          queryClient.prefetchQuery({
+            queryKey: flowersQueryKeys.detail(flower.id),
+            queryFn: () => getFlower(flower.id),
+            staleTime: 5 * 60 * 1000,
+          });
+        });
+      }
+    },
   });
 };
 
@@ -45,8 +58,8 @@ export const useFlower = (id: string | undefined) => {
     queryKey: flowersQueryKeys.detail(id!),
     queryFn: () => getFlower(id!),
     enabled: !!id,
-    staleTime: 2 * 60 * 1000, // 2 minutes - reduced
-    gcTime: 3 * 60 * 1000, // 3 minutes - reduced
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
   });

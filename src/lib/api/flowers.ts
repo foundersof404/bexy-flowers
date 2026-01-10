@@ -1,6 +1,5 @@
 import { db } from './database-client';
 import { uploadImage, deleteImage, extractPathFromUrl } from '../supabase-storage';
-import { supabase } from '../supabase';
 import type { Database } from '../supabase';
 
 type FlowerType = Database['public']['Tables']['flower_types']['Row'];
@@ -20,33 +19,18 @@ export interface FlowerTypeWithColors extends FlowerType {
 /**
  * Get all flower types
  */
-export async function getFlowerTypes(filters?: { category?: string; featured?: boolean; isActive?: boolean }): Promise<FlowerType[]> {
-  let query = supabase
+export async function getFlowerTypes(): Promise<FlowerType[]> {
+  const { data, error } = await supabase
     .from('flower_types')
     .select('*')
     .order('name', { ascending: true });
-
-  // Apply filters if provided
-  if (filters?.isActive !== undefined) {
-    query = query.eq('is_active', filters.isActive);
-  }
-
-  const { data, error } = await query;
 
   if (error) {
     throw new Error(`Failed to fetch flower types: ${error.message}`);
   }
 
-  return data || [];
+  return data;
 }
-
-// Alias for backwards compatibility
-export const getFlowers = getFlowerTypes;
-
-/**
- * Get single flower type by ID
- */
-export const getFlower = getFlowerTypeWithColors;
 
 /**
  * Get flower type with colors
@@ -181,13 +165,15 @@ export async function deleteFlowerType(id: string): Promise<void> {
     }
   }
 
-  await db.delete('flower_types', { id });
-}
+  const { error } = await supabase
+    .from('flower_types')
+    .delete()
+    .eq('id', id);
 
-// Aliases for backwards compatibility
-export const createFlower = createFlowerType;
-export const updateFlower = updateFlowerType;
-export const deleteFlower = deleteFlowerType;
+  if (error) {
+    throw new Error(`Failed to delete flower type: ${error.message}`);
+  }
+}
 
 // ==================== Flower Colors ====================
 

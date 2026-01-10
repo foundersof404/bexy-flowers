@@ -40,7 +40,8 @@ const Footer = () => {
           >
             <h3 
               className="font-luxury text-3xl font-normal text-primary"
-              style={{ fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}
+              style={{ letterSpacing: '-0.02em' }}
+              style={{ fontFamily: "'EB Garamond', serif" }}
             >
               Bexy Flowers
             </h3>

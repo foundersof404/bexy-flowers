@@ -2,8 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { AdminLayout } from '@/components/admin/AdminLayout';
-import { useQueryClient } from '@tanstack/react-query';
-import { accessoriesQueryKeys } from '@/hooks/useAccessories';
 import {
   ArrowLeft,
   Plus,
@@ -14,7 +12,6 @@ import {
   Loader2,
   DollarSign,
   Package,
-  RefreshCw,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,27 +20,22 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { ImageUpload } from '@/components/admin/ImageUpload';
-import { encodeImageUrl } from '@/lib/imageUtils';
 import {
   getAccessories,
   createAccessory,
   updateAccessory,
   deleteAccessory,
 } from '@/lib/api/accessories';
-import { useAccessories } from '@/hooks/useAccessories';
 
 const GOLD_COLOR = 'rgb(199, 158, 72)';
 
 const AdminAccessories = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const queryClient = useQueryClient();
-  
-  // Use React Query hook for cached data - fetch all accessories
-  const { data: accessoriesData = [], isLoading: loadingAccessories, refetch: refetchAccessories } = useAccessories();
+  const [accessories, setAccessories] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -68,11 +60,25 @@ const AdminAccessories = () => {
       navigate('/admin/login');
       return;
     }
+
+    loadAccessories();
   }, [navigate]);
 
-  // Use data directly from React Query instead of syncing to state
-  const accessories = accessoriesData;
-  const loading = loadingAccessories;
+  const loadAccessories = async () => {
+    try {
+      setLoading(true);
+      const data = await getAccessories();
+      setAccessories(data);
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Failed to load accessories',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleEdit = (accessory: any) => {
     setEditingId(accessory.id);
@@ -116,16 +122,12 @@ const AdminAccessories = () => {
 
       if (editingId) {
         await updateAccessory(editingId, formData, imageFile || undefined, !!imageFile);
-        // Invalidate React Query cache so frontend sees changes immediately
-        queryClient.invalidateQueries({ queryKey: accessoriesQueryKeys.lists() });
         toast({
           title: 'Success',
           description: 'Accessory updated successfully',
         });
       } else {
         await createAccessory(formData, imageFile || undefined);
-        // Invalidate React Query cache so frontend sees changes immediately
-        queryClient.invalidateQueries({ queryKey: accessoriesQueryKeys.lists() });
         toast({
           title: 'Success',
           description: 'Accessory created successfully',
@@ -150,9 +152,6 @@ const AdminAccessories = () => {
   const handleDelete = async (id: string) => {
     try {
       await deleteAccessory(id);
-      // Invalidate React Query cache so frontend sees changes immediately
-      queryClient.invalidateQueries({ queryKey: accessoriesQueryKeys.lists() });
-      queryClient.removeQueries({ queryKey: accessoriesQueryKeys.detail(id) });
       toast({
         title: 'Success',
         description: 'Accessory deleted successfully',
@@ -192,35 +191,17 @@ const AdminAccessories = () => {
                   <p className="text-sm text-gray-500">Manage accessory items for custom bouquets</p>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    refetchAccessories();
-                    toast({
-                      title: "Refreshing...",
-                      description: "Fetching latest accessories from database",
-                    });
-                  }}
-                  disabled={loading}
-                  className="gap-2"
-                >
-                  <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-                  Refresh
-                </Button>
-                <Button
-                  onClick={handleNew}
-                  className="gap-2"
-                  style={{
-                    background: `linear-gradient(135deg, ${GOLD_COLOR} 0%, rgba(199, 158, 72, 0.9) 100%)`,
-                    color: 'white',
-                  }}
-                >
-                  <Plus className="w-4 h-4" />
-                  Add Accessory
-                </Button>
-              </div>
+              <Button
+                onClick={handleNew}
+                className="gap-2"
+                style={{
+                  background: `linear-gradient(135deg, ${GOLD_COLOR} 0%, rgba(199, 158, 72, 0.9) 100%)`,
+                  color: 'white',
+                }}
+              >
+                <Plus className="w-4 h-4" />
+                Add Accessory
+              </Button>
             </div>
           </div>
         </header>
@@ -261,12 +242,9 @@ const AdminAccessories = () => {
                           <TableCell>
                             {accessory.image_url ? (
                               <img
-                                src={encodeImageUrl(accessory.image_url)}
+                                src={accessory.image_url}
                                 alt={accessory.name}
                                 className="w-16 h-16 object-cover rounded"
-                                onError={(e) => {
-                                  (e.target as HTMLImageElement).style.display = 'none';
-                                }}
                               />
                             ) : (
                               <div className="w-16 h-16 bg-gray-200 rounded flex items-center justify-center">
@@ -289,12 +267,9 @@ const AdminAccessories = () => {
                             </span>
                           </TableCell>
                           <TableCell>
-                            <Badge
-                              variant={accessory.is_active ? 'default' : 'secondary'}
-                              className={accessory.is_active ? 'bg-green-500' : ''}
-                            >
+                            <span className={accessory.is_active ? 'text-green-600' : 'text-gray-400'}>
                               {accessory.is_active ? 'Active' : 'Inactive'}
-                            </Badge>
+                            </span>
                           </TableCell>
                           <TableCell className="text-right">
                             <div className="flex items-center justify-end gap-2">

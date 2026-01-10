@@ -42,12 +42,6 @@ import {
   updateSignatureCollection,
   type SignatureCollectionWithProduct,
 } from '@/lib/api/signature-collection';
-import {
-  useUpdateSignatureCollection,
-  useRemoveFromSignatureCollection,
-} from '@/hooks/useSignatureCollection';
-import { useQueryClient } from '@tanstack/react-query';
-import { collectionQueryKeys } from '@/hooks/useCollectionProducts';
 import { getCollectionProducts } from '@/lib/api/collection-products';
 import { migrateSignatureCollection } from '@/lib/migrateSignatureCollection';
 import { encodeImageUrl } from '@/lib/imageUtils';
@@ -59,9 +53,6 @@ const GOLD_COLOR = 'rgb(199, 158, 72)';
 const AdminSignatureCollection = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const queryClient = useQueryClient();
-  const updateSignatureMutation = useUpdateSignatureCollection();
-  const removeSignatureMutation = useRemoveFromSignatureCollection();
   const [collections, setCollections] = useState<SignatureCollectionWithProduct[]>([]);
   const [availableProducts, setAvailableProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -145,8 +136,6 @@ const AdminSignatureCollection = () => {
         : 0;
       
       await addToSignatureCollection(selectedProductId, maxOrder);
-      // Invalidate collection products cache since signature collection affects product display
-      queryClient.invalidateQueries({ queryKey: collectionQueryKeys.lists() });
       toast({
         title: 'Success',
         description: 'Product added to signature collection',
@@ -166,14 +155,12 @@ const AdminSignatureCollection = () => {
 
   const handleDelete = async (id: string) => {
     try {
-      await removeSignatureMutation.mutateAsync(id);
+      await removeFromSignatureCollection(id);
       toast({
         title: 'Success',
         description: 'Product removed from signature collection',
       });
       setDeleteDialog({ open: false, id: null });
-      // Invalidate collection products cache since signature collection affects product display
-      queryClient.invalidateQueries({ queryKey: collectionQueryKeys.lists() });
       await loadData();
     } catch (error) {
       toast({
@@ -300,15 +287,7 @@ const AdminSignatureCollection = () => {
         );
       }
 
-      // Use React Query mutation for proper cache invalidation
-      await updateSignatureMutation.mutateAsync({
-        id: editingItem.id,
-        updates,
-      });
-      
-      // Invalidate collection products cache since signature collection changes affect product display
-      queryClient.invalidateQueries({ queryKey: collectionQueryKeys.lists() });
-      
+      await updateSignatureCollection(editingItem.id, updates);
       toast({
         title: 'Success',
         description: 'Signature collection item updated',
@@ -528,7 +507,7 @@ const AdminSignatureCollection = () => {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 items-stretch">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {collections.map((item, index) => {
               const displayTitle = getDisplayTitle(item);
               const displayPrice = getDisplayPrice(item);
@@ -543,10 +522,9 @@ const AdminSignatureCollection = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05 }}
-                  className="h-full flex"
                 >
-                  <Card className="h-full w-full flex flex-col hover:shadow-lg transition-shadow">
-                    <CardHeader className="pb-3 flex-shrink-0">
+                  <Card className="h-full hover:shadow-lg transition-shadow">
+                    <CardHeader className="pb-3">
                       <div className="flex items-start justify-between">
                         <div className="flex items-center gap-2">
                           <Badge className="bg-purple-600 text-white font-bold">
@@ -582,9 +560,9 @@ const AdminSignatureCollection = () => {
                         </div>
                       </div>
                     </CardHeader>
-                    <CardContent className="flex-1 flex flex-col space-y-3 min-h-0">
+                    <CardContent className="space-y-3">
                       {/* Image */}
-                      <div className="aspect-square relative bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                      <div className="aspect-square relative bg-gray-100 rounded-lg overflow-hidden">
                         {displayImages[0] ? (
                           <img
                             src={encodeImageUrl(displayImages[0])}
@@ -604,10 +582,10 @@ const AdminSignatureCollection = () => {
                       </div>
 
                       {/* Title */}
-                      <h3 className="font-semibold text-sm sm:text-base line-clamp-2 flex-shrink-0 min-h-[2.5rem]">{displayTitle}</h3>
+                      <h3 className="font-semibold text-sm sm:text-base line-clamp-2">{displayTitle}</h3>
 
                       {/* Price */}
-                      <div className="flex items-center gap-2 flex-shrink-0">
+                      <div className="flex items-center gap-2">
                         {item.discount_percentage && item.discount_percentage > 0 ? (
                           <>
                             <span className="text-sm line-through text-gray-400">
@@ -622,28 +600,24 @@ const AdminSignatureCollection = () => {
                         )}
                       </div>
 
-                      {/* Tags - Fixed height for alignment */}
-                      <div className="flex-shrink-0 min-h-[1.75rem]">
-                        {item.tags && item.tags.length > 0 ? (
-                          <div className="flex flex-wrap gap-1">
-                            {item.tags.slice(0, 3).map((tag) => (
-                              <Badge key={tag} variant="outline" className="text-xs">
-                                {tag}
-                              </Badge>
-                            ))}
-                            {item.tags.length > 3 && (
-                              <Badge variant="outline" className="text-xs">
-                                +{item.tags.length - 3}
-                              </Badge>
-                            )}
-                          </div>
-                        ) : (
-                          <div className="h-6"></div>
-                        )}
-                      </div>
+                      {/* Tags */}
+                      {item.tags && item.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-1">
+                          {item.tags.slice(0, 3).map((tag) => (
+                            <Badge key={tag} variant="outline" className="text-xs">
+                              {tag}
+                            </Badge>
+                          ))}
+                          {item.tags.length > 3 && (
+                            <Badge variant="outline" className="text-xs">
+                              +{item.tags.length - 3}
+                            </Badge>
+                          )}
+                        </div>
+                      )}
 
-                      {/* Actions - pushed to bottom */}
-                      <div className="flex gap-2 pt-2 border-t mt-auto flex-shrink-0">
+                      {/* Actions */}
+                      <div className="flex gap-2 pt-2 border-t">
                         <Button
                           size="sm"
                           variant="outline"

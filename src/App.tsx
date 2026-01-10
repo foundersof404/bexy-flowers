@@ -68,21 +68,23 @@ const AdminLuxuryBoxes = lazy(() => import("./pages/admin/AdminLuxuryBoxes"));
 const AdminWeddingCreations = lazy(() => import("./pages/admin/AdminWeddingCreations"));
 const AdminSettings = lazy(() => import("./pages/admin/AdminSettings"));
 
-// ⚡ PERFORMANCE OPTIMIZATION: Enhanced QueryClient with memory-safe caching
+// ⚡ PERFORMANCE OPTIMIZATION: Enhanced QueryClient with aggressive caching for returning users
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 2 * 60 * 1000, // 2 minutes - reduced to prevent memory buildup
-      gcTime: 5 * 60 * 1000, // 5 minutes - significantly reduced from 30 minutes
+      staleTime: 10 * 60 * 1000, // 10 minutes - data stays fresh longer for returning users
+      gcTime: 30 * 60 * 1000, // 30 minutes - keep cached data longer in memory
       refetchOnWindowFocus: false, // Don't refetch on window focus for better performance
-      refetchOnMount: false, // Use cached data if available
+      refetchOnMount: false, // Use cached data if available (critical for returning users)
       refetchOnReconnect: true, // Refetch on reconnect (network recovery)
-      retry: 1, // Reduced retries to prevent accumulation
-      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000), // Reduced max delay
+      retry: 2, // Retry failed requests
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
       // ⚡ SCALABILITY: Network mode for better offline support
       networkMode: 'online',
       // ⚡ SCALABILITY: Structural sharing for better memory usage
       structuralSharing: true,
+      // ⚡ CACHING: Enable persistent caching
+      persister: undefined, // Can be extended with IndexedDB persister
     },
     mutations: {
       retry: 1,
@@ -90,42 +92,6 @@ const queryClient = new QueryClient({
     },
   },
 });
-
-// 🛡️ MEMORY MANAGEMENT: Periodic cache cleanup to prevent memory leaks
-if (typeof window !== 'undefined') {
-  // Clean up stale queries every 3 minutes
-  setInterval(() => {
-    // Remove queries that haven't been accessed in 10 minutes
-    const now = Date.now();
-    queryClient.getQueryCache().getAll().forEach((query) => {
-      const lastAccess = (query as any).state?.dataUpdatedAt || 0;
-      const timeSinceAccess = now - lastAccess;
-      
-      // Remove queries older than 10 minutes that are not currently being used
-      if (timeSinceAccess > 10 * 60 * 1000 && query.getObserversCount() === 0) {
-        queryClient.removeQueries({ queryKey: query.queryKey });
-      }
-    });
-    
-    // Limit total cache size - keep only last 50 queries
-    const allQueries = queryClient.getQueryCache().getAll();
-    if (allQueries.length > 50) {
-      // Sort by last access time and remove oldest unused queries
-      const sortedQueries = allQueries
-        .filter(q => q.getObserversCount() === 0)
-        .sort((a, b) => {
-          const aTime = (a as any).state?.dataUpdatedAt || 0;
-          const bTime = (b as any).state?.dataUpdatedAt || 0;
-          return aTime - bTime;
-        });
-      
-      // Remove oldest 20 queries if cache is too large
-      sortedQueries.slice(0, Math.min(20, sortedQueries.length)).forEach(query => {
-        queryClient.removeQueries({ queryKey: query.queryKey });
-      });
-    }
-  }, 3 * 60 * 1000); // Run every 3 minutes
-}
 
 // Component that contains router-dependent logic
 const AppRouter = () => {

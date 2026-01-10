@@ -2,8 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { AdminLayout } from '@/components/admin/AdminLayout';
-import { useQueryClient } from '@tanstack/react-query';
-import { luxuryBoxesQueryKeys } from '@/hooks/useLuxuryBoxes';
 import {
   ArrowLeft,
   Plus,
@@ -16,7 +14,6 @@ import {
   Package,
   Palette,
   Ruler,
-  RefreshCw,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -43,17 +40,14 @@ import {
   updateBoxSize,
   deleteBoxSize,
 } from '@/lib/api/luxury-boxes';
-import { useLuxuryBoxes } from '@/hooks/useLuxuryBoxes';
 
 const GOLD_COLOR = 'rgb(199, 158, 72)';
 
 const AdminLuxuryBoxes = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const queryClient = useQueryClient();
-  
-  // Use React Query hook for cached data - fetch all luxury boxes
-  const { data: boxesData = [], isLoading: loadingBoxes, refetch: refetchBoxes } = useLuxuryBoxes();
+  const [boxes, setBoxes] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -100,11 +94,25 @@ const AdminLuxuryBoxes = () => {
       navigate('/admin/login');
       return;
     }
+
+    loadBoxes();
   }, [navigate]);
 
-  // Use data directly from React Query instead of syncing to state
-  const boxes = boxesData;
-  const loading = loadingBoxes;
+  const loadBoxes = async () => {
+    try {
+      setLoading(true);
+      const data = await getLuxuryBoxes();
+      setBoxes(data);
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Failed to load luxury boxes',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const loadBoxDetails = async (boxId: string) => {
     try {
@@ -160,16 +168,12 @@ const AdminLuxuryBoxes = () => {
 
       if (editingId) {
         await updateLuxuryBox(editingId, formData);
-        // Invalidate React Query cache so frontend sees changes immediately
-        queryClient.invalidateQueries({ queryKey: luxuryBoxesQueryKeys.lists() });
         toast({
           title: 'Success',
           description: 'Box updated successfully',
         });
       } else {
         await createLuxuryBox(formData);
-        // Invalidate React Query cache so frontend sees changes immediately
-        queryClient.invalidateQueries({ queryKey: luxuryBoxesQueryKeys.lists() });
         toast({
           title: 'Success',
           description: 'Box created successfully',
@@ -193,9 +197,6 @@ const AdminLuxuryBoxes = () => {
   const handleDelete = async (id: string) => {
     try {
       await deleteLuxuryBox(id);
-      // Invalidate React Query cache so frontend sees changes immediately
-      queryClient.invalidateQueries({ queryKey: luxuryBoxesQueryKeys.lists() });
-      queryClient.removeQueries({ queryKey: luxuryBoxesQueryKeys.detail(id) });
       toast({
         title: 'Success',
         description: 'Box deleted successfully',
@@ -406,35 +407,17 @@ const AdminLuxuryBoxes = () => {
               </div>
             </div>
             {!showForm && !selectedBoxId && (
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    refetchBoxes();
-                    toast({
-                      title: "Refreshing...",
-                      description: "Fetching latest luxury boxes from database",
-                    });
-                  }}
-                  disabled={loading}
-                  className="gap-2"
-                >
-                  <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-                  Refresh
-                </Button>
-                <Button
-                  onClick={handleNew}
-                  className="gap-2"
-                  style={{
-                    background: `linear-gradient(135deg, ${GOLD_COLOR} 0%, rgba(199, 158, 72, 0.9) 100%)`,
-                    color: 'white',
-                  }}
-                >
-                  <Plus className="w-4 h-4" />
-                  Add Box
-                </Button>
-              </div>
+              <Button
+                onClick={handleNew}
+                className="gap-2"
+                style={{
+                  background: `linear-gradient(135deg, ${GOLD_COLOR} 0%, rgba(199, 158, 72, 0.9) 100%)`,
+                  color: 'white',
+                }}
+              >
+                <Plus className="w-4 h-4" />
+                Add Box
+              </Button>
             )}
           </div>
         </div>

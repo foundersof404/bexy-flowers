@@ -548,9 +548,8 @@ const CartPage: React.FC = () => {
                     e.preventDefault();
                   }}
                   className="w-full bg-gradient-to-r from-amber-400 to-amber-600 hover:from-amber-500 hover:to-amber-700 text-white font-normal py-6 rounded-full"
+                  style={{ fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}
                   style={{ 
-                    fontFamily: "'EB Garamond', serif",
-                    letterSpacing: '-0.02em',
                     position: 'relative', 
                     zIndex: 1000,
                     pointerEvents: 'auto',

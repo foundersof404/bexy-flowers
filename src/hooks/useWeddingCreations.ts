@@ -30,11 +30,23 @@ export const useWeddingCreations = (filters?: {
   return useQuery({
     queryKey: weddingQueryKeys.list(filters),
     queryFn: () => getWeddingCreations(filters),
-    staleTime: 2 * 60 * 1000, // 2 minutes - reduced to prevent memory issues
-    gcTime: 3 * 60 * 1000, // 3 minutes - reduced
+    staleTime: 5 * 60 * 1000, // 5 minutes - wedding data changes less frequently
+    gcTime: 10 * 60 * 1000,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
-    // REMOVED: Pre-warming to prevent memory buildup
+    // Pre-warm individual creations for better navigation performance
+    onSuccess: (data) => {
+      if (data && data.length > 0) {
+        // Pre-load first 3 wedding creations (most likely to be viewed)
+        data.slice(0, 3).forEach((creation) => {
+          queryClient.prefetchQuery({
+            queryKey: weddingQueryKeys.detail(creation.id),
+            queryFn: () => getWeddingCreation(creation.id),
+            staleTime: 5 * 60 * 1000,
+          });
+        });
+      }
+    },
   });
 };
 
@@ -46,8 +58,8 @@ export const useWeddingCreation = (id: string | undefined) => {
     queryKey: weddingQueryKeys.detail(id!),
     queryFn: () => getWeddingCreation(id!),
     enabled: !!id,
-    staleTime: 2 * 60 * 1000, // 2 minutes - reduced
-    gcTime: 3 * 60 * 1000, // 3 minutes - reduced
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
   });

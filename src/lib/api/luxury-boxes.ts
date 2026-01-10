@@ -1,5 +1,4 @@
 import { db } from './database-client';
-import { supabase } from '../supabase';
 import type { Database } from '../supabase';
 
 type LuxuryBox = Database['public']['Tables']['luxury_boxes']['Row'];
@@ -115,9 +114,6 @@ export async function updateLuxuryBox(id: string, updates: LuxuryBoxUpdate): Pro
 export async function deleteLuxuryBox(id: string): Promise<void> {
   await db.delete('luxury_boxes', { id });
 }
-
-// Alias for backwards compatibility
-export const getLuxuryBox = getLuxuryBoxWithDetails;
 
 // ==================== Box Colors ====================
 

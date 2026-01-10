@@ -47,7 +47,11 @@ export const useSmoothScroll = () => {
     // Integrate Lenis with GSAP ScrollTrigger for better performance
     lenis.on('scroll', updateScrollTrigger);
 
+<<<<<<< HEAD
+    // Animation loop for Lenis - with proper cleanup checks and visibility pause
+=======
     // Animation loop for Lenis - with proper cleanup checks and visibility handling
+>>>>>>> e08b7416d4623293cad964ab9401aaff170ca4d9
     function raf(time: number) {
       if (!isActiveRef.current || !lenisRef.current) {
         // Stop if component unmounted or lenis destroyed
@@ -55,7 +59,11 @@ export const useSmoothScroll = () => {
         return;
       }
       
+<<<<<<< HEAD
+      // CRITICAL: Pause RAF loop when page is hidden to prevent unresponsive page
+=======
       // Pause animation when page is hidden to save resources
+>>>>>>> e08b7416d4623293cad964ab9401aaff170ca4d9
       if (document.hidden) {
         rafIdRef.current = requestAnimationFrame(raf);
         return;
@@ -73,6 +81,15 @@ export const useSmoothScroll = () => {
 
     rafIdRef.current = requestAnimationFrame(raf);
     
+<<<<<<< HEAD
+    // CRITICAL: Pause Lenis when page becomes hidden to prevent performance issues
+    const handleVisibilityChange = () => {
+      if (document.hidden && lenisRef.current) {
+        // Pause smooth scroll when tab is hidden
+        lenisRef.current.stop();
+      } else if (!document.hidden && lenisRef.current) {
+        // Resume when tab becomes visible
+=======
     // Handle visibility change to pause/resume animations
     const handleVisibilityChange = () => {
       if (document.hidden && lenisRef.current) {
@@ -80,6 +97,7 @@ export const useSmoothScroll = () => {
         lenisRef.current.stop();
       } else if (!document.hidden && lenisRef.current && isActiveRef.current) {
         // Resume when page becomes visible
+>>>>>>> e08b7416d4623293cad964ab9401aaff170ca4d9
         lenisRef.current.start();
       }
     };

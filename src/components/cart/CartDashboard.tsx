@@ -489,9 +489,8 @@ const CartDashboard: React.FC<CartDashboardProps> = ({ isOpen, onClose }) => {
                     <Button
                       onClick={onClose}
                       className="px-8 py-3 font-normal uppercase"
+                      style={{ fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}
                       style={{
-                        fontFamily: "'EB Garamond', serif",
-                        letterSpacing: '-0.02em',
                         background: accentColor,
                         color: 'white',
                         clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))',
@@ -595,9 +594,8 @@ const CartDashboard: React.FC<CartDashboardProps> = ({ isOpen, onClose }) => {
                                 {item.size && (
                                   <div
                                     className="inline-block px-2.5 py-1 text-xs font-normal uppercase"
+                                    style={{ fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}
                                     style={{
-                                      fontFamily: "'EB Garamond', serif",
-                                      letterSpacing: '-0.02em',
                                       color: accentColor,
                                       background: `${accentColor}10`,
                                       clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))',
@@ -617,9 +615,8 @@ const CartDashboard: React.FC<CartDashboardProps> = ({ isOpen, onClose }) => {
                                       <span
                                         key={accIndex}
                                         className="px-2 py-0.5 text-[10px] font-normal uppercase"
+                                        style={{ fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}
                                         style={{
-                                          fontFamily: "'EB Garamond', serif",
-                                          letterSpacing: '-0.02em',
                                           color: accentColor,
                                           background: `${accentColor}10`,
                                           clipPath: 'polygon(0 0, calc(100% - 3px) 0, 100% 3px, 100% 100%, 3px 100%, 0 calc(100% - 3px))',

@@ -30,11 +30,23 @@ export const useAccessories = (filters?: {
   return useQuery({
     queryKey: accessoriesQueryKeys.list(filters),
     queryFn: () => getAccessories(filters),
-    staleTime: 2 * 60 * 1000, // 2 minutes - reduced
-    gcTime: 3 * 60 * 1000, // 3 minutes - reduced
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
-    // REMOVED: Pre-warming to prevent memory buildup
+    // Pre-warm individual accessories for better navigation performance
+    onSuccess: (data) => {
+      if (data && data.length > 0) {
+        // Pre-load first 3 accessories (most likely to be viewed)
+        data.slice(0, 3).forEach((accessory) => {
+          queryClient.prefetchQuery({
+            queryKey: accessoriesQueryKeys.detail(accessory.id),
+            queryFn: () => getAccessory(accessory.id),
+            staleTime: 5 * 60 * 1000,
+          });
+        });
+      }
+    },
   });
 };
 
@@ -46,8 +58,8 @@ export const useAccessory = (id: string | undefined) => {
     queryKey: accessoriesQueryKeys.detail(id!),
     queryFn: () => getAccessory(id!),
     enabled: !!id,
-    staleTime: 2 * 60 * 1000, // 2 minutes - reduced
-    gcTime: 3 * 60 * 1000, // 3 minutes - reduced
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
   });

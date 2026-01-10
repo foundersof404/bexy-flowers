@@ -5,7 +5,6 @@ import {
   removeFromSignatureCollection,
   updateSignatureCollection
 } from '@/lib/api/signature-collection';
-import { collectionQueryKeys } from './useCollectionProducts';
 
 // Query keys for better cache management
 export const signatureQueryKeys = {
@@ -28,8 +27,8 @@ export const useSignatureCollection = (filters?: {
   return useQuery({
     queryKey: signatureQueryKeys.list(filters),
     queryFn: () => getSignatureCollections(),
-    staleTime: 2 * 60 * 1000, // 2 minutes - reduced
-    gcTime: 3 * 60 * 1000, // 3 minutes - reduced
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
   });
@@ -49,8 +48,6 @@ export const useAddToSignatureCollection = () => {
     }) => addToSignatureCollection(productId, displayOrder),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: signatureQueryKeys.lists() });
-      // Also invalidate collection products since signature collection affects product display
-      queryClient.invalidateQueries({ queryKey: collectionQueryKeys.lists() });
     },
   });
 };
@@ -65,8 +62,6 @@ export const useRemoveFromSignatureCollection = () => {
     mutationFn: (productId: string) => removeFromSignatureCollection(productId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: signatureQueryKeys.lists() });
-      // Also invalidate collection products since signature collection affects product display
-      queryClient.invalidateQueries({ queryKey: collectionQueryKeys.lists() });
     },
   });
 };
@@ -84,8 +79,6 @@ export const useUpdateSignatureCollection = () => {
     }) => updateSignatureCollection(id, updates),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: signatureQueryKeys.lists() });
-      // Also invalidate collection products since signature collection changes affect product display
-      queryClient.invalidateQueries({ queryKey: collectionQueryKeys.lists() });
     },
   });
 };

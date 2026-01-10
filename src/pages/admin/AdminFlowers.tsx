@@ -2,8 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { AdminLayout } from '@/components/admin/AdminLayout';
-import { useQueryClient } from '@tanstack/react-query';
-import { flowersQueryKeys } from '@/hooks/useFlowers';
 import {
   ArrowLeft,
   Plus,
@@ -15,7 +13,6 @@ import {
   DollarSign,
   Flower,
   Palette,
-  RefreshCw,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -40,17 +37,14 @@ import {
   updateFlowerColor,
   deleteFlowerColor,
 } from '@/lib/api/flowers';
-import { useFlowers } from '@/hooks/useFlowers';
 
 const GOLD_COLOR = 'rgb(199, 158, 72)';
 
 const AdminFlowers = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const queryClient = useQueryClient();
-  
-  // Use React Query hook for cached data - fetch all flower types (no filters for admin view)
-  const { data: flowerTypesData = [], isLoading: loadingFlowers, refetch: refetchFlowers } = useFlowers();
+  const [flowerTypes, setFlowerTypes] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -88,11 +82,25 @@ const AdminFlowers = () => {
       navigate('/admin/login');
       return;
     }
+
+    loadFlowerTypes();
   }, [navigate]);
 
-  // Use data directly from React Query instead of syncing to state
-  const flowerTypes = flowerTypesData;
-  const loading = loadingFlowers;
+  const loadFlowerTypes = async () => {
+    try {
+      setLoading(true);
+      const data = await getFlowerTypes();
+      setFlowerTypes(data);
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Failed to load flower types',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const loadFlowerDetails = async (flowerId: string) => {
     try {
@@ -155,16 +163,12 @@ const AdminFlowers = () => {
           imageFile || undefined,
           !!imageFile
         );
-        // Invalidate React Query cache so frontend sees changes immediately
-        queryClient.invalidateQueries({ queryKey: flowersQueryKeys.lists() });
         toast({
           title: 'Success',
           description: 'Flower type updated successfully',
         });
       } else {
         await createFlowerType(formData, imageFile || undefined);
-        // Invalidate React Query cache so frontend sees changes immediately
-        queryClient.invalidateQueries({ queryKey: flowersQueryKeys.lists() });
         toast({
           title: 'Success',
           description: 'Flower type created successfully',
@@ -189,9 +193,6 @@ const AdminFlowers = () => {
   const handleDelete = async (id: string) => {
     try {
       await deleteFlowerType(id);
-      // Invalidate React Query cache so frontend sees changes immediately
-      queryClient.invalidateQueries({ queryKey: flowersQueryKeys.lists() });
-      queryClient.removeQueries({ queryKey: flowersQueryKeys.detail(id) });
       toast({
         title: 'Success',
         description: 'Flower type deleted successfully',
@@ -325,35 +326,17 @@ const AdminFlowers = () => {
                 <p className="text-sm text-gray-500">Manage flower types and their colors for custom bouquets</p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  refetchFlowers();
-                  toast({
-                    title: "Refreshing...",
-                    description: "Fetching latest flower types from database",
-                  });
-                }}
-                disabled={loading}
-                className="gap-2"
-              >
-                <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-                Refresh
-              </Button>
-              <Button
-                onClick={handleNew}
-                className="gap-2"
-                style={{
-                  background: `linear-gradient(135deg, ${GOLD_COLOR} 0%, rgba(199, 158, 72, 0.9) 100%)`,
-                  color: 'white',
-                }}
-              >
-                <Plus className="w-4 h-4" />
-                Add Flower Type
-              </Button>
-            </div>
+            <Button
+              onClick={handleNew}
+              className="gap-2"
+              style={{
+                background: `linear-gradient(135deg, ${GOLD_COLOR} 0%, rgba(199, 158, 72, 0.9) 100%)`,
+                color: 'white',
+              }}
+            >
+              <Plus className="w-4 h-4" />
+              Add Flower Type
+            </Button>
           </div>
         </div>
       </header>
