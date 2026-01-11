@@ -19,43 +19,43 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   const isInitialLoad = useRef(true);
   const syncTimeoutRef = useRef<number | null>(null);
 
-  // Load cart from database on mount
+  // Load cart from database on mount - NON-BLOCKING
   useEffect(() => {
     const loadCartFromDatabase = async () => {
       try {
-        setIsLoading(true);
-        // First, try to load from database
-        const dbCart = await getVisitorCart();
-
-        if (dbCart.length > 0) {
-          // Database has cart items, use them
-          setCartItems(dbCart);
-          // Update localStorage as cache
-          localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(dbCart));
-        } else {
-          // No items in database, try localStorage as fallback
-          try {
-            const savedCart = localStorage.getItem(CART_STORAGE_KEY);
-            if (savedCart) {
-              const localCart = JSON.parse(savedCart);
-              setCartItems(localCart);
-              // Sync local cart to database
-              await syncCartToDatabase(localCart);
-            }
-          } catch (error) {
-            console.error('Error loading cart from localStorage:', error);
-          }
-        }
-      } catch (error) {
-        console.error('Error loading cart from database:', error);
-        // Fallback to localStorage
+        // CRITICAL FIX: Load from localStorage FIRST (instant, non-blocking)
+        // This prevents the page from freezing while waiting for database
         try {
           const savedCart = localStorage.getItem(CART_STORAGE_KEY);
           if (savedCart) {
-            setCartItems(JSON.parse(savedCart));
+            const localCart = JSON.parse(savedCart);
+            setCartItems(localCart);
+            setIsLoading(false); // Immediately show cached data
+            isInitialLoad.current = false;
           }
-        } catch (localError) {
-          console.error('Error loading cart from localStorage:', localError);
+        } catch (error) {
+          console.error('Error loading cart from localStorage:', error);
+        }
+        
+        // Then try to sync with database in the background (non-blocking)
+        // Only if we're in production or Netlify Dev is running
+        if (import.meta.env.PROD || import.meta.env.VITE_USE_NETLIFY_FUNCTIONS === 'true') {
+          const dbCart = await getVisitorCart();
+
+          if (dbCart.length > 0) {
+            // Database has cart items, use them
+            setCartItems(dbCart);
+            // Update localStorage as cache
+            localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(dbCart));
+          } else if (cartItems.length > 0) {
+            // Sync local cart to database if database is empty
+            await syncCartToDatabase(cartItems);
+          }
+        }
+      } catch (error) {
+        // Silently fail - we already have localStorage data
+        if (!(error instanceof Error && error.message === 'NETLIFY_FUNCTIONS_UNAVAILABLE')) {
+          console.warn('Background cart sync failed:', error);
         }
       } finally {
         setIsLoading(false);

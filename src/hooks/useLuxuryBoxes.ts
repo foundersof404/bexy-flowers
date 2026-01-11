@@ -25,28 +25,14 @@ export const useLuxuryBoxes = (filters?: {
   featured?: boolean;
   isActive?: boolean;
 }) => {
-  const queryClient = useQueryClient();
-  
   return useQuery({
     queryKey: luxuryBoxesQueryKeys.list(filters),
     queryFn: () => getLuxuryBoxes(filters),
-    staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
+    staleTime: 2 * 60 * 1000, // Reduced from 5 min to prevent memory buildup
+    gcTime: 5 * 60 * 1000, // Reduced from 10 min to prevent memory leaks
     refetchOnWindowFocus: false,
-    refetchOnMount: false,
-    // Pre-warm individual luxury boxes for better navigation performance
-    onSuccess: (data) => {
-      if (data && data.length > 0) {
-        // Pre-load first 3 luxury boxes (most likely to be viewed)
-        data.slice(0, 3).forEach((box) => {
-          queryClient.prefetchQuery({
-            queryKey: luxuryBoxesQueryKeys.detail(box.id),
-            queryFn: () => getLuxuryBox(box.id),
-            staleTime: 5 * 60 * 1000,
-          });
-        });
-      }
-    },
+    refetchOnMount: false, // Use cached data if available
+    // Removed onSuccess prefetching to prevent memory accumulation
   });
 };
 
@@ -58,8 +44,8 @@ export const useLuxuryBox = (id: string | undefined) => {
     queryKey: luxuryBoxesQueryKeys.detail(id!),
     queryFn: () => getLuxuryBox(id!),
     enabled: !!id,
-    staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
+    staleTime: 2 * 60 * 1000, // Reduced from 5 min to prevent memory buildup
+    gcTime: 5 * 60 * 1000, // Reduced from 10 min to prevent memory leaks
     refetchOnWindowFocus: false,
     refetchOnMount: false,
   });

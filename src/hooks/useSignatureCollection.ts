@@ -27,8 +27,8 @@ export const useSignatureCollection = (filters?: {
   return useQuery({
     queryKey: signatureQueryKeys.list(filters),
     queryFn: () => getSignatureCollections(),
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000,
+    staleTime: 2 * 60 * 1000, // Reduced from 5 min to prevent memory buildup
+    gcTime: 5 * 60 * 1000, // Reduced from 10 min to prevent memory leaks
     refetchOnWindowFocus: false,
     refetchOnMount: false,
   });

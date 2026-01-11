@@ -4,7 +4,8 @@ import {
   getFlower,
   createFlower,
   updateFlower,
-  deleteFlower
+  deleteFlower,
+  getFlowersForCustomize
 } from '@/lib/api/flowers';
 
 // Query keys for better cache management
@@ -25,28 +26,30 @@ export const useFlowers = (filters?: {
   featured?: boolean;
   isActive?: boolean;
 }) => {
-  const queryClient = useQueryClient();
-  
   return useQuery({
     queryKey: flowersQueryKeys.list(filters),
     queryFn: () => getFlowers(filters),
-    staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
+    staleTime: 2 * 60 * 1000, // Reduced from 5 min to prevent memory buildup
+    gcTime: 5 * 60 * 1000, // Reduced from 10 min to prevent memory leaks
     refetchOnWindowFocus: false,
-    refetchOnMount: false,
-    // Pre-warm individual flowers for better navigation performance
-    onSuccess: (data) => {
-      if (data && data.length > 0) {
-        // Pre-load first 3 flowers (most likely to be viewed)
-        data.slice(0, 3).forEach((flower) => {
-          queryClient.prefetchQuery({
-            queryKey: flowersQueryKeys.detail(flower.id),
-            queryFn: () => getFlower(flower.id),
-            staleTime: 5 * 60 * 1000,
-          });
-        });
-      }
-    },
+    refetchOnMount: false, // Use cached data if available
+    // Removed onSuccess prefetching to prevent memory accumulation
+  });
+};
+
+/**
+ * React Query hook for fetching flowers in Customize page format
+ * Maps database structure (flower_types + flower_colors) to individual flowers
+ * Only returns active flowers with quantity > 0
+ */
+export const useFlowersForCustomize = () => {
+  return useQuery({
+    queryKey: ['flowers', 'customize'],
+    queryFn: getFlowersForCustomize,
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    gcTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: false,
+    refetchOnMount: false, // Use cached data if available
   });
 };
 
@@ -58,8 +61,8 @@ export const useFlower = (id: string | undefined) => {
     queryKey: flowersQueryKeys.detail(id!),
     queryFn: () => getFlower(id!),
     enabled: !!id,
-    staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
+    staleTime: 2 * 60 * 1000, // Reduced from 5 min to prevent memory buildup
+    gcTime: 5 * 60 * 1000, // Reduced from 10 min to prevent memory leaks
     refetchOnWindowFocus: false,
     refetchOnMount: false,
   });
@@ -78,6 +81,7 @@ export const useCreateFlower = () => {
     }) => createFlower(flower, images),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: flowersQueryKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: ['flowers', 'customize'] });
     },
   });
 };
@@ -103,6 +107,7 @@ export const useUpdateFlower = () => {
     onSuccess: (data) => {
       queryClient.setQueryData(flowersQueryKeys.detail(data.id), data);
       queryClient.invalidateQueries({ queryKey: flowersQueryKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: ['flowers', 'customize'] });
     },
   });
 };
@@ -118,6 +123,7 @@ export const useDeleteFlower = () => {
     onSuccess: (_, deletedId) => {
       queryClient.removeQueries({ queryKey: flowersQueryKeys.detail(deletedId) });
       queryClient.invalidateQueries({ queryKey: flowersQueryKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: ['flowers', 'customize'] });
     },
   });
 };

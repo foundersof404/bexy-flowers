@@ -32,47 +32,75 @@ interface DatabaseResponse<T = any> {
 }
 
 /**
- * Make database request to backend API
+ * Make database request to backend API with timeout
  */
 async function databaseRequest<T = any>(request: DatabaseRequest): Promise<T> {
   const frontendApiKey = import.meta.env.VITE_FRONTEND_API_KEY;
   
+  // CRITICAL FIX: Add timeout to prevent infinite hanging
+  const TIMEOUT_MS = import.meta.env.DEV ? 3000 : 10000; // 3s in dev, 10s in prod
+  
   try {
-    const response = await fetch(API_ENDPOINT, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(frontendApiKey && { 'X-API-Key': frontendApiKey }),
-      },
-      body: JSON.stringify(request),
-    });
+    // Create abort controller for timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
     
-    if (!response.ok) {
-      // Handle 404 specifically (Netlify Functions not available)
-      if (response.status === 404) {
-        if (import.meta.env.DEV) {
-          // Only warn once to prevent console spam
-          if (!hasWarnedAboutNetlify) {
-            hasWarnedAboutNetlify = true;
-            console.info('[Database] Netlify Functions not available in local dev. Using localStorage fallback.');
+    try {
+      const response = await fetch(API_ENDPOINT, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(frontendApiKey && { 'X-API-Key': frontendApiKey }),
+        },
+        body: JSON.stringify(request),
+        signal: controller.signal,
+      });
+      
+      clearTimeout(timeoutId);
+      
+      if (!response.ok) {
+        // Handle 404 specifically (Netlify Functions not available)
+        if (response.status === 404) {
+          if (import.meta.env.DEV) {
+            // Only warn once to prevent console spam
+            if (!hasWarnedAboutNetlify) {
+              hasWarnedAboutNetlify = true;
+              console.info('[Database] Netlify Functions not available in local dev. Using localStorage fallback.');
+            }
+            // Return empty result instead of throwing - let the calling code use localStorage fallback
+            throw new Error('NETLIFY_FUNCTIONS_UNAVAILABLE');
           }
-          // Return empty result instead of throwing - let the calling code use localStorage fallback
-          throw new Error('NETLIFY_FUNCTIONS_UNAVAILABLE');
+          throw new Error('Database endpoint not found. Please ensure Netlify Functions are deployed.');
         }
-        throw new Error('Database endpoint not found. Please ensure Netlify Functions are deployed.');
+        
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        throw new Error(errorData.error || errorData.message || `Database request failed: ${response.status}`);
       }
       
-      const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-      throw new Error(errorData.error || errorData.message || `Database request failed: ${response.status}`);
+      const result: DatabaseResponse<T> = await response.json();
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Database operation failed');
+      }
+      
+      return result.data;
+    } catch (fetchError) {
+      clearTimeout(timeoutId);
+      
+      // Handle abort/timeout
+      if (fetchError instanceof Error && fetchError.name === 'AbortError') {
+        if (import.meta.env.DEV) {
+          if (!hasWarnedAboutNetlify) {
+            hasWarnedAboutNetlify = true;
+            console.info('[Database] Request timed out. Netlify Functions not available in local dev. Using localStorage fallback.');
+          }
+          throw new Error('NETLIFY_FUNCTIONS_UNAVAILABLE');
+        }
+        throw new Error('Database request timed out');
+      }
+      
+      throw fetchError;
     }
-    
-    const result: DatabaseResponse<T> = await response.json();
-    
-    if (!result.success) {
-      throw new Error(result.error || 'Database operation failed');
-    }
-    
-    return result.data;
   } catch (error) {
     // Re-throw if it's already an Error with a message
     if (error instanceof Error) {

@@ -20,10 +20,10 @@ export const useSmoothScroll = () => {
       ignoreMobileResize: true,
     });
 
-    // Initialize Lenis with heavy/strong smooth scroll settings
+    // Initialize Lenis with optimized settings - Apple-like smooth scrolling
     const lenis = new Lenis({
-      duration: 1.2, // Longer duration for heavier feel
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // Smooth easing
+      duration: 1.2, // Smooth duration for that premium feel
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // Apple-like easing
       smooth: true,
       smoothTouch: false, // Disable on touch devices for better performance
       touchMultiplier: 2,
@@ -34,24 +34,21 @@ export const useSmoothScroll = () => {
     globalLenis = lenis; // Set global for scrollTo function
     isActiveRef.current = true; // Reset active flag
 
-    // ⚡ PERFORMANCE: Throttle ScrollTrigger updates to reduce frame drops
+    // ⚡ PERFORMANCE: Throttle ScrollTrigger updates to balance smoothness and performance
     let lastUpdate = 0;
     const updateScrollTrigger = () => {
       const now = performance.now();
-      if (now - lastUpdate >= 16) { // ~60fps
+      // Throttle to ~60fps for smooth experience
+      if (now - lastUpdate >= 16) {
         ScrollTrigger.update();
         lastUpdate = now;
       }
     };
 
-    // Integrate Lenis with GSAP ScrollTrigger for better performance
+    // Integrate Lenis with GSAP ScrollTrigger for smooth animations
     lenis.on('scroll', updateScrollTrigger);
 
-<<<<<<< HEAD
-    // Animation loop for Lenis - with proper cleanup checks and visibility pause
-=======
     // Animation loop for Lenis - with proper cleanup checks and visibility handling
->>>>>>> e08b7416d4623293cad964ab9401aaff170ca4d9
     function raf(time: number) {
       if (!isActiveRef.current || !lenisRef.current) {
         // Stop if component unmounted or lenis destroyed
@@ -59,11 +56,7 @@ export const useSmoothScroll = () => {
         return;
       }
       
-<<<<<<< HEAD
       // CRITICAL: Pause RAF loop when page is hidden to prevent unresponsive page
-=======
-      // Pause animation when page is hidden to save resources
->>>>>>> e08b7416d4623293cad964ab9401aaff170ca4d9
       if (document.hidden) {
         rafIdRef.current = requestAnimationFrame(raf);
         return;
@@ -81,23 +74,13 @@ export const useSmoothScroll = () => {
 
     rafIdRef.current = requestAnimationFrame(raf);
     
-<<<<<<< HEAD
     // CRITICAL: Pause Lenis when page becomes hidden to prevent performance issues
     const handleVisibilityChange = () => {
       if (document.hidden && lenisRef.current) {
         // Pause smooth scroll when tab is hidden
         lenisRef.current.stop();
-      } else if (!document.hidden && lenisRef.current) {
-        // Resume when tab becomes visible
-=======
-    // Handle visibility change to pause/resume animations
-    const handleVisibilityChange = () => {
-      if (document.hidden && lenisRef.current) {
-        // Pause smooth scrolling when page is hidden
-        lenisRef.current.stop();
       } else if (!document.hidden && lenisRef.current && isActiveRef.current) {
-        // Resume when page becomes visible
->>>>>>> e08b7416d4623293cad964ab9401aaff170ca4d9
+        // Resume when tab becomes visible
         lenisRef.current.start();
       }
     };

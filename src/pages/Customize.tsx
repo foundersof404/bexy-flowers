@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Box, Gift, Check, CheckCircle2, Wand2, Plus, Minus, X, Info, ChevronRight, Palette, ShoppingCart, Circle, Square, Heart, Download, MessageCircle, Sparkles, ArrowRight, Star, Crown, GraduationCap, Heart as HeartIcon, Candy, Eye, EyeOff, History, BookmarkPlus, Bookmark, RefreshCw, Loader2, Edit3 } from "lucide-react";
 import UltraNavigation from "@/components/UltraNavigation";
@@ -6,7 +6,9 @@ import { useCart } from "@/contexts/CartContext";
 import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
 import heroBouquetMain from "@/assets/bouquet-1.jpg";
-import { flowers, flowerFamilies, EnhancedFlower, Season } from "@/data/flowers";
+import { flowerFamilies, EnhancedFlower, Season } from "@/data/flowers";
+import { useFlowersForCustomize } from "@/hooks/useFlowers";
+import type { CustomizeFlower } from "@/lib/api/flowers";
 import { generateBouquetImage as generateImage, generateWithVariation, ProgressStage } from "@/lib/api/imageGeneration";
 import { buildAdvancedPrompt } from "@/lib/api/promptEngine";
 import { getPromptHistory, getFavorites, addToFavorites, removeFromFavorites, isFavorite, PromptHistoryEntry } from "@/lib/api/promptHistory";
@@ -237,6 +239,40 @@ const Customize: React.FC = () => {
   // Editable prompt state
   const [isEditingPrompt, setIsEditingPrompt] = useState(false);
   const [customPrompt, setCustomPrompt] = useState<string>('');
+
+  // Fetch flowers from database
+  const { data: customizeFlowers = [], isLoading: flowersLoading } = useFlowersForCustomize();
+
+  // ⚡ PERFORMANCE: Memoize flowers mapping to prevent re-computation on every render
+  const flowers: EnhancedFlower[] = useMemo(() => {
+    // Use a Set to track seen IDs and prevent duplicates
+    const seenIds = new Set<string>();
+    const uniqueFlowers: EnhancedFlower[] = [];
+    
+    customizeFlowers.forEach((f: CustomizeFlower, index: number) => {
+      // Ensure unique ID by appending index if duplicate found
+      let uniqueId = f.id;
+      if (seenIds.has(uniqueId)) {
+        uniqueId = `${f.id}-${index}`;
+        console.warn(`Duplicate flower ID detected: ${f.id}. Using ${uniqueId} instead.`);
+      }
+      
+      seenIds.add(uniqueId);
+      uniqueFlowers.push({
+        id: uniqueId,
+        name: f.name,
+        price: f.price,
+        imageUrl: f.imageUrl,
+        category: f.category,
+        description: f.description,
+        family: f.family,
+        colorName: f.colorName,
+        seasons: (f.seasons || []) as Season[],
+      });
+    });
+    
+    return uniqueFlowers;
+  }, [customizeFlowers]);
 
   // Cleanup blob URLs
   useEffect(() => {
@@ -482,21 +518,31 @@ const Customize: React.FC = () => {
     }
   }, [selectedFamily]);
 
-  // Pricing
-  const basePrice = (selectedPackage?.basePrice || 0) * (selectedSize?.priceMultiplier || 1);
-  const flowerPrice = Object.values(selectedFlowers).reduce((acc, curr) => acc + (curr.flower.price * curr.quantity), 0);
-  const glitterPrice = withGlitter ? 2 : 0;
-  const accessoriesPrice = selectedAccessories.reduce((acc, accId) => {
-    const accessory = accessories.find(a => a.id === accId);
-    return acc + (accessory?.price || 0);
-  }, 0);
-  const totalPrice = basePrice + flowerPrice + glitterPrice + accessoriesPrice;
+  // ⚡ PERFORMANCE: Memoize pricing calculations
+  const totalPrice = useMemo(() => {
+    const basePrice = (selectedPackage?.basePrice || 0) * (selectedSize?.priceMultiplier || 1);
+    const flowerPrice = Object.values(selectedFlowers).reduce((acc, curr) => acc + (curr.flower.price * curr.quantity), 0);
+    const glitterPrice = withGlitter ? 2 : 0;
+    const accessoriesPrice = selectedAccessories.reduce((acc, accId) => {
+      const accessory = accessories.find(a => a.id === accId);
+      return acc + (accessory?.price || 0);
+    }, 0);
+    return basePrice + flowerPrice + glitterPrice + accessoriesPrice;
+  }, [selectedPackage?.basePrice, selectedSize?.priceMultiplier, selectedFlowers, withGlitter, selectedAccessories]);
 
-  // Price animation
+  // ⚡ PERFORMANCE: Optimized price animation with cleanup
   const [displayPrice, setDisplayPrice] = useState(0);
   const prevPriceRef = useRef(0);
+  const animationFrameRef = useRef<number | null>(null);
+  
   useEffect(() => {
     if (totalPrice === prevPriceRef.current) return;
+    
+    // Cancel any ongoing animation
+    if (animationFrameRef.current !== null) {
+      cancelAnimationFrame(animationFrameRef.current);
+    }
+    
     const duration = 500;
     const startTime = Date.now();
     const startPrice = prevPriceRef.current;
@@ -508,22 +554,33 @@ const Customize: React.FC = () => {
       const easeOut = 1 - Math.pow(1 - progress, 3);
       setDisplayPrice(startPrice + priceDiff * easeOut);
       if (progress < 1) {
-        requestAnimationFrame(animate);
+        animationFrameRef.current = requestAnimationFrame(animate);
       } else {
         setDisplayPrice(totalPrice);
         prevPriceRef.current = totalPrice;
+        animationFrameRef.current = null;
       }
     };
-    animate();
+    
+    animationFrameRef.current = requestAnimationFrame(animate);
+    
+    return () => {
+      if (animationFrameRef.current !== null) {
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
+      }
+    };
   }, [totalPrice]);
 
-  // Get max flowers for current size
-  const maxFlowers = selectedSize?.maxFlowers || 10;
+  // ⚡ PERFORMANCE: Memoize flower count calculations
+  const maxFlowers = useMemo(() => selectedSize?.maxFlowers || 10, [selectedSize?.maxFlowers]);
   
-  // Calculate current total flowers
-  const currentTotalFlowers = Object.values(selectedFlowers).reduce((acc, curr) => acc + curr.quantity, 0);
-  const canAddMore = currentTotalFlowers < maxFlowers;
-  const remainingSlots = maxFlowers - currentTotalFlowers;
+  const currentTotalFlowers = useMemo(() => {
+    return Object.values(selectedFlowers).reduce((acc, curr) => acc + curr.quantity, 0);
+  }, [selectedFlowers]);
+  
+  const canAddMore = useMemo(() => currentTotalFlowers < maxFlowers, [currentTotalFlowers, maxFlowers]);
+  const remainingSlots = useMemo(() => maxFlowers - currentTotalFlowers, [maxFlowers, currentTotalFlowers]);
 
   // Handlers
   const handleAddFlower = (flower: EnhancedFlower) => {
@@ -987,8 +1044,8 @@ const Customize: React.FC = () => {
     seasonal: [] // Empty - seasonal filter shows ALL flowers
   };
 
-  // Get recommended flowers based on package/size (Florist's Choice)
-  const getRecommendedFlowers = (): string[] => {
+  // ⚡ PERFORMANCE: Memoize recommended flowers to prevent recalculation
+  const recommendedFlowerIds = useMemo((): string[] => {
     if (selectedPackage?.type === "box" && selectedSize?.id === "medium") {
       return ["rose-red", "rose-pink", "peony-pink", "orchid-white", "hydrangea-white"];
     }
@@ -996,20 +1053,22 @@ const Customize: React.FC = () => {
       return ["rose-red", "rose-pink", "tulip-red", "lily-pink"];
     }
     return ["rose-red", "rose-pink", "tulip-pink", "carnation-red"];
-  };
+  }, [selectedPackage?.type, selectedSize?.id]);
 
-  const recommendedFlowerIds = getRecommendedFlowers();
+  // ⚡ PERFORMANCE: Memoize filtered flowers to prevent expensive recalculations
+  const filteredFlowers = useMemo(() => {
+    return flowerMode === "specific" && selectedFamily
+      ? flowers.filter(f => f.family === selectedFamily)
+      : flowers;
+  }, [flowers, flowerMode, selectedFamily]);
 
-  // Filter flowers by family (specific variety mode)
-  const filteredFlowers = flowerMode === "specific" && selectedFamily
-    ? flowers.filter(f => f.family === selectedFamily)
-    : flowers;
-
-  // Filter by category (popular, romantic, minimal, luxury, seasonal)
-  let categoryFiltered = filteredFlowers;
-  if (flowerFilter !== "all" && flowerFilter !== "seasonal") {
+  // ⚡ PERFORMANCE: Memoize category filtering
+  const categoryFiltered = useMemo(() => {
+    if (flowerFilter === "all" || flowerFilter === "seasonal") {
+      return filteredFlowers;
+    }
     const families = flowerCategories[flowerFilter] || [];
-    categoryFiltered = filteredFlowers.filter(f => {
+    return filteredFlowers.filter(f => {
       if (!families.includes(f.family)) return false;
       
       // Additional color-based filtering for specific categories
@@ -1019,30 +1078,24 @@ const Customize: React.FC = () => {
         // Romantic tulips: red, pink, white (exclude blue, yellow, peach)
         if (f.family === "tulips" && !["red", "pink", "white"].includes(f.colorName)) return false;
       }
-      if (flowerFilter === "minimal") {
-        // Minimal: Simple flowers - gypsum, daisies, lavender (all colors are fine for minimal)
-        // No additional filtering needed
-      }
-      if (flowerFilter === "luxury") {
-        // Luxury: Premium flowers - orchids, peonies, hydrangeas, lilies (all colors are fine)
-        // No additional filtering needed
-      }
       
       return true;
     });
-  }
+  }, [filteredFlowers, flowerFilter]);
 
-  // Filter by season if seasonal category is selected
-  // When "seasonal" is selected, show ALL flowers (not filtered by families), then filter by season if specific season is chosen
-  const availableFlowers = flowerFilter === "seasonal"
-    ? seasonFilter === "all-seasons"
-      ? filteredFlowers // Show ALL flowers when "all-seasons" is selected (not categoryFiltered)
-      : filteredFlowers.filter(f => {
-          // Filter by specific season - if flower has seasons data, filter by it
-          if (!f.seasons || f.seasons.length === 0) return false; // Exclude flowers without season data
-          return f.seasons.includes(seasonFilter);
-        })
-    : categoryFiltered;
+  // ⚡ PERFORMANCE: Memoize available flowers (final filtered list)
+  const availableFlowers = useMemo(() => {
+    if (flowerFilter === "seasonal") {
+      if (seasonFilter === "all-seasons") {
+        return filteredFlowers;
+      }
+      return filteredFlowers.filter(f => {
+        if (!f.seasons || f.seasons.length === 0) return false;
+        return f.seasons.includes(seasonFilter);
+      });
+    }
+    return categoryFiltered;
+  }, [filteredFlowers, categoryFiltered, flowerFilter, seasonFilter]);
 
   const steps = [
     { id: 1, title: "Base", icon: Box },
