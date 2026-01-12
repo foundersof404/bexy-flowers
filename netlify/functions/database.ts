@@ -571,8 +571,9 @@ export const handler: Handler = async (
       };
     }
 
-    // Validate table name (prevent SQL injection)
-    if (!isValidTableName(request.table)) {
+    // Validate table name (prevent SQL injection) - SKIP for RPC operations
+    // RPC operations use functionName instead of table name
+    if (request.operation !== 'rpc' && !isValidTableName(request.table)) {
       logSecurityEvent('validation_error', 'warning', event.path, ip, {
         reason: 'Invalid table name',
         table: request.table,
@@ -582,6 +583,31 @@ export const handler: Handler = async (
         headers,
         body: JSON.stringify({ error: 'Invalid table name. Only alphanumeric characters, underscores, and hyphens are allowed.' }),
       };
+    }
+
+    // For RPC operations, validate functionName instead
+    if (request.operation === 'rpc') {
+      if (!request.functionName) {
+        logSecurityEvent('validation_error', 'warning', event.path, ip, {
+          reason: 'Missing functionName for RPC operation',
+        });
+        return {
+          statusCode: 400,
+          headers,
+          body: JSON.stringify({ error: 'RPC operation requires functionName' }),
+        };
+      }
+      if (!isValidTableName(request.functionName)) {
+        logSecurityEvent('validation_error', 'warning', event.path, ip, {
+          reason: 'Invalid function name',
+          functionName: request.functionName,
+        });
+        return {
+          statusCode: 400,
+          headers,
+          body: JSON.stringify({ error: 'Invalid function name. Only alphanumeric characters, underscores, and hyphens are allowed.' }),
+        };
+      }
     }
 
     // NOW check if database is configured (after validation passes)

@@ -73,6 +73,17 @@ async function databaseRequest<T = any>(request: DatabaseRequest): Promise<T> {
           throw new Error('Database endpoint not found. Please ensure Netlify Functions are deployed.');
         }
         
+        // Handle 400 (Bad Request) - client errors should not be retried
+        if (response.status === 400) {
+          const errorData = await response.json().catch(() => ({ error: 'Bad Request' }));
+          const errorMessage = errorData.error || errorData.message || 'Invalid request';
+          // Don't spam console with repeated 400 errors
+          if (import.meta.env.DEV && !hasWarnedAboutNetlify) {
+            console.warn('[Database] Bad request (400):', errorMessage);
+          }
+          throw new Error(errorMessage);
+        }
+        
         const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
         throw new Error(errorData.error || errorData.message || `Database request failed: ${response.status}`);
       }

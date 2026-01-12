@@ -22,6 +22,9 @@ interface VisitorFavoriteItem {
   updated_at: string;
 }
 
+// Circuit breaker: Skip RPC if it fails (function doesn't exist)
+let rpcFunctionAvailable: boolean | null = null;
+
 /**
  * Ensure visitor exists in database (create if doesn't exist)
  */
@@ -30,25 +33,37 @@ async function ensureVisitor(): Promise<void> {
   
   try {
     // Try to call the database function to get or create visitor
-    try {
-      await db.rpc('get_or_create_visitor', {
-        p_visitor_id: visitorId
-      });
-    } catch (rpcError) {
-      // If function doesn't exist, try direct insert/update via database proxy
-      const existing = await db.selectOne('visitors', { visitor_id: visitorId });
-
-      if (!existing) {
-        await db.insert('visitors', {
-          visitor_id: visitorId,
-          first_visit_at: new Date().toISOString(),
-          last_visit_at: new Date().toISOString()
+    // Skip if we know RPC function is not available
+    if (rpcFunctionAvailable !== false) {
+      try {
+        await db.rpc('get_or_create_visitor', {
+          p_visitor_id: visitorId
         });
-      } else {
-        await db.update('visitors', { visitor_id: visitorId }, {
-          last_visit_at: new Date().toISOString()
-        });
+        rpcFunctionAvailable = true; // Mark as available on success
+        return; // Success - early return
+      } catch (rpcError) {
+        // If RPC fails with 400/404, mark as unavailable and fall through to fallback
+        const errorMsg = rpcError instanceof Error ? rpcError.message : String(rpcError);
+        if (errorMsg.includes('400') || errorMsg.includes('404') || errorMsg.includes('function') || errorMsg.includes('not found')) {
+          rpcFunctionAvailable = false; // Mark as unavailable
+        }
+        // Fall through to fallback method
       }
+    }
+
+    // Fallback: direct insert/update via database proxy
+    const existing = await db.selectOne('visitors', { visitor_id: visitorId });
+
+    if (!existing) {
+      await db.insert('visitors', {
+        visitor_id: visitorId,
+        first_visit_at: new Date().toISOString(),
+        last_visit_at: new Date().toISOString()
+      });
+    } else {
+      await db.update('visitors', { visitor_id: visitorId }, {
+        last_visit_at: new Date().toISOString()
+      });
     }
   } catch (error) {
     // Only log if it's not the expected "Netlify unavailable" error in dev mode
