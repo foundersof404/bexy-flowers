@@ -15,6 +15,108 @@ export interface FlowerTypeWithColors extends FlowerType {
   colors: FlowerColor[];
 }
 
+// Flower Type Categories (Parent types like "Roses", "Tulips")
+export interface FlowerTypeCategory {
+  id: string;
+  name: string;
+  display_name: string;
+  description?: string;
+  icon?: string;
+  display_order: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+// ==================== Flower Type Categories ====================
+
+/**
+ * Get all flower type categories
+ */
+export async function getFlowerTypeCategories(): Promise<FlowerTypeCategory[]> {
+  const { data, error } = await supabase
+    .from('flower_type_categories')
+    .select('*')
+    .order('display_order', { ascending: true });
+
+  if (error) {
+    throw new Error(`Failed to fetch flower type categories: ${error.message}`);
+  }
+
+  return data || [];
+}
+
+/**
+ * Get active flower type categories
+ */
+export async function getActiveFlowerTypeCategories(): Promise<FlowerTypeCategory[]> {
+  const { data, error } = await supabase
+    .from('flower_type_categories')
+    .select('*')
+    .eq('is_active', true)
+    .order('display_order', { ascending: true });
+
+  if (error) {
+    throw new Error(`Failed to fetch active flower type categories: ${error.message}`);
+  }
+
+  return data || [];
+}
+
+/**
+ * Create a new flower type category
+ */
+export async function createFlowerTypeCategory(
+  category: Omit<FlowerTypeCategory, 'id' | 'created_at' | 'updated_at'>
+): Promise<FlowerTypeCategory> {
+  const { data, error } = await supabase
+    .from('flower_type_categories')
+    .insert(category)
+    .select()
+    .single();
+
+  if (error) {
+    throw new Error(`Failed to create flower type category: ${error.message}`);
+  }
+
+  return data;
+}
+
+/**
+ * Update a flower type category
+ */
+export async function updateFlowerTypeCategory(
+  id: string,
+  updates: Partial<Omit<FlowerTypeCategory, 'id' | 'created_at' | 'updated_at'>>
+): Promise<FlowerTypeCategory> {
+  const { data, error } = await supabase
+    .from('flower_type_categories')
+    .update({ ...updates, updated_at: new Date().toISOString() })
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) {
+    throw new Error(`Failed to update flower type category: ${error.message}`);
+  }
+
+  return data;
+}
+
+/**
+ * Delete a flower type category
+ */
+export async function deleteFlowerTypeCategory(id: string): Promise<void> {
+  const { error } = await supabase
+    .from('flower_type_categories')
+    .delete()
+    .eq('id', id);
+
+  if (error) {
+    throw new Error(`Failed to delete flower type category: ${error.message}`);
+  }
+}
+
 // ==================== Flower Types ====================
 
 /**
@@ -31,6 +133,24 @@ export async function getFlowerTypes(): Promise<FlowerType[]> {
   }
 
   return data;
+}
+
+/**
+ * Get flower types by category
+ */
+export async function getFlowerTypesByCategory(categoryId: string): Promise<FlowerType[]> {
+  const { data, error } = await supabase
+    .from('flower_types')
+    .select('*')
+    .eq('category_id', categoryId)
+    .eq('is_active', true)
+    .order('name', { ascending: true });
+
+  if (error) {
+    throw new Error(`Failed to fetch flower types by category: ${error.message}`);
+  }
+
+  return data || [];
 }
 
 /**
@@ -242,6 +362,13 @@ export interface CustomizeFlower {
   description: string;
   category: string;
   seasons?: string[]; // Can be enhanced with database column
+  availabilityMode?: 'specific' | 'mix' | 'both'; // Where the flower appears in Customize page
+  categoryId?: string; // Flower type category ID
+  categoryName?: string; // Category name (e.g., "roses")
+  categoryDisplayName?: string; // Category display name (e.g., "Roses")
+  categoryIcon?: string; // Category icon (e.g., "🌹")
+  quantity: number; // Available quantity in stock
+  filterCategories?: string[]; // Filter categories: popular, romantic, minimal, luxury, seasonal
 }
 
 // Season mapping based on flower families (can be moved to database later)
@@ -268,11 +395,19 @@ const SEASON_MAPPING: Record<string, string[]> = {
  * Only returns active flowers with quantity > 0
  */
 export async function getFlowersForCustomize(): Promise<CustomizeFlower[]> {
-  // Fetch all active flower types with quantity > 0
+  // Fetch all active flower types with quantity > 0, including category information
   // Each flower_type now represents an individual flower variant
   const { data: flowerTypes, error: typesError } = await supabase
     .from('flower_types')
-    .select('*')
+    .select(`
+      *,
+      flower_type_categories (
+        id,
+        name,
+        display_name,
+        icon
+      )
+    `)
     .eq('is_active', true)
     .gt('quantity', 0)
     .order('name', { ascending: true });
@@ -386,16 +521,29 @@ export async function getFlowersForCustomize(): Promise<CustomizeFlower[]> {
     
     seenIds.add(mapping.id);
     
+    // Extract category information if available
+    const category = (flowerType as any).flower_type_categories;
+    
+    // Use category name as family if available, otherwise fallback to mapping
+    const familyName = category?.name || mapping.family;
+    
     flowers.push({
       id: mapping.id,
       name: flowerType.name,
       price: flowerType.price_per_stem,
-      family: mapping.family,
+      family: familyName, // Use category name if available
       colorName: mapping.colorName,
       imageUrl: flowerType.image_url || '',
       description: flowerType.title || flowerType.name,
-      category: mapping.family,
-      seasons: SEASON_MAPPING[mapping.family] || ['all-year'],
+      category: familyName, // Use category name if available
+      seasons: SEASON_MAPPING[familyName] || SEASON_MAPPING[mapping.family] || ['all-year'],
+      availabilityMode: (flowerType.availability_mode as 'specific' | 'mix' | 'both') || 'both',
+      categoryId: category?.id,
+      categoryName: category?.name,
+      categoryDisplayName: category?.display_name,
+      categoryIcon: category?.icon,
+      quantity: flowerType.quantity || 0, // Include quantity from database
+      filterCategories: (flowerType.filter_categories as string[]) || [], // Include filter categories
     });
   }
 

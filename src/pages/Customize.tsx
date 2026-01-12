@@ -268,6 +268,9 @@ const Customize: React.FC = () => {
         family: f.family,
         colorName: f.colorName,
         seasons: (f.seasons || []) as Season[],
+        availabilityMode: f.availabilityMode, // IMPORTANT: Include availability mode for filtering
+        quantity: f.quantity, // Include quantity for stock validation
+        filterCategories: f.filterCategories, // Include filter categories for filtering
       });
     });
     
@@ -284,7 +287,6 @@ const Customize: React.FC = () => {
   }, [generatedImage]);
 
   // Intersection Observer for lazy loading video only when visible (mobile only)
-  // PERFORMANCE FIX: Keep observer active to pause/resume video
   useEffect(() => {
     if (!isMobile) return;
 
@@ -294,19 +296,8 @@ const Customize: React.FC = () => {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting) {
+          if (entry.isIntersecting && !shouldLoadVideo) {
             setShouldLoadVideo(true);
-            // PERFORMANCE FIX: Play video when visible
-            if (videoRef.current && shouldLoadVideo) {
-              videoRef.current.play().catch(() => {
-                // Auto-play prevented
-              });
-            }
-          } else {
-            // PERFORMANCE FIX: Pause video when not visible to save resources
-            if (videoRef.current && shouldLoadVideo) {
-              videoRef.current.pause();
-            }
           }
         });
       },
@@ -596,17 +587,43 @@ const Customize: React.FC = () => {
 
   // Handlers
   const handleAddFlower = (flower: EnhancedFlower) => {
+    // Check if flower has available quantity
+    const availableQuantity = flower.quantity ?? 0;
+    if (availableQuantity <= 0) {
+      toast.error(`${flower.name} is currently out of stock`);
+      return;
+    }
+
     if (flowerMode === "specific") {
       // Specific Variety: Set to max flowers (only one flower type allowed)
+      // But limit to available quantity
+      const quantityToSet = Math.min(maxFlowers, availableQuantity);
+      if (quantityToSet <= 0) {
+        toast.error(`${flower.name} is currently out of stock`);
+        return;
+      }
       setSelectedFlowers({
         [flower.id]: {
           flower,
-          quantity: maxFlowers
+          quantity: quantityToSet
         }
       });
+      if (quantityToSet < maxFlowers) {
+        toast.warning(`Only ${quantityToSet} ${flower.name}${quantityToSet === 1 ? ' is' : ' are'} available (requested ${maxFlowers})`);
+      }
     } else {
       // Mix & Match: Add one at a time, but check max
-      if (!canAddMore) return; // Don't add if max reached
+      if (!canAddMore) {
+        toast.warning(`Maximum ${maxFlowers} flowers allowed for this bouquet size`);
+        return;
+      }
+      
+      const currentQuantity = selectedFlowers[flower.id]?.quantity || 0;
+      if (currentQuantity >= availableQuantity) {
+        toast.warning(`Only ${availableQuantity} ${flower.name}${availableQuantity === 1 ? ' is' : ' are'} available`);
+        return;
+      }
+
       setSelectedFlowers(prev => ({
         ...prev,
         [flower.id]: {
@@ -1040,22 +1057,6 @@ const Customize: React.FC = () => {
     fall: { label: "Fall", icon: "🍂", color: "bg-orange-100 text-orange-700 border-orange-300" },
     winter: { label: "Winter", icon: "❄️", color: "bg-blue-100 text-blue-700 border-blue-300" },
     "all-year": { label: "All Year", icon: "🌿", color: "bg-gray-100 border-gray-300", style: { color: '#2c2d2a', fontFamily: "'EB Garamond', serif" } }
-  };
-
-  
-
-  // Flower categories mapping - maps filter categories to flower families
-  // Popular: Most commonly requested flowers
-  // Romantic: Red, pink, white roses (not blue/yellow), peonies, lilies, pink/red/white tulips, pink/white orchids
-  // Minimal: Simple, delicate filler flowers - gypsum, daisies, lavender
-  // Luxury: Premium, expensive flowers - orchids, peonies, hydrangeas, lilies
-  // Seasonal: Empty array - seasonal filter shows ALL flowers, then filters by season
-  const flowerCategories: Record<string, string[]> = {
-    popular: ["roses", "tulips", "carnation"],
-    romantic: ["roses", "peonies", "lily", "tulips", "orchid"], // Will filter by color in logic
-    minimal: ["gypsum", "daisies", "lavender"],
-    luxury: ["orchid", "peonies", "hydrangea", "lily"],
-    seasonal: [] // Empty - seasonal filter shows ALL flowers
   };
 
   // ⚡ PERFORMANCE: Memoize recommended flowers to prevent recalculation
@@ -1733,21 +1734,25 @@ const Customize: React.FC = () => {
                           {availableFlowers
                             .filter(f => recommendedFlowerIds.includes(f.id))
                             .slice(0, 4)
-                            .map(flower => (
-                              <button
-                                key={flower.id}
-                                onClick={() => handleAddFlower(flower)}
-                                disabled={flowerMode === "mix" && !canAddMore}
-                                className={`px-3 py-1.5 bg-white border rounded-lg text-xs font-normal transition-all ${
-                                  flowerMode === "mix" && !canAddMore
-                                    ? 'border-gray-200 cursor-not-allowed'
-                                    : 'border-[#C79E48]/30 hover:bg-[#C79E48]/10 hover:border-[#C79E48]'
-                                }`}
-                                style={{ color: flowerMode === "mix" && !canAddMore ? '#9ca3af' : '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}
-                              >
-                                {flower.name}
-                              </button>
-                            ))}
+                            .map(flower => {
+                              const availableQuantity = flower.quantity ?? 0;
+                              const isOutOfStock = availableQuantity <= 0;
+                              return (
+                                <button
+                                  key={flower.id}
+                                  onClick={() => handleAddFlower(flower)}
+                                  disabled={isOutOfStock || (flowerMode === "mix" && !canAddMore)}
+                                  className={`px-3 py-1.5 bg-white border rounded-lg text-xs font-normal transition-all ${
+                                    isOutOfStock || (flowerMode === "mix" && !canAddMore)
+                                      ? 'border-gray-200 cursor-not-allowed opacity-60'
+                                      : 'border-[#C79E48]/30 hover:bg-[#C79E48]/10 hover:border-[#C79E48]'
+                                  }`}
+                                  style={{ color: isOutOfStock || (flowerMode === "mix" && !canAddMore) ? '#9ca3af' : '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}
+                                >
+                                  {flower.name} {isOutOfStock && '(Out of Stock)'}
+                                </button>
+                              );
+                            })}
                         </div>
                       </div>
                     )}
@@ -1758,14 +1763,19 @@ const Customize: React.FC = () => {
                           const qty = selectedFlowers[flower.id]?.quantity || 0;
                           const isRecommended = recommendedFlowerIds.includes(flower.id);
                           const isSelected = qty > 0;
+                          const availableQuantity = flower.quantity ?? 0;
+                          const isOutOfStock = availableQuantity <= 0;
+                          const isQuantityMaxed = flowerMode === "mix" && qty >= availableQuantity;
                           return (
                             <motion.div
                               key={flower.id}
-                              whileHover={!isSelected ? { y: -2 } : {}}
+                              whileHover={!isSelected && !isOutOfStock ? { y: -2 } : {}}
                               className={`relative p-3 rounded-xl border-2 transition-all ${
-                                isSelected
-                                  ? 'border-[#C79E48] bg-gradient-to-br from-[#C79E48]/8 to-[#C79E48]/4 shadow-md translate-y-[-2px]'
-                                  : 'border-gray-200 bg-white hover:border-[#C79E48]/50 hover:shadow-sm'
+                                isOutOfStock
+                                  ? 'border-gray-200 bg-gray-50 opacity-60'
+                                  : isSelected
+                                    ? 'border-[#C79E48] bg-gradient-to-br from-[#C79E48]/8 to-[#C79E48]/4 shadow-md translate-y-[-2px]'
+                                    : 'border-gray-200 bg-white hover:border-[#C79E48]/50 hover:shadow-sm'
                               }`}
                             >
                               {isRecommended && !isSelected && (
@@ -1780,15 +1790,23 @@ const Customize: React.FC = () => {
                                   src={flower.imageUrl}
                                   alt={flower.name}
                                   className={`w-full h-full object-cover ${
-                                    flower.seasons && 
+                                    isOutOfStock || (flower.seasons && 
                                     !flower.seasons.includes("all-year") && 
-                                    !flower.seasons.includes(currentSeason)
+                                    !flower.seasons.includes(currentSeason))
                                       ? "opacity-50 grayscale-[30%]" 
                                       : ""
                                   }`}
                                 />
+                                {/* Out of Stock Overlay */}
+                                {isOutOfStock && (
+                                  <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center p-2 z-20">
+                                    <div className="text-white text-center">
+                                      <div className="text-xs font-normal mb-1" style={{ fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>Out of Stock</div>
+                                    </div>
+                                  </div>
+                                )}
                                 {/* Out of Season Overlay */}
-                                {flower.seasons && 
+                                {!isOutOfStock && flower.seasons && 
                                  !flower.seasons.includes("all-year") && 
                                  !flower.seasons.includes(currentSeason) && (
                                   <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center p-2 z-20">
@@ -1812,7 +1830,14 @@ const Customize: React.FC = () => {
                               </div>
                               
                               <div className="text-xs font-normal mb-1" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>{flower.name}</div>
-                              <div className="text-xs font-normal mb-2" style={{ color: '#C79E48', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>${flower.price.toFixed(2)}</div>
+                              <div className="flex items-center justify-between mb-2">
+                                <div className="text-xs font-normal" style={{ color: '#C79E48', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>${flower.price.toFixed(2)}</div>
+                                {!isOutOfStock && availableQuantity > 0 && (
+                                  <div className="text-[10px] font-normal" style={{ color: '#6b7280', fontFamily: "'EB Garamond', serif" }}>
+                                    {availableQuantity} {availableQuantity === 1 ? 'left' : 'left'}
+                                  </div>
+                                )}
+                              </div>
                               
                               {qty > 0 ? (
                                 flowerMode === "specific" ? (
@@ -1834,12 +1859,13 @@ const Customize: React.FC = () => {
                                     <span className="font-normal text-sm" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>{qty}</span>
                                     <button 
                                       onClick={() => handleAddFlower(flower)} 
-                                      disabled={!canAddMore}
+                                      disabled={!canAddMore || isQuantityMaxed}
                                       className={`w-7 h-7 rounded-full flex items-center justify-center transition-colors ${
-                                        canAddMore 
+                                        canAddMore && !isQuantityMaxed
                                           ? 'bg-[#C79E48] text-white hover:bg-[#b08d45]' 
                                           : 'bg-gray-300 text-gray-400 cursor-not-allowed'
                                       }`}
+                                      title={isQuantityMaxed ? `Only ${availableQuantity} available` : undefined}
                                     >
                                       <Plus className="w-3 h-3" />
                                     </button>
@@ -1848,15 +1874,21 @@ const Customize: React.FC = () => {
                               ) : (
                                 <button
                                   onClick={() => handleAddFlower(flower)}
-                                  disabled={flowerMode === "mix" && !canAddMore}
+                                  disabled={isOutOfStock || (flowerMode === "mix" && !canAddMore)}
                                   className={`w-full py-1.5 rounded-lg text-xs font-normal transition-colors ${
-                                    flowerMode === "mix" && !canAddMore
+                                    isOutOfStock || (flowerMode === "mix" && !canAddMore)
                                       ? 'bg-gray-200 cursor-not-allowed'
                                       : 'bg-gray-100 hover:bg-[#C79E48] hover:text-white'
                                   }`}
-                                  style={{ color: flowerMode === "mix" && !canAddMore ? '#9ca3af' : '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}
+                                  style={{ color: isOutOfStock || (flowerMode === "mix" && !canAddMore) ? '#9ca3af' : '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}
                                 >
-                                  {flowerMode === "specific" ? "Select" : canAddMore ? "Add" : "Max Reached"}
+                                  {isOutOfStock 
+                                    ? "Out of Stock" 
+                                    : flowerMode === "specific" 
+                                      ? "Select" 
+                                      : canAddMore 
+                                        ? "Add" 
+                                        : "Max Reached"}
                                 </button>
                               )}
                             </motion.div>

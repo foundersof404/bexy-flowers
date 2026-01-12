@@ -120,14 +120,157 @@ const UltraCategories = () => {
     });
   };
 
+  // Scroll-reveal animations for title and description
   useEffect(() => {
     const title = titleRef.current;
-    const container = containerRef.current;
+    const section = sectionRef.current;
 
-    if (title && container) {
-      // Set initial states - visible immediately (no scroll animation)
-      gsap.set(title, { y: 0, opacity: 1 });
-      gsap.set(container, { y: 0, opacity: 1 });
+    if (title && section) {
+      const ctx = gsap.context(() => {
+        // Animate title on scroll
+        gsap.fromTo(
+          title,
+          { y: 50, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 1,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: section,
+              start: "top 80%",
+              toggleActions: "play none none none",
+            },
+          }
+        );
+
+        // Animate description on scroll
+        const description = section.querySelector('p');
+        if (description) {
+          gsap.fromTo(
+            description,
+            { y: 30, opacity: 0 },
+            {
+              y: 0,
+              opacity: 1,
+              duration: 0.8,
+              delay: 0.2,
+              ease: "power2.out",
+              scrollTrigger: {
+                trigger: section,
+                start: "top 80%",
+                toggleActions: "play none none none",
+              },
+            }
+          );
+        }
+      }, section);
+
+      return () => ctx.revert();
+    }
+  }, []);
+
+  // Scroll-reveal animations for category cards (desktop)
+  useEffect(() => {
+    const container = containerRef.current;
+    const section = sectionRef.current;
+
+    if (container && section) {
+      const ctx = gsap.context(() => {
+        // Get first set of cards (not duplicates)
+        const cards = container.querySelectorAll('.category-card-desktop');
+        
+        if (cards.length > 0) {
+          gsap.fromTo(
+            cards,
+            {
+              y: 60,
+              opacity: 0,
+              scale: 0.95,
+            },
+            {
+              y: 0,
+              opacity: 1,
+              scale: 1,
+              duration: 0.8,
+              stagger: 0.1,
+              ease: "power2.out",
+              scrollTrigger: {
+                trigger: container,
+                start: "top 75%",
+                toggleActions: "play none none none",
+              },
+            }
+          );
+        }
+      }, section);
+
+      return () => ctx.revert();
+    }
+  }, []);
+
+  // Scroll-reveal animations for category cards (mobile)
+  useEffect(() => {
+    const row1 = mobileRow1Ref.current;
+    const row2 = mobileRow2Ref.current;
+    const section = sectionRef.current;
+
+    if ((row1 || row2) && section) {
+      const ctx = gsap.context(() => {
+        // Animate row 1 cards
+        if (row1) {
+          const cards1 = row1.querySelectorAll('.category-card-mobile');
+          if (cards1.length > 0) {
+            gsap.fromTo(
+              cards1,
+              {
+                x: -50,
+                opacity: 0,
+              },
+              {
+                x: 0,
+                opacity: 1,
+                duration: 0.6,
+                stagger: 0.08,
+                ease: "power2.out",
+                scrollTrigger: {
+                  trigger: row1,
+                  start: "top 85%",
+                  toggleActions: "play none none none",
+                },
+              }
+            );
+          }
+        }
+
+        // Animate row 2 cards
+        if (row2) {
+          const cards2 = row2.querySelectorAll('.category-card-mobile');
+          if (cards2.length > 0) {
+            gsap.fromTo(
+              cards2,
+              {
+                x: 50,
+                opacity: 0,
+              },
+              {
+                x: 0,
+                opacity: 1,
+                duration: 0.6,
+                stagger: 0.08,
+                ease: "power2.out",
+                scrollTrigger: {
+                  trigger: row2,
+                  start: "top 85%",
+                  toggleActions: "play none none none",
+                },
+              }
+            );
+          }
+        }
+      }, section);
+
+      return () => ctx.revert();
     }
   }, []);
 
@@ -281,7 +424,7 @@ const UltraCategories = () => {
             {[...categories, ...categories].map((category, index) => (
               <div
                 key={`${category.id}-${index}`}
-                className="flex-shrink-0 w-80 h-96 group cursor-pointer"
+                className={`flex-shrink-0 w-80 h-96 group cursor-pointer ${index < categories.length ? 'category-card-desktop' : ''}`}
                 onClick={() => handleExplore(category.filterValue)}
                   style={{ 
                     willChange: 'transform',
@@ -399,7 +542,7 @@ const UltraCategories = () => {
               {[...categories.slice(0, 5), ...categories.slice(0, 5), ...categories.slice(0, 5)].map((category, index) => (
                 <div
                   key={`row1-${category.id}-${index}`}
-                  className="flex-shrink-0 w-[196px] h-56 group cursor-pointer"
+                  className={`flex-shrink-0 w-[196px] h-56 group cursor-pointer ${index < 5 ? 'category-card-mobile' : ''}`}
                   onClick={() => handleExplore(category.filterValue)}
                   style={{ 
                     willChange: 'transform',
@@ -478,7 +621,7 @@ const UltraCategories = () => {
               {[...categories.slice(5, 9), ...categories.slice(5, 9), ...categories.slice(5, 9)].map((category, index) => (
                 <div
                   key={`row2-${category.id}-${index}`}
-                  className="flex-shrink-0 w-[196px] h-56 group cursor-pointer"
+                  className={`flex-shrink-0 w-[196px] h-56 group cursor-pointer ${index < 4 ? 'category-card-mobile' : ''}`}
                   onClick={() => handleExplore(category.filterValue)}
                   style={{ 
                     willChange: 'transform',
