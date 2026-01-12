@@ -397,10 +397,20 @@ const SEASON_MAPPING: Record<string, string[]> = {
 export async function getFlowersForCustomize(): Promise<CustomizeFlower[]> {
   // Fetch all active flower types with quantity > 0, including category information
   // Each flower_type now represents an individual flower variant
+  // BACKWARD COMPATIBLE: Handles cases where new columns don't exist yet
   const { data: flowerTypes, error: typesError } = await supabase
     .from('flower_types')
     .select(`
-      *,
+      id,
+      name,
+      title,
+      price_per_stem,
+      image_url,
+      quantity,
+      is_active,
+      availability_mode,
+      category_id,
+      filter_categories,
       flower_type_categories (
         id,
         name,
@@ -413,13 +423,46 @@ export async function getFlowersForCustomize(): Promise<CustomizeFlower[]> {
     .order('name', { ascending: true });
 
   if (typesError) {
+    // BACKWARD COMPATIBLE: If error is due to missing columns, try without them
+    if (typesError.message.includes('column') || typesError.message.includes('does not exist')) {
+      console.warn('[getFlowersForCustomize] New columns not available, using basic query:', typesError.message);
+      
+      // Fallback query without new columns
+      const { data: fallbackFlowerTypes, error: fallbackError } = await supabase
+        .from('flower_types')
+        .select('id, name, title, price_per_stem, image_url, quantity, is_active')
+        .eq('is_active', true)
+        .gt('quantity', 0)
+        .order('name', { ascending: true });
+      
+      if (fallbackError) {
+        throw new Error(`Failed to fetch flower types: ${fallbackError.message}`);
+      }
+      
+      if (!fallbackFlowerTypes || fallbackFlowerTypes.length === 0) {
+        return [];
+      }
+      
+      // Map fallback data without new fields
+      return mapFlowerTypesToCustomizeFlowers(fallbackFlowerTypes, true);
+    }
+    
     throw new Error(`Failed to fetch flower types: ${typesError.message}`);
   }
 
   if (!flowerTypes || flowerTypes.length === 0) {
     return [];
   }
+  
+  return mapFlowerTypesToCustomizeFlowers(flowerTypes, false);
+}
 
+/**
+ * Helper function to map flower types to CustomizeFlower format
+ * @param flowerTypes - Array of flower types from database
+ * @param isLegacy - Whether this is legacy data without new columns
+ */
+function mapFlowerTypesToCustomizeFlowers(flowerTypes: any[], isLegacy: boolean): CustomizeFlower[] {
   // Map each flower_type directly to CustomizeFlower format
   const flowers: CustomizeFlower[] = [];
   
@@ -521,13 +564,14 @@ export async function getFlowersForCustomize(): Promise<CustomizeFlower[]> {
     
     seenIds.add(mapping.id);
     
-    // Extract category information if available
-    const category = (flowerType as any).flower_type_categories;
+    // Extract category information if available (only for new schema)
+    const category = !isLegacy ? (flowerType as any).flower_type_categories : null;
     
     // Use category name as family if available, otherwise fallback to mapping
     const familyName = category?.name || mapping.family;
     
-    flowers.push({
+    // BACKWARD COMPATIBLE: Handle both legacy and new schema
+    const flowerData: CustomizeFlower = {
       id: mapping.id,
       name: flowerType.name,
       price: flowerType.price_per_stem,
@@ -537,14 +581,20 @@ export async function getFlowersForCustomize(): Promise<CustomizeFlower[]> {
       description: flowerType.title || flowerType.name,
       category: familyName, // Use category name if available
       seasons: SEASON_MAPPING[familyName] || SEASON_MAPPING[mapping.family] || ['all-year'],
-      availabilityMode: (flowerType.availability_mode as 'specific' | 'mix' | 'both') || 'both',
-      categoryId: category?.id,
-      categoryName: category?.name,
-      categoryDisplayName: category?.display_name,
-      categoryIcon: category?.icon,
+      availabilityMode: !isLegacy ? ((flowerType.availability_mode as 'specific' | 'mix' | 'both') || 'both') : 'both',
       quantity: flowerType.quantity || 0, // Include quantity from database
-      filterCategories: (flowerType.filter_categories as string[]) || [], // Include filter categories
-    });
+    };
+    
+    // Add new fields only if not legacy
+    if (!isLegacy) {
+      flowerData.categoryId = category?.id;
+      flowerData.categoryName = category?.name;
+      flowerData.categoryDisplayName = category?.display_name;
+      flowerData.categoryIcon = category?.icon;
+      flowerData.filterCategories = (flowerType.filter_categories as string[]) || [];
+    }
+    
+    flowers.push(flowerData);
   }
 
   return flowers;

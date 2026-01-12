@@ -1094,6 +1094,7 @@ const Customize: React.FC = () => {
 
   // ⚡ PERFORMANCE: Memoize category filtering
   // Now uses database filter_categories instead of hardcoded mapping
+  // BACKWARD COMPATIBLE: Falls back to family-based filtering if filterCategories not available
   const categoryFiltered = useMemo(() => {
     if (flowerFilter === "all" || flowerFilter === "seasonal") {
       return filteredFlowers;
@@ -1101,9 +1102,26 @@ const Customize: React.FC = () => {
     
     // Filter by database filter_categories array
     return filteredFlowers.filter(f => {
-      // If flower has no filter categories defined, don't show it (unless "all" is selected)
+      // BACKWARD COMPATIBLE: If filterCategories not available, use legacy family-based filtering
       if (!f.filterCategories || f.filterCategories.length === 0) {
-        return false;
+        // Legacy fallback mapping
+        const legacyCategories: Record<string, string[]> = {
+          popular: ["roses", "tulips", "carnation"],
+          romantic: ["roses", "peonies", "lily", "tulips", "orchid"],
+          minimal: ["gypsum", "daisies", "lavender"],
+          luxury: ["orchid", "peonies", "hydrangea", "lily"],
+        };
+        
+        const families = legacyCategories[flowerFilter] || [];
+        if (!families.includes(f.family)) return false;
+        
+        // Additional color-based filtering for romantic category
+        if (flowerFilter === "romantic") {
+          if (f.family === "roses" && (f.colorName === "blue" || f.colorName === "yellow")) return false;
+          if (f.family === "tulips" && !["red", "pink", "white"].includes(f.colorName)) return false;
+        }
+        
+        return true;
       }
       
       // Check if the flower's filterCategories includes the selected filter
