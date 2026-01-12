@@ -14,6 +14,10 @@ export const useSmoothScroll = () => {
   const isActiveRef = useRef<boolean>(true);
 
   useEffect(() => {
+    // ⚡ PERFORMANCE FIX: DISABLE LENIS SMOOTH SCROLL TO STOP INFINITE requestAnimationFrame LOOP
+    // This was causing "Page Unresponsive" errors by running continuously
+    console.log('⚠️ Lenis smooth scroll is DISABLED for performance');
+    
     // ⚡ PERFORMANCE: Configure ScrollTrigger for better performance
     ScrollTrigger.config({
       autoRefreshEvents: "visibilitychange,DOMContentLoaded,load",
@@ -85,41 +89,16 @@ export const useSmoothScroll = () => {
       }
     };
     
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-
-    // Update ScrollTrigger when Lenis scrolls
-    ScrollTrigger.scrollerProxy(document.body, {
-      scrollTop(value) {
-        if (arguments.length && lenisRef.current) {
-          lenisRef.current.scrollTo(value, { immediate: true });
-        }
-        return lenisRef.current?.scroll || 0;
-      },
-      getBoundingClientRect() {
-        return {
-          top: 0,
-          left: 0,
-          width: window.innerWidth,
-          height: window.innerHeight,
-        };
-      },
-    });
-
     return () => {
-      isActiveRef.current = false; // Stop the RAF loop
-      
-      // Remove visibility change listener
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      isActiveRef.current = false;
       
       if (rafIdRef.current !== null) {
         cancelAnimationFrame(rafIdRef.current);
         rafIdRef.current = null;
       }
       
-      // Remove scroll listener before destroying
       if (lenisRef.current) {
         try {
-          lenisRef.current.off('scroll', updateScrollTrigger);
           lenisRef.current.destroy();
         } catch (error) {
           console.error('Error destroying Lenis:', error);
@@ -127,15 +106,8 @@ export const useSmoothScroll = () => {
         lenisRef.current = null;
       }
       
-      if (globalLenis === lenis) {
+      if (globalLenis) {
         globalLenis = null;
-      }
-      
-      // Clean up ScrollTrigger proxy
-      try {
-        ScrollTrigger.scrollerProxy(document.body, null);
-      } catch (error) {
-        // Ignore if already cleaned up
       }
     };
   }, []);
@@ -144,7 +116,13 @@ export const useSmoothScroll = () => {
 };
 
 export const scrollTo = (target: string | number, options?: any) => {
-  if (globalLenis) {
-    globalLenis.scrollTo(target, options);
+  // Fallback to native scroll since Lenis is disabled
+  if (typeof target === 'number') {
+    window.scrollTo({ top: target, behavior: 'smooth' });
+  } else {
+    const element = document.querySelector(target);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
   }
 };

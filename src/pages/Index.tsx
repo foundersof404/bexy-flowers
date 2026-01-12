@@ -78,35 +78,14 @@ const ProfessionalCustomSection = React.memo(() => {
         background: 'linear-gradient(180deg, #faf7f3 0%, #ffffff 100%)'
       }}
     >
-      {/* Optimized Floating Background Elements - Reduced for performance - Hidden on mobile */}
+      {/* Optimized Floating Background Elements - Static (removed infinite animations for performance) */}
       {!isMobile && (
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <motion.div
-            className="absolute top-20 -left-20 w-96 h-96 bg-gradient-to-br from-[#C79E48]/8 to-transparent rounded-full blur-2xl opacity-60"
-            animate={{
-              scale: [1, 1.15, 1],
-              opacity: [0.4, 0.6, 0.4]
-            }}
-            transition={{
-              duration: 10,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-            style={{ willChange: 'transform, opacity' }}
+          <div
+            className="absolute top-20 -left-20 w-96 h-96 bg-gradient-to-br from-[#C79E48]/8 to-transparent rounded-full blur-2xl opacity-50"
           />
-          <motion.div
-            className="absolute bottom-20 -right-20 w-96 h-96 bg-gradient-to-br from-[#B88A44]/8 to-transparent rounded-full blur-2xl opacity-60"
-            animate={{
-              scale: [1.15, 1, 1.15],
-              opacity: [0.6, 0.4, 0.6]
-            }}
-            transition={{
-              duration: 10,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: 1
-            }}
-            style={{ willChange: 'transform, opacity' }}
+          <div
+            className="absolute bottom-20 -right-20 w-96 h-96 bg-gradient-to-br from-[#B88A44]/8 to-transparent rounded-full blur-2xl opacity-50"
           />
         </div>
       )}
@@ -326,25 +305,14 @@ const ProfessionalCustomSection = React.memo(() => {
                   }}
                 />
 
-                {/* Optimized Floating Particles Around Button - Reduced for performance */}
+                {/* Floating Particles - Static (removed infinite animations for performance) */}
                 {[...Array(4)].map((_, i) => (
-                  <motion.div
+                  <div
                     key={i}
-                    className="absolute w-1 h-1 rounded-full bg-[#C79E48] opacity-60"
+                    className="absolute w-1 h-1 rounded-full bg-[#C79E48] opacity-50"
                     style={{
                       top: `${20 + Math.sin(i * Math.PI / 2) * 40}%`,
-                      left: `${50 + Math.cos(i * Math.PI / 2) * 45}%`,
-                      willChange: 'transform, opacity'
-                    }}
-                    animate={{
-                      y: [0, -10, 0],
-                      opacity: [0.4, 0.8, 0.4]
-                    }}
-                    transition={{
-                      duration: 4,
-                      repeat: Infinity,
-                      delay: i * 0.4,
-                      ease: "easeInOut"
+                      left: `${50 + Math.cos(i * Math.PI / 2) * 45}%`
                     }}
                   />
                 ))}
@@ -370,41 +338,12 @@ const ProfessionalCustomSection = React.memo(() => {
               whileTap={{ scale: 0.98 }}
               transition={{ duration: 0.3 }}
             >
-            {/* Optimized Shimmer Effect */}
-            <motion.div
-              className="absolute inset-0 -left-full w-1/2 h-full pointer-events-none"
-              style={{
-                background: 'linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.3) 50%, transparent 100%)',
-                transform: 'skewX(-20deg)',
-                willChange: 'left'
-              }}
-              animate={{
-                left: ['100%', '-50%']
-              }}
-              transition={{
-                duration: 2.5,
-                repeat: Infinity,
-                ease: "linear",
-                repeatDelay: 1.5
-              }}
-            />
-
             <span className={`relative z-10 uppercase tracking-wider ${isMobile ? 'text-xs' : 'text-xs sm:text-sm md:text-base'}`}>
               Start Designing Now
             </span>
-            <motion.div
-              className="relative z-10"
-              animate={!isMobile ? {
-                x: [0, 4, 0]
-              } : {}}
-              transition={{
-                duration: 1.5,
-                repeat: Infinity,
-                ease: "easeInOut"
-              }}
-            >
+            <div className="relative z-10">
               <ArrowRight className={isMobile ? "w-3 h-3" : "w-4 h-4 sm:w-5 sm:h-5"} strokeWidth={2.5} />
-            </motion.div>
+            </div>
             </motion.a>
 
             {/* Trust Badge - Hidden on mobile */}
@@ -439,7 +378,7 @@ const Index = () => {
       <UltraNavigation />
       <div className="relative z-10">
         <Suspense fallback={<HeroSkeleton />}>
-          <CarouselHero />
+          <CarouselHero isHomepage={true} />
         </Suspense>
         <LazySection rootMargin="400px 0px">
           <Suspense fallback={<FeaturedBouquetsSkeleton />}>

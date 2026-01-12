@@ -284,6 +284,7 @@ const Customize: React.FC = () => {
   }, [generatedImage]);
 
   // Intersection Observer for lazy loading video only when visible (mobile only)
+  // PERFORMANCE FIX: Keep observer active to pause/resume video
   useEffect(() => {
     if (!isMobile) return;
 
@@ -293,8 +294,19 @@ const Customize: React.FC = () => {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting && !shouldLoadVideo) {
+          if (entry.isIntersecting) {
             setShouldLoadVideo(true);
+            // PERFORMANCE FIX: Play video when visible
+            if (videoRef.current && shouldLoadVideo) {
+              videoRef.current.play().catch(() => {
+                // Auto-play prevented
+              });
+            }
+          } else {
+            // PERFORMANCE FIX: Pause video when not visible to save resources
+            if (videoRef.current && shouldLoadVideo) {
+              videoRef.current.pause();
+            }
           }
         });
       },
@@ -572,6 +584,7 @@ const Customize: React.FC = () => {
     };
   }, [totalPrice]);
 
+<<<<<<< HEAD
   // ⚡ PERFORMANCE: Memoize flower count calculations
   const maxFlowers = useMemo(() => selectedSize?.maxFlowers || 10, [selectedSize?.maxFlowers]);
   
@@ -581,6 +594,18 @@ const Customize: React.FC = () => {
   
   const canAddMore = useMemo(() => currentTotalFlowers < maxFlowers, [currentTotalFlowers, maxFlowers]);
   const remainingSlots = useMemo(() => maxFlowers - currentTotalFlowers, [maxFlowers, currentTotalFlowers]);
+=======
+  // Get max flowers for current size
+  const maxFlowers = selectedSize?.maxFlowers || 10;
+
+  // Calculate current total flowers - PERFORMANCE FIX: Memoized
+  const currentTotalFlowers = useMemo(() => 
+    Object.values(selectedFlowers).reduce((acc, curr) => acc + curr.quantity, 0),
+    [selectedFlowers]
+  );
+  const canAddMore = currentTotalFlowers < maxFlowers;
+  const remainingSlots = maxFlowers - currentTotalFlowers;
+>>>>>>> a82d65413c0130d86a4d6fafa587744f918f3ea6
 
   // Handlers
   const handleAddFlower = (flower: EnhancedFlower) => {
@@ -1030,6 +1055,8 @@ const Customize: React.FC = () => {
     "all-year": { label: "All Year", icon: "🌿", color: "bg-gray-100 border-gray-300", style: { color: '#2c2d2a', fontFamily: "'EB Garamond', serif" } }
   };
 
+  
+
   // Flower categories mapping - maps filter categories to flower families
   // Popular: Most commonly requested flowers
   // Romantic: Red, pink, white roses (not blue/yellow), peonies, lilies, pink/red/white tulips, pink/white orchids
@@ -1057,29 +1084,42 @@ const Customize: React.FC = () => {
 
   // ⚡ PERFORMANCE: Memoize filtered flowers to prevent expensive recalculations
   const filteredFlowers = useMemo(() => {
+    // Filter by availability mode first
+    let modeFilteredFlowers = flowers;
+    if (flowerMode === "specific") {
+      // Show only flowers available in "specific" or "both" modes
+      modeFilteredFlowers = flowers.filter(f => 
+        !f.availabilityMode || f.availabilityMode === 'specific' || f.availabilityMode === 'both'
+      );
+    } else if (flowerMode === "mix") {
+      // Show only flowers available in "mix" or "both" modes
+      modeFilteredFlowers = flowers.filter(f => 
+        !f.availabilityMode || f.availabilityMode === 'mix' || f.availabilityMode === 'both'
+      );
+    }
+    
+    // Then filter by family if in specific mode
     return flowerMode === "specific" && selectedFamily
-      ? flowers.filter(f => f.family === selectedFamily)
-      : flowers;
+      ? modeFilteredFlowers.filter(f => f.family === selectedFamily)
+      : modeFilteredFlowers;
   }, [flowers, flowerMode, selectedFamily]);
 
   // ⚡ PERFORMANCE: Memoize category filtering
+  // Now uses database filter_categories instead of hardcoded mapping
   const categoryFiltered = useMemo(() => {
     if (flowerFilter === "all" || flowerFilter === "seasonal") {
       return filteredFlowers;
     }
-    const families = flowerCategories[flowerFilter] || [];
+    
+    // Filter by database filter_categories array
     return filteredFlowers.filter(f => {
-      if (!families.includes(f.family)) return false;
-      
-      // Additional color-based filtering for specific categories
-      if (flowerFilter === "romantic") {
-        // Romantic: Exclude blue, yellow roses (not romantic colors)
-        if (f.family === "roses" && (f.colorName === "blue" || f.colorName === "yellow")) return false;
-        // Romantic tulips: red, pink, white (exclude blue, yellow, peach)
-        if (f.family === "tulips" && !["red", "pink", "white"].includes(f.colorName)) return false;
+      // If flower has no filter categories defined, don't show it (unless "all" is selected)
+      if (!f.filterCategories || f.filterCategories.length === 0) {
+        return false;
       }
       
-      return true;
+      // Check if the flower's filterCategories includes the selected filter
+      return f.filterCategories.includes(flowerFilter);
     });
   }, [filteredFlowers, flowerFilter]);
 

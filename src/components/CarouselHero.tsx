@@ -23,12 +23,18 @@ interface SlideData {
   bgColor: string;
 }
 
+interface CarouselHeroProps {
+  slidesToShow?: SlideData[];
+  isHomepage?: boolean;
+}
+
 // Helper function to get image path
 const getImagePath = (imageName: string) => {
   return `/assets/hero_section/${imageName}`;
 };
 
-const slides: SlideData[] = [
+// All slides (used by Collection page)
+const allSlides: SlideData[] = [
   {
     id: 'romantic',
     title: 'Romantic',
@@ -67,7 +73,20 @@ const slides: SlideData[] = [
   }
 ];
 
-const CarouselHero = () => {
+// Homepage slide (single slide for desktop) - Brand-focused content
+const homepageSlides: SlideData[] = [
+  {
+    id: 'bexy-brand',
+    title: 'Bexy Flowers',
+    price: '',
+    contentTitle: 'Lebanon\'s Premier Luxury Florist',
+    contentSubtitle: 'Bexy Flowers represents the pinnacle of floral artistry in Lebanon. We craft extraordinary arrangements that elevate every moment with sophistication, elegance, and timeless beauty. Experience the art of premium floristry.',
+    productImage: getImagePath('image3.webp'),
+    bgColor: '#b6d6c8'
+  }
+];
+
+const CarouselHero = ({ slidesToShow, isHomepage = false }: CarouselHeroProps = {}) => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const swiperRef = useRef<SwiperType | null>(null);
@@ -77,6 +96,10 @@ const CarouselHero = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isVideoVisible, setIsVideoVisible] = useState(false);
   const [shouldLoadVideo, setShouldLoadVideo] = useState(false);
+
+  // Determine which slides to use
+  // Homepage desktop: 1 slide, Homepage mobile: all slides, Collection: all slides
+  const slides = slidesToShow || (isHomepage && !isMobile ? homepageSlides : allSlides);
 
   // Collect all images for preloading (only productImage is actually used, bgImage is not rendered)
   const allSlideImages = slides.map(slide => slide.productImage);
@@ -107,6 +130,7 @@ const CarouselHero = () => {
   }, []);
 
   // Intersection Observer for lazy loading video only when visible
+  // PERFORMANCE FIX: Keep observer active to pause/resume video
   useEffect(() => {
     if (!isMobile) return;
 
@@ -114,17 +138,23 @@ const CarouselHero = () => {
     const targetElement = containerRef.current || videoRef.current;
     if (!targetElement) return;
 
-    // Early return if video already should load to prevent re-creating observer
-    if (shouldLoadVideo) return;
-
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             setIsVideoVisible(true);
             setShouldLoadVideo(true);
-            // Disconnect after triggering to prevent re-running
-            observer.disconnect();
+            // PERFORMANCE FIX: Play video when visible
+            if (videoRef.current && shouldLoadVideo) {
+              videoRef.current.play().catch(() => {
+                // Auto-play prevented, video will play when user interacts
+              });
+            }
+          } else {
+            // PERFORMANCE FIX: Pause video when not visible to save resources
+            if (videoRef.current && shouldLoadVideo) {
+              videoRef.current.pause();
+            }
           }
         });
       },
@@ -140,8 +170,8 @@ const CarouselHero = () => {
     return () => {
       observer.disconnect();
     };
-    // Removed shouldLoadVideo from dependencies to prevent observer recreation
-  }, [isMobile]);
+    // Include shouldLoadVideo to re-observe after video loads
+  }, [isMobile, shouldLoadVideo]);
 
   // Load and play video when it becomes visible
   useEffect(() => {
@@ -263,23 +293,23 @@ const CarouselHero = () => {
           modules={[Autoplay, Pagination, EffectFade]}
           spaceBetween={0}
           slidesPerView={1}
-          loop={true}
+          loop={slides.length > 1}
           effect="fade"
           fadeEffect={{
             crossFade: true
           }}
           speed={800}
-          autoplay={{
+          autoplay={slides.length > 1 ? {
             delay: isMobile ? 2500 : 5000,
             disableOnInteraction: false,
             pauseOnMouseEnter: true,
-          }}
-          pagination={{
+          } : false}
+          pagination={slides.length > 1 ? {
             el: '.swiper-pagination',
             type: 'fraction',
             formatFractionCurrent: (number) => String(number),
             formatFractionTotal: (number) => String(number),
-          }}
+          } : false}
           observer={true}
           observeParents={true}
           watchSlidesProgress={true}

@@ -125,8 +125,9 @@ const WeddingHero = () => {
   }, []);
 
   // Intersection Observer for lazy loading video only when visible (mobile only)
+  // PERFORMANCE FIX: Keep observer active to pause/resume video
   useEffect(() => {
-    if (!isMobile || shouldLoadVideo) return; // Early return if already loading
+    if (!isMobile) return;
 
     const targetElement = heroRef.current || videoRef.current;
     if (!targetElement) return;
@@ -136,8 +137,17 @@ const WeddingHero = () => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             setShouldLoadVideo(true);
-            // Disconnect observer once video should load to prevent re-triggering
-            observer.disconnect();
+            // PERFORMANCE FIX: Play video when visible
+            if (videoRef.current && shouldLoadVideo) {
+              videoRef.current.play().catch(() => {
+                // Auto-play prevented
+              });
+            }
+          } else {
+            // PERFORMANCE FIX: Pause video when not visible to save resources
+            if (videoRef.current && shouldLoadVideo) {
+              videoRef.current.pause();
+            }
           }
         });
       },
@@ -417,6 +427,7 @@ const ServiceSection = ({
   // Auto-rotate images every 4 seconds if multiple images provided
   // Seamless loop - no blank/blink between transitions
   // Preload all images to ensure smooth transitions
+  // PERFORMANCE FIX: Only run when section is visible
   const preloadedImagesRef = React.useRef<Set<string>>(new Set());
   
   useEffect(() => {
@@ -435,35 +446,38 @@ const ServiceSection = ({
 
     let interval: NodeJS.Timeout | null = null;
     
-    const startInterval = () => {
-      if (interval) clearInterval(interval);
-      interval = setInterval(() => {
-        // CRITICAL: Don't update if page is hidden
-        if (document.hidden) return;
-        setCurrentImageIndex((prev) => {
-          const next = (prev + 1) % imageArray.length;
-          return next;
+    // Only run interval when section is visible (PERFORMANCE FIX)
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            // Start rotation when visible
+            if (!interval) {
+              interval = setInterval(() => {
+                setCurrentImageIndex((prev) => {
+                  const next = (prev + 1) % imageArray.length;
+                  return next;
+                });
+              }, 4000);
+            }
+          } else {
+            // Stop rotation when not visible to save resources
+            if (interval) {
+              clearInterval(interval);
+              interval = null;
+            }
+          }
         });
-      }, 4000); // 4 seconds between transitions
-    };
-    
-    // CRITICAL: Pause interval when page is hidden to prevent unnecessary updates
-    const handleVisibilityChange = () => {
-      if (document.hidden) {
-        if (interval) {
-          clearInterval(interval);
-          interval = null;
-        }
-      } else {
-        startInterval();
-      }
-    };
-    
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    startInterval();
+      },
+      { threshold: 0.1, rootMargin: '50px' }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
 
     return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      observer.disconnect();
       if (interval) clearInterval(interval);
     };
   }, [imageArray]); // Depend on memoized array - will only change when images prop actually changes
