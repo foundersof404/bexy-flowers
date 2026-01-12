@@ -584,7 +584,6 @@ const Customize: React.FC = () => {
     };
   }, [totalPrice]);
 
-<<<<<<< HEAD
   // ⚡ PERFORMANCE: Memoize flower count calculations
   const maxFlowers = useMemo(() => selectedSize?.maxFlowers || 10, [selectedSize?.maxFlowers]);
   
@@ -594,18 +593,6 @@ const Customize: React.FC = () => {
   
   const canAddMore = useMemo(() => currentTotalFlowers < maxFlowers, [currentTotalFlowers, maxFlowers]);
   const remainingSlots = useMemo(() => maxFlowers - currentTotalFlowers, [maxFlowers, currentTotalFlowers]);
-=======
-  // Get max flowers for current size
-  const maxFlowers = selectedSize?.maxFlowers || 10;
-
-  // Calculate current total flowers - PERFORMANCE FIX: Memoized
-  const currentTotalFlowers = useMemo(() => 
-    Object.values(selectedFlowers).reduce((acc, curr) => acc + curr.quantity, 0),
-    [selectedFlowers]
-  );
-  const canAddMore = currentTotalFlowers < maxFlowers;
-  const remainingSlots = maxFlowers - currentTotalFlowers;
->>>>>>> a82d65413c0130d86a4d6fafa587744f918f3ea6
 
   // Handlers
   const handleAddFlower = (flower: EnhancedFlower) => {
