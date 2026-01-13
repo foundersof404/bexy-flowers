@@ -31,23 +31,40 @@ const UltraFeaturedBouquets = () => {
   const { data: signatureCollections, isLoading: loading } = useSignatureCollection();
 
   // Transform signature collections to bouquets format
+  // IMPORTANT: Use custom fields from signature_collections if available, otherwise use product defaults
   const allBouquets = signatureCollections?.map((item) => {
-    const imageUrl = item.product?.image_urls?.[0];
+    // Use custom images if available, otherwise use product images
+    const images = item.custom_image_urls && item.custom_image_urls.length > 0
+      ? item.custom_image_urls
+      : item.product?.image_urls || [];
+    
+    const imageUrl = images[0];
     if (!imageUrl || !imageUrl.trim()) return null;
 
+    // Use custom fields if available, otherwise fall back to product fields
+    const title = item.custom_title || item.product?.title || '';
+    const description = item.custom_description || item.product?.description || '';
+    const price = item.custom_price ?? item.product?.price ?? 0;
+    const discountPercentage = item.discount_percentage ?? item.product?.discount_percentage ?? null;
+    const imageRotations = (item as any).image_rotations || {};
+
     return {
-      id: item.product?.id || '',
-      name: item.product?.title || '',
-      price: item.product?.price || 0,
+      id: item.product?.id || item.id,
+      name: title,
+      price: price,
       image: encodeImageUrl(imageUrl),
-      description: item.product?.description || '',
-      category: item.product?.category || '',
-      displayCategory: item.product?.display_category || '',
-      featured: item.product?.featured || false,
-      is_out_of_stock: item.product?.is_out_of_stock || false,
-      discount_percentage: item.product?.discount_percentage || null,
+      images: images.map(url => encodeImageUrl(url)),
+      description: description,
+      category: item.product?.category || 'signature',
+      displayCategory: item.product?.display_category || 'Signature Collection',
+      featured: item.product?.featured || true,
+      is_out_of_stock: item.is_out_of_stock || item.product?.is_out_of_stock || false,
+      is_best_selling: item.is_best_selling || false,
+      discount_percentage: discountPercentage,
+      tags: item.tags || item.product?.tags || [],
       signature_order: item.display_order,
       signature_id: item.id,
+      image_rotations: imageRotations, // Include rotation data
     };
   }).filter(Boolean) || [];
 
@@ -397,12 +414,14 @@ const UltraFeaturedBouquets = () => {
                          style={{
                            width: '100%',
                            height: '100%',
-                           objectFit: 'cover'
+                           objectFit: 'cover',
+                           transform: bouquet.image_rotations && bouquet.image_rotations[bouquet.image] 
+                             ? `rotate(${bouquet.image_rotations[bouquet.image]}deg)` 
+                             : 'none'
                          }}
                          className="transition-all duration-300 ease-out group-hover:scale-105"
                          loading={index < 3 ? "eager" : "lazy"}
                          decoding="async"
-                         fetchpriority={index === 0 ? "high" : "low"}
                          onError={(e) => {
                            console.error('Failed to load signature collection image:', bouquet.image, bouquet.name, e);
                            (e.target as HTMLImageElement).style.display = 'none';

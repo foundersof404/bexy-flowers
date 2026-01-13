@@ -23,6 +23,8 @@ import {
   XCircle,
   Eye,
   EyeOff,
+  RotateCw,
+  Upload,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -86,6 +88,7 @@ const AdminSignatureCollection = () => {
     is_best_selling: false,
     tags: [],
     custom_image_urls: [],
+    image_rotations: {}, // Store rotation angles for each image
   });
   const [newTag, setNewTag] = useState('');
   const [imageFiles, setImageFiles] = useState<File[]>([]);
@@ -336,6 +339,7 @@ const AdminSignatureCollection = () => {
       is_best_selling: item.is_best_selling || false,
       tags: item.tags || [],
       custom_image_urls: item.custom_image_urls || [],
+      image_rotations: (item as any).image_rotations || {},
     });
     setImageFiles([]);
     setImagesToDelete([]);
@@ -889,19 +893,120 @@ const AdminSignatureCollection = () => {
                   </div>
                 </div>
 
-                {/* Images */}
+                {/* Images with Rotation Control */}
                 <div className="space-y-4">
                   <h3 className="text-sm sm:text-base font-semibold text-gray-700 border-b pb-2">
                     Custom Images (leave empty to use product images)
                   </h3>
-                  <ImageUpload
-                    images={editFormData.custom_image_urls}
-                    onImagesChange={handleImagesChange}
-                    onFilesChange={setImageFiles}
-                    maxImages={10}
-                    multiple={true}
-                    label="Upload custom images"
-                  />
+                  
+                  {/* Upload Button */}
+                  <div className="flex gap-2">
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={(e) => {
+                        const files = Array.from(e.target.files || []);
+                        setImageFiles([...imageFiles, ...files]);
+                      }}
+                      className="flex-1"
+                    />
+                  </div>
+
+                  {/* Image Grid with Rotation Controls */}
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                    {/* Existing Images */}
+                    {editFormData.custom_image_urls.map((url: string, index: number) => {
+                      const rotation = editFormData.image_rotations[url] || 0;
+                      return (
+                        <div key={url} className="relative group">
+                          <div className="aspect-square rounded-lg overflow-hidden border-2 border-gray-200 bg-gray-50">
+                            <img
+                              src={encodeImageUrl(url)}
+                              alt={`Image ${index + 1}`}
+                              className="w-full h-full object-cover transition-transform"
+                              style={{ transform: `rotate(${rotation}deg)` }}
+                            />
+                          </div>
+                          {/* Controls */}
+                          <div className="absolute top-2 right-2 flex gap-1">
+                            <Button
+                              size="sm"
+                              variant="secondary"
+                              className="h-7 w-7 p-0 bg-white/90 hover:bg-white"
+                              onClick={() => {
+                                const newRotation = (rotation + 90) % 360;
+                                setEditFormData({
+                                  ...editFormData,
+                                  image_rotations: {
+                                    ...editFormData.image_rotations,
+                                    [url]: newRotation,
+                                  },
+                                });
+                              }}
+                              title="Rotate 90°"
+                            >
+                              <RotateCw className="w-3.5 h-3.5" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              className="h-7 w-7 p-0"
+                              onClick={() => {
+                                handleImagesChange(editFormData.custom_image_urls.filter((u: string) => u !== url));
+                                // Remove rotation data for deleted image
+                                const newRotations = { ...editFormData.image_rotations };
+                                delete newRotations[url];
+                                setEditFormData({
+                                  ...editFormData,
+                                  image_rotations: newRotations,
+                                });
+                              }}
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </Button>
+                          </div>
+                          {rotation !== 0 && (
+                            <div className="absolute bottom-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                              {rotation}°
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+
+                    {/* New Images (Preview) */}
+                    {imageFiles.map((file, index) => (
+                      <div key={`new-${index}`} className="relative group">
+                        <div className="aspect-square rounded-lg overflow-hidden border-2 border-blue-300 bg-gray-50">
+                          <img
+                            src={URL.createObjectURL(file)}
+                            alt={`New ${index + 1}`}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <div className="absolute top-2 right-2">
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            className="h-7 w-7 p-0"
+                            onClick={() => {
+                              setImageFiles(imageFiles.filter((_, i) => i !== index));
+                            }}
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </Button>
+                        </div>
+                        <div className="absolute bottom-2 left-2 bg-blue-600 text-white text-xs px-2 py-1 rounded">
+                          New
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  <p className="text-xs text-gray-500">
+                    Click the rotate button to rotate images by 90°. Rotation is applied when you save.
+                  </p>
                 </div>
 
                 {/* Tags */}

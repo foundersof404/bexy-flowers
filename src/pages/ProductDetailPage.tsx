@@ -341,37 +341,58 @@ const ProductDetailPage = () => {
 
 
   return (
-    <div className="min-h-screen bg-white">
+    <motion.div 
+      className="min-h-screen bg-white"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.3 }}
+    >
       {/* Navigation Bar */}
       <UltraNavigation />
 
       {/* Back Button */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+      <motion.div 
+        className="max-w-7xl mx-auto px-4 sm:px-6 py-6"
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.4, delay: 0.1 }}
+      >
         <button
-          className="flex items-center gap-2 transition-colors"
+          className="flex items-center gap-2 transition-colors hover:text-[#C79E48]"
           style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif" }}
           onClick={() => navigate(-1)}
         >
           <ArrowLeft className="w-5 h-5" />
           <span>Back</span>
         </button>
-      </div>
+      </motion.div>
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-16">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
 
           {/* Left Column - Image Gallery */}
-          <div className="max-w-md mx-auto lg:mx-0">
+          <motion.div 
+            className="max-w-md mx-auto lg:mx-0"
+            initial={{ opacity: 0, x: -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
             <ImageGallery
               images={productData.images || [productData.imageUrl]}
               currentImageIndex={currentImageIndex}
               onImageChange={setCurrentImageIndex}
             />
-          </div>
+          </motion.div>
 
           {/* Right Column - Product Details */}
-          <div className="space-y-6">
+          <motion.div 
+            className="space-y-6"
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+          >
             {/* Product Header */}
             <div className="space-y-4">
               {productData.category && (
@@ -436,7 +457,7 @@ const ProductDetailPage = () => {
                 <span>{isFavorite(productData.id) ? 'Saved' : 'Save'}</span>
               </button>
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
 
@@ -488,7 +509,7 @@ const ProductDetailPage = () => {
         </section>
       )}
       <BackToTop />
-    </div>
+    </motion.div>
   );
 };
 
