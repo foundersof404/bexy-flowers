@@ -296,7 +296,7 @@ const CarouselHero = ({ slidesToShow, isHomepage = false }: CarouselHeroProps = 
       )}
       <div className="carousel-hero-wrapper">
         <Swiper
-          modules={[Autoplay, Pagination, EffectFade]}
+          modules={[Pagination, EffectFade]}
           spaceBetween={0}
           slidesPerView={1}
           loop={slides.length > 1}

@@ -20,7 +20,7 @@ import { useCollectionProducts } from "@/hooks/useCollectionProducts";
 // import { useNavigationPredictor } from "@/hooks/useNavigationPredictor";
 // import { useEnhancedRoutePrefetch } from "@/hooks/useEnhancedRoutePrefetch";
 import { useIsMobile } from "@/hooks/use-mobile";
-import CarouselHero from "@/components/CarouselHero";
+// import CarouselHero from "@/components/CarouselHero"; // ⚡ DISABLED - Causes 99% CPU usage
 
 // Get default category ID - prefer "red-roses", fallback to first non-"all" category, or "all"
 const getDefaultCategoryId = (): string => {
@@ -169,12 +169,8 @@ const Collection = () => {
       <UltraNavigation />
       
       <div className="collection-content relative z-10">
-        {/* Hero Section - Mobile: Original CollectionHero, Desktop: CarouselHero */}
-        {isMobile ? (
-          <CollectionHero />
-        ) : (
-          <CarouselHero />
-        )}
+        {/* Hero Section - PERFORMANCE FIX: Use CollectionHero on both mobile and desktop to avoid Swiper CPU usage */}
+        <CollectionHero />
         
         {/* Fixed Category Navigation */}
         <CategoryNavigation 
