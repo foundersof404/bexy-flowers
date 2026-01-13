@@ -7,6 +7,9 @@ export interface EnhancedFlower extends Flower {
   colorName: string;
   isTinted?: boolean;
   seasons?: Season[]; // Lebanon-specific seasonal availability
+  availabilityMode?: 'specific' | 'mix' | 'both'; // Where the flower appears in Customize page
+  quantity?: number; // Available quantity in stock
+  filterCategories?: string[]; // Filter categories: popular, romantic, minimal, luxury, seasonal
 }
 
 export const flowerFamilies = [

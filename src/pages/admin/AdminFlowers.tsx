@@ -36,6 +36,9 @@ import {
   createFlowerColor,
   updateFlowerColor,
   deleteFlowerColor,
+  getFlowerTypeCategories,
+  createFlowerTypeCategory,
+  type FlowerTypeCategory,
 } from '@/lib/api/flowers';
 
 const GOLD_COLOR = 'rgb(199, 158, 72)';
@@ -44,9 +47,11 @@ const AdminFlowers = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [flowerTypes, setFlowerTypes] = useState<any[]>([]);
+  const [flowerCategories, setFlowerCategories] = useState<FlowerTypeCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [showForm, setShowForm] = useState(false);
+  const [showCategoryForm, setShowCategoryForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [selectedFlowerId, setSelectedFlowerId] = useState<string | null>(null);
   const [selectedFlowerDetails, setSelectedFlowerDetails] = useState<any>(null);
@@ -64,8 +69,21 @@ const AdminFlowers = () => {
     image_url: '',
     quantity: 0,
     is_active: true,
+    availability_mode: 'both' as 'specific' | 'mix' | 'both',
+    category_id: '' as string,
+    filter_categories: [] as string[],
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
+
+  // Category form state
+  const [categoryFormData, setCategoryFormData] = useState({
+    name: '',
+    display_name: '',
+    description: '',
+    icon: '',
+    display_order: 0,
+    is_active: true,
+  });
 
   // Color form state
   const [colorFormData, setColorFormData] = useState({
@@ -84,6 +102,7 @@ const AdminFlowers = () => {
     }
 
     loadFlowerTypes();
+    loadFlowerCategories();
   }, [navigate]);
 
   const loadFlowerTypes = async () => {
@@ -99,6 +118,19 @@ const AdminFlowers = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadFlowerCategories = async () => {
+    try {
+      const data = await getFlowerTypeCategories();
+      setFlowerCategories(data);
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Failed to load flower categories',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -124,6 +156,9 @@ const AdminFlowers = () => {
       image_url: flower.image_url || '',
       quantity: flower.quantity || 0,
       is_active: flower.is_active,
+      availability_mode: flower.availability_mode || 'both',
+      category_id: flower.category_id || '',
+      filter_categories: (flower.filter_categories as string[]) || [],
     });
     setImageFile(null);
     setShowForm(true);
@@ -138,9 +173,54 @@ const AdminFlowers = () => {
       image_url: '',
       quantity: 0,
       is_active: true,
+      availability_mode: 'both',
+      category_id: '',
+      filter_categories: [],
     });
     setImageFile(null);
     setShowForm(true);
+  };
+
+  const handleNewCategory = () => {
+    setCategoryFormData({
+      name: '',
+      display_name: '',
+      description: '',
+      icon: '',
+      display_order: flowerCategories.length,
+      is_active: true,
+    });
+    setShowCategoryForm(true);
+  };
+
+  const handleSaveCategory = async () => {
+    if (!categoryFormData.name || !categoryFormData.display_name) {
+      toast({
+        title: 'Validation Error',
+        description: 'Please fill in name and display name',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    try {
+      setSaving(true);
+      await createFlowerTypeCategory(categoryFormData);
+      toast({
+        title: 'Success',
+        description: 'Flower type category created successfully',
+      });
+      setShowCategoryForm(false);
+      await loadFlowerCategories();
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Failed to create category',
+        variant: 'destructive',
+      });
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleSave = async () => {
@@ -555,6 +635,123 @@ const AdminFlowers = () => {
                     />
                   </div>
 
+                  <div className="space-y-2">
+                    <Label htmlFor="availability_mode" className="font-medium">
+                      Availability Mode
+                    </Label>
+                    <p className="text-sm text-gray-500 mb-2">
+                      Choose where this flower appears in the Customize page
+                    </p>
+                    <select
+                      id="availability_mode"
+                      value={formData.availability_mode}
+                      onChange={(e) => setFormData({ ...formData, availability_mode: e.target.value as 'specific' | 'mix' | 'both' })}
+                      className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-[#C79E48] focus:border-transparent"
+                    >
+                      <option value="both">Both Modes (Default)</option>
+                      <option value="specific">🌹 Specific Variety Only</option>
+                      <option value="mix">💐 Mix & Match Only</option>
+                    </select>
+                    <div className="text-xs text-gray-500 space-y-1 mt-2">
+                      <div>• <strong>Both Modes:</strong> Available in both "Specific Variety" and "Mix & Match"</div>
+                      <div>• <strong>Specific Variety Only:</strong> Only appears when choosing one flower type</div>
+                      <div>• <strong>Mix & Match Only:</strong> Only appears when creating mixed bouquets</div>
+                    </div>
+                  </div>
+
+                  {formData.availability_mode !== 'mix' && (
+                    <div className="space-y-2 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <Label htmlFor="category_id" className="font-medium">
+                          Flower Type Category <span className="text-red-500">*</span>
+                        </Label>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={handleNewCategory}
+                          className="gap-1 text-xs"
+                        >
+                          <Plus className="w-3 h-3" />
+                          New Type
+                        </Button>
+                      </div>
+                      <p className="text-sm text-gray-600 mb-2">
+                        Select which flower type this belongs to (e.g., "Roses", "Tulips")
+                      </p>
+                      <select
+                        id="category_id"
+                        value={formData.category_id}
+                        onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}
+                        className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-[#C79E48] focus:border-transparent"
+                        required
+                      >
+                        <option value="">-- Select Flower Type --</option>
+                        {flowerCategories.map(cat => (
+                          <option key={cat.id} value={cat.id}>
+                            {cat.icon} {cat.display_name}
+                          </option>
+                        ))}
+                      </select>
+                      <div className="text-xs text-gray-600 mt-2">
+                        {formData.availability_mode === 'specific' ? (
+                          <><strong>Note:</strong> Customers will first choose this flower type in "Specific Variety" mode, then see all flowers in this category.</>
+                        ) : (
+                          <><strong>Note:</strong> This flower will appear under "{formData.category_id ? flowerCategories.find(c => c.id === formData.category_id)?.display_name : 'this type'}" in "Choose Your Blooms" section.</>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="space-y-2 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <Label htmlFor="filter_categories" className="font-medium">
+                      Filter Categories
+                    </Label>
+                    <p className="text-sm text-gray-600 mb-2">
+                      Select which filter categories this flower belongs to (can select multiple)
+                    </p>
+                    <div className="space-y-2">
+                      {[
+                        { id: 'popular', label: 'Popular', description: 'Most commonly requested flowers' },
+                        { id: 'romantic', label: 'Romantic', description: 'Perfect for romantic occasions' },
+                        { id: 'minimal', label: 'Minimal', description: 'Simple, delicate filler flowers' },
+                        { id: 'luxury', label: 'Luxury', description: 'Premium, expensive flowers' },
+                        { id: 'seasonal', label: 'Seasonal', description: 'Available seasonally (shows all flowers when selected)' },
+                      ].map(category => (
+                        <label
+                          key={category.id}
+                          className="flex items-start gap-2 p-2 rounded border border-gray-200 hover:bg-white cursor-pointer"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={formData.filter_categories.includes(category.id)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setFormData({
+                                  ...formData,
+                                  filter_categories: [...formData.filter_categories, category.id],
+                                });
+                              } else {
+                                setFormData({
+                                  ...formData,
+                                  filter_categories: formData.filter_categories.filter(c => c !== category.id),
+                                });
+                              }
+                            }}
+                            className="mt-1"
+                          />
+                          <div className="flex-1">
+                            <div className="font-medium text-sm">{category.label}</div>
+                            <div className="text-xs text-gray-500">{category.description}</div>
+                          </div>
+                        </label>
+                      ))}
+                    </div>
+                    <div className="text-xs text-gray-600 mt-2">
+                      <strong>Note:</strong> These categories determine which filter buttons (Popular, Romantic, Minimal, Luxury, Seasonal) will show this flower in the Customize page.
+                    </div>
+                  </div>
+
                   <div className="flex items-center justify-end gap-4 pt-4 border-t">
                     <Button
                       variant="outline"
@@ -795,6 +992,129 @@ const AdminFlowers = () => {
             >
               Delete
             </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Category Creation Dialog */}
+      <Dialog open={showCategoryForm} onOpenChange={setShowCategoryForm}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Create New Flower Type Category</DialogTitle>
+            <DialogDescription>
+              Add a new flower type category (e.g., "Roses", "Tulips"). Customers will see this when choosing "Specific Variety".
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="cat_name">
+                  Name <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="cat_name"
+                  value={categoryFormData.name}
+                  onChange={(e) => setCategoryFormData({ ...categoryFormData, name: e.target.value })}
+                  placeholder="e.g., roses"
+                />
+                <p className="text-xs text-gray-500">Lowercase, no spaces (used internally)</p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="cat_display_name">
+                  Display Name <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="cat_display_name"
+                  value={categoryFormData.display_name}
+                  onChange={(e) => setCategoryFormData({ ...categoryFormData, display_name: e.target.value })}
+                  placeholder="e.g., Roses"
+                />
+                <p className="text-xs text-gray-500">What customers see</p>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="cat_icon">Icon (Emoji)</Label>
+              <Input
+                id="cat_icon"
+                value={categoryFormData.icon}
+                onChange={(e) => setCategoryFormData({ ...categoryFormData, icon: e.target.value })}
+                placeholder="e.g., 🌹"
+                maxLength={2}
+              />
+              <p className="text-xs text-gray-500">Single emoji to represent this flower type</p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="cat_description">Description</Label>
+              <Textarea
+                id="cat_description"
+                value={categoryFormData.description}
+                onChange={(e) => setCategoryFormData({ ...categoryFormData, description: e.target.value })}
+                placeholder="e.g., Classic and romantic roses in various colors"
+                rows={3}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="cat_display_order">Display Order</Label>
+                <Input
+                  id="cat_display_order"
+                  type="number"
+                  value={categoryFormData.display_order}
+                  onChange={(e) => setCategoryFormData({ ...categoryFormData, display_order: parseInt(e.target.value) || 0 })}
+                  placeholder="0"
+                />
+                <p className="text-xs text-gray-500">Lower numbers appear first</p>
+              </div>
+
+              <div className="flex items-center justify-between p-4 border rounded-lg mt-6">
+                <div>
+                  <Label htmlFor="cat_is_active" className="font-medium cursor-pointer">
+                    Active
+                  </Label>
+                </div>
+                <Switch
+                  id="cat_is_active"
+                  checked={categoryFormData.is_active}
+                  onCheckedChange={(checked) => setCategoryFormData({ ...categoryFormData, is_active: checked })}
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-4 pt-4 border-t">
+              <Button
+                variant="outline"
+                onClick={() => setShowCategoryForm(false)}
+                disabled={saving}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSaveCategory}
+                disabled={saving}
+                className="gap-2"
+                style={{
+                  background: `linear-gradient(135deg, ${GOLD_COLOR} 0%, rgba(199, 158, 72, 0.9) 100%)`,
+                  color: 'white',
+                }}
+              >
+                {saving ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4 h-4" />
+                    Create Category
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>

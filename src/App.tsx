@@ -68,23 +68,21 @@ const AdminLuxuryBoxes = lazy(() => import("./pages/admin/AdminLuxuryBoxes"));
 const AdminWeddingCreations = lazy(() => import("./pages/admin/AdminWeddingCreations"));
 const AdminSettings = lazy(() => import("./pages/admin/AdminSettings"));
 
-// ⚡ PERFORMANCE OPTIMIZATION: Enhanced QueryClient with aggressive caching for returning users
+// ⚡ MEMORY LEAK FIX: Reduced cache times to prevent memory accumulation
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 10 * 60 * 1000, // 10 minutes - data stays fresh longer for returning users
-      gcTime: 30 * 60 * 1000, // 30 minutes - keep cached data longer in memory
+      staleTime: 2 * 60 * 1000, // 2 minutes - reduced from 10 min to prevent memory buildup
+      gcTime: 5 * 60 * 1000, // 5 minutes - reduced from 30 min to prevent memory leaks
       refetchOnWindowFocus: false, // Don't refetch on window focus for better performance
-      refetchOnMount: false, // Use cached data if available (critical for returning users)
+      refetchOnMount: false, // Use cached data if available
       refetchOnReconnect: true, // Refetch on reconnect (network recovery)
-      retry: 2, // Retry failed requests
-      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+      retry: 1, // Reduced retry attempts to prevent excessive queries
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000), // Reduced max delay
       // ⚡ SCALABILITY: Network mode for better offline support
       networkMode: 'online',
       // ⚡ SCALABILITY: Structural sharing for better memory usage
       structuralSharing: true,
-      // ⚡ CACHING: Enable persistent caching
-      persister: undefined, // Can be extended with IndexedDB persister
     },
     mutations: {
       retry: 1,
@@ -95,10 +93,16 @@ const queryClient = new QueryClient({
 
 // Component that contains router-dependent logic
 const AppRouter = () => {
-  // Initialize navigation predictor and component prefetching (inside router context)
-  useNavigationPredictor();
-  useComponentPrefetch();
-  usePerformanceMonitor();
+  // CRITICAL FIX: Disable heavy performance hooks in development to prevent freezing
+  // These hooks do prefetching, pattern learning, and monitoring which can overload the system
+  const isProduction = import.meta.env.PROD;
+  
+  // Only enable these in production or if explicitly enabled
+  if (isProduction || import.meta.env.VITE_ENABLE_PERFORMANCE_HOOKS === 'true') {
+    useNavigationPredictor();
+    useComponentPrefetch();
+    usePerformanceMonitor();
+  }
 
   return (
     <RouteStateProvider>
@@ -146,6 +150,52 @@ const App = () => {
       console.log('[App] Service Worker registration initiated');
     }
   }, []);
+
+  // 🚨 MEMORY LEAK FIX: Periodic cache cleanup to prevent memory accumulation
+  useEffect(() => {
+    const cleanupInterval = setInterval(() => {
+      try {
+        // Remove stale queries and limit cache size
+        const queryCache = queryClient.getQueryCache();
+        let queries = queryCache.getAll();
+        
+        // Remove queries that are stale and not being observed
+        queries.forEach((query) => {
+          const isStale = query.isStale();
+          const observersCount = query.getObserversCount();
+          
+          if (isStale && observersCount === 0) {
+            queryCache.remove(query);
+          }
+        });
+
+        // Get fresh list after removing stale queries
+        queries = queryCache.getAll();
+
+        // Limit total cache size to 30 queries max (reduced from 50)
+        if (queries.length > 30) {
+          const sortedQueries = [...queries].sort((a, b) => {
+            const aTime = a.state.dataUpdatedAt || 0;
+            const bTime = b.state.dataUpdatedAt || 0;
+            return aTime - bTime; // Oldest first
+          });
+
+          // Remove oldest queries that aren't being observed
+          const toRemove = sortedQueries.slice(0, queries.length - 30);
+          toRemove.forEach((query) => {
+            if (query.getObserversCount() === 0) {
+              queryCache.remove(query);
+            }
+          });
+        }
+      } catch (error) {
+        // Silently handle cleanup errors to prevent crashes
+        console.warn('Cache cleanup error:', error);
+      }
+    }, 5 * 60 * 1000); // Run cleanup every 5 minutes (reduced frequency to prevent CPU spikes)
+
+    return () => clearInterval(cleanupInterval);
+  }, [queryClient]);
 
   return (
     <QueryClientProvider client={queryClient}>

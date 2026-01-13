@@ -6,7 +6,9 @@ import { useCart } from "@/contexts/CartContext";
 import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
 import heroBouquetMain from "@/assets/bouquet-1.jpg";
-import { flowers, flowerFamilies, EnhancedFlower, Season } from "@/data/flowers";
+import { flowerFamilies, EnhancedFlower, Season } from "@/data/flowers";
+import { useFlowersForCustomize } from "@/hooks/useFlowers";
+import type { CustomizeFlower } from "@/lib/api/flowers";
 import { generateBouquetImage as generateImage, generateWithVariation, ProgressStage } from "@/lib/api/imageGeneration";
 import { buildAdvancedPrompt } from "@/lib/api/promptEngine";
 import { getPromptHistory, getFavorites, addToFavorites, removeFromFavorites, isFavorite, PromptHistoryEntry } from "@/lib/api/promptHistory";
@@ -238,6 +240,43 @@ const Customize: React.FC = () => {
   const [isEditingPrompt, setIsEditingPrompt] = useState(false);
   const [customPrompt, setCustomPrompt] = useState<string>('');
 
+  // Fetch flowers from database
+  const { data: customizeFlowers = [], isLoading: flowersLoading } = useFlowersForCustomize();
+
+  // ⚡ PERFORMANCE: Memoize flowers mapping to prevent re-computation on every render
+  const flowers: EnhancedFlower[] = useMemo(() => {
+    // Use a Set to track seen IDs and prevent duplicates
+    const seenIds = new Set<string>();
+    const uniqueFlowers: EnhancedFlower[] = [];
+    
+    customizeFlowers.forEach((f: CustomizeFlower, index: number) => {
+      // Ensure unique ID by appending index if duplicate found
+      let uniqueId = f.id;
+      if (seenIds.has(uniqueId)) {
+        uniqueId = `${f.id}-${index}`;
+        console.warn(`Duplicate flower ID detected: ${f.id}. Using ${uniqueId} instead.`);
+      }
+      
+      seenIds.add(uniqueId);
+      uniqueFlowers.push({
+        id: uniqueId,
+        name: f.name,
+        price: f.price,
+        imageUrl: f.imageUrl,
+        category: f.category,
+        description: f.description,
+        family: f.family,
+        colorName: f.colorName,
+        seasons: (f.seasons || []) as Season[],
+        availabilityMode: f.availabilityMode, // IMPORTANT: Include availability mode for filtering
+        quantity: f.quantity, // Include quantity for stock validation
+        filterCategories: f.filterCategories, // Include filter categories for filtering
+      });
+    });
+    
+    return uniqueFlowers;
+  }, [customizeFlowers]);
+
   // Cleanup blob URLs
   useEffect(() => {
     return () => {
@@ -248,7 +287,6 @@ const Customize: React.FC = () => {
   }, [generatedImage]);
 
   // Intersection Observer for lazy loading video only when visible (mobile only)
-  // PERFORMANCE FIX: Keep observer active to pause/resume video
   useEffect(() => {
     if (!isMobile) return;
 
@@ -502,21 +540,31 @@ const Customize: React.FC = () => {
     }
   }, [selectedFamily]);
 
-  // Pricing
-  const basePrice = (selectedPackage?.basePrice || 0) * (selectedSize?.priceMultiplier || 1);
-  const flowerPrice = Object.values(selectedFlowers).reduce((acc, curr) => acc + (curr.flower.price * curr.quantity), 0);
-  const glitterPrice = withGlitter ? 2 : 0;
-  const accessoriesPrice = selectedAccessories.reduce((acc, accId) => {
-    const accessory = accessories.find(a => a.id === accId);
-    return acc + (accessory?.price || 0);
-  }, 0);
-  const totalPrice = basePrice + flowerPrice + glitterPrice + accessoriesPrice;
+  // ⚡ PERFORMANCE: Memoize pricing calculations
+  const totalPrice = useMemo(() => {
+    const basePrice = (selectedPackage?.basePrice || 0) * (selectedSize?.priceMultiplier || 1);
+    const flowerPrice = Object.values(selectedFlowers).reduce((acc, curr) => acc + (curr.flower.price * curr.quantity), 0);
+    const glitterPrice = withGlitter ? 2 : 0;
+    const accessoriesPrice = selectedAccessories.reduce((acc, accId) => {
+      const accessory = accessories.find(a => a.id === accId);
+      return acc + (accessory?.price || 0);
+    }, 0);
+    return basePrice + flowerPrice + glitterPrice + accessoriesPrice;
+  }, [selectedPackage?.basePrice, selectedSize?.priceMultiplier, selectedFlowers, withGlitter, selectedAccessories]);
 
-  // Price animation
+  // ⚡ PERFORMANCE: Optimized price animation with cleanup
   const [displayPrice, setDisplayPrice] = useState(0);
   const prevPriceRef = useRef(0);
+  const animationFrameRef = useRef<number | null>(null);
+  
   useEffect(() => {
     if (totalPrice === prevPriceRef.current) return;
+    
+    // Cancel any ongoing animation
+    if (animationFrameRef.current !== null) {
+      cancelAnimationFrame(animationFrameRef.current);
+    }
+    
     const duration = 500;
     const startTime = Date.now();
     const startPrice = prevPriceRef.current;
@@ -528,39 +576,73 @@ const Customize: React.FC = () => {
       const easeOut = 1 - Math.pow(1 - progress, 3);
       setDisplayPrice(startPrice + priceDiff * easeOut);
       if (progress < 1) {
-        requestAnimationFrame(animate);
+        animationFrameRef.current = requestAnimationFrame(animate);
       } else {
         setDisplayPrice(totalPrice);
         prevPriceRef.current = totalPrice;
+        animationFrameRef.current = null;
       }
     };
-    animate();
+    
+    animationFrameRef.current = requestAnimationFrame(animate);
+    
+    return () => {
+      if (animationFrameRef.current !== null) {
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
+      }
+    };
   }, [totalPrice]);
 
-  // Get max flowers for current size
-  const maxFlowers = selectedSize?.maxFlowers || 10;
-
-  // Calculate current total flowers - PERFORMANCE FIX: Memoized
-  const currentTotalFlowers = useMemo(() => 
-    Object.values(selectedFlowers).reduce((acc, curr) => acc + curr.quantity, 0),
-    [selectedFlowers]
-  );
-  const canAddMore = currentTotalFlowers < maxFlowers;
-  const remainingSlots = maxFlowers - currentTotalFlowers;
+  // ⚡ PERFORMANCE: Memoize flower count calculations
+  const maxFlowers = useMemo(() => selectedSize?.maxFlowers || 10, [selectedSize?.maxFlowers]);
+  
+  const currentTotalFlowers = useMemo(() => {
+    return Object.values(selectedFlowers).reduce((acc, curr) => acc + curr.quantity, 0);
+  }, [selectedFlowers]);
+  
+  const canAddMore = useMemo(() => currentTotalFlowers < maxFlowers, [currentTotalFlowers, maxFlowers]);
+  const remainingSlots = useMemo(() => maxFlowers - currentTotalFlowers, [maxFlowers, currentTotalFlowers]);
 
   // Handlers
   const handleAddFlower = (flower: EnhancedFlower) => {
+    // Check if flower has available quantity
+    const availableQuantity = flower.quantity ?? 0;
+    if (availableQuantity <= 0) {
+      toast.error(`${flower.name} is currently out of stock`);
+      return;
+    }
+
     if (flowerMode === "specific") {
       // Specific Variety: Set to max flowers (only one flower type allowed)
+      // But limit to available quantity
+      const quantityToSet = Math.min(maxFlowers, availableQuantity);
+      if (quantityToSet <= 0) {
+        toast.error(`${flower.name} is currently out of stock`);
+        return;
+      }
       setSelectedFlowers({
         [flower.id]: {
           flower,
-          quantity: maxFlowers
+          quantity: quantityToSet
         }
       });
+      if (quantityToSet < maxFlowers) {
+        toast.warning(`Only ${quantityToSet} ${flower.name}${quantityToSet === 1 ? ' is' : ' are'} available (requested ${maxFlowers})`);
+      }
     } else {
       // Mix & Match: Add one at a time, but check max
-      if (!canAddMore) return; // Don't add if max reached
+      if (!canAddMore) {
+        toast.warning(`Maximum ${maxFlowers} flowers allowed for this bouquet size`);
+        return;
+      }
+      
+      const currentQuantity = selectedFlowers[flower.id]?.quantity || 0;
+      if (currentQuantity >= availableQuantity) {
+        toast.warning(`Only ${availableQuantity} ${flower.name}${availableQuantity === 1 ? ' is' : ' are'} available`);
+        return;
+      }
+
       setSelectedFlowers(prev => ({
         ...prev,
         [flower.id]: {
@@ -996,24 +1078,8 @@ const Customize: React.FC = () => {
     "all-year": { label: "All Year", icon: "🌿", color: "bg-gray-100 border-gray-300", style: { color: '#2c2d2a', fontFamily: "'EB Garamond', serif" } }
   };
 
-  
-
-  // Flower categories mapping - maps filter categories to flower families
-  // Popular: Most commonly requested flowers
-  // Romantic: Red, pink, white roses (not blue/yellow), peonies, lilies, pink/red/white tulips, pink/white orchids
-  // Minimal: Simple, delicate filler flowers - gypsum, daisies, lavender
-  // Luxury: Premium, expensive flowers - orchids, peonies, hydrangeas, lilies
-  // Seasonal: Empty array - seasonal filter shows ALL flowers, then filters by season
-  const flowerCategories: Record<string, string[]> = {
-    popular: ["roses", "tulips", "carnation"],
-    romantic: ["roses", "peonies", "lily", "tulips", "orchid"], // Will filter by color in logic
-    minimal: ["gypsum", "daisies", "lavender"],
-    luxury: ["orchid", "peonies", "hydrangea", "lily"],
-    seasonal: [] // Empty - seasonal filter shows ALL flowers
-  };
-
-  // Get recommended flowers based on package/size (Florist's Choice)
-  const getRecommendedFlowers = (): string[] => {
+  // ⚡ PERFORMANCE: Memoize recommended flowers to prevent recalculation
+  const recommendedFlowerIds = useMemo((): string[] => {
     if (selectedPackage?.type === "box" && selectedSize?.id === "medium") {
       return ["rose-red", "rose-pink", "peony-pink", "orchid-white", "hydrangea-white"];
     }
@@ -1021,49 +1087,50 @@ const Customize: React.FC = () => {
       return ["rose-red", "rose-pink", "tulip-red", "lily-pink"];
     }
     return ["rose-red", "rose-pink", "tulip-pink", "carnation-red"];
-  };
+  }, [selectedPackage?.type, selectedSize?.id]);
 
-  const recommendedFlowerIds = getRecommendedFlowers();
-
-  // Filter flowers by family (specific variety mode) - PERFORMANCE FIX: Memoized
+  // ⚡ PERFORMANCE: Memoize filtered flowers to prevent expensive recalculations
   const filteredFlowers = useMemo(() => {
-    if (flowerMode === "specific" && selectedFamily) {
-      return flowers.filter(f => f.family === selectedFamily);
+    // Filter by availability mode first
+    let modeFilteredFlowers = flowers;
+    if (flowerMode === "specific") {
+      // Show only flowers available in "specific" or "both" modes
+      modeFilteredFlowers = flowers.filter(f => 
+        !f.availabilityMode || f.availabilityMode === 'specific' || f.availabilityMode === 'both'
+      );
+    } else if (flowerMode === "mix") {
+      // Show only flowers available in "mix" or "both" modes
+      modeFilteredFlowers = flowers.filter(f => 
+        !f.availabilityMode || f.availabilityMode === 'mix' || f.availabilityMode === 'both'
+      );
     }
-    return flowers;
-  }, [flowerMode, selectedFamily]);
+    
+    // Then filter by family if in specific mode
+    return flowerMode === "specific" && selectedFamily
+      ? modeFilteredFlowers.filter(f => f.family === selectedFamily)
+      : modeFilteredFlowers;
+  }, [flowers, flowerMode, selectedFamily]);
 
-  // Filter by category (popular, romantic, minimal, luxury, seasonal) - PERFORMANCE FIX: Memoized
+  // ⚡ PERFORMANCE: Memoize category filtering
+  // Now uses database filter_categories instead of hardcoded mapping
   const categoryFiltered = useMemo(() => {
     if (flowerFilter === "all" || flowerFilter === "seasonal") {
       return filteredFlowers;
     }
     
-    const families = flowerCategories[flowerFilter] || [];
+    // Filter by database filter_categories array
     return filteredFlowers.filter(f => {
-      if (!families.includes(f.family)) return false;
-      
-      // Additional color-based filtering for specific categories
-      if (flowerFilter === "romantic") {
-        // Romantic: Exclude blue, yellow roses (not romantic colors)
-        if (f.family === "roses" && (f.colorName === "blue" || f.colorName === "yellow")) return false;
-        // Romantic tulips: red, pink, white (exclude blue, yellow, peach)
-        if (f.family === "tulips" && !["red", "pink", "white"].includes(f.colorName)) return false;
-      }
-      if (flowerFilter === "minimal") {
-        // Minimal: Simple flowers - gypsum, daisies, lavender (all colors are fine for minimal)
-        // No additional filtering needed
-      }
-      if (flowerFilter === "luxury") {
-        // Luxury: Premium flowers - orchids, peonies, hydrangeas, lilies (all colors are fine)
-        // No additional filtering needed
+      // If flower has no filter categories defined, don't show it (unless "all" is selected)
+      if (!f.filterCategories || f.filterCategories.length === 0) {
+        return false;
       }
       
-      return true;
+      // Check if the flower's filterCategories includes the selected filter
+      return f.filterCategories.includes(flowerFilter);
     });
   }, [filteredFlowers, flowerFilter]);
 
-  // Filter by season if seasonal category is selected - PERFORMANCE FIX: Memoized
+  // ⚡ PERFORMANCE: Memoize available flowers (final filtered list)
   const availableFlowers = useMemo(() => {
     if (flowerFilter === "seasonal") {
       if (seasonFilter === "all-seasons") {
@@ -1075,7 +1142,7 @@ const Customize: React.FC = () => {
       });
     }
     return categoryFiltered;
-  }, [flowerFilter, seasonFilter, filteredFlowers, categoryFiltered]);
+  }, [filteredFlowers, categoryFiltered, flowerFilter, seasonFilter]);
 
   const steps = [
     { id: 1, title: "Base", icon: Box },
@@ -1686,21 +1753,25 @@ const Customize: React.FC = () => {
                           {availableFlowers
                             .filter(f => recommendedFlowerIds.includes(f.id))
                             .slice(0, 4)
-                            .map(flower => (
-                              <button
-                                key={flower.id}
-                                onClick={() => handleAddFlower(flower)}
-                                disabled={flowerMode === "mix" && !canAddMore}
-                                className={`px-3 py-1.5 bg-white border rounded-lg text-xs font-normal transition-all ${
-                                  flowerMode === "mix" && !canAddMore
-                                    ? 'border-gray-200 cursor-not-allowed'
-                                    : 'border-[#C79E48]/30 hover:bg-[#C79E48]/10 hover:border-[#C79E48]'
-                                }`}
-                                style={{ color: flowerMode === "mix" && !canAddMore ? '#9ca3af' : '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}
-                              >
-                                {flower.name}
-                              </button>
-                            ))}
+                            .map(flower => {
+                              const availableQuantity = flower.quantity ?? 0;
+                              const isOutOfStock = availableQuantity <= 0;
+                              return (
+                                <button
+                                  key={flower.id}
+                                  onClick={() => handleAddFlower(flower)}
+                                  disabled={isOutOfStock || (flowerMode === "mix" && !canAddMore)}
+                                  className={`px-3 py-1.5 bg-white border rounded-lg text-xs font-normal transition-all ${
+                                    isOutOfStock || (flowerMode === "mix" && !canAddMore)
+                                      ? 'border-gray-200 cursor-not-allowed opacity-60'
+                                      : 'border-[#C79E48]/30 hover:bg-[#C79E48]/10 hover:border-[#C79E48]'
+                                  }`}
+                                  style={{ color: isOutOfStock || (flowerMode === "mix" && !canAddMore) ? '#9ca3af' : '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}
+                                >
+                                  {flower.name} {isOutOfStock && '(Out of Stock)'}
+                                </button>
+                              );
+                            })}
                         </div>
                       </div>
                     )}
@@ -1711,14 +1782,19 @@ const Customize: React.FC = () => {
                           const qty = selectedFlowers[flower.id]?.quantity || 0;
                           const isRecommended = recommendedFlowerIds.includes(flower.id);
                           const isSelected = qty > 0;
+                          const availableQuantity = flower.quantity ?? 0;
+                          const isOutOfStock = availableQuantity <= 0;
+                          const isQuantityMaxed = flowerMode === "mix" && qty >= availableQuantity;
                           return (
                             <motion.div
                               key={flower.id}
-                              whileHover={!isSelected ? { y: -2 } : {}}
+                              whileHover={!isSelected && !isOutOfStock ? { y: -2 } : {}}
                               className={`relative p-3 rounded-xl border-2 transition-all ${
-                                isSelected
-                                  ? 'border-[#C79E48] bg-gradient-to-br from-[#C79E48]/8 to-[#C79E48]/4 shadow-md translate-y-[-2px]'
-                                  : 'border-gray-200 bg-white hover:border-[#C79E48]/50 hover:shadow-sm'
+                                isOutOfStock
+                                  ? 'border-gray-200 bg-gray-50 opacity-60'
+                                  : isSelected
+                                    ? 'border-[#C79E48] bg-gradient-to-br from-[#C79E48]/8 to-[#C79E48]/4 shadow-md translate-y-[-2px]'
+                                    : 'border-gray-200 bg-white hover:border-[#C79E48]/50 hover:shadow-sm'
                               }`}
                             >
                               {isRecommended && !isSelected && (
@@ -1733,15 +1809,23 @@ const Customize: React.FC = () => {
                                   src={flower.imageUrl}
                                   alt={flower.name}
                                   className={`w-full h-full object-cover ${
-                                    flower.seasons && 
+                                    isOutOfStock || (flower.seasons && 
                                     !flower.seasons.includes("all-year") && 
-                                    !flower.seasons.includes(currentSeason)
+                                    !flower.seasons.includes(currentSeason))
                                       ? "opacity-50 grayscale-[30%]" 
                                       : ""
                                   }`}
                                 />
+                                {/* Out of Stock Overlay */}
+                                {isOutOfStock && (
+                                  <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center p-2 z-20">
+                                    <div className="text-white text-center">
+                                      <div className="text-xs font-normal mb-1" style={{ fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>Out of Stock</div>
+                                    </div>
+                                  </div>
+                                )}
                                 {/* Out of Season Overlay */}
-                                {flower.seasons && 
+                                {!isOutOfStock && flower.seasons && 
                                  !flower.seasons.includes("all-year") && 
                                  !flower.seasons.includes(currentSeason) && (
                                   <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center p-2 z-20">
@@ -1765,7 +1849,14 @@ const Customize: React.FC = () => {
                               </div>
                               
                               <div className="text-xs font-normal mb-1" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>{flower.name}</div>
-                              <div className="text-xs font-normal mb-2" style={{ color: '#C79E48', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>${flower.price.toFixed(2)}</div>
+                              <div className="flex items-center justify-between mb-2">
+                                <div className="text-xs font-normal" style={{ color: '#C79E48', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>${flower.price.toFixed(2)}</div>
+                                {!isOutOfStock && availableQuantity > 0 && (
+                                  <div className="text-[10px] font-normal" style={{ color: '#6b7280', fontFamily: "'EB Garamond', serif" }}>
+                                    {availableQuantity} {availableQuantity === 1 ? 'left' : 'left'}
+                                  </div>
+                                )}
+                              </div>
                               
                               {qty > 0 ? (
                                 flowerMode === "specific" ? (
@@ -1787,12 +1878,13 @@ const Customize: React.FC = () => {
                                     <span className="font-normal text-sm" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>{qty}</span>
                                     <button 
                                       onClick={() => handleAddFlower(flower)} 
-                                      disabled={!canAddMore}
+                                      disabled={!canAddMore || isQuantityMaxed}
                                       className={`w-7 h-7 rounded-full flex items-center justify-center transition-colors ${
-                                        canAddMore 
+                                        canAddMore && !isQuantityMaxed
                                           ? 'bg-[#C79E48] text-white hover:bg-[#b08d45]' 
                                           : 'bg-gray-300 text-gray-400 cursor-not-allowed'
                                       }`}
+                                      title={isQuantityMaxed ? `Only ${availableQuantity} available` : undefined}
                                     >
                                       <Plus className="w-3 h-3" />
                                     </button>
@@ -1801,15 +1893,21 @@ const Customize: React.FC = () => {
                               ) : (
                                 <button
                                   onClick={() => handleAddFlower(flower)}
-                                  disabled={flowerMode === "mix" && !canAddMore}
+                                  disabled={isOutOfStock || (flowerMode === "mix" && !canAddMore)}
                                   className={`w-full py-1.5 rounded-lg text-xs font-normal transition-colors ${
-                                    flowerMode === "mix" && !canAddMore
+                                    isOutOfStock || (flowerMode === "mix" && !canAddMore)
                                       ? 'bg-gray-200 cursor-not-allowed'
                                       : 'bg-gray-100 hover:bg-[#C79E48] hover:text-white'
                                   }`}
-                                  style={{ color: flowerMode === "mix" && !canAddMore ? '#9ca3af' : '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}
+                                  style={{ color: isOutOfStock || (flowerMode === "mix" && !canAddMore) ? '#9ca3af' : '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}
                                 >
-                                  {flowerMode === "specific" ? "Select" : canAddMore ? "Add" : "Max Reached"}
+                                  {isOutOfStock 
+                                    ? "Out of Stock" 
+                                    : flowerMode === "specific" 
+                                      ? "Select" 
+                                      : canAddMore 
+                                        ? "Add" 
+                                        : "Max Reached"}
                                 </button>
                               )}
                             </motion.div>

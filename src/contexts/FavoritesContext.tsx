@@ -18,43 +18,43 @@ export const FavoritesProvider: React.FC<FavoritesProviderProps> = ({ children }
   const isInitialLoad = useRef(true);
   const syncTimeoutRef = useRef<number | null>(null);
 
-  // Load favorites from database on mount
+  // Load favorites from database on mount - NON-BLOCKING
   useEffect(() => {
     const loadFavoritesFromDatabase = async () => {
       try {
-        setIsLoading(true);
-        // First, try to load from database
-        const dbFavorites = await getVisitorFavorites();
-        
-        if (dbFavorites.length > 0) {
-          // Database has favorites, use them
-          setFavorites(dbFavorites);
-          // Update localStorage as cache
-          localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(dbFavorites));
-        } else {
-          // No items in database, try localStorage as fallback
-          try {
-            const savedFavorites = localStorage.getItem(FAVORITES_STORAGE_KEY);
-            if (savedFavorites) {
-              const localFavorites = JSON.parse(savedFavorites);
-              setFavorites(localFavorites);
-              // Sync local favorites to database
-              await syncFavoritesToDatabase(localFavorites);
-            }
-          } catch (error) {
-            console.error('Error loading favorites from localStorage:', error);
-          }
-        }
-      } catch (error) {
-        console.error('Error loading favorites from database:', error);
-        // Fallback to localStorage
+        // CRITICAL FIX: Load from localStorage FIRST (instant, non-blocking)
+        // This prevents the page from freezing while waiting for database
         try {
           const savedFavorites = localStorage.getItem(FAVORITES_STORAGE_KEY);
           if (savedFavorites) {
-            setFavorites(JSON.parse(savedFavorites));
+            const localFavorites = JSON.parse(savedFavorites);
+            setFavorites(localFavorites);
+            setIsLoading(false); // Immediately show cached data
+            isInitialLoad.current = false;
           }
-        } catch (localError) {
-          console.error('Error loading favorites from localStorage:', localError);
+        } catch (error) {
+          console.error('Error loading favorites from localStorage:', error);
+        }
+        
+        // Then try to sync with database in the background (non-blocking)
+        // Only if we're in production or Netlify Dev is running
+        if (import.meta.env.PROD || import.meta.env.VITE_USE_NETLIFY_FUNCTIONS === 'true') {
+          const dbFavorites = await getVisitorFavorites();
+          
+          if (dbFavorites.length > 0) {
+            // Database has favorites, use them
+            setFavorites(dbFavorites);
+            // Update localStorage as cache
+            localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(dbFavorites));
+          } else if (favorites.length > 0) {
+            // Sync local favorites to database if database is empty
+            await syncFavoritesToDatabase(favorites);
+          }
+        }
+      } catch (error) {
+        // Silently fail - we already have localStorage data
+        if (!(error instanceof Error && error.message === 'NETLIFY_FUNCTIONS_UNAVAILABLE')) {
+          console.warn('Background favorites sync failed:', error);
         }
       } finally {
         setIsLoading(false);

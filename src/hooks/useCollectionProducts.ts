@@ -37,8 +37,8 @@ export const useCollectionProducts = (filters?: {
   return useQuery<CollectionProduct[]>({
     queryKey: collectionQueryKeys.list(filters),
     queryFn: () => getCollectionProducts(filters),
-    staleTime: 5 * 60 * 1000, // 5 minutes - products don't change frequently
-    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
+    staleTime: 2 * 60 * 1000, // Reduced from 5 min to prevent memory buildup
+    gcTime: 5 * 60 * 1000, // Reduced from 10 min to prevent memory leaks
     refetchOnWindowFocus: false, // Don't refetch on window focus for better UX
     refetchOnMount: false, // Use cached data if available
     placeholderData: (previousData) => previousData, // Use previous data while fetching
@@ -53,8 +53,8 @@ export const useCollectionProduct = (id: string | undefined) => {
     queryKey: collectionQueryKeys.detail(id!),
     queryFn: () => getCollectionProduct(id!),
     enabled: !!id,
-    staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
+    staleTime: 2 * 60 * 1000, // Reduced from 5 min to prevent memory buildup
+    gcTime: 5 * 60 * 1000, // Reduced from 10 min to prevent memory leaks
     refetchOnWindowFocus: false,
     refetchOnMount: false,
   });
@@ -67,8 +67,8 @@ export const useCollectionTags = () => {
   return useQuery({
     queryKey: collectionQueryKeys.tags(),
     queryFn: getAllTags,
-    staleTime: 10 * 60 * 1000, // Tags change very rarely
-    gcTime: 30 * 60 * 1000, // Keep tags cached longer
+    staleTime: 5 * 60 * 1000, // Reduced from 10 min - tags change rarely but still need limits
+    gcTime: 10 * 60 * 1000, // Reduced from 30 min to prevent memory leaks
     refetchOnWindowFocus: false,
     refetchOnMount: false,
   });
