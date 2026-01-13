@@ -33,7 +33,7 @@ const Favorites = memo(() => {
     return () => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
-  }, []); // FIX: Empty deps - cleanup should only run on unmount, not on every favorites change
+  }, [favorites]);
 
   const totalFavorites = getTotalFavorites();
 
