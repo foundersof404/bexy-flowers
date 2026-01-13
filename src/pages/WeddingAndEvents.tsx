@@ -372,17 +372,10 @@ const WeddingHero = () => {
 
       {/* Subtle decorative elements - elegant, not distracting */}
       <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 z-10">
-        <motion.div
-          animate={{ y: [0, 10, 0] }}
-          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-          className="w-6 h-10 border-2 border-white/30 rounded-full flex items-start justify-center p-2"
-        >
-          <motion.div
-            animate={{ y: [0, 12, 0] }}
-            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-            className="w-1 h-3 bg-white/50 rounded-full"
-          />
-        </motion.div>
+        {/* PERFORMANCE FIX: Removed infinite animation - use CSS instead */}
+        <div className="w-6 h-10 border-2 border-white/30 rounded-full flex items-start justify-center p-2 animate-bounce">
+          <div className="w-1 h-3 bg-white/50 rounded-full" />
+        </div>
       </div>
     </section>
   );
@@ -1991,14 +1984,13 @@ const ContactSection = () => {
 
             <div className="relative z-10">
               <div className="text-center mb-6 sm:mb-8">
-                <motion.div
+                {/* PERFORMANCE FIX: Removed infinite rotation */}
+                <div
                   className={`inline-flex items-center justify-center ${isMobile ? 'w-16 h-16' : 'w-20 h-20'} rounded-full mb-4 sm:mb-6 mx-auto`}
                   style={{ backgroundColor: `${GOLD_COLOR}15` }}
-                  animate={{ rotate: [0, 360] }}
-                  transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
                 >
                   <Calendar className={`${isMobile ? 'w-8 h-8' : 'w-10 h-10'}`} style={{ color: GOLD_COLOR }} />
-                </motion.div>
+                </div>
 
                 <h2
                   className={`${isMobile ? 'text-4xl sm:text-5xl' : 'text-5xl md:text-7xl lg:text-8xl'} font-luxury font-normal mb-3 sm:mb-4 relative uppercase`}

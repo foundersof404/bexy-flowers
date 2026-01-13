@@ -16,6 +16,7 @@ const Footer = React.lazy(() => import('@/components/Footer'));
 gsap.registerPlugin(ScrollTrigger);
 
 const Favorites = memo(() => {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { favorites, removeFromFavorites, isFavorite, toggleFavorite, getTotalFavorites } = useFavorites();
   const { addToCart } = useCartWithToast();
@@ -175,20 +176,10 @@ const Favorites = memo(() => {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.5 }}
             >
-              <motion.div
-                animate={{ 
-                  scale: [1, 1.1, 1],
-                  rotate: [0, 5, -5, 0]
-                }}
-                transition={{ 
-                  duration: 3, 
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-                className="inline-block mb-8"
-              >
+              {/* PERFORMANCE FIX: Removed infinite animation */}
+              <div className="inline-block mb-8">
                 <Heart className="w-20 h-20 text-foreground mx-auto" strokeWidth={1} />
-              </motion.div>
+              </div>
               <h2 
                 className="font-luxury text-2xl sm:text-3xl font-normal uppercase mb-4"
                 style={{
@@ -381,8 +372,9 @@ const Favorites = memo(() => {
                           {favorite.featured && (
                             <span 
                               className="absolute top-4 left-4 px-3 py-1 rounded-full text-[10px] font-normal text-white shadow-lg flex items-center gap-1"
-                              style={{ fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}
-                              style={{
+                              style={{ 
+                                fontFamily: "'EB Garamond', serif", 
+                                letterSpacing: '-0.02em',
                                 background: 'linear-gradient(90deg, #C79E48 0%, #D4A85A 100%)'
                               }}
                             >
@@ -473,20 +465,7 @@ const Favorites = memo(() => {
                             >
                               <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-white relative z-10" strokeWidth={2.5} />
                               
-                              {/* Optimized Shimmer Effect - Simplified */}
-                              <motion.div
-                                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent pointer-events-none"
-                                style={{ willChange: 'transform' }}
-                                animate={{
-                                  x: ['-100%', '200%']
-                                }}
-                                transition={{
-                                  duration: 2,
-                                  repeat: Infinity,
-                                  ease: "linear",
-                                  repeatDelay: 0.5
-                                }}
-                              />
+                              {/* PERFORMANCE FIX: Removed infinite shimmer animation */}
                             </motion.button>
                           </div>
                         </div>

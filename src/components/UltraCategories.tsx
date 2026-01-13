@@ -105,6 +105,7 @@ const UltraCategories = () => {
   const navigate = useNavigate();
   const sectionRef = useRef<HTMLElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
+  const descriptionRef = useRef<HTMLParagraphElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const mobileRow1Ref = useRef<HTMLDivElement>(null);
   const mobileRow2Ref = useRef<HTMLDivElement>(null);
@@ -120,21 +121,22 @@ const UltraCategories = () => {
     });
   };
 
-  // Scroll-reveal animations for title and description
+  // Scroll-reveal animations for title and description (sliding from left to right)
   useEffect(() => {
     const title = titleRef.current;
+    const description = descriptionRef.current;
     const section = sectionRef.current;
 
-    if (title && section) {
+    if (title && description && section) {
       const ctx = gsap.context(() => {
-        // Animate title on scroll
+        // Animate title sliding from left to right
         gsap.fromTo(
           title,
-          { y: 50, opacity: 0 },
+          { x: -100, opacity: 0 },
           {
-            y: 0,
+            x: 0,
             opacity: 1,
-            duration: 1,
+            duration: 1.2,
             ease: "power3.out",
             scrollTrigger: {
               trigger: section,
@@ -144,26 +146,23 @@ const UltraCategories = () => {
           }
         );
 
-        // Animate description on scroll
-        const description = section.querySelector('p');
-        if (description) {
-          gsap.fromTo(
-            description,
-            { y: 30, opacity: 0 },
-            {
-              y: 0,
-              opacity: 1,
-              duration: 0.8,
-              delay: 0.2,
-              ease: "power2.out",
-              scrollTrigger: {
-                trigger: section,
-                start: "top 80%",
-                toggleActions: "play none none none",
-              },
-            }
-          );
-        }
+        // Animate description sliding from left to right
+        gsap.fromTo(
+          description,
+          { x: -80, opacity: 0 },
+          {
+            x: 0,
+            opacity: 1,
+            duration: 1,
+            delay: 0.3,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: section,
+              start: "top 80%",
+              toggleActions: "play none none none",
+            },
+          }
+        );
       }, section);
 
       return () => ctx.revert();
@@ -274,27 +273,91 @@ const UltraCategories = () => {
     }
   }, []);
 
-  // Seamless auto-scroll effect for desktop (single row) - PERFORMANCE FIX: DISABLED
+  // Seamless auto-scroll effect for desktop (single row) - PERFORMANCE OPTIMIZED
   useEffect(() => {
-    // ⚡ PERFORMANCE FIX: DISABLE GSAP INFINITE SCROLL TO STOP PERFORMANCE ISSUES
-    // This was causing continuous GPU usage and contributing to "Page Unresponsive" errors
-    console.log('⚠️ Desktop GSAP infinite scroll is DISABLED for performance');
+    const container = containerRef.current;
+    if (!container) return;
+
+    // PERFORMANCE: Only enable auto-scroll on desktop and when visible
+    const isMobile = window.innerWidth < 1024;
+    if (isMobile) return;
+
+    // Calculate the width of one set of categories
+    const cardWidth = 352; // Width of each card
+    const gap = 32; // gap-8 = 32px
+    const singleSetWidth = categories.length * (cardWidth + gap);
     
-    // The categories are still visible, just not auto-scrolling
-    return () => {
-      // Cleanup is still good practice
-      const container = containerRef.current;
-      if (container) {
-        gsap.killTweensOf(container);
-      }
+    // Reset initial position
+    gsap.set(container, { x: 0 });
+
+    let isActive = true;
+    let animation: gsap.core.Tween | null = null;
+    
+    // Use Intersection Observer to only animate when visible
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && isActive) {
+            // Start animation when visible
+            if (!animation) {
+              animation = gsap.to(container, {
+                x: -singleSetWidth,
+                duration: 30,
+                ease: "none",
+                repeat: -1, // Use GSAP's built-in repeat
+                modifiers: {
+                  x: (x) => {
+                    // Seamless loop: reset when reaching end
+                    const num = parseFloat(x);
+                    return `${num % singleSetWidth}px`;
+                  }
+                }
+              });
+            } else {
+              animation.resume();
+            }
+          } else {
+            // Pause animation when not visible
+            if (animation) {
+              animation.pause();
+            }
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+
+    observer.observe(container);
+
+    // Pause on hover for better UX
+    const handleMouseEnter = () => {
+      if (animation) animation.pause();
     };
-  }, []);
+    const handleMouseLeave = () => {
+      if (animation) animation.resume();
+    };
+    
+    container.addEventListener('mouseenter', handleMouseEnter);
+    container.addEventListener('mouseleave', handleMouseLeave);
+
+    return () => {
+      isActive = false;
+      observer.disconnect();
+      if (animation) {
+        animation.kill();
+        animation = null;
+      }
+      gsap.killTweensOf(container);
+      container.removeEventListener('mouseenter', handleMouseEnter);
+      container.removeEventListener('mouseleave', handleMouseLeave);
+    };
+  }, [categories.length]);
 
   // Mobile: Two rows with opposite scroll directions - PERFORMANCE FIX: DISABLED
   useEffect(() => {
-    // ⚡ PERFORMANCE FIX: DISABLE MOBILE GSAP INFINITE SCROLL TO STOP PERFORMANCE ISSUES
+    // ? PERFORMANCE FIX: DISABLE MOBILE GSAP INFINITE SCROLL TO STOP PERFORMANCE ISSUES
     // This was causing continuous GPU usage and contributing to "Page Unresponsive" errors
-    console.log('⚠️ Mobile GSAP infinite scroll is DISABLED for performance');
+    console.log('?? Mobile GSAP infinite scroll is DISABLED for performance');
     
     // The categories are still visible, just not auto-scrolling
     return () => {
@@ -400,6 +463,7 @@ const UltraCategories = () => {
 
           {/* Enhanced Description */}
           <p 
+            ref={descriptionRef}
             className="font-body text-sm sm:text-base md:text-lg lg:text-xl text-slate-600 max-w-4xl mx-auto leading-relaxed font-light px-2"
           >
             Discover our meticulously curated floral collections, where each arrangement 
