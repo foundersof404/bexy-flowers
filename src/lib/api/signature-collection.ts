@@ -1,4 +1,6 @@
 import { supabase } from '../supabase';
+import { uploadMultipleImages } from '../supabase-storage';
+import { createCollectionProduct } from './collection-products';
 import type { Database } from '../supabase';
 
 type SignatureCollection = Database['public']['Tables']['signature_collections']['Row'];
@@ -83,6 +85,69 @@ export async function addToSignatureCollection(
   }
 
   return data;
+}
+
+/**
+ * Create a custom product and add it to signature collection
+ */
+export async function createCustomSignatureProduct(
+  productData: {
+    title: string;
+    description: string;
+    price: number;
+    category?: string;
+    display_category?: string;
+    tags?: string[];
+    imageFiles?: File[];
+  },
+  displayOrder?: number
+): Promise<SignatureCollectionWithProduct> {
+  // Get max display order if not provided
+  let order = displayOrder;
+  if (order === undefined) {
+    const { data: maxOrder } = await supabase
+      .from('signature_collections')
+      .select('display_order')
+      .order('display_order', { ascending: false })
+      .limit(1)
+      .single();
+
+    order = maxOrder ? maxOrder.display_order + 1 : 0;
+  }
+
+  // Step 1: Create product in collection_products
+  const newProduct = await createCollectionProduct(
+    {
+      title: productData.title,
+      description: productData.description,
+      price: productData.price,
+      category: productData.category || 'signature',
+      display_category: productData.display_category || 'Signature Collection',
+      tags: productData.tags || ['signature', 'custom'],
+      is_active: true,
+      featured: true,
+    },
+    productData.imageFiles
+  );
+
+  // Step 2: Add to signature_collections
+  const signatureItem = await addToSignatureCollection(newProduct.id, order);
+
+  // Step 3: Return with product data
+  const { data, error } = await supabase
+    .from('signature_collections')
+    .select(`
+      *,
+      product:collection_products(*)
+    `)
+    .eq('id', signatureItem.id)
+    .single();
+
+  if (error) {
+    throw new Error(`Failed to fetch created signature collection: ${error.message}`);
+  }
+
+  return data as SignatureCollectionWithProduct;
 }
 
 /**

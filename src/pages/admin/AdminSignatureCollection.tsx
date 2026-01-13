@@ -40,6 +40,7 @@ import {
   removeFromSignatureCollection,
   reorderSignatureCollections,
   updateSignatureCollection,
+  createCustomSignatureProduct,
   type SignatureCollectionWithProduct,
 } from '@/lib/api/signature-collection';
 import { getCollectionProducts } from '@/lib/api/collection-products';
@@ -59,6 +60,18 @@ const AdminSignatureCollection = () => {
   const [addingProduct, setAddingProduct] = useState(false);
   const [migrating, setMigrating] = useState(false);
   const [selectedProductId, setSelectedProductId] = useState<string>('');
+  const [addMode, setAddMode] = useState<'select' | 'custom'>('select');
+  const [customProductDialog, setCustomProductDialog] = useState(false);
+  const [customProductData, setCustomProductData] = useState({
+    title: '',
+    description: '',
+    price: 0,
+    category: 'signature',
+    display_category: 'Signature Collection',
+    tags: [] as string[],
+  });
+  const [customProductImages, setCustomProductImages] = useState<File[]>([]);
+  const [customProductNewTag, setCustomProductNewTag] = useState('');
   const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; id: string | null }>({
     open: false,
     id: null,
@@ -151,6 +164,86 @@ const AdminSignatureCollection = () => {
     } finally {
       setAddingProduct(false);
     }
+  };
+
+  const handleCreateCustomProduct = async () => {
+    if (!customProductData.title.trim()) {
+      toast({
+        title: 'Validation Error',
+        description: 'Please enter a product title',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (customProductData.price < 0) {
+      toast({
+        title: 'Validation Error',
+        description: 'Price must be greater than or equal to 0',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (customProductImages.length === 0) {
+      toast({
+        title: 'Validation Error',
+        description: 'Please upload at least one image',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    try {
+      setAddingProduct(true);
+      await createCustomSignatureProduct(
+        {
+          ...customProductData,
+          imageFiles: customProductImages,
+        }
+      );
+      toast({
+        title: 'Success',
+        description: 'Custom product created and added to signature collection',
+      });
+      setCustomProductDialog(false);
+      setCustomProductData({
+        title: '',
+        description: '',
+        price: 0,
+        category: 'signature',
+        display_category: 'Signature Collection',
+        tags: [],
+      });
+      setCustomProductImages([]);
+      setCustomProductNewTag('');
+      await loadData();
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Failed to create custom product',
+        variant: 'destructive',
+      });
+    } finally {
+      setAddingProduct(false);
+    }
+  };
+
+  const handleAddCustomTag = () => {
+    if (customProductNewTag && !customProductData.tags.includes(customProductNewTag)) {
+      setCustomProductData({
+        ...customProductData,
+        tags: [...customProductData.tags, customProductNewTag],
+      });
+      setCustomProductNewTag('');
+    }
+  };
+
+  const handleRemoveCustomTag = (tag: string) => {
+    setCustomProductData({
+      ...customProductData,
+      tags: customProductData.tags.filter((t) => t !== tag),
+    });
   };
 
   const handleDelete = async (id: string) => {
@@ -425,52 +518,98 @@ const AdminSignatureCollection = () => {
           <CardHeader className="pb-3">
             <CardTitle className="text-base sm:text-lg">Add Product to Signature Collection</CardTitle>
             <CardDescription className="text-xs sm:text-sm">
-              Select a product from your collection to feature on the home page
+              Select an existing product or create a custom product to feature on the home page
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-              <Select value={selectedProductId} onValueChange={setSelectedProductId}>
-                <SelectTrigger className="flex-1">
-                  <SelectValue placeholder="Select a product..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableProductsFiltered.length === 0 ? (
-                    <SelectItem value="no-products" disabled>
-                      No available products
-                    </SelectItem>
-                  ) : (
-                    availableProductsFiltered.map((product) => (
-                      <SelectItem key={product.id} value={product.id}>
-                        {product.title} - ${(product.price || 0).toFixed(2)}
-                      </SelectItem>
-                    ))
-                  )}
-                </SelectContent>
-              </Select>
+          <CardContent className="space-y-4">
+            {/* Mode Toggle */}
+            <div className="flex gap-2 border rounded-lg p-1 bg-gray-50">
               <Button
-                onClick={handleAddProduct}
-                disabled={!selectedProductId || addingProduct}
-                className="gap-2 flex-1 sm:flex-none"
+                variant={addMode === 'select' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setAddMode('select')}
+                className="flex-1"
+                style={addMode === 'select' ? {
+                  background: `linear-gradient(135deg, ${GOLD_COLOR} 0%, rgba(199, 158, 72, 0.9) 100%)`,
+                  color: 'white',
+                } : {}}
+              >
+                Select Existing
+              </Button>
+              <Button
+                variant={addMode === 'custom' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setAddMode('custom')}
+                className="flex-1"
+                style={addMode === 'custom' ? {
+                  background: `linear-gradient(135deg, ${GOLD_COLOR} 0%, rgba(199, 158, 72, 0.9) 100%)`,
+                  color: 'white',
+                } : {}}
+              >
+                Create Custom
+              </Button>
+            </div>
+
+            {/* Select Existing Mode */}
+            {addMode === 'select' && (
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                <Select value={selectedProductId} onValueChange={setSelectedProductId}>
+                  <SelectTrigger className="flex-1">
+                    <SelectValue placeholder="Select a product..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableProductsFiltered.length === 0 ? (
+                      <SelectItem value="no-products" disabled>
+                        No available products
+                      </SelectItem>
+                    ) : (
+                      availableProductsFiltered.map((product) => (
+                        <SelectItem key={product.id} value={product.id}>
+                          {product.title} - ${(product.price || 0).toFixed(2)}
+                        </SelectItem>
+                      ))
+                    )}
+                  </SelectContent>
+                </Select>
+                <Button
+                  onClick={handleAddProduct}
+                  disabled={!selectedProductId || addingProduct}
+                  className="gap-2 flex-1 sm:flex-none"
+                  style={{
+                    background: `linear-gradient(135deg, ${GOLD_COLOR} 0%, rgba(199, 158, 72, 0.9) 100%)`,
+                    color: 'white',
+                  }}
+                >
+                  {addingProduct ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span className="hidden sm:inline">Adding...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="w-4 h-4" />
+                      <span className="hidden sm:inline">Add Product</span>
+                      <span className="sm:hidden">Add</span>
+                    </>
+                  )}
+                </Button>
+              </div>
+            )}
+
+            {/* Create Custom Mode */}
+            {addMode === 'custom' && (
+              <Button
+                onClick={() => setCustomProductDialog(true)}
+                className="w-full gap-2"
                 style={{
                   background: `linear-gradient(135deg, ${GOLD_COLOR} 0%, rgba(199, 158, 72, 0.9) 100%)`,
                   color: 'white',
                 }}
               >
-                {addingProduct ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    <span className="hidden sm:inline">Adding...</span>
-                  </>
-                ) : (
-                  <>
-                    <Plus className="w-4 h-4" />
-                    <span className="hidden sm:inline">Add Product</span>
-                    <span className="sm:hidden">Add</span>
-                  </>
-                )}
+                <Plus className="w-4 h-4" />
+                Create Custom Product
               </Button>
-            </div>
+            )}
           </CardContent>
         </Card>
 
@@ -865,6 +1004,184 @@ const AdminSignatureCollection = () => {
                 </div>
               </div>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Custom Product Dialog */}
+        <Dialog open={customProductDialog} onOpenChange={setCustomProductDialog}>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Create Custom Product</DialogTitle>
+              <DialogDescription>
+                Create a new custom product and add it to the signature collection
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-4 sm:space-y-6">
+              {/* Basic Information */}
+              <div className="space-y-4">
+                <h3 className="text-sm sm:text-base font-semibold text-gray-700 border-b pb-2">
+                  Basic Information
+                </h3>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="custom_title" className="text-sm">
+                    Product Title <span className="text-red-500">*</span>
+                  </Label>
+                  <Input
+                    id="custom_title"
+                    value={customProductData.title}
+                    onChange={(e) => setCustomProductData({ ...customProductData, title: e.target.value })}
+                    placeholder="Enter product title"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="custom_description" className="text-sm">Description</Label>
+                  <Textarea
+                    id="custom_description"
+                    value={customProductData.description}
+                    onChange={(e) => setCustomProductData({ ...customProductData, description: e.target.value })}
+                    placeholder="Enter product description"
+                    rows={4}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="custom_price" className="text-sm">
+                      Price ($) <span className="text-red-500">*</span>
+                    </Label>
+                    <div className="relative">
+                      <DollarSign className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                      <Input
+                        id="custom_price"
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={customProductData.price || ''}
+                        onChange={(e) =>
+                          setCustomProductData({
+                            ...customProductData,
+                            price: parseFloat(e.target.value) || 0,
+                          })
+                        }
+                        className="pl-10"
+                        placeholder="0.00"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="custom_category" className="text-sm">Category</Label>
+                    <Input
+                      id="custom_category"
+                      value={customProductData.category}
+                      onChange={(e) => setCustomProductData({ ...customProductData, category: e.target.value })}
+                      placeholder="signature"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Images */}
+              <div className="space-y-4">
+                <h3 className="text-sm sm:text-base font-semibold text-gray-700 border-b pb-2">
+                  Product Images <span className="text-red-500">*</span>
+                </h3>
+                <div className="space-y-2">
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={(e) => {
+                      const files = Array.from(e.target.files || []);
+                      setCustomProductImages(files);
+                    }}
+                    className="cursor-pointer"
+                  />
+                  {customProductImages.length > 0 && (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-2">
+                      {customProductImages.map((file, index) => (
+                        <div key={index} className="relative aspect-square rounded-lg overflow-hidden border">
+                          <img
+                            src={URL.createObjectURL(file)}
+                            alt={`Preview ${index + 1}`}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <p className="text-xs text-gray-500">
+                    Upload at least one image. Multiple images are supported.
+                  </p>
+                </div>
+              </div>
+
+              {/* Tags */}
+              <div className="space-y-4">
+                <h3 className="text-sm sm:text-base font-semibold text-gray-700 border-b pb-2">
+                  Tags
+                </h3>
+                <div className="flex gap-2">
+                  <Input
+                    value={customProductNewTag}
+                    onChange={(e) => setCustomProductNewTag(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCustomTag())}
+                    placeholder="Add tag..."
+                    className="flex-1"
+                  />
+                  <Button onClick={handleAddCustomTag} variant="outline" type="button">
+                    <Plus className="w-4 h-4" />
+                  </Button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {customProductData.tags.map((tag) => (
+                    <Badge key={tag} variant="secondary" className="gap-1">
+                      {tag}
+                      <button
+                        onClick={() => handleRemoveCustomTag(tag)}
+                        className="ml-1 hover:text-red-600"
+                        type="button"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex justify-end gap-3 pt-4 border-t">
+                <Button variant="outline" onClick={() => setCustomProductDialog(false)}>
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleCreateCustomProduct}
+                  disabled={addingProduct || !customProductData.title.trim() || customProductImages.length === 0}
+                  className="gap-2"
+                  style={{
+                    background: `linear-gradient(135deg, ${GOLD_COLOR} 0%, rgba(199, 158, 72, 0.9) 100%)`,
+                    color: 'white',
+                  }}
+                >
+                  {addingProduct ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Creating...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="w-4 h-4" />
+                      Create Product
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
           </DialogContent>
         </Dialog>
 
