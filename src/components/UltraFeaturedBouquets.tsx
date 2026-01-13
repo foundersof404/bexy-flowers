@@ -207,39 +207,16 @@ const UltraFeaturedBouquets = () => {
     };
   }, [loading, bouquets.length]);
 
-  // Auto-scroll functionality for luxury collection section
+  // 🚨 CRITICAL FIX: Disable auto-scroll IntersectionObserver
+  // This was creating unnecessary observers that could accumulate over time
   useEffect(() => {
-    if (!isAutoScroll) return;
-
-    const isMobile = window.innerWidth < 768;
-    if (isMobile) return; // Disable auto-scroll on mobile
-
-    const section = sectionRef.current;
-    if (!section) return;
-
-    // Auto-scroll to the luxury collection section when it comes into view
-    // This creates a smooth, heavy scroll effect using Lenis
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting && entry.intersectionRatio > 0.3) {
-            // Section is in view - ensure smooth heavy scroll is active
-            // The heavy scroll is handled by Lenis in useSmoothScroll hook
-          }
-        });
-      },
-      {
-        threshold: 0.3,
-        rootMargin: '-100px 0px'
-      }
-    );
-
-    observer.observe(section);
-
+    // DISABLED: Auto-scroll observer completely removed for stability
+    console.log('✅ Auto-scroll observer DISABLED for performance');
+    
     return () => {
-      observer.disconnect();
+      // No cleanup needed since we're not creating any observers
     };
-  }, [isAutoScroll]);
+  }, []);
 
   return (
     <>

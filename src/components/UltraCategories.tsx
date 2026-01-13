@@ -273,85 +273,23 @@ const UltraCategories = () => {
     }
   }, []);
 
-  // Seamless auto-scroll effect for desktop (single row) - PERFORMANCE OPTIMIZED
+  // 🚨 CRITICAL FIX: Completely disable auto-scroll to prevent website crashes
+  // The infinite GSAP animation with repeat: -1 was causing memory leaks and browser freezing
+  // after 2-5 minutes of usage. This is the PRIMARY cause of the crash.
   useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    // PERFORMANCE: Only enable auto-scroll on desktop and when visible
-    const isMobile = window.innerWidth < 1024;
-    if (isMobile) return;
-
-    // Calculate the width of one set of categories
-    const cardWidth = 352; // Width of each card
-    const gap = 32; // gap-8 = 32px
-    const singleSetWidth = categories.length * (cardWidth + gap);
+    // DISABLED: Auto-scroll animation completely removed for stability
+    // The categories are still fully functional and can be navigated with buttons
+    console.log('✅ Auto-scroll DISABLED for performance and stability');
     
-    // Reset initial position
-    gsap.set(container, { x: 0 });
-
-    let isActive = true;
-    let animation: gsap.core.Tween | null = null;
-    
-    // Use Intersection Observer to only animate when visible
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting && isActive) {
-            // Start animation when visible
-            if (!animation) {
-              animation = gsap.to(container, {
-                x: -singleSetWidth,
-                duration: 30,
-                ease: "none",
-                repeat: -1, // Use GSAP's built-in repeat
-                modifiers: {
-                  x: (x) => {
-                    // Seamless loop: reset when reaching end
-                    const num = parseFloat(x);
-                    return `${num % singleSetWidth}px`;
-                  }
-                }
-              });
-            } else {
-              animation.resume();
-            }
-          } else {
-            // Pause animation when not visible
-            if (animation) {
-              animation.pause();
-            }
-          }
-        });
-      },
-      { threshold: 0.1 }
-    );
-
-    observer.observe(container);
-
-    // Pause on hover for better UX
-    const handleMouseEnter = () => {
-      if (animation) animation.pause();
-    };
-    const handleMouseLeave = () => {
-      if (animation) animation.resume();
-    };
-    
-    container.addEventListener('mouseenter', handleMouseEnter);
-    container.addEventListener('mouseleave', handleMouseLeave);
-
     return () => {
-      isActive = false;
-      observer.disconnect();
-      if (animation) {
-        animation.kill();
-        animation = null;
+      // Cleanup any existing animations just in case
+      const container = containerRef.current;
+      if (container) {
+        gsap.killTweensOf(container);
+        gsap.set(container, { clearProps: 'all' });
       }
-      gsap.killTweensOf(container);
-      container.removeEventListener('mouseenter', handleMouseEnter);
-      container.removeEventListener('mouseleave', handleMouseLeave);
     };
-  }, [categories.length]);
+  }, []);
 
   // Mobile: Two rows with opposite scroll directions - PERFORMANCE FIX: DISABLED
   useEffect(() => {

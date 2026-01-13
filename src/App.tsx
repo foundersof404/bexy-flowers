@@ -151,51 +151,22 @@ const App = () => {
     }
   }, []);
 
-  // 🚨 MEMORY LEAK FIX: Periodic cache cleanup to prevent memory accumulation
+  // 🚨 CRITICAL FIX: Disable periodic cache cleanup interval
+  // This setInterval was running every 5 minutes and could accumulate over time
+  // React Query already has built-in garbage collection with gcTime
   useEffect(() => {
-    const cleanupInterval = setInterval(() => {
-      try {
-        // Remove stale queries and limit cache size
-        const queryCache = queryClient.getQueryCache();
-        let queries = queryCache.getAll();
-        
-        // Remove queries that are stale and not being observed
-        queries.forEach((query) => {
-          const isStale = query.isStale();
-          const observersCount = query.getObserversCount();
-          
-          if (isStale && observersCount === 0) {
-            queryCache.remove(query);
-          }
-        });
-
-        // Get fresh list after removing stale queries
-        queries = queryCache.getAll();
-
-        // Limit total cache size to 30 queries max (reduced from 50)
-        if (queries.length > 30) {
-          const sortedQueries = [...queries].sort((a, b) => {
-            const aTime = a.state.dataUpdatedAt || 0;
-            const bTime = b.state.dataUpdatedAt || 0;
-            return aTime - bTime; // Oldest first
-          });
-
-          // Remove oldest queries that aren't being observed
-          const toRemove = sortedQueries.slice(0, queries.length - 30);
-          toRemove.forEach((query) => {
-            if (query.getObserversCount() === 0) {
-              queryCache.remove(query);
-            }
-          });
-        }
-      } catch (error) {
-        // Silently handle cleanup errors to prevent crashes
-        console.warn('Cache cleanup error:', error);
-      }
-    }, 5 * 60 * 1000); // Run cleanup every 5 minutes (reduced frequency to prevent CPU spikes)
-
-    return () => clearInterval(cleanupInterval);
-  }, [queryClient]);
+    // DISABLED: Periodic cleanup removed - React Query handles this automatically
+    console.log('✅ Manual cache cleanup DISABLED - using React Query built-in GC');
+    
+    // React Query will automatically clean up stale queries based on:
+    // - staleTime: 2 minutes
+    // - gcTime: 5 minutes
+    // This is more efficient and doesn't create additional intervals
+    
+    return () => {
+      // No interval to clean up
+    };
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
