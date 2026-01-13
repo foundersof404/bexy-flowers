@@ -273,37 +273,200 @@ const UltraCategories = () => {
     }
   }, []);
 
-  // 🚨 CRITICAL FIX: Completely disable auto-scroll to prevent website crashes
-  // The infinite GSAP animation with repeat: -1 was causing memory leaks and browser freezing
-  // after 2-5 minutes of usage. This is the PRIMARY cause of the crash.
+  // Auto-scroll effect for desktop (single row) - OPTIMIZED VERSION
   useEffect(() => {
-    // DISABLED: Auto-scroll animation completely removed for stability
-    // The categories are still fully functional and can be navigated with buttons
-    console.log('✅ Auto-scroll DISABLED for performance and stability');
-    
-    return () => {
-      // Cleanup any existing animations just in case
-      const container = containerRef.current;
-      if (container) {
-        gsap.killTweensOf(container);
-        gsap.set(container, { clearProps: 'all' });
-      }
-    };
-  }, []);
+    const container = containerRef.current;
+    if (!container) return;
 
-  // Mobile: Two rows with opposite scroll directions - PERFORMANCE FIX: DISABLED
-  useEffect(() => {
-    // ? PERFORMANCE FIX: DISABLE MOBILE GSAP INFINITE SCROLL TO STOP PERFORMANCE ISSUES
-    // This was causing continuous GPU usage and contributing to "Page Unresponsive" errors
-    console.log('?? Mobile GSAP infinite scroll is DISABLED for performance');
+    // Only enable auto-scroll on desktop
+    const isMobile = window.innerWidth < 1024;
+    if (isMobile) return;
+
+    // Calculate the width of one set of categories
+    const cardWidth = 352;
+    const gap = 32;
+    const singleSetWidth = categories.length * (cardWidth + gap);
     
-    // The categories are still visible, just not auto-scrolling
+    // Reset initial position
+    gsap.set(container, { x: 0 });
+
+    let isActive = true;
+    let animation: gsap.core.Tween | null = null;
+    let isPaused = false;
+    
+    // Use Intersection Observer to only animate when visible
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && isActive && !isPaused) {
+            // Start animation when visible
+            if (!animation) {
+              animation = gsap.to(container, {
+                x: -singleSetWidth,
+                duration: 40, // Slower duration to reduce CPU usage
+                ease: "none",
+                repeat: -1,
+                modifiers: {
+                  x: (x) => {
+                    const num = parseFloat(x);
+                    return `${num % singleSetWidth}px`;
+                  }
+                }
+              });
+            } else {
+              animation.resume();
+            }
+          } else {
+            // Pause animation when not visible
+            if (animation) {
+              animation.pause();
+            }
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+
+    observer.observe(container);
+
+    // Pause on hover for better UX
+    const handleMouseEnter = () => {
+      isPaused = true;
+      if (animation) animation.pause();
+    };
+    const handleMouseLeave = () => {
+      isPaused = false;
+      if (animation && isActive) animation.resume();
+    };
+    
+    container.addEventListener('mouseenter', handleMouseEnter);
+    container.addEventListener('mouseleave', handleMouseLeave);
+
     return () => {
-      // Cleanup is still good practice
-      const row1 = mobileRow1Ref.current;
-      const row2 = mobileRow2Ref.current;
-      if (row1) gsap.killTweensOf(row1);
-      if (row2) gsap.killTweensOf(row2);
+      isActive = false;
+      isPaused = true;
+      observer.disconnect();
+      if (animation) {
+        animation.kill();
+        animation = null;
+      }
+      gsap.killTweensOf(container);
+      container.removeEventListener('mouseenter', handleMouseEnter);
+      container.removeEventListener('mouseleave', handleMouseLeave);
+    };
+  }, [categories.length]);
+
+  // Mobile: Two rows with opposite scroll directions - OPTIMIZED VERSION
+  useEffect(() => {
+    const row1 = mobileRow1Ref.current;
+    const row2 = mobileRow2Ref.current;
+    const section = sectionRef.current;
+    
+    if (!row1 || !row2 || !section) return;
+    
+    // Only enable on mobile
+    const isMobile = window.innerWidth < 1024;
+    if (!isMobile) return;
+
+    // Calculate widths for seamless scrolling
+    const cardWidth = 196; // w-[196px]
+    const gap = 12; // gap-3 = 12px
+    const row1Count = 5; // First 5 categories
+    const row2Count = 4; // Last 4 categories
+    const row1Width = row1Count * (cardWidth + gap);
+    const row2Width = row2Count * (cardWidth + gap);
+
+    gsap.set(row1, { x: 0 });
+    gsap.set(row2, { x: 0 });
+
+    let isActive = true;
+    let animation1: gsap.core.Tween | null = null;
+    let animation2: gsap.core.Tween | null = null;
+    let isPaused1 = false;
+    let isPaused2 = false;
+
+    // Intersection Observer for row 1 (scrolls left/negative direction)
+    const observer1 = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && isActive && !isPaused1) {
+            if (!animation1) {
+              animation1 = gsap.to(row1, {
+                x: -row1Width,
+                duration: 25, // Slower for mobile
+                ease: "none",
+                repeat: -1,
+                modifiers: {
+                  x: (x) => {
+                    const num = parseFloat(x);
+                    return `${num % row1Width}px`;
+                  }
+                }
+              });
+            } else {
+              animation1.resume();
+            }
+          } else {
+            if (animation1) animation1.pause();
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+
+    // Intersection Observer for row 2 (scrolls right/opposite direction)
+    // For opposite direction, we animate in positive direction
+    const observer2 = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && isActive && !isPaused2) {
+            if (!animation2) {
+              // Start from negative position for seamless loop
+              gsap.set(row2, { x: -row2Width });
+              animation2 = gsap.to(row2, {
+                x: 0,
+                duration: 25,
+                ease: "none",
+                repeat: -1,
+                modifiers: {
+                  x: (x) => {
+                    const num = parseFloat(x);
+                    // Loop: when reaching 0, reset to -row2Width
+                    if (num >= 0) {
+                      return `${num - row2Width}px`;
+                    }
+                    return `${num}px`;
+                  }
+                }
+              });
+            } else {
+              animation2.resume();
+            }
+          } else {
+            if (animation2) animation2.pause();
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+
+    observer1.observe(section);
+    observer2.observe(section);
+
+    return () => {
+      isActive = false;
+      observer1.disconnect();
+      observer2.disconnect();
+      if (animation1) {
+        animation1.kill();
+        animation1 = null;
+      }
+      if (animation2) {
+        animation2.kill();
+        animation2 = null;
+      }
+      gsap.killTweensOf(row1);
+      gsap.killTweensOf(row2);
     };
   }, []);
 

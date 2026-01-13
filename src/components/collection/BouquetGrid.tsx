@@ -128,7 +128,7 @@ const BouquetCard = memo(({
 
   return (
     <div
-      className="group relative cursor-pointer"
+      className="group relative cursor-pointer transition-all duration-300 ease-out"
       onClick={handleClick}
       onMouseEnter={handleMouseEnter}
     >
@@ -158,7 +158,7 @@ const BouquetCard = memo(({
         <OptimizedImage
           src={bouquet.image}
           alt={bouquet.name}
-          className={`w-full h-full object-cover object-center ${bouquet.is_out_of_stock ? 'grayscale' : ''}`}
+          className={`w-full h-full object-cover object-center transition-transform duration-500 ease-out group-hover:scale-110 ${bouquet.is_out_of_stock ? 'grayscale' : ''}`}
           loading="lazy"
           decoding="async"
           priority={index < 4}

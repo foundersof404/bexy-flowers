@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useQueryClient } from '@tanstack/react-query';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import {
   ArrowLeft,
@@ -45,6 +46,7 @@ import {
   createCustomSignatureProduct,
   type SignatureCollectionWithProduct,
 } from '@/lib/api/signature-collection';
+import { signatureQueryKeys } from '@/hooks/useSignatureCollection';
 import { getCollectionProducts } from '@/lib/api/collection-products';
 import { migrateSignatureCollection } from '@/lib/migrateSignatureCollection';
 import { encodeImageUrl } from '@/lib/imageUtils';
@@ -56,6 +58,7 @@ const GOLD_COLOR = 'rgb(199, 158, 72)';
 const AdminSignatureCollection = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [collections, setCollections] = useState<SignatureCollectionWithProduct[]>([]);
   const [availableProducts, setAvailableProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -152,6 +155,8 @@ const AdminSignatureCollection = () => {
         : 0;
       
       await addToSignatureCollection(selectedProductId, maxOrder);
+      // Invalidate React Query cache
+      queryClient.invalidateQueries({ queryKey: signatureQueryKeys.lists() });
       toast({
         title: 'Success',
         description: 'Product added to signature collection',
@@ -205,6 +210,8 @@ const AdminSignatureCollection = () => {
           imageFiles: customProductImages,
         }
       );
+      // Invalidate React Query cache
+      queryClient.invalidateQueries({ queryKey: signatureQueryKeys.lists() });
       toast({
         title: 'Success',
         description: 'Custom product created and added to signature collection',
@@ -252,6 +259,8 @@ const AdminSignatureCollection = () => {
   const handleDelete = async (id: string) => {
     try {
       await removeFromSignatureCollection(id);
+      // Invalidate React Query cache
+      queryClient.invalidateQueries({ queryKey: signatureQueryKeys.lists() });
       toast({
         title: 'Success',
         description: 'Product removed from signature collection',
@@ -279,6 +288,8 @@ const AdminSignatureCollection = () => {
       await reorderSignatureCollections(
         items.map((item) => ({ id: item.id, display_order: item.display_order }))
       );
+      // Invalidate React Query cache
+      queryClient.invalidateQueries({ queryKey: signatureQueryKeys.lists() });
       await loadData();
     } catch (error) {
       toast({
@@ -301,6 +312,8 @@ const AdminSignatureCollection = () => {
       await reorderSignatureCollections(
         items.map((item) => ({ id: item.id, display_order: item.display_order }))
       );
+      // Invalidate React Query cache
+      queryClient.invalidateQueries({ queryKey: signatureQueryKeys.lists() });
       await loadData();
     } catch (error) {
       toast({
@@ -314,6 +327,8 @@ const AdminSignatureCollection = () => {
   const handleSwapProduct = async (id: string, newProductId: string) => {
     try {
       await updateSignatureCollection(id, { product_id: newProductId });
+      // Invalidate React Query cache
+      queryClient.invalidateQueries({ queryKey: signatureQueryKeys.lists() });
       toast({
         title: 'Success',
         description: 'Product swapped successfully',
@@ -385,9 +400,14 @@ const AdminSignatureCollection = () => {
       }
 
       await updateSignatureCollection(editingItem.id, updates);
+      
+      // CRITICAL: Invalidate AND refetch React Query cache so frontend shows updated data immediately
+      await queryClient.invalidateQueries({ queryKey: signatureQueryKeys.lists() });
+      await queryClient.refetchQueries({ queryKey: signatureQueryKeys.lists() });
+      
       toast({
         title: 'Success',
-        description: 'Signature collection item updated',
+        description: 'Signature collection item updated - refresh the website to see changes',
       });
       setEditingItem(null);
       setImagesToDelete([]);

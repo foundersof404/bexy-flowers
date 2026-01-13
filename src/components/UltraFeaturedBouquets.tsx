@@ -28,7 +28,13 @@ const UltraFeaturedBouquets = () => {
   const [isAutoScroll, setIsAutoScroll] = useState(true);
 
   // Use React Query hook for optimized data fetching
-  const { data: signatureCollections, isLoading: loading } = useSignatureCollection();
+  // Force refetch on mount to ensure we always have the latest data
+  const { data: signatureCollections, isLoading: loading, refetch } = useSignatureCollection();
+  
+  // Refetch data when component mounts to ensure fresh discount data
+  useEffect(() => {
+    refetch();
+  }, [refetch]);
 
   // Transform signature collections to bouquets format
   // IMPORTANT: Use custom fields from signature_collections if available, otherwise use product defaults
