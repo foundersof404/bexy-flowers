@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Autoplay, Pagination, EffectFade } from 'swiper/modules';
+import { Pagination, EffectFade } from 'swiper/modules';
 import type { Swiper as SwiperType } from 'swiper';
 import 'swiper/css';
 import 'swiper/css/effect-fade';
@@ -305,20 +305,16 @@ const CarouselHero = ({ slidesToShow, isHomepage = false }: CarouselHeroProps = 
             crossFade: true
           }}
           speed={800}
-          autoplay={slides.length > 1 ? {
-            delay: isMobile ? 2500 : 5000,
-            disableOnInteraction: false,
-            pauseOnMouseEnter: true,
-          } : false}
+          autoplay={false}
           pagination={slides.length > 1 ? {
             el: '.swiper-pagination',
             type: 'fraction',
             formatFractionCurrent: (number) => String(number),
             formatFractionTotal: (number) => String(number),
           } : false}
-          observer={true}
-          observeParents={true}
-          watchSlidesProgress={true}
+          observer={false}
+          observeParents={false}
+          watchSlidesProgress={false}
           onSwiper={(swiper) => {
             swiperRef.current = swiper;
             // Update Swiper dimensions after initialization
