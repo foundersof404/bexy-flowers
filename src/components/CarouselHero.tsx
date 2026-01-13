@@ -141,19 +141,20 @@ const CarouselHero = ({ slidesToShow, isHomepage = false }: CarouselHeroProps = 
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
+          const videoElement = videoRef.current;
           if (entry.isIntersecting) {
             setIsVideoVisible(true);
             setShouldLoadVideo(true);
-            // PERFORMANCE FIX: Play video when visible
-            if (videoRef.current && shouldLoadVideo) {
-              videoRef.current.play().catch(() => {
+            // PERFORMANCE FIX: Play video when visible (use ref directly, not state)
+            if (videoElement) {
+              videoElement.play().catch(() => {
                 // Auto-play prevented, video will play when user interacts
               });
             }
           } else {
             // PERFORMANCE FIX: Pause video when not visible to save resources
-            if (videoRef.current && shouldLoadVideo) {
-              videoRef.current.pause();
+            if (videoElement) {
+              videoElement.pause();
             }
           }
         });
@@ -170,8 +171,7 @@ const CarouselHero = ({ slidesToShow, isHomepage = false }: CarouselHeroProps = 
     return () => {
       observer.disconnect();
     };
-    // Include shouldLoadVideo to re-observe after video loads
-  }, [isMobile, shouldLoadVideo]);
+  }, [isMobile]); // REMOVED shouldLoadVideo from deps to prevent re-trigger loops
 
   // Load and play video when it becomes visible
   useEffect(() => {
@@ -220,6 +220,7 @@ const CarouselHero = ({ slidesToShow, isHomepage = false }: CarouselHeroProps = 
     if (!isMobile || !videoRef.current) return;
 
     let resizeTimer: NodeJS.Timeout | null = null;
+    let initialTimeoutId: NodeJS.Timeout | null = null; // FIX: Store initial timeout for cleanup
     
     const handleResize = () => {
       if (!videoRef.current) return;
@@ -247,10 +248,15 @@ const CarouselHero = ({ slidesToShow, isHomepage = false }: CarouselHeroProps = 
     window.addEventListener('resize', throttledResize, { passive: true });
     window.addEventListener('orientationchange', handleResize, { passive: true });
     
-    // Force resize on mount
-    setTimeout(handleResize, 100);
+    // FIX: Store initial timeout so it can be cleaned up
+    initialTimeoutId = setTimeout(handleResize, 100);
 
     return () => {
+      // FIX: Clear initial timeout
+      if (initialTimeoutId) {
+        clearTimeout(initialTimeoutId);
+        initialTimeoutId = null;
+      }
       if (resizeTimer) {
         clearTimeout(resizeTimer);
         resizeTimer = null;

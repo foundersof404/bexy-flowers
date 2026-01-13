@@ -84,7 +84,8 @@ const Collection = () => {
       setSelectedCategory(categoryParam);
       
       // Scroll to the main collection grid, bypassing the hero section
-      setTimeout(() => {
+      // FIX: Store timeout for cleanup
+      const scrollTimeoutId = setTimeout(() => {
         const gridElement = document.getElementById('main-collection-grid');
         if (gridElement) {
           // Offset for fixed header/navigation if needed
@@ -94,6 +95,10 @@ const Collection = () => {
           window.scrollTo({top: y, behavior: 'smooth'});
         }
       }, 800); // Delay to allow page transition/animation to complete
+
+      return () => {
+        clearTimeout(scrollTimeoutId);
+      };
     }
   }, [location.search]);
 
@@ -130,6 +135,7 @@ const Collection = () => {
     setSelectedCategory(category);
     
     // ⚡ PERFORMANCE: Smooth scroll to grid when category changes
+    // Note: setTimeout in event handler is fine - doesn't need cleanup as it fires immediately
     setTimeout(() => {
       const gridElement = document.getElementById('main-collection-grid');
       if (gridElement) {

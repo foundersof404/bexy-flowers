@@ -18,7 +18,7 @@ interface PriceDisplayProps {
 export const PriceDisplay: React.FC<PriceDisplayProps> = ({
   price,
   discountPercentage,
-  currency = '€',
+  currency = '$',
   size = 'md',
   showDiscountBadge = true,
   className = '',
