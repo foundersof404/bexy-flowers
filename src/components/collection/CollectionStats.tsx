@@ -38,11 +38,10 @@ const CollectionStatsComponent = () => {
               <div className="text-[0.6rem] sm:text-xs uppercase tracking-[0.25em] sm:tracking-[0.35em] text-slate-500">
                 {item.label}
               </div>
-              <motion.div
+              {/* ⚡ PERFORMANCE FIX: Removed infinite animation to prevent CPU usage */}
+              <div
                 className="absolute inset-0 rounded-3xl pointer-events-none"
-                animate={{ opacity: [0.1, 0.25, 0.1] }}
-                transition={{ duration: 6, repeat: Infinity }}
-                style={{ border: "1px solid rgba(199,158,72,0.25)" }}
+                style={{ border: "1px solid rgba(199,158,72,0.25)", opacity: 0.15 }}
               />
             </motion.div>
           ))}

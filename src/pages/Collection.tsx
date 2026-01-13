@@ -16,8 +16,9 @@ import type { Bouquet } from "@/types/bouquet";
 import { generatedCategories } from "@/data/generatedBouquets";
 import { encodeImageUrl } from "@/lib/imageUtils";
 import { useCollectionProducts } from "@/hooks/useCollectionProducts";
-import { useNavigationPredictor } from "@/hooks/useNavigationPredictor";
-import { useEnhancedRoutePrefetch } from "@/hooks/useEnhancedRoutePrefetch";
+// ⚡ PERFORMANCE FIX: Disabled navigation hooks - they cause DOM node accumulation on Collection page
+// import { useNavigationPredictor } from "@/hooks/useNavigationPredictor";
+// import { useEnhancedRoutePrefetch } from "@/hooks/useEnhancedRoutePrefetch";
 import { useIsMobile } from "@/hooks/use-mobile";
 import CarouselHero from "@/components/CarouselHero";
 
@@ -46,11 +47,10 @@ const Collection = () => {
   const location = useLocation();
   const isMobile = useIsMobile();
 
-  // Initialize navigation predictor and enhanced prefetching
-  // ⚡ PERFORMANCE FIX: setupIntersectionObserver not used - removed to prevent unnecessary hook overhead
-  useNavigationPredictor();
-  // const { setupIntersectionObserver } = useEnhancedRoutePrefetch(); // Not used - removed
-  useEnhancedRoutePrefetch(); // Still call for cleanup, but don't destructure unused values
+  // ⚡ PERFORMANCE FIX: DISABLE navigation predictor and prefetching on Collection page
+  // These hooks create DOM nodes and observers that cause CPU/memory issues on this page
+  // useNavigationPredictor(); // DISABLED - causes DOM node accumulation
+  // useEnhancedRoutePrefetch(); // DISABLED - causes DOM node accumulation
 
   // Fetch products using React Query - optimized with caching and pre-loading
   const { data: products, isLoading: loading, error } = useCollectionProducts({ isActive: true });
