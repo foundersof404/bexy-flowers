@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useQueryClient } from '@tanstack/react-query';
+import { luxuryBoxesQueryKeys } from '@/hooks/useLuxuryBoxes';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import {
   ArrowLeft,
@@ -46,6 +48,7 @@ const GOLD_COLOR = 'rgb(199, 158, 72)';
 const AdminLuxuryBoxes = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [boxes, setBoxes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -168,12 +171,24 @@ const AdminLuxuryBoxes = () => {
 
       if (editingId) {
         await updateLuxuryBox(editingId, formData);
+        
+        // CRITICAL: Invalidate React Query cache so frontend sees changes immediately
+        await queryClient.invalidateQueries({ queryKey: luxuryBoxesQueryKeys.all });
+        queryClient.removeQueries({ queryKey: luxuryBoxesQueryKeys.all });
+        await queryClient.refetchQueries({ queryKey: luxuryBoxesQueryKeys.lists() });
+        
         toast({
           title: 'Success',
           description: 'Box updated successfully',
         });
       } else {
         await createLuxuryBox(formData);
+        
+        // CRITICAL: Invalidate React Query cache so frontend sees changes immediately
+        await queryClient.invalidateQueries({ queryKey: luxuryBoxesQueryKeys.all });
+        queryClient.removeQueries({ queryKey: luxuryBoxesQueryKeys.all });
+        await queryClient.refetchQueries({ queryKey: luxuryBoxesQueryKeys.lists() });
+        
         toast({
           title: 'Success',
           description: 'Box created successfully',
@@ -197,6 +212,12 @@ const AdminLuxuryBoxes = () => {
   const handleDelete = async (id: string) => {
     try {
       await deleteLuxuryBox(id);
+      
+      // CRITICAL: Invalidate React Query cache so frontend sees changes immediately
+      await queryClient.invalidateQueries({ queryKey: luxuryBoxesQueryKeys.all });
+      queryClient.removeQueries({ queryKey: luxuryBoxesQueryKeys.all });
+      await queryClient.refetchQueries({ queryKey: luxuryBoxesQueryKeys.lists() });
+      
       toast({
         title: 'Success',
         description: 'Box deleted successfully',
@@ -255,6 +276,12 @@ const AdminLuxuryBoxes = () => {
     try {
       if (editingColorId) {
         await updateBoxColor(editingColorId, colorFormData);
+        
+        // CRITICAL: Invalidate React Query cache so frontend sees changes immediately
+        await queryClient.invalidateQueries({ queryKey: luxuryBoxesQueryKeys.all });
+        queryClient.removeQueries({ queryKey: luxuryBoxesQueryKeys.all });
+        await queryClient.refetchQueries({ queryKey: luxuryBoxesQueryKeys.lists() });
+        
         toast({
           title: 'Success',
           description: 'Color updated successfully',
@@ -264,6 +291,12 @@ const AdminLuxuryBoxes = () => {
           box_id: selectedBoxId,
           ...colorFormData,
         });
+        
+        // CRITICAL: Invalidate React Query cache so frontend sees changes immediately
+        await queryClient.invalidateQueries({ queryKey: luxuryBoxesQueryKeys.all });
+        queryClient.removeQueries({ queryKey: luxuryBoxesQueryKeys.all });
+        await queryClient.refetchQueries({ queryKey: luxuryBoxesQueryKeys.lists() });
+        
         toast({
           title: 'Success',
           description: 'Color added successfully',
@@ -287,10 +320,16 @@ const AdminLuxuryBoxes = () => {
 
     try {
       await deleteBoxColor(colorId);
+      
+      // CRITICAL: Invalidate React Query cache so frontend sees changes immediately
+      await queryClient.invalidateQueries({ queryKey: luxuryBoxesQueryKeys.all });
+      queryClient.removeQueries({ queryKey: luxuryBoxesQueryKeys.all });
+      await queryClient.refetchQueries({ queryKey: luxuryBoxesQueryKeys.lists() });
+      
       toast({
         title: 'Success',
         description: 'Color deleted successfully',
-      });
+        });
       await loadBoxDetails(selectedBoxId);
     } catch (error) {
       toast({
@@ -335,6 +374,12 @@ const AdminLuxuryBoxes = () => {
     try {
       if (editingSizeId) {
         await updateBoxSize(editingSizeId, sizeFormData);
+        
+        // CRITICAL: Invalidate React Query cache so frontend sees changes immediately
+        await queryClient.invalidateQueries({ queryKey: luxuryBoxesQueryKeys.all });
+        queryClient.removeQueries({ queryKey: luxuryBoxesQueryKeys.all });
+        await queryClient.refetchQueries({ queryKey: luxuryBoxesQueryKeys.lists() });
+        
         toast({
           title: 'Success',
           description: 'Size updated successfully',
@@ -344,6 +389,12 @@ const AdminLuxuryBoxes = () => {
           box_id: selectedBoxId,
           ...sizeFormData,
         });
+        
+        // CRITICAL: Invalidate React Query cache so frontend sees changes immediately
+        await queryClient.invalidateQueries({ queryKey: luxuryBoxesQueryKeys.all });
+        queryClient.removeQueries({ queryKey: luxuryBoxesQueryKeys.all });
+        await queryClient.refetchQueries({ queryKey: luxuryBoxesQueryKeys.lists() });
+        
         toast({
           title: 'Success',
           description: 'Size added successfully',
@@ -367,6 +418,12 @@ const AdminLuxuryBoxes = () => {
 
     try {
       await deleteBoxSize(sizeId);
+      
+      // CRITICAL: Invalidate React Query cache so frontend sees changes immediately
+      await queryClient.invalidateQueries({ queryKey: luxuryBoxesQueryKeys.all });
+      queryClient.removeQueries({ queryKey: luxuryBoxesQueryKeys.all });
+      await queryClient.refetchQueries({ queryKey: luxuryBoxesQueryKeys.lists() });
+      
       toast({
         title: 'Success',
         description: 'Size deleted successfully',

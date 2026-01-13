@@ -133,8 +133,10 @@ const AdminWeddingCreations = () => {
           imageFile || undefined,
           imageFile ? true : false
         );
-        // Invalidate React Query cache so frontend sees changes immediately
-        queryClient.invalidateQueries({ queryKey: weddingQueryKeys.lists() });
+        // CRITICAL: Invalidate React Query cache so frontend sees changes immediately
+        await queryClient.invalidateQueries({ queryKey: weddingQueryKeys.all });
+        queryClient.removeQueries({ queryKey: weddingQueryKeys.all });
+        await queryClient.refetchQueries({ queryKey: weddingQueryKeys.lists() });
         toast({
           title: 'Success',
           description: 'Wedding creation updated successfully',
@@ -155,8 +157,10 @@ const AdminWeddingCreations = () => {
           },
           imageFile
         );
-        // Invalidate React Query cache so frontend sees changes immediately
-        queryClient.invalidateQueries({ queryKey: weddingQueryKeys.lists() });
+        // CRITICAL: Invalidate React Query cache so frontend sees changes immediately
+        await queryClient.invalidateQueries({ queryKey: weddingQueryKeys.all });
+        queryClient.removeQueries({ queryKey: weddingQueryKeys.all });
+        await queryClient.refetchQueries({ queryKey: weddingQueryKeys.lists() });
         toast({
           title: 'Success',
           description: 'Wedding creation added successfully',
@@ -180,9 +184,10 @@ const AdminWeddingCreations = () => {
   const handleDelete = async (id: string) => {
     try {
       await deleteWeddingCreation(id);
-      // Invalidate React Query cache so frontend sees changes immediately
-      queryClient.invalidateQueries({ queryKey: weddingQueryKeys.lists() });
-      queryClient.removeQueries({ queryKey: weddingQueryKeys.detail(id) });
+      // CRITICAL: Invalidate React Query cache so frontend sees changes immediately
+      await queryClient.invalidateQueries({ queryKey: weddingQueryKeys.all });
+      queryClient.removeQueries({ queryKey: weddingQueryKeys.all });
+      await queryClient.refetchQueries({ queryKey: weddingQueryKeys.lists() });
       toast({
         title: 'Success',
         description: 'Wedding creation deleted successfully',

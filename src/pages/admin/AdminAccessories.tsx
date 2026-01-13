@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useQueryClient } from '@tanstack/react-query';
+import { accessoriesQueryKeys } from '@/hooks/useAccessories';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import {
   ArrowLeft,
@@ -34,6 +36,7 @@ const GOLD_COLOR = 'rgb(199, 158, 72)';
 const AdminAccessories = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [accessories, setAccessories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -122,12 +125,24 @@ const AdminAccessories = () => {
 
       if (editingId) {
         await updateAccessory(editingId, formData, imageFile || undefined, !!imageFile);
+        
+        // CRITICAL: Invalidate React Query cache so frontend sees changes immediately
+        await queryClient.invalidateQueries({ queryKey: accessoriesQueryKeys.all });
+        queryClient.removeQueries({ queryKey: accessoriesQueryKeys.all });
+        await queryClient.refetchQueries({ queryKey: accessoriesQueryKeys.lists() });
+        
         toast({
           title: 'Success',
           description: 'Accessory updated successfully',
         });
       } else {
         await createAccessory(formData, imageFile || undefined);
+        
+        // CRITICAL: Invalidate React Query cache so frontend sees changes immediately
+        await queryClient.invalidateQueries({ queryKey: accessoriesQueryKeys.all });
+        queryClient.removeQueries({ queryKey: accessoriesQueryKeys.all });
+        await queryClient.refetchQueries({ queryKey: accessoriesQueryKeys.lists() });
+        
         toast({
           title: 'Success',
           description: 'Accessory created successfully',
@@ -152,6 +167,12 @@ const AdminAccessories = () => {
   const handleDelete = async (id: string) => {
     try {
       await deleteAccessory(id);
+      
+      // CRITICAL: Invalidate React Query cache so frontend sees changes immediately
+      await queryClient.invalidateQueries({ queryKey: accessoriesQueryKeys.all });
+      queryClient.removeQueries({ queryKey: accessoriesQueryKeys.all });
+      await queryClient.refetchQueries({ queryKey: accessoriesQueryKeys.lists() });
+      
       toast({
         title: 'Success',
         description: 'Accessory deleted successfully',
