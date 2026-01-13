@@ -296,8 +296,20 @@ const Customize: React.FC = () => {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting && !shouldLoadVideo) {
+          const videoElement = videoRef.current;
+          if (entry.isIntersecting) {
             setShouldLoadVideo(true);
+            // PERFORMANCE FIX: Play video when visible (use ref directly, not state)
+            if (videoElement) {
+              videoElement.play().catch(() => {
+                // Auto-play prevented
+              });
+            }
+          } else {
+            // PERFORMANCE FIX: Pause video when not visible to save resources
+            if (videoElement) {
+              videoElement.pause();
+            }
           }
         });
       },
@@ -313,7 +325,7 @@ const Customize: React.FC = () => {
     return () => {
       observer.disconnect();
     };
-  }, [isMobile, shouldLoadVideo]);
+  }, [isMobile]); // REMOVED shouldLoadVideo from deps to prevent re-trigger loops
 
   // Load and play video when it becomes visible
   useEffect(() => {
@@ -356,6 +368,7 @@ const Customize: React.FC = () => {
     if (!isMobile || !videoRef.current) return;
 
     let resizeTimer: NodeJS.Timeout | null = null;
+    let initialTimeoutId: NodeJS.Timeout | null = null; // FIX: Store initial timeout for cleanup
     
     const handleResize = () => {
       if (!videoRef.current) return;
@@ -382,9 +395,15 @@ const Customize: React.FC = () => {
 
     window.addEventListener('resize', throttledResize, { passive: true });
     window.addEventListener('orientationchange', handleResize, { passive: true });
-    setTimeout(handleResize, 100);
+    // FIX: Store initial timeout so it can be cleaned up
+    initialTimeoutId = setTimeout(handleResize, 100);
 
     return () => {
+      // FIX: Clear initial timeout
+      if (initialTimeoutId) {
+        clearTimeout(initialTimeoutId);
+        initialTimeoutId = null;
+      }
       if (resizeTimer) {
         clearTimeout(resizeTimer);
         resizeTimer = null;

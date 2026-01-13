@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Autoplay, Pagination, EffectFade } from 'swiper/modules';
+import { Pagination, EffectFade } from 'swiper/modules';
 import type { Swiper as SwiperType } from 'swiper';
 import 'swiper/css';
 import 'swiper/css/effect-fade';
@@ -141,19 +141,20 @@ const CarouselHero = ({ slidesToShow, isHomepage = false }: CarouselHeroProps = 
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
+          const videoElement = videoRef.current;
           if (entry.isIntersecting) {
             setIsVideoVisible(true);
             setShouldLoadVideo(true);
-            // PERFORMANCE FIX: Play video when visible
-            if (videoRef.current && shouldLoadVideo) {
-              videoRef.current.play().catch(() => {
+            // PERFORMANCE FIX: Play video when visible (use ref directly, not state)
+            if (videoElement) {
+              videoElement.play().catch(() => {
                 // Auto-play prevented, video will play when user interacts
               });
             }
           } else {
             // PERFORMANCE FIX: Pause video when not visible to save resources
-            if (videoRef.current && shouldLoadVideo) {
-              videoRef.current.pause();
+            if (videoElement) {
+              videoElement.pause();
             }
           }
         });
@@ -170,8 +171,7 @@ const CarouselHero = ({ slidesToShow, isHomepage = false }: CarouselHeroProps = 
     return () => {
       observer.disconnect();
     };
-    // Include shouldLoadVideo to re-observe after video loads
-  }, [isMobile, shouldLoadVideo]);
+  }, [isMobile]); // REMOVED shouldLoadVideo from deps to prevent re-trigger loops
 
   // Load and play video when it becomes visible
   useEffect(() => {
@@ -220,6 +220,7 @@ const CarouselHero = ({ slidesToShow, isHomepage = false }: CarouselHeroProps = 
     if (!isMobile || !videoRef.current) return;
 
     let resizeTimer: NodeJS.Timeout | null = null;
+    let initialTimeoutId: NodeJS.Timeout | null = null; // FIX: Store initial timeout for cleanup
     
     const handleResize = () => {
       if (!videoRef.current) return;
@@ -247,10 +248,15 @@ const CarouselHero = ({ slidesToShow, isHomepage = false }: CarouselHeroProps = 
     window.addEventListener('resize', throttledResize, { passive: true });
     window.addEventListener('orientationchange', handleResize, { passive: true });
     
-    // Force resize on mount
-    setTimeout(handleResize, 100);
+    // FIX: Store initial timeout so it can be cleaned up
+    initialTimeoutId = setTimeout(handleResize, 100);
 
     return () => {
+      // FIX: Clear initial timeout
+      if (initialTimeoutId) {
+        clearTimeout(initialTimeoutId);
+        initialTimeoutId = null;
+      }
       if (resizeTimer) {
         clearTimeout(resizeTimer);
         resizeTimer = null;
@@ -290,7 +296,7 @@ const CarouselHero = ({ slidesToShow, isHomepage = false }: CarouselHeroProps = 
       )}
       <div className="carousel-hero-wrapper">
         <Swiper
-          modules={[Autoplay, Pagination, EffectFade]}
+          modules={[Pagination, EffectFade]}
           spaceBetween={0}
           slidesPerView={1}
           loop={slides.length > 1}
@@ -299,20 +305,16 @@ const CarouselHero = ({ slidesToShow, isHomepage = false }: CarouselHeroProps = 
             crossFade: true
           }}
           speed={800}
-          autoplay={slides.length > 1 ? {
-            delay: isMobile ? 2500 : 5000,
-            disableOnInteraction: false,
-            pauseOnMouseEnter: true,
-          } : false}
+          autoplay={false}
           pagination={slides.length > 1 ? {
             el: '.swiper-pagination',
             type: 'fraction',
             formatFractionCurrent: (number) => String(number),
             formatFractionTotal: (number) => String(number),
           } : false}
-          observer={true}
-          observeParents={true}
-          watchSlidesProgress={true}
+          observer={false}
+          observeParents={false}
+          watchSlidesProgress={false}
           onSwiper={(swiper) => {
             swiperRef.current = swiper;
             // Update Swiper dimensions after initialization

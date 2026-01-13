@@ -16,10 +16,11 @@ import type { Bouquet } from "@/types/bouquet";
 import { generatedCategories } from "@/data/generatedBouquets";
 import { encodeImageUrl } from "@/lib/imageUtils";
 import { useCollectionProducts } from "@/hooks/useCollectionProducts";
-import { useNavigationPredictor } from "@/hooks/useNavigationPredictor";
-import { useEnhancedRoutePrefetch } from "@/hooks/useEnhancedRoutePrefetch";
+// ⚡ PERFORMANCE FIX: Disabled navigation hooks - they cause DOM node accumulation on Collection page
+// import { useNavigationPredictor } from "@/hooks/useNavigationPredictor";
+// import { useEnhancedRoutePrefetch } from "@/hooks/useEnhancedRoutePrefetch";
 import { useIsMobile } from "@/hooks/use-mobile";
-import CarouselHero from "@/components/CarouselHero";
+// import CarouselHero from "@/components/CarouselHero"; // ⚡ DISABLED - Causes 99% CPU usage
 
 // Get default category ID - prefer "red-roses", fallback to first non-"all" category, or "all"
 const getDefaultCategoryId = (): string => {
@@ -46,9 +47,10 @@ const Collection = () => {
   const location = useLocation();
   const isMobile = useIsMobile();
 
-  // Initialize navigation predictor and enhanced prefetching
-  useNavigationPredictor();
-  const { setupIntersectionObserver } = useEnhancedRoutePrefetch();
+  // ⚡ PERFORMANCE FIX: DISABLE navigation predictor and prefetching on Collection page
+  // These hooks create DOM nodes and observers that cause CPU/memory issues on this page
+  // useNavigationPredictor(); // DISABLED - causes DOM node accumulation
+  // useEnhancedRoutePrefetch(); // DISABLED - causes DOM node accumulation
 
   // Fetch products using React Query - optimized with caching and pre-loading
   const { data: products, isLoading: loading, error } = useCollectionProducts({ isActive: true });
@@ -84,7 +86,8 @@ const Collection = () => {
       setSelectedCategory(categoryParam);
       
       // Scroll to the main collection grid, bypassing the hero section
-      setTimeout(() => {
+      // FIX: Store timeout for cleanup
+      const scrollTimeoutId = setTimeout(() => {
         const gridElement = document.getElementById('main-collection-grid');
         if (gridElement) {
           // Offset for fixed header/navigation if needed
@@ -94,6 +97,10 @@ const Collection = () => {
           window.scrollTo({top: y, behavior: 'smooth'});
         }
       }, 800); // Delay to allow page transition/animation to complete
+
+      return () => {
+        clearTimeout(scrollTimeoutId);
+      };
     }
   }, [location.search]);
 
@@ -130,6 +137,7 @@ const Collection = () => {
     setSelectedCategory(category);
     
     // ⚡ PERFORMANCE: Smooth scroll to grid when category changes
+    // Note: setTimeout in event handler is fine - doesn't need cleanup as it fires immediately
     setTimeout(() => {
       const gridElement = document.getElementById('main-collection-grid');
       if (gridElement) {
@@ -161,12 +169,8 @@ const Collection = () => {
       <UltraNavigation />
       
       <div className="collection-content relative z-10">
-        {/* Hero Section - Mobile: Original CollectionHero, Desktop: CarouselHero */}
-        {isMobile ? (
-          <CollectionHero />
-        ) : (
-          <CarouselHero />
-        )}
+        {/* Hero Section - PERFORMANCE FIX: Use CollectionHero on both mobile and desktop to avoid Swiper CPU usage */}
+        <CollectionHero />
         
         {/* Fixed Category Navigation */}
         <CategoryNavigation 

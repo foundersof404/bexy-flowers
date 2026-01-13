@@ -45,12 +45,19 @@ export function register() {
 
       // Handle controller change (new SW activated)
       let refreshing = false;
-      navigator.serviceWorker.addEventListener('controllerchange', () => {
+      const handleControllerChange = () => {
         if (!refreshing) {
           refreshing = true;
           window.location.reload();
         }
-      });
+      };
+      navigator.serviceWorker.addEventListener('controllerchange', handleControllerChange);
+
+      // NOTE: Event listener removal is not needed here because:
+      // 1. This runs inside window.addEventListener('load', ...) which only runs once
+      // 2. The page reloads when controller changes, so cleanup happens naturally
+      // 3. Service worker lifecycle events are global and expected to persist
+      // However, if unregister() is called, it should handle cleanup (see unregister function)
     });
   }
 }

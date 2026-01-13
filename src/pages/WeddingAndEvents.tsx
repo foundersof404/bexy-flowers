@@ -135,18 +135,19 @@ const WeddingHero = () => {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
+          const videoElement = videoRef.current;
           if (entry.isIntersecting) {
             setShouldLoadVideo(true);
-            // PERFORMANCE FIX: Play video when visible
-            if (videoRef.current && shouldLoadVideo) {
-              videoRef.current.play().catch(() => {
+            // PERFORMANCE FIX: Play video when visible (use ref directly, not state)
+            if (videoElement) {
+              videoElement.play().catch(() => {
                 // Auto-play prevented
               });
             }
           } else {
             // PERFORMANCE FIX: Pause video when not visible to save resources
-            if (videoRef.current && shouldLoadVideo) {
-              videoRef.current.pause();
+            if (videoElement) {
+              videoElement.pause();
             }
           }
         });
@@ -163,7 +164,7 @@ const WeddingHero = () => {
     return () => {
       observer.disconnect();
     };
-  }, [isMobile, shouldLoadVideo]);
+  }, [isMobile]); // REMOVED shouldLoadVideo from deps to prevent re-trigger loops
 
   // Load and play video when it becomes visible
   useEffect(() => {
@@ -274,7 +275,7 @@ const WeddingHero = () => {
             className="w-full h-full object-cover"
             loading="eager"
             decoding="sync"
-            fetchpriority="high"
+            fetchPriority="high"
             width="1920"
             height="1080"
             style={{
@@ -422,6 +423,7 @@ const ServiceSection = ({
   // Preload all images to ensure smooth transitions
   // PERFORMANCE FIX: Only run when section is visible
   const preloadedImagesRef = React.useRef<Set<string>>(new Set());
+  const intervalRef = React.useRef<NodeJS.Timeout | null>(null); // FIX: Use ref for interval to fix closure issue
   
   useEffect(() => {
     if (imageArray.length <= 1) return;
@@ -436,8 +438,6 @@ const ServiceSection = ({
         preloadedImagesRef.current.add(encodedSrc);
       }
     });
-
-    let interval: NodeJS.Timeout | null = null;
     
     // Only run interval when section is visible (PERFORMANCE FIX)
     const observer = new IntersectionObserver(
@@ -445,8 +445,8 @@ const ServiceSection = ({
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             // Start rotation when visible
-            if (!interval) {
-              interval = setInterval(() => {
+            if (!intervalRef.current) {
+              intervalRef.current = setInterval(() => {
                 setCurrentImageIndex((prev) => {
                   const next = (prev + 1) % imageArray.length;
                   return next;
@@ -455,9 +455,9 @@ const ServiceSection = ({
             }
           } else {
             // Stop rotation when not visible to save resources
-            if (interval) {
-              clearInterval(interval);
-              interval = null;
+            if (intervalRef.current) {
+              clearInterval(intervalRef.current);
+              intervalRef.current = null;
             }
           }
         });
@@ -471,7 +471,11 @@ const ServiceSection = ({
 
     return () => {
       observer.disconnect();
-      if (interval) clearInterval(interval);
+      // FIX: Now cleanup can properly access interval via ref
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
     };
   }, [imageArray]); // Depend on memoized array - will only change when images prop actually changes
 
