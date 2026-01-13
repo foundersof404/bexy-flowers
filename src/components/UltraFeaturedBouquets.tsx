@@ -62,6 +62,9 @@ const UltraFeaturedBouquets = () => {
     const discountPercentage = item.discount_percentage ?? item.product?.discount_percentage ?? null;
     const imageRotations = (item as any).image_rotations || {};
 
+    // DEBUG: Log discount data
+    console.log(`[UltraFeaturedBouquets] Product: ${title}, Discount: ${discountPercentage}%, item.discount_percentage: ${item.discount_percentage}, product.discount_percentage: ${item.product?.discount_percentage}`);
+
     return {
       id: item.product?.id || item.id,
       name: title,
@@ -421,6 +424,30 @@ const UltraFeaturedBouquets = () => {
                            console.log('Successfully loaded signature collection image:', bouquet.image, bouquet.name);
                          }}
                        />
+
+                       {/* CRITICAL: Discount Badge - Top Right Corner */}
+                       {bouquet.discount_percentage && bouquet.discount_percentage > 0 && (
+                         <div
+                           style={{
+                             position: 'absolute',
+                             top: isMobile ? '0.5rem' : '1rem',
+                             right: isMobile ? '0.5rem' : '1rem',
+                             padding: isMobile ? '0.25rem 0.5rem' : '0.375rem 0.75rem',
+                             fontSize: isMobile ? '0.625rem' : '0.75rem',
+                             fontWeight: '700',
+                             fontFamily: "'EB Garamond', serif",
+                             color: '#fff',
+                             background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+                             borderRadius: '0.25rem',
+                             boxShadow: '0 2px 8px rgba(239, 68, 68, 0.4)',
+                             zIndex: 10,
+                             letterSpacing: '0.05em',
+                             textTransform: 'uppercase'
+                           }}
+                         >
+                           {bouquet.discount_percentage}% OFF
+                         </div>
+                       )}
 
                        {/* Icon with sophisticated cut-out effect */}
                        <div 
