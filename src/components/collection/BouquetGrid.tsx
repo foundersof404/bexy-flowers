@@ -1,6 +1,5 @@
 import { useRef, memo, useState, useCallback } from "react";
-import { motion } from "framer-motion";
-import { Heart, Eye, ShoppingCart } from "lucide-react";
+import { Heart, ShoppingCart } from "lucide-react";
 import { useCartWithToast } from "@/hooks/useCartWithToast";
 import { useFavorites } from "@/contexts/FavoritesContext";
 import { useFlyingHeart } from "@/contexts/FlyingHeartContext";
@@ -27,7 +26,7 @@ const getBouquetBadge = (bouquet: Bouquet): string | undefined => {
   return undefined;
 };
 
-// Memoized individual card component with Arts-style design
+// ⚡ PERFORMANCE FIX: Simplified card component - removed Framer Motion, reduced state
 const BouquetCard = memo(({ 
   bouquet, 
   index, 
@@ -38,9 +37,7 @@ const BouquetCard = memo(({
   onBouquetClick: (bouquet: Bouquet) => void;
 }) => {
   const navigate = useNavigate();
-  const cardRef = useRef<HTMLDivElement>(null);
   const heartButtonRef = useRef<HTMLButtonElement | null>(null);
-  const [isHovered, setIsHovered] = useState(false);
   const { addToCart } = useCartWithToast();
   const { toggleFavorite, isFavorite } = useFavorites();
   const { triggerFlyingHeart } = useFlyingHeart();
@@ -67,7 +64,6 @@ const BouquetCard = memo(({
   }, [navigate, bouquet, finalPrice]);
 
   const handleMouseEnter = useCallback(() => {
-    setIsHovered(true);
     // Prefetch product data on hover for instant navigation
     queryClient.prefetchQuery({
       queryKey: collectionQueryKeys.detail(bouquet.id),
@@ -78,8 +74,6 @@ const BouquetCard = memo(({
       staleTime: 5 * 60 * 1000,
     });
   }, [queryClient, bouquet.id]);
-
-  const handleMouseLeave = useCallback(() => setIsHovered(false), []);
 
   const handleFavoriteClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
@@ -134,11 +128,9 @@ const BouquetCard = memo(({
 
   return (
     <div
-      ref={cardRef}
       className="group relative cursor-pointer"
       onClick={handleClick}
       onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
     >
       {/* Discount Badge - Top Left (only if discount and not out of stock) */}
       {bouquet.discount_percentage && bouquet.discount_percentage > 0 && !bouquet.is_out_of_stock && (
@@ -234,17 +226,20 @@ const BouquetCard = memo(({
       </div>
     </div>
   );
+}, (prevProps, nextProps) => {
+  // ⚡ PERFORMANCE: Custom comparison to prevent unnecessary re-renders
+  return (
+    prevProps.bouquet.id === nextProps.bouquet.id &&
+    prevProps.index === nextProps.index
+  );
 });
 
 BouquetCard.displayName = 'BouquetCard';
 
 const BouquetGridComponent = ({ bouquets, onBouquetClick, selectedCategory }: BouquetGridProps) => {
-  // Render all bouquets at once when data is ready to avoid extra work while scrolling
-  const visibleBouquets = bouquets;
-
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6 w-full">
-      {visibleBouquets.map((bouquet, index) => (
+      {bouquets.map((bouquet, index) => (
         <BouquetCard
           key={bouquet.id}
           bouquet={bouquet}

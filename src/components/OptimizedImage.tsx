@@ -2,16 +2,18 @@
  * Optimized Image Component
  * 
  * Features:
- * - Lazy loading with Intersection Observer
+ * - Lazy loading with native browser lazy loading
  * - Responsive images with srcset
  * - Placeholder/skeleton while loading
  * - Error handling with fallback
  * - WebP format support
+ * 
+ * ⚡ PERFORMANCE FIX: Removed IntersectionObserver to prevent CPU issues
+ * Using native browser lazy loading instead - much more efficient!
  */
 
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import type { ImgHTMLAttributes } from 'react';
-import { motion } from 'framer-motion';
 
 interface OptimizedImageProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, 'src'> {
   src: string;
@@ -39,40 +41,6 @@ export function OptimizedImage({
 }: OptimizedImageProps) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
-  const [isInView, setIsInView] = useState(priority);
-  const imgRef = useRef<HTMLImageElement>(null);
-  const observerRef = useRef<IntersectionObserver | null>(null);
-
-  // Intersection Observer for lazy loading
-  useEffect(() => {
-    if (priority || isInView) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setIsInView(true);
-            observer.disconnect();
-          }
-        });
-      },
-      {
-        rootMargin: '50px', // Start loading 50px before entering viewport
-        threshold: 0.01,
-      }
-    );
-
-    if (imgRef.current) {
-      observer.observe(imgRef.current);
-      observerRef.current = observer;
-    }
-
-    return () => {
-      if (observerRef.current) {
-        observerRef.current.disconnect();
-      }
-    };
-  }, [priority, isInView]);
 
   const handleLoad = () => {
     setIsLoaded(true);
@@ -112,7 +80,6 @@ export function OptimizedImage({
     <div
       className={`relative overflow-hidden ${className.includes('!w-full') ? 'w-full h-full' : className}`}
       style={{ width: width || '100%', height: height || '100%' }}
-      ref={imgRef}
     >
       {/* Placeholder/Skeleton */}
       {!isLoaded && placeholder && (
@@ -122,25 +89,23 @@ export function OptimizedImage({
         />
       )}
 
-      {/* Actual Image */}
-      {isInView && (
-        <motion.img
-          src={imageSrc}
-          srcSet={srcSet}
-          sizes={sizes || '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw'}
-          alt={alt}
-          width={width}
-          height={height}
-          loading={priority ? 'eager' : 'lazy'}
-          decoding="async"
-          className={`transition-opacity duration-300 w-full h-full ${
-            isLoaded ? 'opacity-100' : 'opacity-0'
-          } ${className.includes('object-cover') ? 'object-cover object-center' : ''}`}
-          onLoad={handleLoad}
-          onError={handleError}
-          {...props}
-        />
-      )}
+      {/* Actual Image - Always render, let browser handle lazy loading */}
+      <img
+        src={imageSrc}
+        srcSet={srcSet}
+        sizes={sizes || '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw'}
+        alt={alt}
+        width={width}
+        height={height}
+        loading={priority ? 'eager' : 'lazy'}
+        decoding="async"
+        className={`transition-opacity duration-300 w-full h-full ${
+          isLoaded ? 'opacity-100' : 'opacity-0'
+        } ${className.includes('object-cover') ? 'object-cover object-center' : ''}`}
+        onLoad={handleLoad}
+        onError={handleError}
+        {...props}
+      />
 
       {/* Loading indicator */}
       {!isLoaded && !placeholder && (
