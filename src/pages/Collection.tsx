@@ -47,8 +47,10 @@ const Collection = () => {
   const isMobile = useIsMobile();
 
   // Initialize navigation predictor and enhanced prefetching
+  // ⚡ PERFORMANCE FIX: setupIntersectionObserver not used - removed to prevent unnecessary hook overhead
   useNavigationPredictor();
-  const { setupIntersectionObserver } = useEnhancedRoutePrefetch();
+  // const { setupIntersectionObserver } = useEnhancedRoutePrefetch(); // Not used - removed
+  useEnhancedRoutePrefetch(); // Still call for cleanup, but don't destructure unused values
 
   // Fetch products using React Query - optimized with caching and pre-loading
   const { data: products, isLoading: loading, error } = useCollectionProducts({ isActive: true });

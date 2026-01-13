@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react';
+import { useCallback, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { useComponentPrefetch } from './useComponentPrefetch';
@@ -19,6 +19,32 @@ export const useEnhancedRoutePrefetch = () => {
   const prefetchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const intersectionObserverRef = useRef<IntersectionObserver | null>(null);
   const prefetchedRoutesRef = useRef<Set<string>>(new Set());
+  const createdLinksRef = useRef<HTMLLinkElement[]>([]);
+
+  // ⚡ PERFORMANCE FIX: Cleanup on unmount - disconnect observer and remove prefetch links
+  useEffect(() => {
+    return () => {
+      // Cleanup prefetch links to prevent DOM node accumulation
+      createdLinksRef.current.forEach(link => {
+        if (link.parentNode) {
+          link.parentNode.removeChild(link);
+        }
+      });
+      createdLinksRef.current = [];
+
+      // Disconnect IntersectionObserver to prevent memory leaks
+      if (intersectionObserverRef.current) {
+        intersectionObserverRef.current.disconnect();
+        intersectionObserverRef.current = null;
+      }
+
+      // Clear timeout if pending
+      if (prefetchTimeoutRef.current) {
+        clearTimeout(prefetchTimeoutRef.current);
+        prefetchTimeoutRef.current = null;
+      }
+    };
+  }, []);
 
   /**
    * Enhanced prefetch that includes route, components, and data
@@ -32,12 +58,16 @@ export const useEnhancedRoutePrefetch = () => {
     // Mark as prefetched
     prefetchedRoutesRef.current.add(path);
 
-    // 1. Route chunk prefetching (existing logic)
-    const link = document.createElement('link');
-    link.rel = 'prefetch';
-    link.as = 'document';
-    link.href = path;
-    document.head.appendChild(link);
+    // 1. Route chunk prefetching (existing logic) - CHECK IF EXISTS FIRST
+    const existingLink = document.querySelector(`link[rel="prefetch"][href="${path}"]`);
+    if (!existingLink) {
+      const link = document.createElement('link');
+      link.rel = 'prefetch';
+      link.as = 'document';
+      link.href = path;
+      document.head.appendChild(link);
+      createdLinksRef.current.push(link); // Track for cleanup
+    }
 
     // 2. Component pre-loading (new)
     prefetchRouteComponents(path);
@@ -121,6 +151,7 @@ export const useEnhancedRoutePrefetch = () => {
 
   /**
    * Set up Intersection Observer for lazy loading components
+   * ⚡ PERFORMANCE FIX: Properly disconnect observer on cleanup
    */
   const setupIntersectionObserver = useCallback((element: HTMLElement, callback: () => void) => {
     if (!intersectionObserverRef.current) {
@@ -145,7 +176,9 @@ export const useEnhancedRoutePrefetch = () => {
 
     // Return cleanup function
     return () => {
-      intersectionObserverRef.current?.unobserve(element);
+      if (intersectionObserverRef.current) {
+        intersectionObserverRef.current.unobserve(element);
+      }
     };
   }, []);
 
