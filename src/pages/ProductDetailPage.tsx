@@ -16,6 +16,7 @@ import BackToTop from '@/components/BackToTop';
 import { useCollectionProduct, useCollectionProducts } from '@/hooks/useCollectionProducts';
 import { useQueryClient } from '@tanstack/react-query';
 import { collectionQueryKeys } from '@/hooks/useCollectionProducts';
+import { useSignatureCollection } from '@/hooks/useSignatureCollection';
 import { PriceDisplay } from '@/components/PriceDisplay';
 import type { Bouquet } from '@/types/bouquet';
 import { encodeImageUrl } from '@/lib/imageUtils';
@@ -132,11 +133,13 @@ const SizeSelector = ({
 const ImageGallery = ({
   images,
   currentImageIndex,
-  onImageChange
+  onImageChange,
+  discountPercentage
 }: {
   images: string[];
   currentImageIndex: number;
   onImageChange: (index: number) => void;
+  discountPercentage?: number | null;
 }) => (
   <div className="space-y-4">
     {/* Main Image */}
@@ -146,6 +149,30 @@ const ImageGallery = ({
         alt="Product detail"
         className="w-full h-full object-cover"
       />
+      
+      {/* Discount Badge on Image */}
+      {discountPercentage && discountPercentage > 0 && (
+        <div
+          style={{
+            position: 'absolute',
+            top: '1rem',
+            right: '1rem',
+            padding: '0.5rem 1rem',
+            fontSize: '0.875rem',
+            fontWeight: '700',
+            fontFamily: "'EB Garamond', serif",
+            color: '#fff',
+            background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+            borderRadius: '0.375rem',
+            boxShadow: '0 4px 12px rgba(239, 68, 68, 0.4)',
+            zIndex: 10,
+            letterSpacing: '0.05em',
+            textTransform: 'uppercase'
+          }}
+        >
+          {discountPercentage}% OFF
+        </div>
+      )}
     </div>
 
     {/* Thumbnail Gallery */}
@@ -186,12 +213,41 @@ const ProductDetailPage = () => {
   // Fetch product data using React Query (single source of truth)
   const { data: product, isLoading: isLoadingProduct, error } = useCollectionProduct(id);
 
+  // Fetch signature collection data to check for custom overrides
+  const { data: signatureCollections } = useSignatureCollection();
+
+  // Find signature collection item for this product (if exists)
+  const signatureItem = signatureCollections?.find(item => item.product_id === id);
+
   // Fetch all products for recommendations
   const { data: allProducts } = useCollectionProducts({ isActive: true });
 
   // Transform product data to match component interface
+  // CRITICAL: If product is in signature collection, use custom fields
   const productData: ProductData = useMemo(() => {
     if (product) {
+      // Check if this product has signature collection custom overrides
+      if (signatureItem) {
+        console.log('[ProductDetailPage] Using signature collection custom data:', signatureItem);
+        
+        // Use custom fields from signature_collections, fallback to product fields
+        const customImages = signatureItem.custom_image_urls && signatureItem.custom_image_urls.length > 0
+          ? signatureItem.custom_image_urls
+          : product.image_urls || [];
+        
+        return {
+          id: product.id,
+          title: signatureItem.custom_title || product.title,
+          price: signatureItem.custom_price ?? product.price,
+          description: signatureItem.custom_description || product.description || '',
+          imageUrl: encodeImageUrl(customImages[0] || ''),
+          images: customImages.map((url: string) => encodeImageUrl(url)),
+          category: product.display_category || product.category || '',
+          inStock: !signatureItem.is_out_of_stock && !product.is_out_of_stock
+        };
+      }
+      
+      // Use regular product data if not in signature collection
       return {
         id: product.id,
         title: product.title,
@@ -218,7 +274,7 @@ const ProductDetailPage = () => {
       category: 'Premium Bouquets',
       inStock: true
     };
-  }, [product, id]);
+  }, [product, signatureItem, id]);
 
   // Local state management
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -228,7 +284,23 @@ const ProductDetailPage = () => {
 
   // Calculate current price based on selected size
   const selectedSizeOption = sizeOptions.find(option => option.id === selectedSize);
-  const currentPrice = productData.price + (selectedSizeOption?.priceModifier || 0);
+  const basePrice = productData.price + (selectedSizeOption?.priceModifier || 0);
+  
+  // Get discount from signature collection (if exists) or product
+  const discountPercentage = signatureItem?.discount_percentage ?? product?.discount_percentage ?? null;
+  
+  // Calculate final price with discount applied
+  const currentPrice = discountPercentage && discountPercentage > 0
+    ? basePrice * (1 - discountPercentage / 100)
+    : basePrice;
+  
+  console.log('[ProductDetailPage] Price calculation:', { 
+    basePrice, 
+    discountPercentage, 
+    currentPrice,
+    signatureDiscount: signatureItem?.discount_percentage,
+    productDiscount: product?.discount_percentage 
+  });
 
   // Smart recommendation logic using React Query data
   const recommendedBouquets = useMemo((): Bouquet[] => {
@@ -383,6 +455,7 @@ const ProductDetailPage = () => {
               images={productData.images || [productData.imageUrl]}
               currentImageIndex={currentImageIndex}
               onImageChange={setCurrentImageIndex}
+              discountPercentage={discountPercentage}
             />
           </motion.div>
 
@@ -406,8 +479,8 @@ const ProductDetailPage = () => {
               </h1>
 
               <PriceDisplay 
-                price={currentPrice} 
-                discountPercentage={product?.discount_percentage || null}
+                price={basePrice}
+                discountPercentage={discountPercentage}
                 size="lg"
               />
             </div>
@@ -418,6 +491,31 @@ const ProductDetailPage = () => {
                 {productData.description}
               </p>
             </div>
+
+            {/* Tags from Signature Collection */}
+            {signatureItem?.tags && signatureItem.tags.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {signatureItem.tags.map((tag: string, index: number) => (
+                  <span
+                    key={index}
+                    style={{
+                      textTransform: 'uppercase',
+                      background: '#f0f0f0',
+                      color: '#C79E48',
+                      fontFamily: "'EB Garamond', serif",
+                      fontWeight: '600',
+                      fontSize: '0.75rem',
+                      padding: '0.25rem 0.75rem',
+                      borderRadius: '0.25rem',
+                      whiteSpace: 'nowrap',
+                      letterSpacing: '0.05em'
+                    }}
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
 
             {/* Customization Options */}
             <div className="space-y-6 p-6 bg-gray-50 rounded-lg">
