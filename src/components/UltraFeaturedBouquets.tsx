@@ -31,10 +31,18 @@ const UltraFeaturedBouquets = () => {
   // Force refetch on mount to ensure we always have the latest data
   const { data: signatureCollections, isLoading: loading, refetch } = useSignatureCollection();
   
-  // Refetch data when component mounts to ensure fresh discount data
+  // CRITICAL FIX: Always refetch fresh data when component mounts to get latest discounts
   useEffect(() => {
+    // Force refetch every time this component mounts
     refetch();
-  }, [refetch]);
+    
+    // Also set up an interval to periodically check for updates (every 30 seconds)
+    const intervalId = setInterval(() => {
+      refetch();
+    }, 30000); // 30 seconds
+    
+    return () => clearInterval(intervalId);
+  }, []); // Empty deps array = only run on mount/unmount
 
   // Transform signature collections to bouquets format
   // IMPORTANT: Use custom fields from signature_collections if available, otherwise use product defaults
