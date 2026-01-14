@@ -638,36 +638,6 @@ export const handler: Handler = async (
     }
   }
   
-  // SECURITY: Enhanced abuse detection (before rate limit check)
-  const abuseCheck = detectAbuse(ip, body.prompt || '');
-  if (abuseCheck.block) {
-    console.error(`[Security] Blocking suspected attack from IP: ${ip}`);
-    logSecurityEvent('rate_limit', 'critical', event.path, ip, {
-      reason: abuseCheck.reason,
-      blocked: true,
-      message: 'Automated abuse detection triggered',
-    });
-    return {
-      statusCode: 429,
-      headers: {
-        ...corsHeaders,
-        'Retry-After': '3600', // 1 hour
-      },
-      body: JSON.stringify({
-        error: 'Too many requests',
-        message: 'Your IP has been temporarily blocked due to suspicious activity. Please try again later.',
-      }),
-    };
-  }
-  
-  if (abuseCheck.suspicious) {
-    console.warn(`[Security] Suspicious activity detected from IP: ${ip} - ${abuseCheck.reason}`);
-    logSecurityEvent('rate_limit', 'warning', event.path, ip, {
-      reason: abuseCheck.reason,
-      suspicious: true,
-    });
-  }
-  
   // Check rate limits (distributed with Redis fallback to memory)
   const fingerprint = generateFingerprint(event, ip);
   const rateLimitCheck = await checkDistributedRateLimit(ip, fingerprint, {
@@ -770,13 +740,30 @@ export const handler: Handler = async (
     console.log('[Netlify Function] Resolution:', `${width}x${height}`);
     console.log('[Netlify Function] Prompt length:', prompt.length);
     
-    // Fetch image from Pollinations API
-    let response = await fetch(pollinationsUrl, {
-      method: 'GET',
-      headers: {
-        'Accept': 'image/*',
-      },
-    });
+    // Simple timeout helper (60 seconds for gptimage model)
+    const fetchWithTimeout = async (url: string, timeout: number = 60000) => {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), timeout);
+      
+      try {
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: { 'Accept': 'image/*' },
+          signal: controller.signal,
+        });
+        clearTimeout(timeoutId);
+        return response;
+      } catch (error) {
+        clearTimeout(timeoutId);
+        if ((error as Error).name === 'AbortError') {
+          throw new Error('Request timeout after 60 seconds');
+        }
+        throw error;
+      }
+    };
+    
+    // Fetch image from Pollinations API with timeout
+    let response = await fetchWithTimeout(pollinationsUrl);
     
     let usedKey: 'primary' | 'secondary' = 'primary';
     
@@ -787,12 +774,7 @@ export const handler: Handler = async (
       
       const pollinationsUrl2 = `https://gen.pollinations.ai/image/${encodedPrompt}?key=${secretKey2}&model=${model}&width=${width}&height=${height}`;
       
-      response = await fetch(pollinationsUrl2, {
-        method: 'GET',
-        headers: {
-          'Accept': 'image/*',
-        },
-      });
+      response = await fetchWithTimeout(pollinationsUrl2);
       usedKey = 'secondary';
     }
     
