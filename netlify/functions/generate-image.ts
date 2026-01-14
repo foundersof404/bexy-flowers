@@ -1158,23 +1158,56 @@ export const handler: Handler = async (
     };
   } catch (error) {
     const responseTime = Date.now() - startTime;
-    console.error('[Netlify Function] Error:', error);
+    console.error('[Netlify Function] ❌ CRITICAL ERROR:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorStack = error instanceof Error ? error.stack : '';
+    
+    // Enhanced error logging for debugging
+    console.error('[Netlify Function] Error details:', {
+      message: errorMessage,
+      stack: errorStack?.substring(0, 500),
+      responseTime,
+      ip,
+      hasSecretKey: !!process.env.POLLINATIONS_SECRET_KEY,
+      hasSecretKey2: !!process.env.POLLINATIONS_SECRET_KEY2,
+    });
     
     // Log error event
     logSecurityEvent('error', 'error', event.path, ip, {
       error: errorMessage,
+      errorType: error instanceof Error ? error.constructor.name : typeof error,
       responseTime,
+      hasKeys: {
+        primary: !!process.env.POLLINATIONS_SECRET_KEY,
+        secondary: !!process.env.POLLINATIONS_SECRET_KEY2,
+      },
     });
     logPerformanceMetric(event.path, responseTime, 500);
     logRequest(event, ip, responseTime, false, 500, errorMessage);
     
+    // Determine appropriate status code based on error type
+    let statusCode = 500;
+    let userMessage = 'Internal server error';
+    
+    if (errorMessage.includes('timeout') || errorMessage.includes('Request timeout')) {
+      statusCode = 504; // Gateway Timeout
+      userMessage = 'Image generation timeout. Please try again.';
+    } else if (errorMessage.includes('network') || errorMessage.includes('fetch failed')) {
+      statusCode = 502; // Bad Gateway
+      userMessage = 'Unable to reach image generation service. Please try again.';
+    } else if (errorMessage.includes('API keys')) {
+      statusCode = 503; // Service Unavailable
+      userMessage = 'Image generation service unavailable. Please contact support.';
+    }
+    
     return {
-      statusCode: 500,
+      statusCode,
       headers: corsHeaders,
       body: JSON.stringify({
-        error: 'Internal server error',
+        error: userMessage,
         message: errorMessage,
+        timestamp: new Date().toISOString(),
+        requestId: `${Date.now()}-${ip.replace(/\./g, '')}`, // Help track errors
       }),
     };
   }
