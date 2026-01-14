@@ -75,11 +75,10 @@ export const AI_CONFIG = {
         // - 'nanobanana': NanoBanana - Affordable option
         // 
         // RECOMMENDED for realistic flower photography:
-        // 'flux' - Fast generation (5-10 seconds), good quality
-        // 'turbo' - Good balance of quality and cost (3-8 seconds)
-        // 'gptimage' - Best photorealism but SLOW (30-90 seconds) - may timeout
+        // 'gptimage' - Best photorealism, understands text/logos well
         // 'seedream-pro' - High quality, good for product photos
-        model: 'flux', // Changed back to 'flux' for faster generation (prevents 504 timeouts)
+        // 'turbo' - Good balance of quality and cost
+        model: 'gptimage', // Changed from 'flux' for more realistic results
         width: 1024, // High resolution for quality
         height: 1024, // High resolution for quality
       }
