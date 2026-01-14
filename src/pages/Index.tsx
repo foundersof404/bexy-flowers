@@ -323,12 +323,12 @@ const ProfessionalCustomSection = React.memo(() => {
             <motion.a
               href="/customize"
               className={`group inline-flex items-center ${isMobile ? 'gap-2 px-4 py-2.5' : 'gap-2 sm:gap-3 md:gap-4 px-4 sm:px-6 md:px-8 lg:px-10 py-2.5 sm:py-3 md:py-4 lg:py-5'} rounded-lg sm:rounded-xl md:rounded-2xl font-normal text-white relative overflow-hidden ${isMobile ? 'w-full' : 'w-full sm:w-auto'} touch-target min-h-[44px] ${isMobile ? 'text-xs' : 'text-xs sm:text-sm md:text-base'}`}
-              style={{ fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}
               style={{
+                fontFamily: "'EB Garamond', serif",
+                letterSpacing: '-0.02em',
                 background: 'linear-gradient(90deg, #B88A44 0%, #D4A85A 50%, #CFA340 100%)',
                 boxShadow: '0 8px 32px rgba(184, 138, 68, 0.4)',
                 fontSize: isMobile ? '0.75rem' : 'clamp(0.875rem, 2vw, 1.1rem)',
-                letterSpacing: '0.05em',
                 willChange: 'transform, box-shadow'
               }}
               whileHover={!isMobile ? {

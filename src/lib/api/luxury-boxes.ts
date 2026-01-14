@@ -1,4 +1,5 @@
 import { db } from './database-client';
+import { supabase } from '../supabase';
 import type { Database } from '../supabase';
 
 type LuxuryBox = Database['public']['Tables']['luxury_boxes']['Row'];
@@ -37,6 +38,26 @@ export async function getLuxuryBoxes(type?: 'box' | 'wrap'): Promise<LuxuryBox[]
 
   if (error) {
     throw new Error(`Failed to fetch luxury boxes: ${error.message}`);
+  }
+
+  return data;
+}
+
+/**
+ * Get a single luxury box by ID
+ */
+export async function getLuxuryBox(id: string): Promise<LuxuryBox | null> {
+  const { data, error } = await supabase
+    .from('luxury_boxes')
+    .select('*')
+    .eq('id', id)
+    .single();
+
+  if (error) {
+    if (error.code === 'PGRST116') {
+      return null;
+    }
+    throw new Error(`Failed to fetch luxury box: ${error.message}`);
   }
 
   return data;
