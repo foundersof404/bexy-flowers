@@ -861,7 +861,7 @@ export const handler: Handler = async (
     console.log('[Netlify Function] Prompt length:', prompt.length);
     
     // Enhanced API fetch with timeout and retry protection
-    const API_TIMEOUT = 45000; // 45 seconds timeout
+    const API_TIMEOUT = 90000; // Increased to 90 seconds (Pollinations can be slow for high-quality models)
     const fetchWithTimeout = async (url: string, timeoutMs: number): Promise<Response> => {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
@@ -880,7 +880,7 @@ export const handler: Handler = async (
       } catch (error) {
         clearTimeout(timeoutId);
         if ((error as Error).name === 'AbortError') {
-          throw new Error('Request timeout');
+          throw new Error('Request timeout - Pollinations API took too long (>90 seconds)');
         }
         throw error;
       }
