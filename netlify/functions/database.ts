@@ -136,6 +136,11 @@ function getSecurityHeaders(origin: string): Record<string, string> {
     'Content-Type': 'application/json',
     'X-Content-Type-Options': 'nosniff',
     'X-Frame-Options': 'DENY',
+    // CRITICAL: Prevent caching of API responses to ensure fresh data
+    // This fixes the issue where discount changes don't reflect on live site
+    'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',
+    'Pragma': 'no-cache',
+    'Expires': '0',
   };
 
   if (ALLOWED_ORIGINS.some(allowed => origin.startsWith(allowed))) {
