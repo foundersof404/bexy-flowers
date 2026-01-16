@@ -6,6 +6,22 @@
 [dev]
   targetPort = 8080
 
+# Function configuration - increase timeout for AI image generation
+[functions]
+  # Increase timeout for generate-image function (requires Pro/Business plan for >10s)
+  # Free tier: 10 seconds max
+  # Pro tier: 26 seconds max
+  # Business tier: 26 seconds max (can be increased with support)
+  # Background functions: 15 minutes max
+  external_node_modules = ["@supabase/supabase-js"]
+
+# Specific function settings
+[functions."generate-image"]
+  # Set timeout to max allowed (26 seconds for Pro tier)
+  # If on free tier, this will be capped at 10 seconds
+  # Note: gptimage model takes 30-90 seconds - consider 'flux' or 'turbo' for faster results
+  timeout = 26
+
 [[redirects]]
   from = "/*"
   to = "/index.html"

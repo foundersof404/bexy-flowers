@@ -149,19 +149,57 @@ async function generateWithPollinationsServerless(
     });
     
     let response: Response;
-    try {
-        response = await fetch(serverlessEndpoint, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                ...(frontendApiKey && { 'X-API-Key': frontendApiKey }), // Include API key if configured
-            },
-            body: JSON.stringify(signedPayload), // Send signed payload
-        });
-    } catch (fetchError) {
-        // SECURITY: Never fall back to direct API - keys must not be exposed
-        console.error('[ImageGen] ❌ Network error calling serverless function');
-        throw new Error('SERVERLESS_UNAVAILABLE');
+    
+    // Add timeout to prevent hanging - Netlify functions have a max of 26s
+    // We use 30s to give some buffer for network latency
+    const SERVERLESS_TIMEOUT = 30000; // 30 seconds
+    const MAX_RETRIES = 2; // Retry once on timeout
+    
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), SERVERLESS_TIMEOUT);
+            
+            console.log(`[ImageGen] Attempt ${attempt}/${MAX_RETRIES} - calling serverless function...`);
+            
+            response = await fetch(serverlessEndpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(frontendApiKey && { 'X-API-Key': frontendApiKey }), // Include API key if configured
+                },
+                body: JSON.stringify(signedPayload), // Send signed payload
+                signal: controller.signal,
+            });
+            
+            clearTimeout(timeoutId);
+            
+            // If successful or non-retryable error, break out of retry loop
+            if (response.ok || (response.status !== 504 && response.status !== 502 && response.status !== 503)) {
+                break;
+            }
+            
+            // Log timeout/gateway errors and retry
+            console.warn(`[ImageGen] ⚠️ Attempt ${attempt} failed with status ${response.status}, ${attempt < MAX_RETRIES ? 'retrying...' : 'no more retries'}`);
+            
+            if (attempt < MAX_RETRIES) {
+                // Wait 2 seconds before retry
+                await new Promise(resolve => setTimeout(resolve, 2000));
+            }
+        } catch (fetchError) {
+            if ((fetchError as Error).name === 'AbortError') {
+                console.error(`[ImageGen] ❌ Attempt ${attempt} timed out after ${SERVERLESS_TIMEOUT/1000}s`);
+                if (attempt < MAX_RETRIES) {
+                    console.log('[ImageGen] Retrying...');
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                    continue;
+                }
+                throw new Error('Image generation timed out. Please try again or use a faster model.');
+            }
+            // SECURITY: Never fall back to direct API - keys must not be exposed
+            console.error('[ImageGen] ❌ Network error calling serverless function');
+            throw new Error('SERVERLESS_UNAVAILABLE');
+        }
     }
     
     // If serverless function is not available (404 - local development)

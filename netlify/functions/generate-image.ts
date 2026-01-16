@@ -740,8 +740,13 @@ export const handler: Handler = async (
     console.log('[Netlify Function] Resolution:', `${width}x${height}`);
     console.log('[Netlify Function] Prompt length:', prompt.length);
     
-    // Simple timeout helper (60 seconds for gptimage model)
-    const fetchWithTimeout = async (url: string, timeout: number = 60000) => {
+    // Simple timeout helper
+    // NOTE: Netlify functions have a max timeout of 10s (free) or 26s (paid)
+    // gptimage model is SLOW (30-90s) - consider using 'flux' or 'turbo' for faster results
+    // Setting to 25 seconds to stay within Netlify's paid tier limit
+    const FETCH_TIMEOUT = 25000; // 25 seconds (Netlify max is 26s on paid tier)
+    
+    const fetchWithTimeout = async (url: string, timeout: number = FETCH_TIMEOUT) => {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), timeout);
       
@@ -756,7 +761,7 @@ export const handler: Handler = async (
       } catch (error) {
         clearTimeout(timeoutId);
         if ((error as Error).name === 'AbortError') {
-          throw new Error('Request timeout after 60 seconds');
+          throw new Error(`Request timeout after ${timeout/1000} seconds - try a faster model like 'flux' or 'turbo'`);
         }
         throw error;
       }
@@ -767,8 +772,8 @@ export const handler: Handler = async (
     
     let usedKey: 'primary' | 'secondary' = 'primary';
     
-    // If primary key fails with rate limit (429) or auth errors, try secondary key
-    if (!response.ok && secretKey2 && (response.status === 429 || response.status === 401 || response.status === 403)) {
+    // If primary key fails with rate limit (429), auth errors (401, 403), or timeout (504), try secondary key
+    if (!response.ok && secretKey2 && (response.status === 429 || response.status === 401 || response.status === 403 || response.status === 504 || response.status === 502 || response.status === 503)) {
       console.warn('[Netlify Function] Primary key failed with status:', response.status);
       console.log('[Netlify Function] Falling back to secondary API key');
       
