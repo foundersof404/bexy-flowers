@@ -212,7 +212,7 @@ export function buildPollinationsUrl(prompt: string, width: number, height: numb
   const params = new URLSearchParams();
   
   // Model (required) - use 'flux' as default (confirmed to work)
-  params.append('model', config.params.model || 'flux');
+  params.append('model', config.params.model || 'gptimage');
   
   // Dimensions (optional but recommended)
   if (width) {

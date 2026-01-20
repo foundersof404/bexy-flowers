@@ -64,7 +64,7 @@ export const handler: Handler = async (
     let prompt: string;
     let width: number = 1024;
     let height: number = 1024;
-    let model: string = 'flux';
+    let model: string = 'gptimage';
 
     if (event.httpMethod === 'GET') {
       // GET request - parameters in query string
@@ -72,14 +72,14 @@ export const handler: Handler = async (
       prompt = params.prompt || '';
       width = params.width ? parseInt(params.width, 10) : 1024;
       height = params.height ? parseInt(params.height, 10) : 1024;
-      model = params.model || 'flux';
+      model = params.model || 'gptimage';
     } else if (event.httpMethod === 'POST') {
       // POST request - parameters in body
       const body: RequestBody = JSON.parse(event.body || '{}');
       prompt = body.prompt || '';
       width = body.width || 1024;
       height = body.height || 1024;
-      model = body.model || 'flux';
+      model = body.model || 'gptimage';
     } else {
       return {
         statusCode: 405,

@@ -78,7 +78,7 @@ export async function createSignedRequest(data: {
       ...data,
       width: data.width || 1024,
       height: data.height || 1024,
-      model: data.model || 'flux',
+      model: data.model || 'gptimage',
       timestamp: Date.now(),
       nonce: generateNonce(),
       signature: '', // Empty signature - server will allow if signing not enforced
@@ -92,7 +92,7 @@ export async function createSignedRequest(data: {
     prompt: data.prompt,
     width: data.width || 1024,
     height: data.height || 1024,
-    model: data.model || 'flux',
+    model: data.model || 'gptimage',
     timestamp,
     nonce,
   };

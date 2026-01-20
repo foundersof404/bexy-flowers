@@ -127,7 +127,7 @@ async function generateWithPollinationsServerless(
     const finalPrompt = shouldEnhance ? enhancePrompt(prompt) : prompt;
     const cleanedPrompt = cleanPrompt(finalPrompt);
     
-    const model = AI_CONFIG.apis.pollinations.params.model || 'flux';
+    const model = AI_CONFIG.apis.pollinations.params.model || 'gptimage';
     const serverlessEndpoint = AI_CONFIG.apis.pollinations.serverlessEndpoint || '/.netlify/functions/generate-image';
     
     console.log('[ImageGen] 🚀 Using Pollinations via serverless function (unlimited rate limits)');
@@ -337,7 +337,7 @@ async function generateWithPollinations(
     }
     
     // Log generation details for debugging
-    const model = AI_CONFIG.apis.pollinations.params.model || 'flux';
+    const model = AI_CONFIG.apis.pollinations.params.model || 'gptimage';
     console.log('[ImageGen] 🌸 Using Pollinations Flux model (direct API call)');
     console.log('[ImageGen] Model:', model);
     console.log('[ImageGen] Resolution:', `${width}x${height}`);

@@ -408,7 +408,7 @@ export const handler: Handler = async (
     // Get and validate parameters
     const width = body.width || 1024;
     const height = body.height || 1024;
-    const model = body.model || 'flux';
+    const model = body.model || 'gptimage';
     
     const paramValidation = validateParameters(width, height, model);
     if (!paramValidation.valid) {

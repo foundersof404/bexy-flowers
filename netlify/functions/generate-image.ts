@@ -257,7 +257,7 @@ function validateSignature(
     prompt: body.prompt,
     width: body.width || 1024,
     height: body.height || 1024,
-    model: body.model || 'flux',
+    model: body.model || 'gptimage',
     timestamp,
     nonce: body.nonce,
   });
@@ -716,7 +716,7 @@ export const handler: Handler = async (
     // Get and validate parameters
     const width = body.width || 1024;
     const height = body.height || 1024;
-    const model = body.model || 'flux';
+    const model = body.model || 'gptimage';
     
     const paramValidation = validateParameters(width, height, model);
     if (!paramValidation.valid) {

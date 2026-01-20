@@ -364,7 +364,7 @@ function validateInput(body: RequestBody): { valid: boolean; error?: string; san
   }
   
   // Validate model
-  const model = body.model || 'flux';
+  const model = body.model || 'gptimage';
   if (typeof model !== 'string' || !CONFIG.allowedModels.includes(model)) {
     return { valid: false, error: `Invalid model. Allowed: ${CONFIG.allowedModels.join(', ')}` };
   }
