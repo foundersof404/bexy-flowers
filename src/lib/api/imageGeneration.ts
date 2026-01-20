@@ -175,11 +175,21 @@ async function generateWithPollinationsServerless(
             clearTimeout(timeoutId);
             
             // If successful or non-retryable error, break out of retry loop
+            // 401 is NOT retried - it means API key mismatch which won't change on retry
+            // 400 is NOT retried - it means bad request which won't change on retry
             if (response.ok || (response.status !== 504 && response.status !== 502 && response.status !== 503)) {
+                // Log specific error details for debugging
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        console.error('[ImageGen] ❌ 401 Unauthorized - API key mismatch. Check VITE_FRONTEND_API_KEY matches FRONTEND_API_KEY in Netlify.');
+                    } else if (response.status === 400) {
+                        console.error('[ImageGen] ❌ 400 Bad Request - Check request payload format.');
+                    }
+                }
                 break;
             }
             
-            // Log timeout/gateway errors and retry
+            // Log timeout/gateway errors and retry (504, 502, 503 only)
             console.warn(`[ImageGen] ⚠️ Attempt ${attempt} failed with status ${response.status}, ${attempt < MAX_RETRIES ? 'retrying...' : 'no more retries'}`);
             
             if (attempt < MAX_RETRIES) {
