@@ -139,14 +139,8 @@ async function generateWithPollinationsServerless(
     // SECURITY: Include API key and signed request for authentication
     const frontendApiKey = import.meta.env.VITE_FRONTEND_API_KEY;
     
-    // Create signed request payload (prevents replay attacks)
+    // Import signing function (needed for creating fresh payload each attempt)
     const { createSignedRequest } = await import('./requestSigning');
-    const signedPayload = await createSignedRequest({
-        prompt: cleanedPrompt,
-        width,
-        height,
-        model,
-    });
     
     let response: Response;
     
@@ -157,6 +151,15 @@ async function generateWithPollinationsServerless(
     
     for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
         try {
+            // CRITICAL: Create NEW signed payload for EACH attempt
+            // This generates a fresh nonce and timestamp to avoid replay attack detection
+            const signedPayload = await createSignedRequest({
+                prompt: cleanedPrompt,
+                width,
+                height,
+                model,
+            });
+            
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), SERVERLESS_TIMEOUT);
             
@@ -168,7 +171,7 @@ async function generateWithPollinationsServerless(
                     'Content-Type': 'application/json',
                     ...(frontendApiKey && { 'X-API-Key': frontendApiKey }), // Include API key if configured
                 },
-                body: JSON.stringify(signedPayload), // Send signed payload
+                body: JSON.stringify(signedPayload), // Send signed payload with fresh nonce
                 signal: controller.signal,
             });
             
