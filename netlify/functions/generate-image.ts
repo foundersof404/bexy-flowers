@@ -740,47 +740,43 @@ export const handler: Handler = async (
     console.log('[Netlify Function] Resolution:', `${width}x${height}`);
     console.log('[Netlify Function] Prompt length:', prompt.length);
     
-    // Simple timeout helper
-    // NOTE: Netlify functions have a max timeout of 10s (free) or 26s (paid)
-    // gptimage model is SLOW (30-90s) - consider using 'flux' or 'turbo' for faster results
-    // Setting to 25 seconds to stay within Netlify's paid tier limit
-    const FETCH_TIMEOUT = 25000; // 25 seconds (Netlify max is 26s on paid tier)
-    
-    const fetchWithTimeout = async (url: string, timeout: number = FETCH_TIMEOUT) => {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), timeout);
-      
-      try {
-        const response = await fetch(url, {
-          method: 'GET',
-          headers: { 'Accept': 'image/*' },
-          signal: controller.signal,
-        });
-        clearTimeout(timeoutId);
-        return response;
-      } catch (error) {
-        clearTimeout(timeoutId);
-        if ((error as Error).name === 'AbortError') {
-          throw new Error(`Request timeout after ${timeout/1000} seconds - try a faster model like 'flux' or 'turbo'`);
-        }
-        throw error;
-      }
-    };
-    
-    // Fetch image from Pollinations API with timeout
-    let response = await fetchWithTimeout(pollinationsUrl);
-    
+    // Try primary key first, fallback to secondary key if it fails
+    let response: Response;
     let usedKey: 'primary' | 'secondary' = 'primary';
     
-    // If primary key fails with rate limit (429), auth errors (401, 403), or timeout (504), try secondary key
-    if (!response.ok && secretKey2 && (response.status === 429 || response.status === 401 || response.status === 403 || response.status === 504 || response.status === 502 || response.status === 503)) {
-      console.warn('[Netlify Function] Primary key failed with status:', response.status);
-      console.log('[Netlify Function] Falling back to secondary API key');
+    if (secretKey) {
+      console.log('[Netlify Function] Trying primary API key');
       
+      response = await fetch(pollinationsUrl, {
+        method: 'GET',
+        headers: { 'Accept': 'image/*' },
+      });
+      
+      // If primary key fails with rate limit (429) or auth errors, try secondary key
+      if (!response.ok && secretKey2 && (response.status === 429 || response.status === 401 || response.status === 403)) {
+        console.warn('[Netlify Function] Primary key failed with status:', response.status);
+        console.log('[Netlify Function] Falling back to secondary API key');
+        
+        const pollinationsUrl2 = `https://gen.pollinations.ai/image/${encodedPrompt}?key=${secretKey2}&model=${model}&width=${width}&height=${height}`;
+        
+        response = await fetch(pollinationsUrl2, {
+          method: 'GET',
+          headers: { 'Accept': 'image/*' },
+        });
+        usedKey = 'secondary';
+      }
+    } else if (secretKey2) {
+      // If primary key is not set, use secondary key directly
+      console.log('[Netlify Function] Primary key not set, using secondary API key');
       const pollinationsUrl2 = `https://gen.pollinations.ai/image/${encodedPrompt}?key=${secretKey2}&model=${model}&width=${width}&height=${height}`;
       
-      response = await fetchWithTimeout(pollinationsUrl2);
+      response = await fetch(pollinationsUrl2, {
+        method: 'GET',
+        headers: { 'Accept': 'image/*' },
+      });
       usedKey = 'secondary';
+    } else {
+      throw new Error('No valid API key available');
     }
     
     if (!response.ok) {
