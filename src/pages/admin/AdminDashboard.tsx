@@ -92,38 +92,26 @@ const AdminDashboard = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
-  // Use React Query hook for cached data - prevents refetching if data exists
-  const { data: products = [], isLoading: loadingProducts } = useCollectionProducts({ isActive: true });
+  const { data: productsData, isLoading: loadingProducts } = useCollectionProducts({ isActive: true });
+  const products = productsData ?? [];
 
   useEffect(() => {
-    // Check authentication
     const isAuthenticated = localStorage.getItem("adminAuthenticated");
     if (!isAuthenticated) {
       navigate("/admin/login");
       return;
     }
-
-    // Get admin name from localStorage
     const storedName = localStorage.getItem("adminUsername");
-    if (storedName) {
-      setAdminName(storedName);
-    }
+    if (storedName) setAdminName(storedName);
   }, [navigate]);
 
-  // Calculate stats from cached products data - instant and uses cached data
   useEffect(() => {
-    if (!products || products.length === 0) {
-      return; // Wait for data to load
-    }
-
-    // Calculate real stats from products - optimized
-    const totalProducts = products.length;
-    const inStock = products.filter((p) => !p.is_out_of_stock).length;
-    const outOfStock = products.filter((p) => p.is_out_of_stock).length;
-    const activeDiscounts = products.filter((p) => p.discount_percentage && p.discount_percentage > 0).length;
-    
-    // Calculate total revenue
-    const totalRevenue = products.reduce((sum, p) => {
+    if (!productsData || !productsData.length) return;
+    const totalProducts = productsData.length;
+    const inStock = productsData.filter((p) => !p.is_out_of_stock).length;
+    const outOfStock = productsData.filter((p) => p.is_out_of_stock).length;
+    const activeDiscounts = productsData.filter((p) => p.discount_percentage && p.discount_percentage > 0).length;
+    const totalRevenue = productsData.reduce((sum, p) => {
       const price = p.discount_percentage && p.discount_percentage > 0
         ? p.price * (1 - p.discount_percentage / 100)
         : p.price;
@@ -154,9 +142,8 @@ const AdminDashboard = () => {
       // Ignore errors
     }
 
-    // Get recent products (last 5)
-    const recent = [...products]
-      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+    const recent = [...productsData]
+      .sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime())
       .slice(0, 5)
       .map((p) => {
         const imageUrl = p.image_urls?.[0];
@@ -198,7 +185,7 @@ const AdminDashboard = () => {
       { type: 'user', message: '3 new users registered', time: '1 hour ago', icon: Users },
       { type: 'review', message: 'New 5-star review received', time: '2 hours ago', icon: Star },
     ]);
-  }, [products]);
+  }, [productsData]);
 
   const loading = loadingProducts;
 

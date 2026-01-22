@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
@@ -72,17 +72,24 @@ const AdminClients = () => {
   } = useQuery({
     queryKey: ['checkout-orders'],
     queryFn: getCheckoutOrders,
-    staleTime: 60 * 1000,
+    staleTime: 2 * 60 * 1000,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
   });
 
+  const hasToastedErrorRef = useRef(false);
   useEffect(() => {
-    if (isError) {
-      toast({
-        title: 'Error loading orders',
-        description: error instanceof Error ? error.message : 'Failed to fetch client orders.',
-        variant: 'destructive',
-      });
+    if (!isError) {
+      hasToastedErrorRef.current = false;
+      return;
     }
+    if (hasToastedErrorRef.current) return;
+    hasToastedErrorRef.current = true;
+    toast({
+      title: 'Error loading orders',
+      description: error instanceof Error ? error.message : 'Failed to fetch client orders.',
+      variant: 'destructive',
+    });
   }, [isError, error, toast]);
 
   return (

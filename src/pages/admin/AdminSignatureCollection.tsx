@@ -104,7 +104,6 @@ const AdminSignatureCollection = () => {
       navigate('/admin/login');
       return;
     }
-
     loadData();
   }, [navigate]);
 
@@ -115,7 +114,6 @@ const AdminSignatureCollection = () => {
         getSignatureCollections(),
         getCollectionProducts({ isActive: true }),
       ]);
-
       setCollections(collectionsData);
       setAvailableProducts(productsData);
     } catch (error) {

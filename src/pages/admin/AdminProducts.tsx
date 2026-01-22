@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import { useNavigate, useParams } from "react-router-dom";
 import { AdminLayout } from "@/components/admin/AdminLayout";
@@ -34,6 +34,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
+import { useQueryClient } from "@tanstack/react-query";
 import { generatedCategories } from "@/data/generatedBouquets";
 import { ImageUpload } from "@/components/admin/ImageUpload";
 import {
@@ -43,6 +44,7 @@ import {
   useUpdateCollectionProduct,
   useDeleteCollectionProduct,
   useCollectionTags,
+  collectionQueryKeys,
 } from "@/hooks/useCollectionProducts";
 import {
   useSignatureCollection,
@@ -56,6 +58,7 @@ const AdminProducts = () => {
   const { id } = useParams<{ id?: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const isEditing = id && id !== "new";
   const isCreating = id === "new";
 
@@ -144,30 +147,39 @@ const AdminProducts = () => {
     }
   }, [id, isEditing, isCreating, selectedProductData]);
 
-
-
-  // Filter products (exclude signature collection products from main list)
-  const signatureProductIds = new Set(signatureProducts.map(p => p.product_id));
-  const collectionProducts = products.filter(p => !signatureProductIds.has(p.id));
-  
-  const filteredProducts = collectionProducts.filter((product) => {
-    const matchesSearch = product.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.description?.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = categoryFilter === "all" || product.category === categoryFilter;
-    const matchesStatus = statusFilter === "all" || 
-      (statusFilter === "active" && product.is_active) ||
-      (statusFilter === "inactive" && !product.is_active);
-
-    return matchesSearch && matchesCategory && matchesStatus;
-  });
-
-  // Get recent products (last 5, excluding signature collection)
-  const recentProducts = [...collectionProducts]
-    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-    .slice(0, 5);
-
-  // Get out of stock products (excluding signature collection)
-  const outOfStockProducts = collectionProducts.filter(p => p.is_out_of_stock);
+  const signatureProductIds = useMemo(
+    () => new Set((signatureProducts ?? []).map((p) => p.product_id)),
+    [signatureProducts]
+  );
+  const collectionProducts = useMemo(
+    () => (products ?? []).filter((p) => !signatureProductIds.has(p.id)),
+    [products, signatureProductIds]
+  );
+  const filteredProducts = useMemo(() => {
+    const q = searchQuery.toLowerCase();
+    return collectionProducts.filter((product) => {
+      const matchesSearch =
+        product.title.toLowerCase().includes(q) ||
+        product.description?.toLowerCase().includes(q);
+      const matchesCategory = categoryFilter === "all" || product.category === categoryFilter;
+      const matchesStatus =
+        statusFilter === "all" ||
+        (statusFilter === "active" && product.is_active) ||
+        (statusFilter === "inactive" && !product.is_active);
+      return matchesSearch && matchesCategory && matchesStatus;
+    });
+  }, [collectionProducts, searchQuery, categoryFilter, statusFilter]);
+  const recentProducts = useMemo(
+    () =>
+      [...collectionProducts]
+        .sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime())
+        .slice(0, 5),
+    [collectionProducts]
+  );
+  const outOfStockProducts = useMemo(
+    () => collectionProducts.filter((p) => p.is_out_of_stock),
+    [collectionProducts]
+  );
 
   // Handle product save
   const handleSave = async () => {
@@ -280,7 +292,8 @@ const AdminProducts = () => {
         description: `Successfully migrated ${result.success} products. ${result.failed > 0 ? `${result.failed} failed.` : ''}`,
       });
 
-      await loadData();
+      await queryClient.invalidateQueries({ queryKey: collectionQueryKeys.all });
+      await queryClient.refetchQueries({ queryKey: collectionQueryKeys.lists() });
     } catch (error) {
       toast({
         title: "Migration Error",

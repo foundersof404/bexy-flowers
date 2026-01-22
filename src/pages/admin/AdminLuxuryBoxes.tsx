@@ -97,7 +97,6 @@ const AdminLuxuryBoxes = () => {
       navigate('/admin/login');
       return;
     }
-
     loadBoxes();
   }, [navigate]);
 

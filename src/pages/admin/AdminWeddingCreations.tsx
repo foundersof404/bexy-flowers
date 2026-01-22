@@ -65,7 +65,6 @@ const AdminWeddingCreations = () => {
       navigate('/admin/login');
       return;
     }
-
     loadCreations();
   }, [navigate]);
 

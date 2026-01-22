@@ -103,7 +103,6 @@ const AdminFlowers = () => {
       navigate('/admin/login');
       return;
     }
-
     loadFlowerTypes();
     loadFlowerCategories();
   }, [navigate]);

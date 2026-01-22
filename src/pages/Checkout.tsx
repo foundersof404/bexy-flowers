@@ -9,6 +9,7 @@ import {
   Phone,
   Loader2,
   CheckCircle2,
+  MessageCircle,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '@/contexts/CartContext';
@@ -20,6 +21,7 @@ import { Button } from '@/components/ui/button';
 import BackToTop from '@/components/BackToTop';
 
 const DELIVERY_FEE = 4;
+const WHATSAPP_NUMBER = '96176104882';
 
 const Checkout = () => {
   const navigate = useNavigate();
@@ -28,6 +30,16 @@ const Checkout = () => {
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [usedLocalFallback, setUsedLocalFallback] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [savedOrderDetails, setSavedOrderDetails] = useState<{
+    items: typeof cartItems;
+    subtotal: number;
+    deliveryFee: number;
+    total: number;
+    fullName: string;
+    phone: string;
+    email: string;
+    location: string;
+  } | null>(null);
 
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
@@ -36,6 +48,44 @@ const Checkout = () => {
 
   const subtotal = getTotalPrice();
   const total = subtotal + DELIVERY_FEE;
+
+  const formatWhatsAppMessage = (order: typeof savedOrderDetails): string => {
+    if (!order) return '';
+    
+    const itemsText = order.items
+      .map((item, idx) => {
+        const qty = item.quantity ?? 1;
+        const itemTotal = item.price * qty;
+        return `${idx + 1}. ${item.title}${item.size ? ` (${item.size})` : ''}${qty > 1 ? ` × ${qty}` : ''} - $${itemTotal.toFixed(2)}${item.personalNote ? `\n   Note: ${item.personalNote}` : ''}`;
+      })
+      .join('\n');
+
+    return `Hello! I just placed an order at Bexy Flowers. Here are my order details:
+
+👤 *Customer Information:*
+Name: ${order.fullName}
+Phone: ${order.phone}
+Email: ${order.email}
+Location: ${order.location}
+
+🛍️ *Order Items:*
+${itemsText}
+
+💰 *Order Summary:*
+Subtotal: $${order.subtotal.toFixed(2)}
+Delivery Fee: $${order.deliveryFee.toFixed(2)}
+*Total: $${order.total.toFixed(2)}*
+
+Please confirm my order and let me know about delivery timing. Thank you! 🌸`;
+  };
+
+  const handleWhatsAppNotify = () => {
+    if (!savedOrderDetails) return;
+    
+    const message = formatWhatsAppMessage(savedOrderDetails);
+    const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+  };
 
   const validate = (): boolean => {
     const trimmedName = fullName.trim();
@@ -76,15 +126,31 @@ const Checkout = () => {
     setFormError(null);
 
     try {
+      const trimmedName = fullName.trim();
+      const trimmedPhone = phone.trim();
+      const trimmedEmail = email.trim().toLowerCase();
+      const trimmedLocation = location.trim();
+      
       await submitCheckoutOrder({
-        fullName: fullName.trim(),
-        phone: phone.trim(),
-        email: email.trim().toLowerCase(),
-        location: location.trim(),
+        fullName: trimmedName,
+        phone: trimmedPhone,
+        email: trimmedEmail,
+        location: trimmedLocation,
         orderItems: cartItems,
         subtotal,
         deliveryFee: DELIVERY_FEE,
         total,
+      });
+      
+      setSavedOrderDetails({
+        items: [...cartItems],
+        subtotal,
+        deliveryFee: DELIVERY_FEE,
+        total,
+        fullName: trimmedName,
+        phone: trimmedPhone,
+        email: trimmedEmail,
+        location: trimmedLocation,
       });
       setUsedLocalFallback(false);
       setSubmitSuccess(true);
@@ -102,11 +168,16 @@ const Checkout = () => {
 
       if (isLocalhost && isDbUnavailable) {
         try {
+          const trimmedName = fullName.trim();
+          const trimmedPhone = phone.trim();
+          const trimmedEmail = email.trim().toLowerCase();
+          const trimmedLocation = location.trim();
+          
           const order = {
-            fullName: fullName.trim(),
-            phone: phone.trim(),
-            email: email.trim().toLowerCase(),
-            location: location.trim(),
+            fullName: trimmedName,
+            phone: trimmedPhone,
+            email: trimmedEmail,
+            location: trimmedLocation,
             orderItems: cartItems,
             subtotal,
             deliveryFee: DELIVERY_FEE,
@@ -118,6 +189,17 @@ const Checkout = () => {
           const list = existing ? JSON.parse(existing) : [];
           list.push(order);
           localStorage.setItem(key, JSON.stringify(list));
+          
+          setSavedOrderDetails({
+            items: [...cartItems],
+            subtotal,
+            deliveryFee: DELIVERY_FEE,
+            total,
+            fullName: trimmedName,
+            phone: trimmedPhone,
+            email: trimmedEmail,
+            location: trimmedLocation,
+          });
         } catch {
           setFormError('Could not save order locally. Please try again.');
           return;
@@ -201,6 +283,25 @@ const Checkout = () => {
                 delivery and payment.
               </p>
             )}
+            
+            {savedOrderDetails && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="pt-4"
+              >
+                <Button
+                  onClick={handleWhatsAppNotify}
+                  className="bg-[#25D366] hover:bg-[#20BA5A] text-white font-normal px-6 py-3 rounded-lg shadow-md hover:shadow-lg transition-all flex items-center gap-2 mx-auto"
+                  style={{ fontFamily: "'EB Garamond', serif" }}
+                >
+                  <MessageCircle className="w-5 h-5" />
+                  Notify by WhatsApp
+                </Button>
+              </motion.div>
+            )}
+            
             <p className="text-sm text-amber-700/80" style={{ fontFamily: "'EB Garamond', serif" }}>
               Redirecting you home...
             </p>

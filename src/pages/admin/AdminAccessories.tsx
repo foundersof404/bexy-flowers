@@ -63,7 +63,6 @@ const AdminAccessories = () => {
       navigate('/admin/login');
       return;
     }
-
     loadAccessories();
   }, [navigate]);
 
