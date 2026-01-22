@@ -310,6 +310,13 @@ const AdminDashboard = () => {
 
   const managementSections = [
     {
+      title: "Clients & Orders",
+      description: "Customer orders and contact information",
+      items: [
+        { title: "Clients", icon: Users, path: "/admin/clients", description: "Orders & contact info" },
+      ],
+    },
+    {
       title: "Customization",
       description: "Manage customization options",
       items: [

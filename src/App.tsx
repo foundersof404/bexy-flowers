@@ -67,6 +67,7 @@ const AdminFlowers = lazy(() => import("./pages/admin/AdminFlowers"));
 const AdminLuxuryBoxes = lazy(() => import("./pages/admin/AdminLuxuryBoxes"));
 const AdminWeddingCreations = lazy(() => import("./pages/admin/AdminWeddingCreations"));
 const AdminSettings = lazy(() => import("./pages/admin/AdminSettings"));
+const AdminClients = lazy(() => import("./pages/admin/AdminClients"));
 
 // ⚡ MEMORY LEAK FIX: Reduced cache times to prevent memory accumulation
 const queryClient = new QueryClient({
@@ -131,6 +132,7 @@ const AppRouter = () => {
           <Route path="/admin/boxes" element={<ProtectedRoute><AdminLuxuryBoxes /></ProtectedRoute>} />
           <Route path="/admin/wedding-creations" element={<ProtectedRoute><AdminWeddingCreations /></ProtectedRoute>} />
           <Route path="/admin/settings" element={<ProtectedRoute><AdminSettings /></ProtectedRoute>} />
+          <Route path="/admin/clients" element={<ProtectedRoute><AdminClients /></ProtectedRoute>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
@@ -175,10 +177,10 @@ const App = () => {
           <CartProvider>
             <FavoritesProvider>
               <FlyingHeartProvider>
-                <GlobalCartWrapper />
                 <Toaster />
                 <Sonner />
                 <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+                  <GlobalCartWrapper />
                   <AppRouter />
                 </BrowserRouter>
               </FlyingHeartProvider>

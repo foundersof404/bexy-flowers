@@ -27,10 +27,24 @@ interface VisitorCartItem {
 // Circuit breaker: Skip RPC if it fails (function doesn't exist)
 let rpcFunctionAvailable: boolean | null = null;
 
+// Circuit breaker: Skip all cart DB calls temporarily after 400 / errors to reduce console spam
+const DB_CIRCUIT_MS = 60_000;
+let dbCircuitOpenUntil = 0;
+
+function isDbCircuitOpen(): boolean {
+  return Date.now() < dbCircuitOpenUntil;
+}
+
+function recordDbFailure(): void {
+  dbCircuitOpenUntil = Date.now() + DB_CIRCUIT_MS;
+}
+
 /**
  * Ensure visitor exists in database (create if doesn't exist)
  */
 async function ensureVisitor(): Promise<void> {
+  if (isDbCircuitOpen()) return;
+
   const visitorId = getVisitorId();
   
   try {
@@ -68,11 +82,10 @@ async function ensureVisitor(): Promise<void> {
       });
     }
   } catch (error) {
-    // Only log if it's not the expected "Netlify unavailable" error in dev mode
+    recordDbFailure();
     if (!(error instanceof Error && error.message === 'NETLIFY_FUNCTIONS_UNAVAILABLE')) {
       console.error('Error ensuring visitor:', error);
     }
-    // Continue even if visitor creation fails
   }
 }
 
@@ -117,6 +130,7 @@ function transformToDbFormat(item: CartItem, visitorId: string) {
  * Get all cart items for the current visitor
  */
 export async function getVisitorCart(): Promise<CartItem[]> {
+  if (isDbCircuitOpen()) return [];
   try {
     await ensureVisitor();
     const visitorId = getVisitorId();
@@ -128,7 +142,7 @@ export async function getVisitorCart(): Promise<CartItem[]> {
 
     return (data || []).map(transformCartItem);
   } catch (error) {
-    // Only log if it's not the expected "Netlify unavailable" error in dev mode
+    recordDbFailure();
     if (!(error instanceof Error && error.message === 'NETLIFY_FUNCTIONS_UNAVAILABLE')) {
       console.error('Error in getVisitorCart:', error);
     }
@@ -140,6 +154,7 @@ export async function getVisitorCart(): Promise<CartItem[]> {
  * Add or update cart item for the current visitor
  */
 export async function upsertVisitorCartItem(item: CartItem): Promise<boolean> {
+  if (isDbCircuitOpen()) return false;
   try {
     await ensureVisitor();
     const visitorId = getVisitorId();
@@ -184,6 +199,7 @@ export async function upsertVisitorCartItem(item: CartItem): Promise<boolean> {
 
     return true;
   } catch (error) {
+    recordDbFailure();
     console.error('Error in upsertVisitorCartItem:', error);
     return false;
   }
@@ -197,6 +213,7 @@ export async function removeVisitorCartItem(
   size?: string,
   personalNote?: string
 ): Promise<boolean> {
+  if (isDbCircuitOpen()) return false;
   try {
     const visitorId = getVisitorId();
 
@@ -221,6 +238,7 @@ export async function removeVisitorCartItem(
 
     return true;
   } catch (error) {
+    recordDbFailure();
     console.error('Error in removeVisitorCartItem:', error);
     return false;
   }
@@ -235,6 +253,7 @@ export async function updateVisitorCartItemQuantity(
   size?: string,
   personalNote?: string
 ): Promise<boolean> {
+  if (isDbCircuitOpen()) return false;
   try {
     const visitorId = getVisitorId();
 
@@ -262,6 +281,7 @@ export async function updateVisitorCartItemQuantity(
 
     return true;
   } catch (error) {
+    recordDbFailure();
     console.error('Error in updateVisitorCartItemQuantity:', error);
     return false;
   }
@@ -271,6 +291,7 @@ export async function updateVisitorCartItemQuantity(
  * Clear all cart items for the current visitor
  */
 export async function clearVisitorCart(): Promise<boolean> {
+  if (isDbCircuitOpen()) return false;
   try {
     const visitorId = getVisitorId();
 
@@ -278,6 +299,7 @@ export async function clearVisitorCart(): Promise<boolean> {
 
     return true;
   } catch (error) {
+    recordDbFailure();
     console.error('Error in clearVisitorCart:', error);
     return false;
   }
@@ -287,20 +309,19 @@ export async function clearVisitorCart(): Promise<boolean> {
  * Sync local cart items to database
  */
 export async function syncCartToDatabase(items: CartItem[]): Promise<void> {
+  if (isDbCircuitOpen()) return;
   try {
     await ensureVisitor();
     const visitorId = getVisitorId();
 
-    // Delete all existing items for this visitor
     await db.delete('visitor_carts', { visitor_id: visitorId });
 
-    // Insert all current items
     if (items.length > 0) {
       const dbItems = items.map(item => transformToDbFormat(item, visitorId));
       await db.insert('visitor_carts', dbItems);
     }
   } catch (error) {
-    // Only log if it's not the expected "Netlify unavailable" error in dev mode
+    recordDbFailure();
     if (!(error instanceof Error && error.message === 'NETLIFY_FUNCTIONS_UNAVAILABLE')) {
       console.error('Error syncing cart to database:', error);
     }

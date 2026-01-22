@@ -95,9 +95,18 @@ const CartDashboard: React.FC<CartDashboardProps> = ({ isOpen, onClose }) => {
       alert('Your cart is empty. Please add items before checkout.');
       return;
     }
-    setIsCheckingOut(true);
-    onClose();
-    navigate('/checkout');
+    try {
+      setIsCheckingOut(true);
+      // Navigate first so we're not unmounting CartDashboard during this handler.
+      navigate('/checkout');
+      // Defer close to next tick to avoid unmount-during-handler React errors.
+      setTimeout(() => {
+        onClose();
+      }, 0);
+    } catch (err) {
+      setIsCheckingOut(false);
+      onClose();
+    }
   };
 
   const handleClearCart = () => {

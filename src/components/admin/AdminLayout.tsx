@@ -13,6 +13,7 @@ import {
   Flower2,
   Box,
   Sparkles,
+  Users,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -29,6 +30,7 @@ interface NavItem {
 const navigationItems: NavItem[] = [
   { id: 'home', label: 'Home', icon: Home, path: '/admin/dashboard' },
   { id: 'products', label: 'Products', icon: Package, path: '/admin/products' },
+  { id: 'clients', label: 'Clients', icon: Users, path: '/admin/clients' },
   { id: 'signature', label: 'Signature', icon: Star, path: '/admin/signature-collection' },
   { id: 'wedding', label: 'Wedding', icon: ImageIcon, path: '/admin/wedding-creations' },
   { id: 'flowers', label: 'Flowers', icon: Flower2, path: '/admin/flowers' },
@@ -78,9 +80,10 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
           {navigationItems.map((item) => {
             const Icon = item.icon;
             // Improved active state detection for all admin routes
-            const isActive = location.pathname === item.path || 
+            const isActive = location.pathname === item.path ||
                            (item.path === '/admin/products' && location.pathname.startsWith('/admin/products')) ||
-                           (item.path !== '/admin/products' && location.pathname.startsWith(item.path));
+                           (item.path === '/admin/clients' && location.pathname.startsWith('/admin/clients')) ||
+                           ((item.path !== '/admin/products' && item.path !== '/admin/clients') && location.pathname.startsWith(item.path));
             
             return (
               <Link
