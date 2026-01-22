@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, lazy, Suspense } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -24,9 +24,6 @@ import { Button } from '@/components/ui/button';
 import { useCart } from '@/contexts/CartContext';
 import { useFavorites } from '@/contexts/FavoritesContext';
 import logoImage from '/assets/bexy-flowers-logo.webp';
-
-// ⚡ PERFORMANCE OPTIMIZATION: Lazy load CartDashboard (saves 120KB initial load)
-const CartDashboard = lazy(() => import('@/components/cart/CartDashboard'));
 
 // WhatsApp Icon Component
 const WhatsAppIcon = ({ className }: { className?: string }) => (
@@ -132,17 +129,17 @@ const UltraNavigation = () => {
   const logoRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isCartOpen, setIsCartOpen] = useState(false);
-  const { getTotalItems } = useCart();
+  const { getTotalItems, setIsCartOpen } = useCart();
   const { getTotalFavorites } = useFavorites();
   const cartItems = getTotalItems();
   const favoritesCount = getTotalFavorites();
   const isMobile = useIsMobile();
   const shouldReduceMotion = useReducedMotion();
 
-  // ⚡ PERFORMANCE: Preload CartDashboard on hover for instant opening
+  // ⚡ PERFORMANCE: Preload cart + checkout on hover for fast navigation
   const preloadCartDashboard = () => {
     import('@/components/cart/CartDashboard');
+    import('@/pages/Checkout');
   };
 
   useEffect(() => {
@@ -257,9 +254,7 @@ const UltraNavigation = () => {
 
   return (
     <>
-      {!isCartOpen && (
-        <>
-          <nav
+      <nav
             ref={navRef}
             className={`ultra-navigation fixed top-0 left-0 right-0 z-[100] transition-all duration-300 ${isScrolled
               ? 'shadow-luxury'
@@ -966,20 +961,8 @@ const UltraNavigation = () => {
             )}
           </nav>
 
-          {/* Spacer for fixed navigation */}
-          <div className="h-16 sm:h-20" />
-        </>
-      )}
-
-      {/* Cart Dashboard - Lazy loaded for performance */}
-      {isCartOpen && (
-        <Suspense fallback={null}>
-          <CartDashboard
-            isOpen={isCartOpen}
-            onClose={() => setIsCartOpen(false)}
-          />
-        </Suspense>
-      )}
+      {/* Spacer for fixed navigation */}
+      <div className="h-16 sm:h-20" />
     </>
   );
 };

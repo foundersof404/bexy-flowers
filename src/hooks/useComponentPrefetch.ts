@@ -7,8 +7,8 @@ import { useQueryClient } from '@tanstack/react-query';
  * Based on user behavior analysis and site structure
  */
 const NAVIGATION_PATTERNS = {
-  '/': ['/collection', '/wedding-and-events', '/customize'],
-  '/collection': ['/product/:id', '/wedding-and-events', '/favorites'],
+  '/': ['/collection', '/wedding-and-events', '/customize', '/checkout', '/cart'],
+  '/collection': ['/product/:id', '/wedding-and-events', '/favorites', '/checkout', '/cart'],
   '/product/:id': ['/checkout', '/collection', '/cart'],
   '/wedding-and-events': ['/collection', '/customize', '/'],
   '/customize': ['/checkout', '/wedding-and-events', '/collection'],
