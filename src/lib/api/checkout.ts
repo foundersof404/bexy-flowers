@@ -1,0 +1,57 @@
+/**
+ * Checkout API
+ * Saves customer info and order details to checkout_orders table.
+ */
+
+import { db } from './database-client';
+import type { CartItem } from '@/types/cart';
+
+export interface CheckoutOrderInput {
+  fullName: string;
+  phone: string;
+  email: string;
+  location: string;
+  orderItems: CartItem[];
+  subtotal: number;
+  deliveryFee: number;
+  total: number;
+}
+
+export interface CheckoutOrderRecord {
+  id: string;
+  full_name: string;
+  phone: string;
+  email: string;
+  location: string;
+  order_items: CartItem[];
+  subtotal: number;
+  delivery_fee: number;
+  total: number;
+  created_at: string;
+}
+
+/**
+ * Submit checkout order – saves customer info and order to database.
+ */
+export async function submitCheckoutOrder(input: CheckoutOrderInput): Promise<CheckoutOrderRecord> {
+  const payload = {
+    full_name: input.fullName.trim(),
+    phone: input.phone.trim(),
+    email: input.email.trim().toLowerCase(),
+    location: input.location.trim(),
+    order_items: input.orderItems,
+    subtotal: Number(input.subtotal.toFixed(2)),
+    delivery_fee: Number(input.deliveryFee.toFixed(2)),
+    total: Number(input.total.toFixed(2)),
+  };
+
+  const result = await db.insert<CheckoutOrderRecord[]>('checkout_orders', payload, {
+    select: 'id, full_name, phone, email, location, order_items, subtotal, delivery_fee, total, created_at',
+  });
+
+  const rows = Array.isArray(result) ? result : [result];
+  if (!rows[0]) {
+    throw new Error('Checkout order could not be saved');
+  }
+  return rows[0];
+}

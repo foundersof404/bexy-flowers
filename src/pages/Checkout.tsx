@@ -1,296 +1,452 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ShoppingCart, ArrowLeft, CreditCard, MapPin, Clock } from 'lucide-react';
+import {
+  ShoppingCart,
+  ArrowLeft,
+  CreditCard,
+  MapPin,
+  User,
+  Phone,
+  Loader2,
+  CheckCircle2,
+} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '@/contexts/CartContext';
+import { submitCheckoutOrder } from '@/lib/api/checkout';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
 import BackToTop from '@/components/BackToTop';
+
+const DELIVERY_FEE = 4;
 
 const Checkout = () => {
   const navigate = useNavigate();
   const { cartItems, getTotalPrice, clearCart } = useCart();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [usedLocalFallback, setUsedLocalFallback] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+
+  const [fullName, setFullName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
+  const [location, setLocation] = useState('');
 
   const subtotal = getTotalPrice();
-  const deliveryFee = 4; // $4 delivery fee
-  const total = subtotal + deliveryFee;
+  const total = subtotal + DELIVERY_FEE;
 
-  const handlePlaceOrder = () => {
-    if (cartItems.length === 0) {
-      alert('Your cart is empty. Please add items before placing an order.');
-      return;
+  const validate = (): boolean => {
+    const trimmedName = fullName.trim();
+    const trimmedPhone = phone.trim();
+    const trimmedEmail = email.trim().toLowerCase();
+    const trimmedLocation = location.trim();
+
+    if (!trimmedName || trimmedName.length < 2) {
+      setFormError('Please enter your full name.');
+      return false;
     }
-
-    const phoneNumber = "96176104882";
-    
-    // Create professional WhatsApp message
-    const orderDetails = cartItems.map((item, index) => {
-      const itemNumber = index + 1;
-      let itemStr = `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n*Item ${itemNumber}:* ${item.title}`;
-      
-      // Add image URL if available
-      if (item.image) {
-        const imageUrl = item.image.startsWith('/') 
-          ? `${window.location.origin}${item.image}`
-          : item.image;
-        itemStr += `\n\n📸 *Image:*\n${imageUrl}`;
-      }
-      
-      itemStr += `\n\n💰 *Price:* $${item.price.toFixed(2)} x ${item.quantity} = $${(item.price * item.quantity).toFixed(2)}`;
-      
-      if (item.size) {
-        itemStr += `\n📏 *Size:* ${item.size}`;
-      }
-      
-      if (item.personalNote) {
-        itemStr += `\n💌 *Personal Note:*\n"${item.personalNote}"`;
-      }
-      
-      itemStr += `\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
-      
-      return itemStr;
-    }).join("\n\n");
-
-    const subtotal = getTotalPrice();
-    const deliveryFee = 4;
-    const finalTotal = subtotal + deliveryFee;
-
-    // Create full detailed message with payment selection prompt
-    const fullMessage = `🌸 *BEXY FLOWERS - NEW ORDER REQUEST* 🌸\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nHello! I would like to place an order with the following details:\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n${orderDetails}\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n💰 *PAYMENT SUMMARY*\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n📦 *Items Subtotal:* $${subtotal.toFixed(2)}\n🚚 *Delivery Fee:* $${deliveryFee.toFixed(2)}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n💵 *TOTAL AMOUNT:* $${finalTotal.toFixed(2)}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n💳 *PREFERRED PAYMENT METHOD:*\n\n_Please let me know which payment option works best:_\n\n✅ Option 1: *Whish Money Transfer*\n✅ Option 2: *Cash on Delivery (COD)*\n✅ Option 3: *Bank Transfer*\n✅ Option 4: *Credit/Debit Card*\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n📍 *DELIVERY INFORMATION*\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n⏱️ *Delivery Time:* 3-5 business days\n🌺 *Quality:* Handcrafted Fresh - Made to Order\n📦 *Delivery Fee:* $4.00 (All Areas)\n🎁 *Gift Wrapping:* Complimentary Premium Packaging\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nThank you for choosing *Bexy Flowers*! 💐\n\nWe're excited to create something beautiful for you. Please confirm your preferred payment method and delivery address, and we'll process your order immediately.\n\n_Looking forward to serving you!_ 🌸✨`;
-
-    // Create shorter message for WhatsApp URL (to avoid URL length limits)
-    const shortOrderDetails = cartItems.map((item, index) => {
-      const itemNumber = index + 1;
-      let shortStr = `*Item ${itemNumber}:* ${item.title} - $${item.price.toFixed(2)} x ${item.quantity} = $${(item.price * item.quantity).toFixed(2)}`;
-      if (item.size) shortStr += ` (${item.size})`;
-      return shortStr;
-    }).join('\n');
-
-    const shortMessage = `🌸 *BEXY FLOWERS - NEW ORDER* 🌸\n\nHello! I'd like to place an order:\n\n${shortOrderDetails}\n\n*Subtotal:* $${subtotal.toFixed(2)}\n*Delivery:* $${deliveryFee.toFixed(2)}\n*TOTAL:* $${finalTotal.toFixed(2)}\n\n*Please confirm my preferred payment method:*\n• Whish Money\n• Cash on Delivery\n• Bank Transfer\n• Card Payment\n\nThank you! 💐`;
-
-    // Copy full message to clipboard
-    navigator.clipboard.writeText(fullMessage).then(() => {
-      // Encode and create WhatsApp URL
-      const encodedMessage = encodeURIComponent(shortMessage);
-      const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
-      
-      // Open WhatsApp
-      const newWindow = window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
-      
-      if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
-        alert(`Popup was blocked. Please allow popups for this site.\n\nFull order details have been copied to your clipboard.\n\nPhone: +961 76 104 882`);
-      } else {
-        // Show success message
-        setTimeout(() => {
-          alert('Order details have been sent to WhatsApp!\n\nFull order details are also in your clipboard.\n\nYour cart will be cleared after confirmation.');
-        }, 500);
-      }
-    }).catch(() => {
-      // Fallback if clipboard fails
-      const encodedMessage = encodeURIComponent(shortMessage);
-      const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
-      window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
-      alert(`Order details are ready to send!\n\nPhone: +961 76 104 882\n\nPlease copy the order details manually if needed.`);
-    });
-    
-    // Clear cart after a delay to allow user to see the message
-    setTimeout(() => {
-      clearCart();
-      navigate('/');
-    }, 2000);
+    if (!trimmedPhone || trimmedPhone.length < 6) {
+      setFormError('Please enter a valid phone number.');
+      return false;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!trimmedEmail || !emailRegex.test(trimmedEmail)) {
+      setFormError('Please enter a valid email address.');
+      return false;
+    }
+    if (!trimmedLocation || trimmedLocation.length < 5) {
+      setFormError('Please enter your delivery address or location.');
+      return false;
+    }
+    setFormError(null);
+    return true;
   };
 
-  if (cartItems.length === 0) {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (cartItems.length === 0) {
+      setFormError('Your cart is empty. Please add items before checkout.');
+      return;
+    }
+    if (!validate()) return;
+
+    setIsSubmitting(true);
+    setFormError(null);
+
+    try {
+      await submitCheckoutOrder({
+        fullName: fullName.trim(),
+        phone: phone.trim(),
+        email: email.trim().toLowerCase(),
+        location: location.trim(),
+        orderItems: cartItems,
+        subtotal,
+        deliveryFee: DELIVERY_FEE,
+        total,
+      });
+      setUsedLocalFallback(false);
+      setSubmitSuccess(true);
+      clearCart();
+      setTimeout(() => navigate('/'), 3000);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : '';
+      const isDbUnavailable =
+        msg === 'NETLIFY_FUNCTIONS_UNAVAILABLE' ||
+        msg.includes('Database endpoint not found') ||
+        msg.includes('Netlify Functions not available');
+      const isLocalhost =
+        typeof window !== 'undefined' &&
+        (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+
+      if (isLocalhost && isDbUnavailable) {
+        try {
+          const order = {
+            fullName: fullName.trim(),
+            phone: phone.trim(),
+            email: email.trim().toLowerCase(),
+            location: location.trim(),
+            orderItems: cartItems,
+            subtotal,
+            deliveryFee: DELIVERY_FEE,
+            total,
+            createdAt: new Date().toISOString(),
+          };
+          const key = 'bexy-checkout-orders-local';
+          const existing = localStorage.getItem(key);
+          const list = existing ? JSON.parse(existing) : [];
+          list.push(order);
+          localStorage.setItem(key, JSON.stringify(list));
+        } catch {
+          setFormError('Could not save order locally. Please try again.');
+          return;
+        }
+        setUsedLocalFallback(true);
+        setSubmitSuccess(true);
+        clearCart();
+        setTimeout(() => navigate('/'), 4000);
+      } else {
+        setFormError(msg || 'Could not place order. Please try again.');
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (cartItems.length === 0 && !submitSuccess) {
     return (
       <>
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-amber-50/30 flex items-center justify-center">
-        <motion.div
-          className="text-center space-y-6"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-          <ShoppingCart className="w-16 h-16 mx-auto" style={{ color: '#2c2d2a' }} />
-          <h1 className="text-2xl font-normal" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>Your cart is empty</h1>
-          <p style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>Add some beautiful flowers to get started!</p>
-          <motion.button
-            className="px-6 py-3 bg-amber-500 text-white rounded-lg font-normal hover:bg-amber-600 transition-colors"
-            style={{ fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}
-            onClick={() => navigate('/collection')}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+        <div className="min-h-screen bg-gradient-to-br from-stone-50 via-white to-amber-50/20 flex items-center justify-center">
+          <motion.div
+            className="text-center space-y-6 px-4"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
           >
-            Continue Shopping
-          </motion.button>
-        </motion.div>
-      </div>
-      <BackToTop />
-    </>
+            <ShoppingCart className="w-16 h-16 mx-auto text-amber-700/60" />
+            <h1
+              className="text-2xl font-normal"
+              style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}
+            >
+              Your cart is empty
+            </h1>
+            <p style={{ color: '#6b7280', fontFamily: "'EB Garamond', serif" }}>
+              Add some beautiful flowers to get started.
+            </p>
+            <Button
+              onClick={() => navigate('/collection')}
+              className="bg-amber-700 hover:bg-amber-800 text-white font-normal px-6 py-3 rounded-lg"
+              style={{ fontFamily: "'EB Garamond', serif" }}
+            >
+              Continue Shopping
+            </Button>
+          </motion.div>
+        </div>
+        <BackToTop />
+      </>
     );
   }
 
+  if (submitSuccess) {
+    return (
+      <>
+        <div className="min-h-screen bg-gradient-to-br from-stone-50 via-white to-amber-50/20 flex items-center justify-center">
+          <motion.div
+            className="text-center space-y-6 px-4 max-w-md"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5 }}
+          >
+            <CheckCircle2 className="w-20 h-20 mx-auto text-emerald-600" />
+            <h1
+              className="text-2xl md:text-3xl font-normal"
+              style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}
+            >
+              Order received
+            </h1>
+            {usedLocalFallback ? (
+              <>
+                <p style={{ color: '#6b7280', fontFamily: "'EB Garamond', serif" }}>
+                  You&apos;re testing on <strong>localhost</strong>. The database API (Netlify Functions) isn&apos;t
+                  running, so your order was saved <strong>locally</strong> for testing.
+                </p>
+                <p className="text-sm text-amber-700/90 bg-amber-50 border border-amber-200 rounded-lg px-4 py-3" style={{ fontFamily: "'EB Garamond', serif" }}>
+                  To save orders to the database locally, run <code className="bg-white/80 px-1.5 py-0.5 rounded">npm run dev:netlify</code> instead of <code className="bg-white/80 px-1.5 py-0.5 rounded">npm run dev</code>. On production, orders are saved to the database.
+                </p>
+              </>
+            ) : (
+              <p style={{ color: '#6b7280', fontFamily: "'EB Garamond', serif" }}>
+                Thank you for your order. We&apos;ve saved your details and will be in touch shortly to confirm
+                delivery and payment.
+              </p>
+            )}
+            <p className="text-sm text-amber-700/80" style={{ fontFamily: "'EB Garamond', serif" }}>
+              Redirecting you home...
+            </p>
+          </motion.div>
+        </div>
+        <BackToTop />
+      </>
+    );
+  }
+
+  const formStyles = {
+    label: 'text-sm font-medium text-stone-700',
+    input:
+      'border-stone-200 bg-white/80 focus:ring-amber-500/30 focus:border-amber-500 rounded-lg font-normal',
+    card: 'bg-white/70 backdrop-blur-sm border border-stone-200/80 shadow-sm rounded-2xl',
+  };
+
   return (
     <motion.div
-      className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-amber-50/30"
+      className="min-h-screen bg-gradient-to-br from-stone-50 via-white to-amber-50/20"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      transition={{ duration: 0.6 }}
+      transition={{ duration: 0.4 }}
     >
-      {/* Header */}
-      <div className="max-w-7xl mx-auto px-4 py-6">
+      <div className="max-w-3xl mx-auto px-4 py-8 md:py-12">
         <motion.button
-          className="flex items-center space-x-2 transition-colors"
-          style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif" }}
+          type="button"
+          className="flex items-center gap-2 text-stone-600 hover:text-stone-900 transition-colors mb-8"
+          style={{ fontFamily: "'EB Garamond', serif" }}
           onClick={() => navigate(-1)}
-          initial={{ opacity: 0, x: -20 }}
+          initial={{ opacity: 0, x: -12 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.2 }}
+          transition={{ delay: 0.1 }}
         >
-          <ArrowLeft className="w-5 h-5" />
-          <span>Back</span>
+          <ArrowLeft className="w-4 h-4" />
+          Back
         </motion.button>
-      </div>
 
-      <div className="max-w-4xl mx-auto px-4 pb-16">
         <motion.div
           className="space-y-8"
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3, duration: 0.6 }}
+          transition={{ delay: 0.15, duration: 0.4 }}
         >
-          {/* Page Title */}
-          <div className="text-center space-y-4">
-            <h1 
-              className="font-luxury text-5xl md:text-7xl font-normal relative uppercase"
+          <div className="text-center space-y-2">
+            <h1
+              className="text-3xl md:text-4xl font-normal tracking-tight"
               style={{
-                background: 'linear-gradient(135deg, #2c2d2a 0%, #3D3027 50%, #2c2d2a 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-                filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))',
-                letterSpacing: '-0.02em',
-                lineHeight: '1.2em'
+                color: '#2c2d2a',
+                fontFamily: "'EB Garamond', serif",
+                letterSpacing: '-0.03em',
               }}
             >
-              COMPLETE YOUR ORDER
+              Checkout
             </h1>
-            <p className="text-lg" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>
-              Review your selections and proceed to checkout
+            <p style={{ color: '#6b7280', fontFamily: "'EB Garamond', serif" }}>
+              Enter your details to complete your order
             </p>
           </div>
 
-          {/* Order Summary */}
-          <div className="bg-white/60 backdrop-blur-sm rounded-2xl border border-amber-100/60 p-8">
-            <h2 className="text-2xl font-normal mb-6" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>Order Summary</h2>
-            
-            {/* Items */}
-            <div className="space-y-4 mb-8">
-              {cartItems.map((item, index) => (
-                <motion.div
-                  key={item.id}
-                  className="flex items-center space-x-4 p-4 bg-white/40 rounded-lg"
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.4 + index * 0.1 }}
-                >
-                  <img
-                    src={item.image}
-                    alt={item.title}
-                    className="w-16 h-16 object-cover rounded-lg"
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <motion.div
+              className={`p-6 md:p-8 ${formStyles.card}`}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <h2
+                className="text-lg font-medium mb-6 flex items-center gap-2"
+                style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif" }}
+              >
+                <User className="w-5 h-5 text-amber-700/70" />
+                Contact & delivery
+              </h2>
+              <div className="grid gap-5">
+                <div className="space-y-2">
+                  <Label htmlFor="fullName" className={formStyles.label} style={{ fontFamily: "'EB Garamond', serif" }}>
+                    Full name
+                  </Label>
+                  <Input
+                    id="fullName"
+                    type="text"
+                    placeholder="e.g. Jane Smith"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    className={formStyles.input}
+                    style={{ fontFamily: "'EB Garamond', serif" }}
+                    disabled={isSubmitting}
+                    autoComplete="name"
                   />
-                  <div className="flex-1">
-                    <h3 className="font-normal" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>{item.title}</h3>
-                    {item.size && (
-                      <p className="text-sm text-amber-600 font-medium">Size: {item.size}</p>
-                    )}
-                    {item.personalNote && (
-                      <div className="mt-2 p-2 bg-amber-50/60 rounded-lg border border-amber-200/60">
-                        <p className="text-xs mb-1" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif" }}>Personal Note:</p>
-                        <p className="text-sm leading-relaxed font-normal" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>
-                          "{item.personalNote}"
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="phone" className={formStyles.label} style={{ fontFamily: "'EB Garamond', serif" }}>
+                    Phone number
+                  </Label>
+                  <Input
+                    id="phone"
+                    type="tel"
+                    placeholder="e.g. +961 76 123 456"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    className={formStyles.input}
+                    style={{ fontFamily: "'EB Garamond', serif" }}
+                    disabled={isSubmitting}
+                    autoComplete="tel"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email" className={formStyles.label} style={{ fontFamily: "'EB Garamond', serif" }}>
+                    Email
+                  </Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="e.g. jane@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className={formStyles.input}
+                    style={{ fontFamily: "'EB Garamond', serif" }}
+                    disabled={isSubmitting}
+                    autoComplete="email"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="location" className={formStyles.label} style={{ fontFamily: "'EB Garamond', serif" }}>
+                    <span className="flex items-center gap-1.5">
+                      <MapPin className="w-4 h-4 text-amber-700/70" />
+                      Delivery address / location
+                    </span>
+                  </Label>
+                  <Textarea
+                    id="location"
+                    placeholder="Street, area, city, and any landmarks"
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                    rows={3}
+                    className={`${formStyles.input} min-h-[88px] resize-none`}
+                    style={{ fontFamily: "'EB Garamond', serif" }}
+                    disabled={isSubmitting}
+                    autoComplete="street-address"
+                  />
+                </div>
+              </div>
+            </motion.div>
+
+            <motion.div
+              className={`p-6 md:p-8 ${formStyles.card}`}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.25 }}
+            >
+              <h2
+                className="text-lg font-medium mb-4 flex items-center gap-2"
+                style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif" }}
+              >
+                <CreditCard className="w-5 h-5 text-amber-700/70" />
+                Order summary
+              </h2>
+              <div className="space-y-4">
+                {cartItems.map((item) => (
+                  <div
+                    key={`${item.id}-${item.size ?? ''}-${item.personalNote ?? ''}`}
+                    className="flex gap-4 py-3 border-b border-stone-100 last:border-0"
+                  >
+                    <img
+                      src={item.image}
+                      alt={item.title}
+                      className="w-14 h-14 object-cover rounded-lg flex-shrink-0"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p
+                        className="font-medium truncate"
+                        style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif" }}
+                      >
+                        {item.title}
+                      </p>
+                      {item.size && (
+                        <p className="text-sm text-stone-500" style={{ fontFamily: "'EB Garamond', serif" }}>
+                          {item.size}
                         </p>
-                      </div>
-                    )}
+                      )}
+                      <p className="text-sm text-amber-700/90" style={{ fontFamily: "'EB Garamond', serif" }}>
+                        ${(item.price * item.quantity).toFixed(2)} × {item.quantity}
+                      </p>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <p className="font-normal" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>Qty: {item.quantity}</p>
-                    <p className="font-normal" style={{ color: '#C79E48', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>${(item.price * item.quantity).toFixed(2)}</p>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-
-            {/* Totals */}
-            <div className="space-y-3 pt-6 border-t border-amber-200">
-              <div className="flex justify-between">
-                <span style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif" }}>Subtotal</span>
-                <span className="font-normal" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>${subtotal.toFixed(2)}</span>
+                ))}
               </div>
-              <div className="flex justify-between">
-                <span style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif" }}>Delivery Fee</span>
-                <span className="font-normal" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>${deliveryFee.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between text-lg font-normal pt-3 border-t border-amber-200" style={{ fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>
-                <span style={{ color: '#2c2d2a' }}>Total</span>
-                <span className="text-amber-600">${total.toFixed(2)}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Delivery Information */}
-          <div className="bg-white/60 backdrop-blur-sm rounded-2xl border border-amber-100/60 p-8">
-            <h2 className="text-2xl font-normal mb-6" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>Delivery Information</h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="flex items-center space-x-3">
-                <MapPin className="w-6 h-6 text-amber-500" />
-                <div>
-                  <p className="font-normal" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>Standard Delivery</p>
-                  <p style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>3-5 business days</p>
+              <div className="mt-6 pt-4 space-y-2 border-t border-stone-200">
+                <div className="flex justify-between text-stone-600" style={{ fontFamily: "'EB Garamond', serif" }}>
+                  <span>Subtotal</span>
+                  <span>${subtotal.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-stone-600" style={{ fontFamily: "'EB Garamond', serif" }}>
+                  <span>Delivery</span>
+                  <span>${DELIVERY_FEE.toFixed(2)}</span>
+                </div>
+                <div
+                  className="flex justify-between text-lg font-medium pt-2"
+                  style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif" }}
+                >
+                  <span>Total</span>
+                  <span className="text-amber-700">${total.toFixed(2)}</span>
                 </div>
               </div>
-              
-              <div className="flex items-center space-x-3">
-                <Clock className="w-6 h-6 text-amber-500" />
-                <div>
-                  <p className="font-normal" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>Handcrafted Fresh</p>
-                  <p style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>Made to order</p>
-                </div>
-              </div>
-            </div>
-          </div>
+            </motion.div>
 
-          {/* Payment Method */}
-          <div className="bg-white/60 backdrop-blur-sm rounded-2xl border border-amber-100/60 p-8">
-            <h2 className="text-2xl font-normal mb-6" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>Payment Options</h2>
-            
-            <div className="space-y-3">
-              <div className="flex items-center space-x-3 p-4 bg-white/40 rounded-lg">
-                <CreditCard className="w-6 h-6 text-amber-500" />
-                <div>
-                  <p className="font-normal" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>Multiple Payment Methods Available</p>
-                  <p className="text-sm" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}>Select your preferred option in WhatsApp</p>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-3 text-sm" style={{ color: '#2c2d2a', fontFamily: "'EB Garamond', serif" }}>
-                <div className="p-3 bg-amber-50/50 rounded-lg">✓ Whish Money</div>
-                <div className="p-3 bg-amber-50/50 rounded-lg">✓ Cash on Delivery</div>
-                <div className="p-3 bg-amber-50/50 rounded-lg">✓ Bank Transfer</div>
-                <div className="p-3 bg-amber-50/50 rounded-lg">✓ Card Payment</div>
-              </div>
-            </div>
-          </div>
+            {formError && (
+              <motion.p
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-4 py-3"
+                style={{ fontFamily: "'EB Garamond', serif" }}
+              >
+                {formError}
+              </motion.p>
+            )}
 
-          {/* Place Order Button */}
-          <motion.button
-            className="w-full py-4 bg-gradient-to-r from-amber-500 to-amber-600 text-white font-normal text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
-            style={{ fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}
-            onClick={handlePlaceOrder}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8 }}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            Place Order - ${total.toFixed(2)}
-          </motion.button>
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full py-6 rounded-xl bg-amber-700 hover:bg-amber-800 text-white font-normal text-base shadow-lg hover:shadow-xl transition-all"
+                style={{ fontFamily: "'EB Garamond', serif", letterSpacing: '-0.02em' }}
+              >
+                {isSubmitting ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Placing order...
+                  </span>
+                ) : (
+                  `Place order · $${total.toFixed(2)}`
+                )}
+              </Button>
+              <p
+                className="text-center text-xs text-stone-500 mt-4"
+                style={{ fontFamily: "'EB Garamond', serif" }}
+              >
+                Your information is saved securely and used only to process and deliver your order.
+              </p>
+            </motion.div>
+          </form>
         </motion.div>
       </div>
       <BackToTop />

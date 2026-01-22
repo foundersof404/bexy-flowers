@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
 import { X, ShoppingCart, Trash2, Plus, Minus, CreditCard, ArrowRight, Sparkles, Package } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
@@ -11,6 +12,7 @@ interface CartDashboardProps {
 }
 
 const CartDashboard: React.FC<CartDashboardProps> = ({ isOpen, onClose }) => {
+  const navigate = useNavigate();
   const { cartItems, removeFromCart, updateQuantity, getTotalItems, getTotalPrice, clearCart } = useCart();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const isMobile = useIsMobile();
@@ -81,199 +83,21 @@ const CartDashboard: React.FC<CartDashboardProps> = ({ isOpen, onClose }) => {
   };
 
   const handleCheckout = (e?: React.MouseEvent<HTMLButtonElement> | MouseEvent) => {
-    try {
-      console.log('🚀 ========== CART DASHBOARD CHECKOUT HANDLER CALLED ==========');
-      console.log('⏰ Timestamp:', new Date().toISOString());
-      console.log('🎯 Event:', e);
-      console.log('🛒 Cart Items Count:', cartItems.length);
-      console.log('💰 Total Price:', totalPrice);
-
-      if (isEmpty || isCheckingOut) {
-        console.warn('⚠️ Cart is empty or already checking out');
-        return;
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      if ('stopImmediatePropagation' in e && typeof e.stopImmediatePropagation === 'function') {
+        e.stopImmediatePropagation();
       }
-
-      // CRITICAL: Prevent all default behavior and stop propagation
-      if (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        if ('stopImmediatePropagation' in e && typeof e.stopImmediatePropagation === 'function') {
-          e.stopImmediatePropagation();
-        }
-        console.log('✅ Event prevented and stopped');
-      }
-
-      if (cartItems.length === 0) {
-        console.error('❌ Cart is empty, cannot checkout');
-        alert('Your cart is empty. Please add items before checkout.');
-        return;
-      }
-
-      setIsCheckingOut(true);
-
-      const phoneNumber = "96176104882";
-      console.log('📱 Phone number:', phoneNumber);
-
-      try {
-        const orderDetails = cartItems.map((item, index) => {
-          console.log(`📦 Processing item ${index + 1}:`, item.title);
-          const cardNumber = index + 1;
-
-          // Start with image URL at the top for visibility
-          let itemStr = `*━━━━━━━━━━━━━━━━━━━━━━━━━━━━*\n*Card ${cardNumber} - Item ${cardNumber}:* ${item.title}`;
-
-          // Add image URL prominently at the top
-          if (item.image) {
-            if (item.image.includes('pollinations.ai') || item.image.startsWith('http')) {
-              itemStr += `\n\n📸 *FLOWER IMAGE:*\n${item.image}`;
-            } else {
-              // For local images, try to construct full URL
-              const imageUrl = item.image.startsWith('/')
-                ? `${window.location.origin}${item.image}`
-                : item.image;
-              itemStr += `\n\n📸 *FLOWER IMAGE:*\n${imageUrl}`;
-            }
-          }
-
-          itemStr += `\n\n*Price:* $${item.price} x ${item.quantity} = $${(item.price * item.quantity).toFixed(2)}`;
-
-          if (item.description) itemStr += `\n*Details:* ${item.description}`;
-          if (item.size) itemStr += `\n*Size:* ${item.size}`;
-          if (item.personalNote) itemStr += `\n*Personal Note:* ${item.personalNote}`;
-
-          itemStr += `\n*━━━━━━━━━━━━━━━━━━━━━━━━━━━━*`;
-
-          return itemStr;
-        }).join("\n\n");
-
-        const total = totalPrice;
-        const tax = total * 0.08;
-        const finalTotal = total + tax;
-
-        // Create FULL detailed message (for clipboard)
-        const fullMessage = `🌸 *BEXY FLOWERS - ORDER REQUEST* 🌸\n\nHello! I would like to place an order:\n\n${orderDetails}\n\n*━━━━━━━━━━━━━━━━━━━━━━━━━━━━*\n*ORDER SUMMARY:*\n*Subtotal:* $${total.toFixed(2)}\n*Tax (8%):* $${tax.toFixed(2)}\n*━━━━━━━━━━━━━━━━━━━━━━━━━━━━*\n*TOTAL:* $${finalTotal.toFixed(2)}\n\n*Payment Method:* Whish Money / Cash on Delivery\n\nThank you! 💐`;
-
-        // Create ULTRA-SHORT message for URL (NO image URLs - they're too long!)
-        // WhatsApp has ~2000 char limit for encoded URLs, so we keep it minimal
-        const shortOrderDetails = cartItems.map((item, index) => {
-          const cardNumber = index + 1;
-          let shortStr = `*Card ${cardNumber}:* ${item.title}`;
-          shortStr += ` - $${item.price} x ${item.quantity} = $${(item.price * item.quantity).toFixed(2)}`;
-          if (item.size) shortStr += ` (${item.size})`;
-          return shortStr;
-        }).join('\n');
-
-        // Create a concise message that will ALWAYS fit in WhatsApp URL
-        const shortMessage = `🌸 *BEXY FLOWERS - ORDER REQUEST* 🌸\n\nHello! I would like to place an order:\n\n${shortOrderDetails}\n\n*Subtotal:* $${total.toFixed(2)}\n*Tax (8%):* $${tax.toFixed(2)}\n*TOTAL:* $${finalTotal.toFixed(2)}\n\n*Payment:* Whish Money / Cash on Delivery\n\nThank you! 💐`;
-
-        // Encode and check length
-        let encodedMessage = encodeURIComponent(shortMessage);
-        let whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
-
-        console.log('✅ Order details generated');
-        console.log('📝 Full message length:', fullMessage.length);
-        console.log('📝 Short message length:', shortMessage.length);
-        console.log('📝 Encoded message length:', encodedMessage.length);
-        console.log('🔗 WhatsApp URL length:', whatsappUrl.length);
-        console.log('📄 Full message (with images):', fullMessage);
-        console.log('📄 Short message (for URL):', shortMessage);
-
-        // If still too long (shouldn't happen, but safety check), use minimal
-        if (whatsappUrl.length > 2000) {
-          console.warn('⚠️ Message still too long, using ultra-minimal version');
-          const minimalMessage = `🌸 *BEXY FLOWERS ORDER* 🌸\n\nHello! Order: ${cartItems.length} item(s)\n*Total:* $${finalTotal.toFixed(2)}\n*Payment:* Whish Money / Cash on Delivery\n\n*Full details with images in clipboard*`;
-          encodedMessage = encodeURIComponent(minimalMessage);
-          whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
-          console.log('📄 Minimal message:', minimalMessage);
-        }
-
-        // Save cart state before opening WhatsApp (defensive)
-        try {
-          localStorage.setItem('bexy-flowers-cart-backup', JSON.stringify(cartItems));
-          console.log('💾 Cart backed up to localStorage');
-        } catch (storageError) {
-          console.error('❌ Could not backup cart:', storageError);
-        }
-
-        // ALWAYS copy full message to clipboard FIRST, then open WhatsApp
-        navigator.clipboard.writeText(fullMessage).then(() => {
-          console.log('✅ Full message copied to clipboard');
-
-          // Use setTimeout to ensure all event handlers have finished
-          console.log('⏳ Setting timeout to open WhatsApp...');
-          setTimeout(() => {
-            try {
-              console.log('🚪 Attempting to open WhatsApp window...');
-
-              // Brief info (don't block with alert - message should appear automatically)
-              console.log('💡 Full order details with images are in clipboard as backup');
-
-              // Try to open WhatsApp
-              const newWindow = window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
-
-              if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
-                console.error('❌ Popup blocked');
-                alert('Popup was blocked. Please allow popups for this site.\n\nFull order details are in your clipboard.\n\nPhone: +' + phoneNumber);
-                setIsCheckingOut(false);
-              } else {
-                console.log('✅ WhatsApp opened successfully!');
-                console.log('🪟 New window:', newWindow);
-
-                // Close the cart dashboard after opening WhatsApp
-                setTimeout(() => {
-                  setIsCheckingOut(false);
-                  onClose();
-                }, 500);
-              }
-            } catch (openError) {
-              console.error('❌ Error opening window:', openError);
-              alert('Error opening WhatsApp. Full order details are in your clipboard.\n\nPhone: +' + phoneNumber);
-              setIsCheckingOut(false);
-            }
-          }, 100);
-        }).catch((clipboardError) => {
-          console.warn('⚠️ Could not copy to clipboard:', clipboardError);
-          // Still try to open WhatsApp even if clipboard failed
-          console.log('⏳ Opening WhatsApp...');
-          setTimeout(() => {
-            try {
-              const newWindow = window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
-
-              if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
-                console.error('❌ Popup blocked');
-                alert('Popup was blocked. Please allow popups for this site.\n\nPhone: +' + phoneNumber);
-                setIsCheckingOut(false);
-              } else {
-                console.log('✅ WhatsApp opened successfully!');
-                setTimeout(() => {
-                  setIsCheckingOut(false);
-                  onClose();
-                }, 500);
-              }
-            } catch (openError) {
-              console.error('❌ Error opening window:', openError);
-              alert('Error opening WhatsApp. Please try again.\n\nPhone: +' + phoneNumber);
-              setIsCheckingOut(false);
-            }
-          }, 100);
-        });
-
-      } catch (orderError) {
-        console.error('❌ Error generating order details:', orderError);
-        alert('Error preparing order. Please try again.');
-        setIsCheckingOut(false);
-      }
-
-    } catch (error) {
-      console.error('❌ FATAL ERROR in checkout handler:', error);
-      if (error instanceof Error) {
-        console.error('Error stack:', error.stack);
-      } else {
-        console.error('Error details:', String(error));
-      }
-      alert('An unexpected error occurred. Please try again or contact support.');
-      setIsCheckingOut(false);
     }
+    if (isEmpty || isCheckingOut) return;
+    if (cartItems.length === 0) {
+      alert('Your cart is empty. Please add items before checkout.');
+      return;
+    }
+    setIsCheckingOut(true);
+    onClose();
+    navigate('/checkout');
   };
 
   const handleClearCart = () => {
