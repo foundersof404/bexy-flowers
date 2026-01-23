@@ -10,9 +10,10 @@ export const AI_CONFIG = {
    * Generation Settings
    */
   generation: {
-    // Default image dimensions (1024x1024 for best quality with Flux)
-    defaultWidth: 1024,
-    defaultHeight: 1024,
+    // Default image dimensions (768x768 - optimized for speed while maintaining quality)
+    // Smaller resolution = faster generation (roughly 2x faster than 1024x1024)
+    defaultWidth: 768,
+    defaultHeight: 768,
     
     // Automatically enhance prompts with professional keywords
     autoEnhancePrompts: true,
@@ -79,8 +80,8 @@ export const AI_CONFIG = {
         // 'seedream-pro' - High quality, good for product photos
         // 'turbo' - Good balance of quality and cost
         model: 'gptimage', // Changed from 'flux' for more realistic results
-        width: 1024, // High resolution for quality
-        height: 1024, // High resolution for quality
+        width: 768, // Optimized resolution for faster generation while maintaining quality
+        height: 768, // Optimized resolution for faster generation while maintaining quality
       }
     },
     
@@ -103,7 +104,6 @@ export const AI_CONFIG = {
     // Photography-specific keywords for Flux model
     // Flux understands professional photography terminology
     quality: [
-      '8K resolution',
       'ultra-detailed',
       'photorealistic',
       'professional product photography',

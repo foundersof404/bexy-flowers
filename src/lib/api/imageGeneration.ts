@@ -176,6 +176,15 @@ async function generateWithPollinationsServerless(
         // SECURITY: Sanitize error messages - never expose keys or internal details
         const sanitizedError = errorData.error || 'Image generation failed';
         console.error('[ImageGen] ❌ Serverless function error:', response.status);
+        
+        // For 504 (Gateway Timeout) and 503 (Service Unavailable), create a retryable error
+        if (response.status === 504 || response.status === 503 || (errorData.retryable === true)) {
+            const retryableError = new Error(sanitizedError);
+            (retryableError as any).retryable = true;
+            (retryableError as any).statusCode = response.status;
+            throw retryableError;
+        }
+        
         // Never fall back to direct API - always fail securely
         throw new Error(sanitizedError);
     }
@@ -622,7 +631,14 @@ export async function generateBouquetImage(
             
         } catch (error) {
             lastError = error as Error;
+            const errorObj = error as Error & { retryable?: boolean; statusCode?: number };
             console.warn(`[ImageGen] ❌ ${strategy.name} failed:`, error);
+            
+            // If this is a retryable error (504, 503) and we have more strategies, continue
+            // Otherwise, if it's the last strategy, we'll throw
+            if (errorObj.retryable && i < strategies.length - 1) {
+                console.log(`[ImageGen] ⏳ Retryable error (${errorObj.statusCode || 'unknown'}), will retry with next strategy...`);
+            }
             
             // Continue to next strategy
             continue;

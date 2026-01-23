@@ -840,12 +840,12 @@ export function buildAdvancedPrompt(options: PromptBuilderOptions): BuiltPrompt 
   
   // Technical quality - optimized for Flux model with Flux-specific quality keywords
   // Flux responds well to these specific quality boosters
-  parts.push(`masterpiece, best quality, highly detailed, 8k uhd, dslr, soft lighting, high quality, film grain`);
+  parts.push(`masterpiece, best quality, highly detailed, dslr, soft lighting, high quality, film grain`);
   parts.push(`Fujifilm XT3, professional photography`);
   parts.push(`photograph taken with professional DSLR camera`);
   parts.push(`pure white seamless studio background`);
   parts.push(`soft diffused natural studio lighting with gentle shadows`);
-  parts.push(`sharp focus on all flowers, ultra high resolution 8K detail`);
+  parts.push(`sharp focus on all flowers, high resolution detail`);
   parts.push(`photorealistic, hyperrealistic, lifelike`);
   parts.push(`real photograph, not illustration, not 3D render, not digital art`);
   

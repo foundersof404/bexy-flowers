@@ -822,8 +822,8 @@ const Customize: React.FC = () => {
       toast.loading("Generating your bouquet preview...", { id: 'generating-toast' });
       
       const result = await generateImage(prompt.positive, {
-        width: 1024,
-        height: 1024,
+        width: 768, // Reduced from 1024 for faster generation
+        height: 768, // Reduced from 1024 for faster generation
         enhancePrompt: true,
         negativePrompt: prompt.negative,
         useCache: false, // Disabled - always generate fresh image
@@ -849,8 +849,14 @@ const Customize: React.FC = () => {
       }
     } catch (error) {
       toast.dismiss('generating-toast');
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const isRetryable = (error as any)?.retryable === true || errorMessage.includes('busy') || errorMessage.includes('timeout');
+      
       toast.error("Could not generate preview", {
-        description: "AI services are busy. Try again in a moment.",
+        description: isRetryable 
+          ? "AI services are busy right now. Please try again in a moment."
+          : "Image generation failed. Please try again.",
+        duration: 6000,
       });
     } finally {
       setIsGenerating(false);
@@ -873,8 +879,8 @@ const Customize: React.FC = () => {
       toast.loading(`Creating variation ${newVariationIndex}...`, { id: 'variation-toast' });
       
       const result = await generateWithVariation(lastGeneratedPrompt, newVariationIndex, {
-        width: 1024,
-        height: 1024,
+        width: 768,
+        height: 768,
         onProgress: (stage) => setGenerationProgress(stage)
       });
 
@@ -908,8 +914,8 @@ const Customize: React.FC = () => {
       toast.loading("Generating with custom prompt...", { id: 'custom-generating-toast' });
       
       const result = await generateImage(customPrompt, {
-        width: 1024,
-        height: 1024,
+        width: 768,
+        height: 768,
         enhancePrompt: true,
         negativePrompt: currentPrompt?.negative || '',
         useCache: false,

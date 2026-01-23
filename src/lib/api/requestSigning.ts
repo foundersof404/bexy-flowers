@@ -76,8 +76,8 @@ export async function createSignedRequest(data: {
     console.warn('[Request Signing] VITE_FRONTEND_API_SECRET not set - sending unsigned request');
     return {
       ...data,
-      width: data.width || 1024,
-      height: data.height || 1024,
+      width: data.width || 768,
+      height: data.height || 768,
       model: data.model || 'gptimage',
       timestamp: Date.now(),
       nonce: generateNonce(),
@@ -90,8 +90,8 @@ export async function createSignedRequest(data: {
   
   const payload = {
     prompt: data.prompt,
-    width: data.width || 1024,
-    height: data.height || 1024,
+    width: data.width || 768,
+    height: data.height || 768,
     model: data.model || 'gptimage',
     timestamp,
     nonce,
