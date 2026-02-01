@@ -77,14 +77,14 @@ export const AI_CONFIG = {
         // - 'nanobanana': NanoBanana - Affordable option
         // 
         // SPEED vs QUALITY tradeoff:
-        // 'flux' - FAST (5-15 seconds), default model, most reliable
+        // 'flux' - FAST (5-15 seconds), default model
         // 'turbo' - Fast (5-15 seconds), good quality
-        // 'gptimage' - SLOW (30-60 seconds), best photorealism
+        // 'gptimage' - Best photorealism, text/logo support (20-40 seconds at 512x512)
         // 
-        // Using 'flux' - the default and most reliable model
-        model: 'flux', // Default model - fast and reliable (5-15 seconds)
-        width: 512, // Smaller = faster generation
-        height: 512, // Smaller = faster generation
+        // Using 'gptimage' for best quality flower images
+        model: 'gptimage', // Best photorealism for flower arrangements
+        width: 512, // Smaller resolution = faster generation (20-40s vs 60s at 768x768)
+        height: 512, // Smaller resolution = faster generation
       }
     },
     

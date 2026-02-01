@@ -713,11 +713,11 @@ export const handler: Handler = async (
     
     const prompt = promptValidation.sanitized || body.prompt || '';
     
-    // Get and validate parameters - defaults optimized for SPEED
-    // 512x512 with 'flux' model generates in 5-15 seconds vs 30-60 seconds for gptimage at 768x768
+    // Get and validate parameters - gptimage model with smaller resolution for faster generation
+    // 512x512 with 'gptimage' generates in 20-40 seconds vs 60+ seconds at 768x768
     const width = body.width || 512;
     const height = body.height || 512;
-    const model = body.model || 'flux';
+    const model = body.model || 'gptimage';
     
     const paramValidation = validateParameters(width, height, model);
     if (!paramValidation.valid) {
