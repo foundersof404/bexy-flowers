@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
 interface PreloadOptions {
   priority?: boolean;
@@ -8,11 +8,14 @@ interface PreloadOptions {
 /**
  * Hook to preload multiple images
  * Useful for preloading images before showing a gallery or carousel
+ * CRITICAL: options stored in ref to avoid effect re-running every render (was causing page freeze)
  */
 export const useImagePreloader = (imageUrls: string[], options: PreloadOptions = {}) => {
   const [loadedCount, setLoadedCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [errors, setErrors] = useState<string[]>([]);
+  const optionsRef = useRef(options);
+  optionsRef.current = options;
 
   useEffect(() => {
     if (!imageUrls || imageUrls.length === 0) {
@@ -23,12 +26,13 @@ export const useImagePreloader = (imageUrls: string[], options: PreloadOptions =
     let mounted = true;
     const imageElements: HTMLImageElement[] = [];
     let loaded = 0;
+    const opts = optionsRef.current;
 
     const handleImageLoad = () => {
       if (!mounted) return;
       loaded++;
       setLoadedCount(loaded);
-      options.onProgress?.(loaded, imageUrls.length);
+      opts.onProgress?.(loaded, imageUrls.length);
 
       if (loaded === imageUrls.length) {
         setIsLoading(false);
@@ -40,7 +44,7 @@ export const useImagePreloader = (imageUrls: string[], options: PreloadOptions =
       loaded++;
       setLoadedCount(loaded);
       setErrors((prev) => [...prev, url]);
-      options.onProgress?.(loaded, imageUrls.length);
+      opts.onProgress?.(loaded, imageUrls.length);
 
       if (loaded === imageUrls.length) {
         setIsLoading(false);
@@ -124,7 +128,8 @@ export const useImagePreloader = (imageUrls: string[], options: PreloadOptions =
         img.onerror = null;
       });
     };
-  }, [imageUrls, options]);
+    // CRITICAL: Only depend on imageUrls. options in ref - avoids effect thrash every render (page freeze)
+  }, [imageUrls]);
 
   return {
     isLoading,

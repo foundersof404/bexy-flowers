@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Pagination, EffectFade } from 'swiper/modules';
@@ -101,9 +101,11 @@ const CarouselHero = ({ slidesToShow, isHomepage = false }: CarouselHeroProps = 
   // Homepage desktop: 1 slide, Homepage mobile: all slides, Collection: all slides
   const slides = slidesToShow || (isHomepage && !isMobile ? homepageSlides : allSlides);
 
-  // Collect all images for preloading (only productImage is actually used, bgImage is not rendered)
-  const allSlideImages = slides.map(slide => slide.productImage);
-  const firstSlideImages = [slides[0].productImage];
+  // Memoize to prevent new array every render (useImagePreloader effect thrash → page freeze)
+  const allSlideImages = useMemo(
+    () => slides.map((slide) => slide.productImage),
+    [slides]
+  );
 
   // Preload all images
   useImagePreloader(allSlideImages);

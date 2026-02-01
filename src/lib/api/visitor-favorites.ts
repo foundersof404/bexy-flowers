@@ -25,10 +25,24 @@ interface VisitorFavoriteItem {
 // Circuit breaker: Skip RPC if it fails (function doesn't exist)
 let rpcFunctionAvailable: boolean | null = null;
 
+// Circuit breaker: Skip all favorites DB calls temporarily after errors (matches visitor-cart)
+const DB_CIRCUIT_MS = 60_000;
+let dbCircuitOpenUntil = 0;
+
+function isDbCircuitOpen(): boolean {
+  return Date.now() < dbCircuitOpenUntil;
+}
+
+function recordDbFailure(): void {
+  dbCircuitOpenUntil = Date.now() + DB_CIRCUIT_MS;
+}
+
 /**
  * Ensure visitor exists in database (create if doesn't exist)
  */
 async function ensureVisitor(): Promise<void> {
+  if (isDbCircuitOpen()) return;
+
   const visitorId = getVisitorId();
   
   try {
@@ -66,11 +80,10 @@ async function ensureVisitor(): Promise<void> {
       });
     }
   } catch (error) {
-    // Only log if it's not the expected "Netlify unavailable" error in dev mode
+    recordDbFailure();
     if (!(error instanceof Error && error.message === 'NETLIFY_FUNCTIONS_UNAVAILABLE')) {
       console.error('Error ensuring visitor:', error);
     }
-    // Continue even if visitor creation fails
   }
 }
 
@@ -123,7 +136,7 @@ export async function getVisitorFavorites(): Promise<FavoriteProduct[]> {
 
     return (data || []).map(transformFavoriteItem);
   } catch (error) {
-    // Only log if it's not the expected "Netlify unavailable" error in dev mode
+    recordDbFailure();
     if (!(error instanceof Error && error.message === 'NETLIFY_FUNCTIONS_UNAVAILABLE')) {
       console.error('Error in getVisitorFavorites:', error);
     }
@@ -145,6 +158,7 @@ export async function addVisitorFavorite(product: FavoriteProduct): Promise<bool
 
     return true;
   } catch (error) {
+    recordDbFailure();
     console.error('Error in addVisitorFavorite:', error);
     return false;
   }
@@ -154,6 +168,7 @@ export async function addVisitorFavorite(product: FavoriteProduct): Promise<bool
  * Remove favorite product for the current visitor
  */
 export async function removeVisitorFavorite(productId: string | number): Promise<boolean> {
+  if (isDbCircuitOpen()) return false;
   try {
     const visitorId = getVisitorId();
 
@@ -164,6 +179,7 @@ export async function removeVisitorFavorite(productId: string | number): Promise
 
     return true;
   } catch (error) {
+    recordDbFailure();
     console.error('Error in removeVisitorFavorite:', error);
     return false;
   }
@@ -173,6 +189,7 @@ export async function removeVisitorFavorite(productId: string | number): Promise
  * Check if product is in favorites for the current visitor
  */
 export async function isVisitorFavorite(productId: string | number): Promise<boolean> {
+  if (isDbCircuitOpen()) return false;
   try {
     const visitorId = getVisitorId();
 
@@ -182,6 +199,7 @@ export async function isVisitorFavorite(productId: string | number): Promise<boo
 
     return data.length > 0;
   } catch (error) {
+    recordDbFailure();
     console.error('Error in isVisitorFavorite:', error);
     return false;
   }
@@ -191,6 +209,7 @@ export async function isVisitorFavorite(productId: string | number): Promise<boo
  * Clear all favorites for the current visitor
  */
 export async function clearVisitorFavorites(): Promise<boolean> {
+  if (isDbCircuitOpen()) return false;
   try {
     const visitorId = getVisitorId();
 
@@ -198,6 +217,7 @@ export async function clearVisitorFavorites(): Promise<boolean> {
 
     return true;
   } catch (error) {
+    recordDbFailure();
     console.error('Error in clearVisitorFavorites:', error);
     return false;
   }
@@ -220,7 +240,7 @@ export async function syncFavoritesToDatabase(favorites: FavoriteProduct[]): Pro
       await db.insert('visitor_favorites', dbItems);
     }
   } catch (error) {
-    // Only log if it's not the expected "Netlify unavailable" error in dev mode
+    recordDbFailure();
     if (!(error instanceof Error && error.message === 'NETLIFY_FUNCTIONS_UNAVAILABLE')) {
       console.error('Error syncing favorites to database:', error);
     }

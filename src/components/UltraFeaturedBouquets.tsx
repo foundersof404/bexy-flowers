@@ -31,18 +31,12 @@ const UltraFeaturedBouquets = () => {
   // Force refetch on mount to ensure we always have the latest data
   const { data: signatureCollections, isLoading: loading, refetch } = useSignatureCollection();
   
-  // CRITICAL FIX: Always refetch fresh data when component mounts to get latest discounts
+  // Refetch on mount only. No interval - useSignatureCollection has refetchOnWindowFocus;
+  // periodic refetch was contributing to excessive requests and potential freezes.
   useEffect(() => {
-    // Force refetch every time this component mounts
     refetch();
-    
-    // Also set up an interval to periodically check for updates (every 30 seconds)
-    const intervalId = setInterval(() => {
-      refetch();
-    }, 30000); // 30 seconds
-    
-    return () => clearInterval(intervalId);
-  }, []); // Empty deps array = only run on mount/unmount
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- run only on mount
+  }, []);
 
   // Transform signature collections to bouquets format
   // IMPORTANT: Use custom fields from signature_collections if available, otherwise use product defaults
@@ -61,9 +55,6 @@ const UltraFeaturedBouquets = () => {
     const price = item.custom_price ?? item.product?.price ?? 0;
     const discountPercentage = item.discount_percentage ?? item.product?.discount_percentage ?? null;
     const imageRotations = (item as any).image_rotations || {};
-
-    // DEBUG: Log discount data
-    console.log(`[UltraFeaturedBouquets] Product: ${title}, Discount: ${discountPercentage}%, item.discount_percentage: ${item.discount_percentage}, product.discount_percentage: ${item.product?.discount_percentage}`);
 
     return {
       id: item.product?.id || item.id,
