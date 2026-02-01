@@ -762,11 +762,11 @@ export const handler: Handler = async (
     // GPT image model can take 30-50+ seconds for high-quality generation
     // We don't want to abort early - let the API complete naturally
     
-    // Retry configuration for transient errors (502, 503, 504)
-    // gptimage model takes 20-40+ seconds to generate, so we need longer delays
-    // 502 errors often mean the API is still processing - wait and retry
-    const MAX_RETRIES = 4;
-    const RETRY_DELAYS = [8000, 15000, 20000, 25000]; // 8s, 15s, 20s, 25s delays between retries
+    // NO RETRIES for gptimage model - it takes 20-40+ seconds to generate
+    // Netlify has a 60-second timeout, so we can only make ONE request
+    // Retrying would cause timeout (retry delays + API time > 60s)
+    const MAX_RETRIES = 0; // NO RETRIES - single request only
+    const RETRY_DELAYS: number[] = []; // Empty - no delays needed
     
     // Helper function to fetch with Bearer token authentication
     // Using the secret key as Bearer token for better rate limits
