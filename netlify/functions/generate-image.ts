@@ -730,9 +730,10 @@ export const handler: Handler = async (
       };
     }
     
-    // Build Pollinations API URL
+    // Build Pollinations API URL with referrer for better rate limits
     const encodedPrompt = encodeURIComponent(prompt);
-    const pollinationsUrl = `https://gen.pollinations.ai/image/${encodedPrompt}?key=${secretKey}&model=${model}&width=${width}&height=${height}`;
+    // Add referrer parameter to identify the app (helps with rate limits)
+    const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?model=${model}&width=${width}&height=${height}&nologo=true&referrer=bexyflowers.shop`;
     
     // Log request (without secret key)
     console.log('[Netlify Function] Generating image');
@@ -749,16 +750,29 @@ export const handler: Handler = async (
     // GPT image model can take 30-50+ seconds for high-quality generation
     // We don't want to abort early - let the API complete naturally
     
-    // Retry configuration for transient errors (502, 503, 504) - only 1 retry to save time
-    const MAX_RETRIES = 1;
-    const RETRY_DELAYS = [3000]; // 3s delay before single retry
+    // Retry configuration for transient errors (502, 503, 504)
+    // Pollinations has rate limits: Anonymous=15s, Seed=5s between requests
+    // We need longer delays to respect rate limits
+    const MAX_RETRIES = 3;
+    const RETRY_DELAYS = [5000, 10000, 15000]; // 5s, 10s, 15s delays between retries
     
-    // Helper function to fetch without internal timeout
-    // Netlify's 60-second function limit will be the only timeout
-    const fetchWithTimeout = async (url: string, options: RequestInit = {}): Promise<Response> => {
-      // No AbortController - let the request complete naturally
-      // Netlify will terminate the function after 60 seconds if needed
-      return fetch(url, options);
+    // Helper function to fetch with Bearer token authentication
+    // Using the secret key as Bearer token for better rate limits
+    const fetchWithAuth = async (url: string, token?: string): Promise<Response> => {
+      const headers: Record<string, string> = {
+        'Accept': 'image/*',
+        'User-Agent': 'BexyFlowers/1.0 (https://bexyflowers.shop)',
+      };
+      
+      // Add Bearer token if available for better rate limits
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      
+      return fetch(url, {
+        method: 'GET',
+        headers,
+      });
     };
     
     // Helper function to attempt fetch with retries for transient errors (502, 503, 504)
@@ -774,10 +788,8 @@ export const handler: Handler = async (
             await new Promise(resolve => setTimeout(resolve, delay));
           }
           
-          const resp = await fetchWithTimeout(url, {
-            method: 'GET',
-            headers: { 'Accept': 'image/*' },
-          });
+          // Use Bearer token authentication with the secret key for better rate limits
+          const resp = await fetchWithAuth(url, secretKey || secretKey2);
           
           // If transient error (502, 503, 504), retry
           if (!resp.ok && (resp.status === 502 || resp.status === 503 || resp.status === 504)) {
@@ -809,7 +821,7 @@ export const handler: Handler = async (
           console.warn('[Netlify Function] Primary key failed with status:', response.status);
           console.log('[Netlify Function] Falling back to secondary API key');
           
-          const pollinationsUrl2 = `https://gen.pollinations.ai/image/${encodedPrompt}?key=${secretKey2}&model=${model}&width=${width}&height=${height}`;
+          const pollinationsUrl2 = `https://image.pollinations.ai/prompt/${encodedPrompt}?model=${model}&width=${width}&height=${height}&nologo=true`;
           
           response = await fetchWithRetry(pollinationsUrl2, 'Secondary');
           usedKey = 'secondary';
@@ -821,7 +833,7 @@ export const handler: Handler = async (
           console.log('[Netlify Function] Falling back to secondary API key');
           
           try {
-            const pollinationsUrl2 = `https://gen.pollinations.ai/image/${encodedPrompt}?key=${secretKey2}&model=${model}&width=${width}&height=${height}`;
+            const pollinationsUrl2 = `https://image.pollinations.ai/prompt/${encodedPrompt}?model=${model}&width=${width}&height=${height}&nologo=true`;
             
             response = await fetchWithRetry(pollinationsUrl2, 'Secondary');
             usedKey = 'secondary';
@@ -836,7 +848,7 @@ export const handler: Handler = async (
     } else if (secretKey2) {
       // If primary key is not set, use secondary key directly
       console.log('[Netlify Function] Primary key not set, using secondary API key');
-      const pollinationsUrl2 = `https://gen.pollinations.ai/image/${encodedPrompt}?key=${secretKey2}&model=${model}&width=${width}&height=${height}`;
+      const pollinationsUrl2 = `https://image.pollinations.ai/prompt/${encodedPrompt}?model=${model}&width=${width}&height=${height}&nologo=true`;
       
       response = await fetchWithRetry(pollinationsUrl2, 'Secondary');
       usedKey = 'secondary';

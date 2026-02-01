@@ -51,10 +51,10 @@ export const AI_CONFIG = {
   apis: {
     pollinations: {
       enabled: true,
-      // NEW API ENDPOINT (as of 2025)
-      // Documentation: https://gen.pollinations.ai
-      // Format: https://gen.pollinations.ai/image/{prompt}?key=YOUR_API_KEY
-      baseUrl: 'https://gen.pollinations.ai/image', // New API gateway endpoint
+      // CORRECT API ENDPOINT (as of 2025)
+      // Documentation: https://github.com/pollinations/pollinations/blob/main/APIDOCS.md
+      // Format: https://image.pollinations.ai/prompt/{prompt}?model=...&width=...&height=...
+      baseUrl: 'https://image.pollinations.ai/prompt', // Official image generation endpoint
       // SECURITY: API key removed from frontend - only used server-side in Netlify function
       // Never expose keys in frontend code - they are visible in browser DevTools and bundled JS
       // Use serverless function for unlimited rate limits (secret key)

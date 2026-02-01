@@ -8,6 +8,14 @@
 
 [functions]
   external_node_modules = ["@supabase/supabase-js"]
+  # Increase timeout for image generation (gptimage model takes 20-40+ seconds)
+  # Note: Free tier has 10s limit, Pro tier allows up to 26s, Enterprise allows 60s
+  # If on free tier, this won't help - need to upgrade or use faster model
+
+[functions."generate-image"]
+  # Set maximum timeout for image generation function
+  # This requires Netlify Pro plan or higher for timeouts > 10 seconds
+  timeout = 60
 
 [[redirects]]
   from = "/*"
