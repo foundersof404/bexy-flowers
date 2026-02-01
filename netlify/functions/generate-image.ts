@@ -744,33 +744,20 @@ export const handler: Handler = async (
     let response: Response;
     let usedKey: 'primary' | 'secondary' = 'primary';
     
-    // Timeout for Pollinations API (55 seconds - GPT image model needs more time for high-quality generation)
-    // Netlify functions have 60s timeout, so we use 55s to leave room for response processing
-    const FETCH_TIMEOUT = 55000;
+    // NO INTERNAL TIMEOUT - Let Netlify's 60-second function timeout handle it
+    // GPT image model can take 30-50+ seconds for high-quality generation
+    // We don't want to abort early - let the API complete naturally
     
-    // Retry configuration for transient errors (502, 503, 504)
-    const MAX_RETRIES = 2;
-    const RETRY_DELAYS = [2000, 4000]; // 2s, 4s delays between retries
+    // Retry configuration for transient errors (502, 503, 504) - only 1 retry to save time
+    const MAX_RETRIES = 1;
+    const RETRY_DELAYS = [3000]; // 3s delay before single retry
     
-    // Helper function to fetch with timeout
+    // Helper function to fetch without internal timeout
+    // Netlify's 60-second function limit will be the only timeout
     const fetchWithTimeout = async (url: string, options: RequestInit = {}): Promise<Response> => {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT);
-      
-      try {
-        const response = await fetch(url, {
-          ...options,
-          signal: controller.signal,
-        });
-        clearTimeout(timeoutId);
-        return response;
-      } catch (error) {
-        clearTimeout(timeoutId);
-        if (error instanceof Error && error.name === 'AbortError') {
-          throw new Error('Request timeout: Pollinations API took too long to respond. The service may be busy.');
-        }
-        throw error;
-      }
+      // No AbortController - let the request complete naturally
+      // Netlify will terminate the function after 60 seconds if needed
+      return fetch(url, options);
     };
     
     // Helper function to attempt fetch with retries for transient errors (502, 503, 504)
