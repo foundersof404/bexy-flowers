@@ -77,12 +77,12 @@ export const AI_CONFIG = {
         // - 'nanobanana': NanoBanana - Affordable option
         // 
         // SPEED vs QUALITY tradeoff:
-        // 'turbo' - FASTEST (5-15 seconds), good quality for previews
-        // 'flux' - Fast (10-20 seconds), slightly better detail
+        // 'flux' - FAST (5-15 seconds), default model, most reliable
+        // 'turbo' - Fast (5-15 seconds), good quality
         // 'gptimage' - SLOW (30-60 seconds), best photorealism
         // 
-        // Using 'turbo' for fast preview generation
-        model: 'turbo', // Fast model for quick previews (5-15 seconds)
+        // Using 'flux' - the default and most reliable model
+        model: 'flux', // Default model - fast and reliable (5-15 seconds)
         width: 512, // Smaller = faster generation
         height: 512, // Smaller = faster generation
       }
