@@ -732,10 +732,17 @@ export const handler: Handler = async (
       };
     }
     
-    // Build Pollinations API URL with referrer for better rate limits
+    // Build Pollinations API URL with all parameters to ensure gptimage is used
     const encodedPrompt = encodeURIComponent(prompt);
-    // Add referrer parameter to identify the app (helps with rate limits)
-    const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?model=${model}&width=${width}&height=${height}&nologo=true&referrer=bexyflowers.shop`;
+    // Generate random seed to force fresh generation (prevents caching/fallback)
+    const seed = Math.floor(Math.random() * 1000000000);
+    // Add all parameters:
+    // - model=gptimage: Force gptimage model
+    // - seed: Random seed to prevent caching and force fresh generation
+    // - enhance=true: Let AI improve prompt for better results
+    // - nologo=true: Remove watermark
+    // - referrer: Identify the app for rate limits
+    const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?model=${model}&width=${width}&height=${height}&seed=${seed}&enhance=true&nologo=true&referrer=bexyflowers.shop`;
     
     // Log request details (without secret key)
     console.log('[Netlify Function] ========== IMAGE GENERATION REQUEST ==========');
@@ -744,7 +751,8 @@ export const handler: Handler = async (
     console.log('[Netlify Function] Actual model param:', model);
     console.log('[Netlify Function] Resolution:', `${width}x${height}`);
     console.log('[Netlify Function] Prompt length:', prompt.length);
-    console.log('[Netlify Function] Full URL (without prompt):', `https://image.pollinations.ai/prompt/[PROMPT]?model=${model}&width=${width}&height=${height}&nologo=true&referrer=bexyflowers.shop`);
+    console.log('[Netlify Function] Seed:', seed);
+    console.log('[Netlify Function] Full URL (without prompt):', `https://image.pollinations.ai/prompt/[PROMPT]?model=${model}&width=${width}&height=${height}&seed=${seed}&enhance=true&nologo=true&referrer=bexyflowers.shop`);
     console.log('[Netlify Function] ===============================================');
     
     // Try primary key first, fallback to secondary key if it fails
@@ -826,7 +834,7 @@ export const handler: Handler = async (
           console.warn('[Netlify Function] Primary key failed with status:', response.status);
           console.log('[Netlify Function] Falling back to secondary API key');
           
-          const pollinationsUrl2 = `https://image.pollinations.ai/prompt/${encodedPrompt}?model=${model}&width=${width}&height=${height}&nologo=true`;
+          const pollinationsUrl2 = `https://image.pollinations.ai/prompt/${encodedPrompt}?model=${model}&width=${width}&height=${height}&seed=${seed}&enhance=true&nologo=true&referrer=bexyflowers.shop`;
           
           response = await fetchWithRetry(pollinationsUrl2, 'Secondary');
           usedKey = 'secondary';
@@ -838,7 +846,7 @@ export const handler: Handler = async (
           console.log('[Netlify Function] Falling back to secondary API key');
           
           try {
-            const pollinationsUrl2 = `https://image.pollinations.ai/prompt/${encodedPrompt}?model=${model}&width=${width}&height=${height}&nologo=true`;
+            const pollinationsUrl2 = `https://image.pollinations.ai/prompt/${encodedPrompt}?model=${model}&width=${width}&height=${height}&seed=${seed}&enhance=true&nologo=true&referrer=bexyflowers.shop`;
             
             response = await fetchWithRetry(pollinationsUrl2, 'Secondary');
             usedKey = 'secondary';
@@ -853,7 +861,7 @@ export const handler: Handler = async (
     } else if (secretKey2) {
       // If primary key is not set, use secondary key directly
       console.log('[Netlify Function] Primary key not set, using secondary API key');
-      const pollinationsUrl2 = `https://image.pollinations.ai/prompt/${encodedPrompt}?model=${model}&width=${width}&height=${height}&nologo=true`;
+      const pollinationsUrl2 = `https://image.pollinations.ai/prompt/${encodedPrompt}?model=${model}&width=${width}&height=${height}&seed=${seed}&enhance=true&nologo=true&referrer=bexyflowers.shop`;
       
       response = await fetchWithRetry(pollinationsUrl2, 'Secondary');
       usedKey = 'secondary';
