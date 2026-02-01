@@ -763,10 +763,10 @@ export const handler: Handler = async (
     // We don't want to abort early - let the API complete naturally
     
     // Retry configuration for transient errors (502, 503, 504)
-    // Pollinations has rate limits: Anonymous=15s, Seed=5s between requests
-    // We need longer delays to respect rate limits
-    const MAX_RETRIES = 3;
-    const RETRY_DELAYS = [5000, 10000, 15000]; // 5s, 10s, 15s delays between retries
+    // gptimage model takes 20-40+ seconds to generate, so we need longer delays
+    // 502 errors often mean the API is still processing - wait and retry
+    const MAX_RETRIES = 4;
+    const RETRY_DELAYS = [8000, 15000, 20000, 25000]; // 8s, 15s, 20s, 25s delays between retries
     
     // Helper function to fetch with Bearer token authentication
     // Using the secret key as Bearer token for better rate limits
