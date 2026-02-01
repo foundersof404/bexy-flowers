@@ -33,12 +33,8 @@ const ZodiacBouquetQuiz = React.lazy(() => import("@/components/culture/ZodiacBo
 const FlowerCareGuide = React.lazy(() => import("@/components/culture/FlowerCareGuide"));
 const Footer = React.lazy(() => import("@/components/Footer"));
 
-// Preload critical components immediately for faster navigation
-const preloadCriticalComponents = () => {
-  import("@/components/CarouselHero");
-  import("@/components/UltraFeaturedBouquets");
-  import("@/components/UltraCategories");
-};
+// Preload removed - components are lazy loaded on demand
+// Aggressive preloading was causing slow initial load on mobile
 
 // Professional Custom Bouquet Section Component - Optimized for performance
 const ProfessionalCustomSection = React.memo(() => {

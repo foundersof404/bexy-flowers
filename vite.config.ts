@@ -26,6 +26,8 @@ export default defineConfig({
           'vendor-query': ['@tanstack/react-query'],
           'vendor-ui': ['framer-motion', 'lucide-react'],
           'vendor-swiper': ['swiper'],
+          // Supabase in separate chunk - only loaded when needed (admin pages, data fetching)
+          'supabase': ['@supabase/supabase-js'],
         },
         // Use content hash for long-term caching
         chunkFileNames: 'assets/[name]-[hash].js',

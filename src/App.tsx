@@ -25,24 +25,33 @@ gsap.config({
   nullTargetWarn: false,
 });
 
-// ⚡ PERFORMANCE: Preload critical routes immediately on app load
-// This ensures instant navigation for new users
+// ⚡ PERFORMANCE: Preload critical routes ONLY on desktop after page is fully loaded
+// Mobile devices have limited bandwidth - don't preload aggressively
 const preloadCriticalRoutes = () => {
-  // Preload main pages that users navigate to most
+  // Skip preloading on mobile devices to save bandwidth
+  const isMobile = window.innerWidth < 768 || /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  if (isMobile) {
+    console.log('[Preload] Skipping preload on mobile device');
+    return;
+  }
+  
+  // Only preload on desktop after page is interactive
   import("./pages/Index");
   import("./pages/Collection");
-  import("./components/UltraNavigation");
-  import("./components/Footer");
 };
 
-// Start preloading after initial render
+// Start preloading only after page is fully loaded and idle
 if (typeof window !== 'undefined') {
-  // Use requestIdleCallback for non-blocking preload, fallback to setTimeout
-  if ('requestIdleCallback' in window) {
-    (window as any).requestIdleCallback(() => preloadCriticalRoutes(), { timeout: 2000 });
-  } else {
-    setTimeout(preloadCriticalRoutes, 100);
-  }
+  // Wait for load event before preloading anything
+  window.addEventListener('load', () => {
+    // Use requestIdleCallback for non-blocking preload with longer timeout
+    if ('requestIdleCallback' in window) {
+      (window as any).requestIdleCallback(() => preloadCriticalRoutes(), { timeout: 5000 });
+    } else {
+      // Delay preload significantly on slower devices
+      setTimeout(preloadCriticalRoutes, 3000);
+    }
+  }, { once: true });
 }
 
 // ⚡ PERFORMANCE OPTIMIZATION: Route-based code splitting
