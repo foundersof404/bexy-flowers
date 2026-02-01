@@ -717,7 +717,9 @@ export const handler: Handler = async (
     // 512x512 with 'gptimage' generates in 20-40 seconds vs 60+ seconds at 768x768
     const width = body.width || 512;
     const height = body.height || 512;
-    const model = body.model || 'gptimage';
+    // FORCE gptimage model - ignore any model sent from frontend
+    // This ensures we ALWAYS use gptimage regardless of what the request contains
+    const model = 'gptimage'; // HARDCODED - DO NOT CHANGE
     
     const paramValidation = validateParameters(width, height, model);
     if (!paramValidation.valid) {
