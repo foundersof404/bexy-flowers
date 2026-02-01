@@ -10,10 +10,11 @@ export const AI_CONFIG = {
    * Generation Settings
    */
   generation: {
-    // Default image dimensions (768x768 - optimized for speed while maintaining quality)
-    // Smaller resolution = faster generation (roughly 2x faster than 1024x1024)
-    defaultWidth: 768,
-    defaultHeight: 768,
+    // Default image dimensions (512x512 - optimized for FAST generation)
+    // 512x512 is ~4x faster than 1024x1024, ~2x faster than 768x768
+    // Quality is still good for preview/customization purposes
+    defaultWidth: 512,
+    defaultHeight: 512,
     
     // Automatically enhance prompts with professional keywords
     autoEnhancePrompts: true,
@@ -75,13 +76,15 @@ export const AI_CONFIG = {
         // - 'kontext': FLUX.1 Kontext - Better context understanding
         // - 'nanobanana': NanoBanana - Affordable option
         // 
-        // RECOMMENDED for realistic flower photography:
-        // 'gptimage' - Best photorealism, understands text/logos well
-        // 'seedream-pro' - High quality, good for product photos
-        // 'turbo' - Good balance of quality and cost
-        model: 'gptimage', // Changed from 'flux' for more realistic results
-        width: 768, // Optimized resolution for faster generation while maintaining quality
-        height: 768, // Optimized resolution for faster generation while maintaining quality
+        // SPEED vs QUALITY tradeoff:
+        // 'turbo' - FASTEST (5-15 seconds), good quality for previews
+        // 'flux' - Fast (10-20 seconds), slightly better detail
+        // 'gptimage' - SLOW (30-60 seconds), best photorealism
+        // 
+        // Using 'turbo' for fast preview generation
+        model: 'turbo', // Fast model for quick previews (5-15 seconds)
+        width: 512, // Smaller = faster generation
+        height: 512, // Smaller = faster generation
       }
     },
     
