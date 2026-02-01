@@ -744,8 +744,13 @@ export const handler: Handler = async (
     let response: Response;
     let usedKey: 'primary' | 'secondary' = 'primary';
     
-    // Timeout for Pollinations API (40 seconds - GPT image model needs more time for high-quality generation)
-    const FETCH_TIMEOUT = 40000;
+    // Timeout for Pollinations API (55 seconds - GPT image model needs more time for high-quality generation)
+    // Netlify functions have 60s timeout, so we use 55s to leave room for response processing
+    const FETCH_TIMEOUT = 55000;
+    
+    // Retry configuration for transient errors (502, 503, 504)
+    const MAX_RETRIES = 2;
+    const RETRY_DELAYS = [2000, 4000]; // 2s, 4s delays between retries
     
     // Helper function to fetch with timeout
     const fetchWithTimeout = async (url: string, options: RequestInit = {}): Promise<Response> => {
@@ -768,41 +773,69 @@ export const handler: Handler = async (
       }
     };
     
+    // Helper function to attempt fetch with retries for transient errors (502, 503, 504)
+    const fetchWithRetry = async (url: string, keyLabel: string): Promise<Response> => {
+      let lastError: Error | null = null;
+      let lastResponse: Response | null = null;
+      
+      for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+        try {
+          if (attempt > 0) {
+            const delay = RETRY_DELAYS[attempt - 1] || 2000;
+            console.log(`[Netlify Function] Retry ${attempt}/${MAX_RETRIES} after ${delay}ms delay...`);
+            await new Promise(resolve => setTimeout(resolve, delay));
+          }
+          
+          const resp = await fetchWithTimeout(url, {
+            method: 'GET',
+            headers: { 'Accept': 'image/*' },
+          });
+          
+          // If transient error (502, 503, 504), retry
+          if (!resp.ok && (resp.status === 502 || resp.status === 503 || resp.status === 504)) {
+            console.warn(`[Netlify Function] ${keyLabel} key got ${resp.status}, will retry...`);
+            lastResponse = resp;
+            continue;
+          }
+          
+          return resp;
+        } catch (err) {
+          lastError = err instanceof Error ? err : new Error(String(err));
+          console.warn(`[Netlify Function] ${keyLabel} key fetch error:`, lastError.message);
+        }
+      }
+      
+      // All retries exhausted
+      if (lastResponse) return lastResponse;
+      throw lastError || new Error('All retries exhausted');
+    };
+    
     if (secretKey) {
       console.log('[Netlify Function] Trying primary API key');
       
       try {
-        response = await fetchWithTimeout(pollinationsUrl, {
-          method: 'GET',
-          headers: { 'Accept': 'image/*' },
-        });
+        response = await fetchWithRetry(pollinationsUrl, 'Primary');
         
-        // If primary key fails with rate limit (429), auth errors (401/403), or timeout (504), try secondary key
-        if (!response.ok && secretKey2 && (response.status === 429 || response.status === 401 || response.status === 403 || response.status === 504)) {
+        // If primary key fails with rate limit (429), auth errors (401/403), try secondary key
+        if (!response.ok && secretKey2 && (response.status === 429 || response.status === 401 || response.status === 403)) {
           console.warn('[Netlify Function] Primary key failed with status:', response.status);
           console.log('[Netlify Function] Falling back to secondary API key');
           
           const pollinationsUrl2 = `https://gen.pollinations.ai/image/${encodedPrompt}?key=${secretKey2}&model=${model}&width=${width}&height=${height}`;
           
-          response = await fetchWithTimeout(pollinationsUrl2, {
-            method: 'GET',
-            headers: { 'Accept': 'image/*' },
-          });
+          response = await fetchWithRetry(pollinationsUrl2, 'Secondary');
           usedKey = 'secondary';
         }
       } catch (fetchError) {
-        // If primary key fetch fails with timeout or network error, try secondary key
-        if (secretKey2 && (fetchError instanceof Error && (fetchError.message.includes('timeout') || fetchError.message.includes('aborted')))) {
-          console.warn('[Netlify Function] Primary key request timed out or failed');
+        // If primary key fetch fails, try secondary key
+        if (secretKey2) {
+          console.warn('[Netlify Function] Primary key request failed');
           console.log('[Netlify Function] Falling back to secondary API key');
           
           try {
             const pollinationsUrl2 = `https://gen.pollinations.ai/image/${encodedPrompt}?key=${secretKey2}&model=${model}&width=${width}&height=${height}`;
             
-            response = await fetchWithTimeout(pollinationsUrl2, {
-              method: 'GET',
-              headers: { 'Accept': 'image/*' },
-            });
+            response = await fetchWithRetry(pollinationsUrl2, 'Secondary');
             usedKey = 'secondary';
           } catch (secondaryError) {
             // Both keys failed
@@ -817,10 +850,7 @@ export const handler: Handler = async (
       console.log('[Netlify Function] Primary key not set, using secondary API key');
       const pollinationsUrl2 = `https://gen.pollinations.ai/image/${encodedPrompt}?key=${secretKey2}&model=${model}&width=${width}&height=${height}`;
       
-      response = await fetchWithTimeout(pollinationsUrl2, {
-        method: 'GET',
-        headers: { 'Accept': 'image/*' },
-      });
+      response = await fetchWithRetry(pollinationsUrl2, 'Secondary');
       usedKey = 'secondary';
     } else {
       throw new Error('No valid API key available');
@@ -834,7 +864,9 @@ export const handler: Handler = async (
       
       // Provide more specific error messages for common issues
       let userMessage = `Pollinations API error: ${response.status}`;
-      if (response.status === 504) {
+      if (response.status === 502) {
+        userMessage = 'AI service gateway error. The service may be temporarily overloaded. Please try again.';
+      } else if (response.status === 504) {
         userMessage = 'AI service is busy right now. Please try again in a moment.';
       } else if (response.status === 429) {
         userMessage = 'Rate limit exceeded. Please wait a moment before trying again.';
