@@ -735,12 +735,15 @@ export const handler: Handler = async (
     // Add referrer parameter to identify the app (helps with rate limits)
     const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?model=${model}&width=${width}&height=${height}&nologo=true&referrer=bexyflowers.shop`;
     
-    // Log request (without secret key)
-    console.log('[Netlify Function] Generating image');
+    // Log request details (without secret key)
+    console.log('[Netlify Function] ========== IMAGE GENERATION REQUEST ==========');
     console.log('[Netlify Function] IP:', ip);
-    console.log('[Netlify Function] Model:', model);
+    console.log('[Netlify Function] Model: gptimage (ENFORCED)');
+    console.log('[Netlify Function] Actual model param:', model);
     console.log('[Netlify Function] Resolution:', `${width}x${height}`);
     console.log('[Netlify Function] Prompt length:', prompt.length);
+    console.log('[Netlify Function] Full URL (without prompt):', `https://image.pollinations.ai/prompt/[PROMPT]?model=${model}&width=${width}&height=${height}&nologo=true&referrer=bexyflowers.shop`);
+    console.log('[Netlify Function] ===============================================');
     
     // Try primary key first, fallback to secondary key if it fails
     let response: Response;
