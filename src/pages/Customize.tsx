@@ -1166,22 +1166,25 @@ const Customize: React.FC = () => {
         className="relative min-h-[50vh] sm:min-h-[60vh] md:min-h-[70vh] flex items-center justify-center overflow-hidden pt-16 sm:pt-20 md:pt-24 pb-8 sm:pb-12 md:pb-16"
         style={{
           background: isMobile ? 'transparent' : 'linear-gradient(180deg, #FAF8F3 0%, #F5F1E8 50%, #EDE7D9 100%)',
-          minHeight: isMobile ? 'calc(100vh + 80px)' : '70vh',
-          height: isMobile ? 'calc(100vh + 80px)' : undefined,
-          marginTop: isMobile ? 0 : undefined,
-          paddingTop: isMobile ? '6rem' : undefined,
+          minHeight: isMobile ? 'calc(100vh + 200px)' : '70vh',
+          height: isMobile ? 'calc(100vh + 200px)' : undefined,
+          marginTop: isMobile ? '-80px' : undefined,
+          paddingTop: isMobile ? '80px' : undefined,
           paddingBottom: isMobile ? '4rem' : undefined
         }}
       >
-        {/* Video background for mobile view - UNCHANGED */}
+        {/* Video background for mobile view - Absolute within hero section, extends behind header */}
         {isMobile && (
           <video
             ref={videoRef}
-            className="fixed left-0 right-0 w-full object-cover object-center pointer-events-none z-0"
+            className="absolute left-0 right-0 w-full object-cover object-center pointer-events-none z-0"
             style={{
-              width: '100vw',
-              height: 'calc(100vh + 50px)',
-              top: '-50px',
+              width: '100%',
+              maxWidth: '100%',
+              height: 'calc(100vh + 200px)',
+              minHeight: 'calc(100vh + 200px)',
+              top: '-80px',
+              bottom: 0,
               left: 0,
               right: 0,
               marginLeft: 0,

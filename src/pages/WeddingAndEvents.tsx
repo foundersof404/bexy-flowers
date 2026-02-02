@@ -226,16 +226,19 @@ const WeddingHero = () => {
   }, [isMobile]);
 
   return (
-    <section ref={heroRef} className={`relative ${isMobile ? 'h-screen' : 'min-h-screen'} flex items-center justify-center overflow-hidden ${isMobile ? 'bg-transparent' : 'bg-gradient-to-b from-[#fafafa] to-white'}`} style={isMobile ? { marginTop: 0 } : { marginTop: '-12.3rem', paddingTop: '50' }}>
-      {/* Video background for mobile view */}
+    <section ref={heroRef} className={`relative ${isMobile ? 'h-screen' : 'min-h-screen'} flex items-center justify-center overflow-hidden ${isMobile ? 'bg-transparent' : 'bg-gradient-to-b from-[#fafafa] to-white'}`} style={isMobile ? { marginTop: '-80px', paddingTop: '80px' } : { marginTop: '-12.3rem', paddingTop: '50' }}>
+      {/* Video background for mobile view - Absolute within hero section, extends behind header */}
       {isMobile && (
         <video
           ref={videoRef}
-          className="fixed left-0 right-0 w-full object-cover object-center z-0 pointer-events-none"
+          className="absolute left-0 right-0 w-full object-cover object-center z-0 pointer-events-none"
           style={{
-            width: '100vw',
-            height: 'calc(100vh + 50px)', // Increase height by 5cm (50px)
-            top: '-50px', // Move video 5cm to the top, behind header
+            width: '100%',
+            maxWidth: '100%',
+            height: 'calc(100vh + 200px)',
+            minHeight: 'calc(100vh + 200px)',
+            top: '-80px',
+            bottom: 0,
             left: 0,
             right: 0,
             marginLeft: 0,
