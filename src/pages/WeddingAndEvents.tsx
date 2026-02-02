@@ -7,6 +7,7 @@ import LazySection from "@/components/LazySection";
 import UltraNavigation from "@/components/UltraNavigation";
 import Footer from "@/components/Footer";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useIOSPerformance } from "@/hooks/use-ios-performance";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import heroWeddingImage from "@/assets/heroWedding.webp";
@@ -41,6 +42,7 @@ const weddingFlowersImages = [
 
 const WeddingHero = () => {
   const isMobile = useIsMobile();
+  const { isOldIOS } = useIOSPerformance();
   const heroRef = useRef<HTMLElement>(null);
   const imageRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
@@ -50,59 +52,63 @@ const WeddingHero = () => {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
+      // iOS 18 OPTIMIZATION: Simpler animations on older iOS devices
+      const animationDuration = isOldIOS ? 0.6 : 1.5;
+      const animationDelay = isOldIOS ? 0.1 : 0.3;
+      
       // Hero image parallax and fade in
       gsap.fromTo(
         imageRef.current,
-        { scale: 1.2, opacity: 0 },
+        { scale: isOldIOS ? 1.05 : 1.2, opacity: 0 },
         {
           scale: 1,
           opacity: 1,
-          duration: 1.5,
-          ease: "power3.out",
+          duration: animationDuration,
+          ease: isOldIOS ? "power2.out" : "power3.out",
         }
       );
 
-      // Text animation
+      // Text animation - simplified on old iOS
       gsap.fromTo(
         textRef.current?.querySelector("h1"),
-        { y: 100, opacity: 0 },
+        { y: isOldIOS ? 30 : 100, opacity: 0 },
         {
           y: 0,
           opacity: 1,
-          duration: 1.2,
-          delay: 0.3,
-          ease: "power4.out",
+          duration: isOldIOS ? 0.6 : 1.2,
+          delay: animationDelay,
+          ease: isOldIOS ? "power2.out" : "power4.out",
         }
       );
 
       gsap.fromTo(
         textRef.current?.querySelector("p"),
-        { y: 50, opacity: 0 },
+        { y: isOldIOS ? 20 : 50, opacity: 0 },
         {
           y: 0,
           opacity: 1,
-          duration: 1,
-          delay: 0.6,
-          ease: "power3.out",
+          duration: isOldIOS ? 0.5 : 1,
+          delay: isOldIOS ? animationDelay + 0.1 : 0.6,
+          ease: isOldIOS ? "power2.out" : "power3.out",
         }
       );
 
-      // Button animation
+      // Button animation - simplified on old iOS
       gsap.fromTo(
         buttonRef.current,
-        { y: 30, opacity: 0, scale: 0.9 },
+        { y: isOldIOS ? 15 : 30, opacity: 0, scale: isOldIOS ? 0.95 : 0.9 },
         {
           y: 0,
           opacity: 1,
           scale: 1,
-          duration: 0.8,
-          delay: 0.9,
-          ease: "back.out(1.7)",
+          duration: isOldIOS ? 0.4 : 0.8,
+          delay: isOldIOS ? animationDelay + 0.2 : 0.9,
+          ease: isOldIOS ? "power2.out" : "back.out(1.7)",
         }
       );
 
-      // Parallax effect on scroll - disabled on mobile for performance
-      if (!isMobile) {
+      // Parallax effect on scroll - disabled on mobile and old iOS for performance
+      if (!isMobile && !isOldIOS) {
         ScrollTrigger.create({
           trigger: heroRef.current,
           start: "top top",
@@ -122,10 +128,11 @@ const WeddingHero = () => {
     }, heroRef);
 
     return () => ctx.revert();
-  }, []);
+  }, [isMobile, isOldIOS]);
 
   // Intersection Observer for lazy loading video only when visible (mobile only)
   // PERFORMANCE FIX: Keep observer active to pause/resume video
+  // iOS 18 OPTIMIZATION: More aggressive optimizations for older iOS
   useEffect(() => {
     if (!isMobile) return;
 
@@ -135,25 +142,35 @@ const WeddingHero = () => {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
+          const videoElement = videoRef.current;
           if (entry.isIntersecting) {
             setShouldLoadVideo(true);
             // PERFORMANCE FIX: Play video when visible
-            if (videoRef.current && shouldLoadVideo) {
-              videoRef.current.play().catch(() => {
+            if (videoElement && shouldLoadVideo) {
+              // iOS 18 OPTIMIZATION: Reduce playback rate on older iOS
+              if (isOldIOS) {
+                videoElement.playbackRate = 0.85;
+              }
+              videoElement.play().catch(() => {
                 // Auto-play prevented
               });
             }
           } else {
             // PERFORMANCE FIX: Pause video when not visible to save resources
-            if (videoRef.current && shouldLoadVideo) {
-              videoRef.current.pause();
+            if (videoElement && shouldLoadVideo) {
+              videoElement.pause();
+              // iOS 18 OPTIMIZATION: More aggressive memory cleanup
+              if (isOldIOS) {
+                videoElement.currentTime = 0;
+              }
             }
           }
         });
       },
       {
         root: null,
-        rootMargin: '100px',
+        // iOS 18 OPTIMIZATION: Smaller rootMargin for older iOS
+        rootMargin: isOldIOS ? '50px' : '100px',
         threshold: 0.01,
       }
     );
@@ -163,13 +180,20 @@ const WeddingHero = () => {
     return () => {
       observer.disconnect();
     };
-  }, [isMobile, shouldLoadVideo]);
+  }, [isMobile, shouldLoadVideo, isOldIOS]);
 
   // Load and play video when it becomes visible
+  // iOS 18 OPTIMIZATION: Optimize video settings for older iOS devices
   useEffect(() => {
     if (!isMobile || !videoRef.current || !shouldLoadVideo) return;
 
     const videoElement = videoRef.current;
+    
+    // iOS 18 OPTIMIZATION: Reduce playback rate and optimize settings
+    if (isOldIOS) {
+      videoElement.playbackRate = 0.85; // Slightly slower playback reduces CPU usage
+      videoElement.volume = 0.9; // Slightly lower volume
+    }
     
     const forceFullWidth = () => {
       if (videoElement) {
@@ -199,7 +223,7 @@ const WeddingHero = () => {
       videoElement.removeEventListener('loadedmetadata', forceFullWidth);
       videoElement.removeEventListener('loadeddata', forceFullWidth);
     };
-  }, [isMobile, shouldLoadVideo]);
+  }, [isMobile, shouldLoadVideo, isOldIOS]);
 
   // Handle window resize to ensure video stays full width
   useEffect(() => {

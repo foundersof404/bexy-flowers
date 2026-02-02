@@ -8,6 +8,7 @@ import 'swiper/css/effect-fade';
 import 'swiper/css/pagination';
 import './CarouselHero.css';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useIOSPerformance } from '@/hooks/use-ios-performance';
 import { useImagePreloader } from '@/hooks/useImagePreloader';
 // WebM video - using ?url suffix for Vite to handle it as an asset
 // Optimized: 720p max, no audio, compressed WebM for smaller file size
@@ -91,6 +92,7 @@ const homepageSlides: SlideData[] = [
 const CarouselHero = ({ slidesToShow, isHomepage = false }: CarouselHeroProps = {}) => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const { isOldIOS, needsOptimizations } = useIOSPerformance();
   const swiperRef = useRef<SwiperType | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -135,6 +137,7 @@ const CarouselHero = ({ slidesToShow, isHomepage = false }: CarouselHeroProps = 
 
   // Intersection Observer for lazy loading video only when visible
   // PERFORMANCE FIX: Keep observer active to pause/resume video
+  // iOS 18 OPTIMIZATION: More aggressive pausing and reduced quality for older iOS
   useEffect(() => {
     if (!isMobile) return;
 
@@ -151,6 +154,10 @@ const CarouselHero = ({ slidesToShow, isHomepage = false }: CarouselHeroProps = 
             setShouldLoadVideo(true);
             // PERFORMANCE FIX: Play video when visible (use ref directly, not state)
             if (videoElement) {
+              // iOS 18 OPTIMIZATION: Reduce playback rate on older iOS for better performance
+              if (isOldIOS) {
+                videoElement.playbackRate = 0.85; // Slightly slower playback reduces CPU usage
+              }
               videoElement.play().catch(() => {
                 // Auto-play prevented, video will play when user interacts
               });
@@ -159,15 +166,24 @@ const CarouselHero = ({ slidesToShow, isHomepage = false }: CarouselHeroProps = 
             setIsVideoVisible(false);
             if (videoElement) {
               videoElement.pause();
-              // Reset video to start when scrolled away (optional, saves memory)
-              videoElement.currentTime = 0;
+              // iOS 18 OPTIMIZATION: More aggressive memory cleanup on older iOS
+              if (isOldIOS) {
+                videoElement.currentTime = 0;
+                // Clear video buffer to free memory
+                videoElement.removeAttribute('src');
+                videoElement.load();
+              } else {
+                // Reset video to start when scrolled away (optional, saves memory)
+                videoElement.currentTime = 0;
+              }
             }
           }
         });
       },
       {
         root: null,
-        rootMargin: '100px', // Start loading 100px before entering viewport
+        // iOS 18 OPTIMIZATION: Smaller rootMargin for older iOS to reduce intersection checks
+        rootMargin: isOldIOS ? '50px' : '100px', // Start loading 50px before entering viewport on old iOS
         threshold: 0.01, // Trigger when 1% visible
       }
     );
@@ -177,13 +193,20 @@ const CarouselHero = ({ slidesToShow, isHomepage = false }: CarouselHeroProps = 
     return () => {
       observer.disconnect();
     };
-  }, [isMobile]); // REMOVED shouldLoadVideo from deps to prevent re-trigger loops
+  }, [isMobile, isOldIOS]); // Added isOldIOS to deps
 
   // Load and play video when it becomes visible
+  // iOS 18 OPTIMIZATION: Optimize video settings for older iOS devices
   useEffect(() => {
     if (!isMobile || !videoRef.current || !shouldLoadVideo) return;
 
     const videoElement = videoRef.current;
+    
+    // iOS 18 OPTIMIZATION: Reduce playback rate and optimize settings
+    if (isOldIOS) {
+      videoElement.playbackRate = 0.85; // Slightly slower playback reduces CPU usage
+      videoElement.volume = 0.9; // Slightly lower volume
+    }
     
     // Force video to cover full width
     const forceFullWidth = () => {
@@ -219,7 +242,7 @@ const CarouselHero = ({ slidesToShow, isHomepage = false }: CarouselHeroProps = 
       videoElement.removeEventListener('loadedmetadata', forceFullWidth);
       videoElement.removeEventListener('loadeddata', forceFullWidth);
     };
-  }, [isMobile, shouldLoadVideo]);
+  }, [isMobile, shouldLoadVideo, isOldIOS]);
 
   // Handle window resize to ensure video stays full width - Throttled for performance
   useEffect(() => {

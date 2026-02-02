@@ -106,3 +106,40 @@ export function getOptimalBatchSize(defaultSize: number = 12): number {
   }
   return defaultSize;
 }
+
+/**
+ * Detect iOS version from user agent
+ * Returns the major iOS version number (e.g., 18, 17, 16) or null if not iOS
+ */
+export function getIOSVersion(): number | null {
+  if (typeof navigator === 'undefined') return null;
+  
+  const ua = navigator.userAgent || navigator.vendor || (window as any).opera;
+  const match = ua.match(/OS (\d+)[_\d]*/);
+  
+  if (match && match[1]) {
+    return parseInt(match[1], 10);
+  }
+  
+  return null;
+}
+
+/**
+ * Check if device is running older iOS (iOS 18 or below)
+ * iOS 18 and below may have performance issues with heavy animations/videos
+ */
+export function isOldIOS(): boolean {
+  const iosVersion = getIOSVersion();
+  if (iosVersion === null) return false;
+  
+  // iOS 18 and below are considered "old" for performance optimization purposes
+  return iosVersion <= 18;
+}
+
+/**
+ * Check if device needs performance optimizations
+ * Combines low-end device check with old iOS check
+ */
+export function needsPerformanceOptimizations(): boolean {
+  return isLowEndDevice() || isOldIOS();
+}
