@@ -364,11 +364,6 @@ const ProfessionalCustomSection = React.memo(() => {
 ProfessionalCustomSection.displayName = 'ProfessionalCustomSection';
 
 const Index = () => {
-  // Preload critical components on mount for faster subsequent navigation
-  useEffect(() => {
-    preloadCriticalComponents();
-  }, []);
-
   return (
     <div className="min-h-screen overflow-x-hidden relative">
       <UltraNavigation />

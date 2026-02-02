@@ -319,15 +319,19 @@ const CarouselHero = ({ slidesToShow, isHomepage = false }: CarouselHeroProps = 
           watchSlidesProgress={false}
           onSwiper={(swiper) => {
             swiperRef.current = swiper;
-            // Update Swiper dimensions after initialization
+            // Update Swiper dimensions after initialization (guard against destroyed instance)
             setTimeout(() => {
-              swiper.update();
-              swiper.updateSize();
-              swiper.updateSlides();
+              const instance = swiperRef.current;
+              if (!instance || (instance as any).destroyed) return;
+              instance.update();
+              instance.updateSize();
+              instance.updateSlides();
             }, 100);
           }}
           onSlideChange={handleSlideChange}
           onResize={(swiper) => {
+            // Guard against updates on a destroyed or undefined swiper instance
+            if (!swiper || (swiper as any).destroyed) return;
             swiper.update();
             swiper.updateSize();
             swiper.updateSlides();
