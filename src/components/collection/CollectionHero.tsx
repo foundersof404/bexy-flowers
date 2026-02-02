@@ -9,7 +9,7 @@ const CollectionHeroComponent = () => {
   const heroRef = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const isMobile = useIsMobile();
-  const { isOldIOS } = useIOSPerformance();
+  const { needsMobileOptimizations } = useIOSPerformance();
   const [shouldLoadVideo, setShouldLoadVideo] = useState(false);
 
   // Intersection Observer for lazy loading video only when visible (mobile only)
@@ -32,8 +32,8 @@ const CollectionHeroComponent = () => {
       },
       {
         root: null,
-        // iOS 18 OPTIMIZATION: Smaller rootMargin for older iOS
-        rootMargin: isOldIOS ? '50px' : '100px',
+        // iOS/Android OPTIMIZATION: Smaller rootMargin on mobile
+        rootMargin: needsMobileOptimizations ? '50px' : '100px',
         threshold: 0.01,
       }
     );
@@ -43,7 +43,7 @@ const CollectionHeroComponent = () => {
     return () => {
       observer.disconnect();
     };
-  }, [isMobile, shouldLoadVideo, isOldIOS]);
+  }, [isMobile, shouldLoadVideo, needsMobileOptimizations]);
 
   // Load and play video when it becomes visible
   // iOS 18 OPTIMIZATION: Optimize video settings for older iOS devices
@@ -52,8 +52,8 @@ const CollectionHeroComponent = () => {
 
     const videoElement = videoRef.current;
     
-    // iOS 18 OPTIMIZATION: Reduce playback rate and optimize settings
-    if (isOldIOS) {
+    // iOS/Android OPTIMIZATION: Reduce playback rate and optimize settings
+    if (needsMobileOptimizations) {
       videoElement.playbackRate = 0.85; // Slightly slower playback reduces CPU usage
       videoElement.volume = 0.9; // Slightly lower volume
     }
@@ -68,7 +68,7 @@ const CollectionHeroComponent = () => {
         // Auto-play was prevented, video will play when user interacts
       });
     }
-  }, [isMobile, shouldLoadVideo, isOldIOS]);
+  }, [isMobile, shouldLoadVideo, needsMobileOptimizations]);
 
   return (
     <section 

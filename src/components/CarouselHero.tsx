@@ -92,7 +92,8 @@ const homepageSlides: SlideData[] = [
 const CarouselHero = ({ slidesToShow, isHomepage = false }: CarouselHeroProps = {}) => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
-  const { isOldIOS, needsOptimizations } = useIOSPerformance();
+  const { isOldIOS, needsMobileOptimizations } = useIOSPerformance();
+  const needsOptimizations = needsMobileOptimizations; // old iOS or Android
   const swiperRef = useRef<SwiperType | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -154,8 +155,8 @@ const CarouselHero = ({ slidesToShow, isHomepage = false }: CarouselHeroProps = 
             setShouldLoadVideo(true);
             // PERFORMANCE FIX: Play video when visible (use ref directly, not state)
             if (videoElement) {
-              // iOS 18 OPTIMIZATION: Reduce playback rate on older iOS for better performance
-              if (isOldIOS) {
+              // iOS/Android OPTIMIZATION: Reduce playback rate for better performance
+              if (needsOptimizations) {
                 videoElement.playbackRate = 0.85; // Slightly slower playback reduces CPU usage
               }
               videoElement.play().catch(() => {
@@ -166,14 +167,15 @@ const CarouselHero = ({ slidesToShow, isHomepage = false }: CarouselHeroProps = 
             setIsVideoVisible(false);
             if (videoElement) {
               videoElement.pause();
-              // iOS 18 OPTIMIZATION: More aggressive memory cleanup on older iOS
-              if (isOldIOS) {
+              // iOS/Android OPTIMIZATION: More aggressive memory cleanup on mobile
+              if (needsOptimizations) {
                 videoElement.currentTime = 0;
-                // Clear video buffer to free memory
-                videoElement.removeAttribute('src');
-                videoElement.load();
+                // Clear video buffer on old iOS; on Android just reset time to save memory
+                if (isOldIOS) {
+                  videoElement.removeAttribute('src');
+                  videoElement.load();
+                }
               } else {
-                // Reset video to start when scrolled away (optional, saves memory)
                 videoElement.currentTime = 0;
               }
             }
@@ -182,8 +184,8 @@ const CarouselHero = ({ slidesToShow, isHomepage = false }: CarouselHeroProps = 
       },
       {
         root: null,
-        // iOS 18 OPTIMIZATION: Smaller rootMargin for older iOS to reduce intersection checks
-        rootMargin: isOldIOS ? '50px' : '100px', // Start loading 50px before entering viewport on old iOS
+        // iOS/Android OPTIMIZATION: Smaller rootMargin on mobile to reduce intersection checks
+        rootMargin: needsOptimizations ? '50px' : '100px',
         threshold: 0.01, // Trigger when 1% visible
       }
     );
@@ -193,7 +195,7 @@ const CarouselHero = ({ slidesToShow, isHomepage = false }: CarouselHeroProps = 
     return () => {
       observer.disconnect();
     };
-  }, [isMobile, isOldIOS]); // Added isOldIOS to deps
+  }, [isMobile, needsOptimizations, isOldIOS]);
 
   // Load and play video when it becomes visible
   // iOS 18 OPTIMIZATION: Optimize video settings for older iOS devices
@@ -202,8 +204,8 @@ const CarouselHero = ({ slidesToShow, isHomepage = false }: CarouselHeroProps = 
 
     const videoElement = videoRef.current;
     
-    // iOS 18 OPTIMIZATION: Reduce playback rate and optimize settings
-    if (isOldIOS) {
+    // iOS/Android OPTIMIZATION: Reduce playback rate and optimize settings
+    if (needsOptimizations) {
       videoElement.playbackRate = 0.85; // Slightly slower playback reduces CPU usage
       videoElement.volume = 0.9; // Slightly lower volume
     }
@@ -242,7 +244,7 @@ const CarouselHero = ({ slidesToShow, isHomepage = false }: CarouselHeroProps = 
       videoElement.removeEventListener('loadedmetadata', forceFullWidth);
       videoElement.removeEventListener('loadeddata', forceFullWidth);
     };
-  }, [isMobile, shouldLoadVideo, isOldIOS]);
+  }, [isMobile, shouldLoadVideo, needsOptimizations]);
 
   // Handle window resize to ensure video stays full width - Throttled for performance
   useEffect(() => {

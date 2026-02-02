@@ -199,7 +199,7 @@ const ProgressStepper = ({ currentStep, steps }: { currentStep: number, steps: A
 
 const Customize: React.FC = () => {
   const isMobile = useIsMobile();
-  const { isOldIOS } = useIOSPerformance();
+  const { needsMobileOptimizations } = useIOSPerformance();
   const { addToCart } = useCart();
   const videoRef = useRef<HTMLVideoElement>(null);
   const [shouldLoadVideo, setShouldLoadVideo] = useState(false);
@@ -306,8 +306,8 @@ const Customize: React.FC = () => {
       },
       {
         root: null,
-        // iOS 18 OPTIMIZATION: Smaller rootMargin for older iOS
-        rootMargin: isOldIOS ? '50px' : '100px',
+        // iOS/Android OPTIMIZATION: Smaller rootMargin on mobile
+        rootMargin: needsMobileOptimizations ? '50px' : '100px',
         threshold: 0.01,
       }
     );
@@ -317,7 +317,7 @@ const Customize: React.FC = () => {
     return () => {
       observer.disconnect();
     };
-  }, [isMobile, shouldLoadVideo, isOldIOS]);
+  }, [isMobile, shouldLoadVideo, needsMobileOptimizations]);
 
   // Load and play video when it becomes visible
   // iOS 18 OPTIMIZATION: Optimize video settings for older iOS devices
@@ -326,8 +326,8 @@ const Customize: React.FC = () => {
 
     const videoElement = videoRef.current;
     
-    // iOS 18 OPTIMIZATION: Reduce playback rate and optimize settings
-    if (isOldIOS) {
+    // iOS/Android OPTIMIZATION: Reduce playback rate and optimize settings
+    if (needsMobileOptimizations) {
       videoElement.playbackRate = 0.85; // Slightly slower playback reduces CPU usage
       videoElement.volume = 0.9; // Slightly lower volume
     }
@@ -360,7 +360,7 @@ const Customize: React.FC = () => {
       videoElement.removeEventListener('loadedmetadata', forceFullWidth);
       videoElement.removeEventListener('loadeddata', forceFullWidth);
     };
-  }, [isMobile, shouldLoadVideo, isOldIOS]);
+  }, [isMobile, shouldLoadVideo, needsMobileOptimizations]);
 
   // Handle window resize to ensure video stays full width
   useEffect(() => {
