@@ -79,7 +79,7 @@ const FlowerCareGuide = () => {
 
       <div className="max-w-5xl mx-auto relative z-10">
         <div
-          className="text-center mb-8 sm:mb-10 md:mb-12"
+          className="flex flex-col items-center text-center mb-8 sm:mb-10 md:mb-12"
         >
           {/* Modern Floating Badge */}
           <div 

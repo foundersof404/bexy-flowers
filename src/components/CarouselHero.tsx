@@ -74,6 +74,7 @@ const allSlides: SlideData[] = [
 ];
 
 // Homepage slide (single slide for desktop) - Brand-focused content
+// Desktop hero image now uses the dedicated bexyhero asset
 const homepageSlides: SlideData[] = [
   {
     id: 'bexy-brand',
@@ -81,8 +82,9 @@ const homepageSlides: SlideData[] = [
     price: '',
     contentTitle: 'Lebanon\'s Premier Luxury Florist',
     contentSubtitle: 'Bexy Flowers represents the pinnacle of floral artistry in Lebanon. We craft extraordinary arrangements that elevate every moment with sophistication, elegance, and timeless beauty. Experience the art of premium floristry.',
-    productImage: getImagePath('image3.webp'),
-    bgColor: '#b6d6c8'
+    productImage: '/assets/bexyhero.png',
+    // Soft pink → rose gradient background for desktop hero
+    bgColor: 'linear-gradient(135deg, #fce0f0 0%, #f78fb3 50%, #f25c78 100%)'
   }
 ];
 
@@ -380,7 +382,8 @@ const CarouselHero = ({ slidesToShow, isHomepage = false }: CarouselHeroProps = 
                   <div 
                     className="right-side__img"
                     style={{
-                      backgroundColor: slide.bgColor
+                      // Allow solid colors or gradients for background
+                      background: slide.bgColor
                     }}
                   >
                     <img

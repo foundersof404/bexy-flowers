@@ -713,7 +713,8 @@
   position: absolute;
   top: 10%;
   left: 0;
-  transform: scale(1.1) translateZ(0);
+  /* Slightly zoomed-out by default */
+  transform: scale(1.0) translateZ(0);
   transition-duration: 0.8s;
   z-index: 2;
   filter: drop-shadow(0 15px 30px rgba(0, 0, 0, 0.12));
@@ -728,7 +729,8 @@
 @media screen and (min-width: 769px) {
   .bottle-img {
     top: 8%;
-    transform: scale(1.15) translateZ(0);
+    /* Desktop: gentler zoom for hero image */
+    transform: scale(1.05) translateZ(0);
     filter: drop-shadow(0 25px 50px rgba(0, 0, 0, 0.2)) 
             drop-shadow(0 0 40px rgba(199, 158, 72, 0.15));
   }
@@ -928,7 +930,8 @@
 
 .swiper-slide-active .bottle-img {
   opacity: 1;
-  transform: scale(1.1);
+  /* Active slide: keep image slightly zoomed-out compared to previous design */
+  transform: scale(1.0);
 }
 
 

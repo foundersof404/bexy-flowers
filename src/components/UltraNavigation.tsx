@@ -107,16 +107,16 @@ const navigationItems: NavigationItem[] = [
     description: "Bespoke Creations"
   },
   {
-    name: "About",
-    path: "/about",
-    icon: <Crown className="w-5 h-5" />,
-    description: "Our Story"
-  },
-  {
     name: "Wedding & Events",
     path: "/wedding-and-events",
     icon: <Calendar className="w-5 h-5" />,
     description: "Special Occasions"
+  },
+  {
+    name: "About",
+    path: "/about",
+    icon: <Crown className="w-5 h-5" />,
+    description: "Our Story"
   }
 ];
 
@@ -159,13 +159,10 @@ const UltraNavigation = () => {
     // Prevent body scroll when menu is open on mobile
     if (isMobile) {
       if (newState) {
+        // Use overflow-only lock to avoid Android scroll bugs with position: fixed
         document.body.style.overflow = "hidden";
-        document.body.style.position = "fixed";
-        document.body.style.width = "100%";
       } else {
         document.body.style.overflow = "";
-        document.body.style.position = "";
-        document.body.style.width = "";
       }
     }
 
@@ -225,8 +222,6 @@ const UltraNavigation = () => {
     // Restore body scroll on mobile
     if (isMobile) {
       document.body.style.overflow = "";
-      document.body.style.position = "";
-      document.body.style.width = "";
     }
     // Run again on next frame to beat layout/animation timing
     requestAnimationFrame(() => {
@@ -337,35 +332,19 @@ const UltraNavigation = () => {
                           onMouseEnter={() => handlePrefetch(item.path, 100)}
                           onMouseLeave={cancelPrefetch}
                         >
-                          <span className="relative z-10 flex items-center gap-2">
-                            {/* Icon */}
-                            <motion.span
-                              className="transition-all duration-300 relative inline-flex items-center justify-center"
-                              whileHover={isMobile || shouldReduceMotion ? {} : {
-                                scale: 1.15,
-                              }}
-                              style={{
-                                color: isActive ? GOLD_COLOR : 'inherit',
-                              }}
-                            >
-                              {item.icon}
-                            </motion.span>
-
-                            {/* Text */}
-                            <motion.span
-                              className="relative whitespace-nowrap"
-                              style={{
-                                color: isActive ? GOLD_COLOR : 'inherit',
-                                fontFamily: "'EB Garamond', serif",
-                              }}
-                              whileHover={{
-                                scale: 1.05,
-                              }}
-                              transition={{ duration: 0.3 }}
-                            >
-                              {item.name}
-                            </motion.span>
-                          </span>
+                          <motion.span
+                            className="relative z-10 whitespace-nowrap"
+                            style={{
+                              color: isActive ? GOLD_COLOR : 'inherit',
+                              fontFamily: "'EB Garamond', serif",
+                            }}
+                            whileHover={{
+                              scale: 1.05,
+                            }}
+                            transition={{ duration: 0.3 }}
+                          >
+                            {item.name}
+                          </motion.span>
 
                           {/* Active Gold Background */}
                           {isActive && (
@@ -763,21 +742,7 @@ const UltraNavigation = () => {
                                 transition={{ duration: 0.3 }}
                               />
 
-                              <div className="flex items-center space-x-3 sm:space-x-4 relative z-10">
-                                {/* Icon */}
-                                <motion.span
-                                  className="relative flex-shrink-0"
-                                  whileHover={{ scale: 1.1 }}
-                                  transition={{ duration: 0.3 }}
-                                  style={{
-                                    color: isActive ? GOLD_COLOR : 'inherit',
-                                  }}
-                                >
-                                  <div className="w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center relative">
-                                    {item.icon}
-                                  </div>
-                                </motion.span>
-
+                          <div className="flex items-center space-x-3 sm:space-x-4 relative z-10">
                                 <div className="flex-1 min-w-0">
                                   <div
                                     className="font-luxury font-medium relative text-lg sm:text-xl uppercase tracking-[0.15em]"

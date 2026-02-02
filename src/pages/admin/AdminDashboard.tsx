@@ -45,9 +45,13 @@ import { useToast } from "@/hooks/use-toast";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { encodeImageUrl } from "@/lib/imageUtils";
 import { useCollectionProducts } from "@/hooks/useCollectionProducts";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
+import { getCheckoutOrders } from "@/lib/api/checkout";
+import type { CartItem } from "@/types/cart";
 
 const GOLD_COLOR = "rgb(199, 158, 72)";
 
@@ -78,15 +82,19 @@ const AdminDashboard = () => {
     totalFavorites: 0,
     totalCartAdditions: 0,
     activeDiscounts: 0,
-    totalRevenue: "0.00",
+    totalRevenue: "0.00", // Total revenue from ALL orders
+    totalOrders: 0, // Total orders count (all time)
     todayOrders: 0,
     todayRevenue: "0.00",
-    activeUsers: 0,
+    activeUsers: 0, // Today's unique clients
+    totalClients: 0, // Total unique clients (all time)
   });
   const [recentProducts, setRecentProducts] = useState<any[]>([]);
   const [recentActivity, setRecentActivity] = useState<any[]>([]);
   const [adminName, setAdminName] = useState("Rebecca");
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [availabilitySchedule, setAvailabilitySchedule] = useState<Record<string, { start: string; end: string }>>({});
+  const [isAvailabilityModalOpen, setIsAvailabilityModalOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
@@ -94,6 +102,25 @@ const AdminDashboard = () => {
   
   const { data: productsData, isLoading: loadingProducts } = useCollectionProducts({ isActive: true });
   const products = productsData ?? [];
+
+  // Fetch orders for real data
+  const { data: orders = [] } = useQuery({
+    queryKey: ['checkout-orders'],
+    queryFn: getCheckoutOrders,
+    staleTime: 2 * 60 * 1000,
+  });
+
+  // Load availability schedule from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem('ownerAvailabilitySchedule');
+    if (saved) {
+      try {
+        setAvailabilitySchedule(JSON.parse(saved));
+      } catch (e) {
+        console.error('Failed to load availability schedule', e);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     const isAuthenticated = localStorage.getItem("adminAuthenticated");
@@ -111,12 +138,7 @@ const AdminDashboard = () => {
     const inStock = productsData.filter((p) => !p.is_out_of_stock).length;
     const outOfStock = productsData.filter((p) => p.is_out_of_stock).length;
     const activeDiscounts = productsData.filter((p) => p.discount_percentage && p.discount_percentage > 0).length;
-    const totalRevenue = productsData.reduce((sum, p) => {
-      const price = p.discount_percentage && p.discount_percentage > 0
-        ? p.price * (1 - p.discount_percentage / 100)
-        : p.price;
-      return sum + price;
-    }, 0);
+    // Note: totalRevenue is now calculated from actual orders, not product prices
 
     // Get favorites and cart additions from localStorage
     let totalFavorites = 0;
@@ -161,7 +183,11 @@ const AdminDashboard = () => {
         };
       });
 
-    setStats({
+    setRecentProducts(recent);
+    
+    // Update product-related stats (revenue comes from orders, not products)
+    setStats(prev => ({
+      ...prev,
       totalProducts,
       inStock,
       outOfStock,
@@ -170,13 +196,8 @@ const AdminDashboard = () => {
       totalFavorites: totalFavorites || 0,
       totalCartAdditions: totalCartAdditions || 0,
       activeDiscounts,
-      totalRevenue: totalRevenue.toFixed(2),
-      todayOrders: Math.floor(Math.random() * 50) + 10,
-      todayRevenue: (Math.random() * 5000 + 1000).toFixed(2),
-      activeUsers: Math.floor(Math.random() * 100) + 20,
-    });
-
-    setRecentProducts(recent);
+      // Revenue and order stats are calculated from orders, not here
+    }));
     
     // Mock recent activity
     setRecentActivity([
@@ -186,6 +207,136 @@ const AdminDashboard = () => {
       { type: 'review', message: 'New 5-star review received', time: '2 hours ago', icon: Star },
     ]);
   }, [productsData]);
+
+  // Calculate COMPLETE sales analytics from ALL orders
+  useEffect(() => {
+    if (!orders || orders.length === 0) {
+      setStats(prev => ({
+        ...prev,
+        totalRevenue: "0.00",
+        totalOrders: 0,
+        todayOrders: 0,
+        todayRevenue: "0.00",
+        activeUsers: 0,
+        totalClients: 0,
+      }));
+      return;
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    // Filter today's orders
+    const todayOrders = orders.filter(order => {
+      const orderDate = new Date(order.created_at);
+      orderDate.setHours(0, 0, 0, 0);
+      return orderDate.getTime() === today.getTime();
+    });
+
+    // ===== CALCULATE TOTAL REVENUE (ALL ORDERS) =====
+    // Total revenue from ALL orders (subtotal - this is the actual sales amount before delivery)
+    let totalAllTimeRevenue = 0;
+    let totalAllTimeFlowerRevenue = 0;
+    let totalAllTimeAddOnsRevenue = 0;
+
+    orders.forEach(order => {
+      // Use subtotal as the main revenue (actual product sales)
+      const orderSubtotal = order.subtotal || 0;
+      totalAllTimeRevenue += orderSubtotal;
+
+      // Separate flowers from accessories/add-ons by analyzing order_items
+      if (order.order_items && Array.isArray(order.order_items)) {
+        order.order_items.forEach((item: CartItem) => {
+          const itemTotal = (item.price || 0) * (item.quantity || 1);
+          
+          // If item has accessories, estimate that accessories are ~20% of price (adjustable)
+          // Otherwise, it's a flower product
+          if (item.accessories && Array.isArray(item.accessories) && item.accessories.length > 0) {
+            // Item has accessories - split the revenue
+            // Base flower price (80% of item price)
+            totalAllTimeFlowerRevenue += itemTotal * 0.8;
+            // Accessories/add-ons (20% of item price)
+            totalAllTimeAddOnsRevenue += itemTotal * 0.2;
+          } else {
+            // Pure flower product - 100% flower revenue
+            totalAllTimeFlowerRevenue += itemTotal;
+          }
+        });
+      } else {
+        // Fallback: if no order_items breakdown, treat as flower revenue
+        totalAllTimeFlowerRevenue += orderSubtotal;
+      }
+    });
+
+    // ===== CALCULATE TODAY'S REVENUE =====
+    let todayFlowerRevenue = 0;
+    let todayAddOnsRevenue = 0;
+    let todayTotalRevenue = 0;
+
+    todayOrders.forEach(order => {
+      const orderSubtotal = order.subtotal || 0;
+      todayTotalRevenue += orderSubtotal;
+
+      if (order.order_items && Array.isArray(order.order_items)) {
+        order.order_items.forEach((item: CartItem) => {
+          const itemTotal = (item.price || 0) * (item.quantity || 1);
+          
+          if (item.accessories && Array.isArray(item.accessories) && item.accessories.length > 0) {
+            todayFlowerRevenue += itemTotal * 0.8;
+            todayAddOnsRevenue += itemTotal * 0.2;
+          } else {
+            todayFlowerRevenue += itemTotal;
+          }
+        });
+      } else {
+        todayFlowerRevenue += orderSubtotal;
+      }
+    });
+
+    // ===== CALCULATE CLIENT METRICS =====
+    // Total unique clients (all time)
+    const totalUniqueClients = new Set(
+      orders
+        .map(order => order.email?.toLowerCase().trim())
+        .filter(Boolean)
+    ).size;
+
+    // Today's unique clients
+    const todayUniqueClients = new Set(
+      todayOrders
+        .map(order => order.email?.toLowerCase().trim())
+        .filter(Boolean)
+    ).size;
+
+    // Update stats with REAL sales data
+    setStats(prev => ({
+      ...prev,
+      // Total revenue from ALL sales (this replaces the product-based calculation)
+      totalRevenue: totalAllTimeRevenue.toFixed(2),
+      // Total orders count (all time)
+      totalOrders: orders.length,
+      // Today's metrics
+      todayOrders: todayOrders.length,
+      todayRevenue: todayTotalRevenue.toFixed(2),
+      // Active users = today's unique clients
+      activeUsers: todayUniqueClients,
+      // Total unique clients (all time)
+      totalClients: totalUniqueClients,
+    }));
+
+    // Store detailed analytics for potential future use
+    // You can add these to state if needed for more detailed breakdowns
+    console.log('Sales Analytics:', {
+      totalOrders: orders.length,
+      totalRevenue: totalAllTimeRevenue,
+      totalFlowerRevenue: totalAllTimeFlowerRevenue,
+      totalAddOnsRevenue: totalAllTimeAddOnsRevenue,
+      todayOrders: todayOrders.length,
+      todayRevenue: todayTotalRevenue,
+      totalUniqueClients,
+      todayUniqueClients,
+    });
+  }, [orders]);
 
   const loading = loadingProducts;
 
@@ -385,48 +536,45 @@ const AdminDashboard = () => {
                   <CardTitle className="text-lg">Your Activity Results for Today</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="relative h-64 overflow-hidden">
-                    {/* Visualization circles - overlapping and crossing screen */}
-                    <div className="absolute inset-0">
-                      {/* Orders circle - Dark (left side, partially off-screen) */}
+                  <div className="relative min-h-[260px] overflow-visible py-6">
+                    {/* Visualization circles - three large, separated bubbles */}
+                    <div className="flex items-center justify-center gap-10 lg:gap-16 h-full">
+                      {/* Orders circle */}
                       <motion.div
-                        initial={{ scale: 0, x: -50 }}
-                        animate={{ scale: 1, x: 0 }}
+                        initial={{ scale: 0, y: 20 }}
+                        animate={{ scale: 1, y: 0 }}
                         transition={{ delay: 0.2, duration: 0.6, ease: "easeOut" }}
-                        className="absolute -left-16 top-1/2 -translate-y-1/2 w-48 h-48 rounded-full bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center shadow-2xl"
-                        style={{ zIndex: 3 }}
+                        className="w-40 h-40 sm:w-52 sm:h-52 rounded-full bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center shadow-2xl"
                       >
-                        <div className="text-center text-white ml-8">
-                          <div className="text-3xl font-bold">{stats.todayOrders}</div>
-                          <div className="text-sm">Orders</div>
+                        <div className="text-center text-white px-2">
+                          <div className="text-2xl sm:text-3xl font-bold">{stats.todayOrders}</div>
+                          <div className="text-xs sm:text-sm mt-1">Orders</div>
                         </div>
                       </motion.div>
                       
-                      {/* Revenue circle - Red/Pink (center, overlapping both) */}
+                      {/* Revenue circle */}
                       <motion.div
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
+                        initial={{ scale: 0, y: 20 }}
+                        animate={{ scale: 1, y: 0 }}
                         transition={{ delay: 0.3, duration: 0.6, ease: "easeOut" }}
-                        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-56 h-56 rounded-full bg-gradient-to-br from-red-400 via-pink-400 to-pink-500 flex items-center justify-center shadow-2xl"
-                        style={{ zIndex: 2, opacity: 0.95 }}
+                        className="w-44 h-44 sm:w-56 sm:h-56 rounded-full bg-gradient-to-br from-red-400 via-pink-400 to-pink-500 flex items-center justify-center shadow-2xl"
                       >
-                        <div className="text-center text-white">
-                          <div className="text-3xl font-bold">${stats.todayRevenue}</div>
-                          <div className="text-sm">Revenue</div>
+                        <div className="text-center text-white px-2">
+                          <div className="text-2xl sm:text-3xl font-bold">${stats.todayRevenue}</div>
+                          <div className="text-xs sm:text-sm mt-1">Revenue</div>
                         </div>
                       </motion.div>
                       
-                      {/* Users circle - Yellow (right side, partially off-screen) */}
+                      {/* Active users circle */}
                       <motion.div
-                        initial={{ scale: 0, x: 50 }}
-                        animate={{ scale: 1, x: 0 }}
+                        initial={{ scale: 0, y: 20 }}
+                        animate={{ scale: 1, y: 0 }}
                         transition={{ delay: 0.4, duration: 0.6, ease: "easeOut" }}
-                        className="absolute -right-16 top-1/2 -translate-y-1/2 w-52 h-52 rounded-full bg-gradient-to-br from-yellow-300 to-amber-400 flex items-center justify-center shadow-2xl"
-                        style={{ zIndex: 1 }}
+                        className="w-40 h-40 sm:w-52 sm:h-52 rounded-full bg-gradient-to-br from-yellow-300 to-amber-400 flex items-center justify-center shadow-2xl"
                       >
-                        <div className="text-center text-gray-900 mr-8">
-                          <div className="text-3xl font-bold">{stats.activeUsers}</div>
-                          <div className="text-sm">Active Users</div>
+                        <div className="text-center text-gray-900 px-2">
+                          <div className="text-2xl sm:text-3xl font-bold">{stats.activeUsers}</div>
+                          <div className="text-xs sm:text-sm mt-1">Active Users</div>
                         </div>
                       </motion.div>
                     </div>
@@ -461,7 +609,47 @@ const AdminDashboard = () => {
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-lg text-white">Activity Days</CardTitle>
-                    <span className="text-sm text-gray-400">June</span>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          const newDate = new Date(currentDate);
+                          newDate.setMonth(newDate.getMonth() - 1);
+                          setCurrentDate(newDate);
+                        }}
+                        className="text-white hover:bg-gray-700 h-8 px-2"
+                      >
+                        <ChevronRight className="w-4 h-4 rotate-180" />
+                      </Button>
+                      <span className="text-sm text-gray-400 min-w-[120px] text-center">
+                        {currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          const newDate = new Date(currentDate);
+                          newDate.setMonth(newDate.getMonth() + 1);
+                          setCurrentDate(newDate);
+                        }}
+                        className="text-white hover:bg-gray-700 h-8 px-2"
+                      >
+                        <ChevronRight className="w-4 h-4" />
+                      </Button>
+                      <Dialog open={isAvailabilityModalOpen} onOpenChange={setIsAvailabilityModalOpen}>
+                        <DialogTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-white hover:bg-gray-700 h-8 px-2"
+                            title="Manage availability"
+                          >
+                            <Clock className="w-4 h-4" />
+                          </Button>
+                        </DialogTrigger>
+                      </Dialog>
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -473,39 +661,76 @@ const AdminDashboard = () => {
                       ))}
                     </div>
                     <div className="grid grid-cols-7 gap-2">
-                      {Array.from({ length: 30 }, (_, i) => {
-                        const day = i + 1;
-                        const isActive = [1, 5, 17, 28].includes(day);
-                        const isToday = day === new Date().getDate();
-                        return (
-                          <motion.div
-                            key={i}
-                            initial={{ opacity: 0, scale: 0.8 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ delay: 0.5 + i * 0.01 }}
-                            className={`aspect-square rounded-lg flex items-center justify-center text-sm font-medium transition-all ${
-                              isToday
-                                ? 'bg-yellow-400 text-gray-900'
-                                : isActive
-                                ? 'bg-gray-700 text-white'
-                                : 'text-gray-500'
-                            }`}
-                          >
-                            {day}
-                          </motion.div>
+                      {(() => {
+                        const year = currentDate.getFullYear();
+                        const month = currentDate.getMonth();
+                        const firstDay = new Date(year, month, 1).getDay();
+                        const daysInMonth = new Date(year, month + 1, 0).getDate();
+                        const today = new Date();
+                        const isCurrentMonth = today.getMonth() === month && today.getFullYear() === year;
+                        
+                        return Array.from({ length: firstDay }, (_, i) => (
+                          <div key={`empty-${i}`} className="aspect-square" />
+                        )).concat(
+                          Array.from({ length: daysInMonth }, (_, i) => {
+                            const day = i + 1;
+                            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                            const date = new Date(year, month, day);
+                            const dayOfWeek = date.getDay(); // 0 = Sunday, 6 = Saturday
+                            const isSunday = dayOfWeek === 0;
+                            const isToday = isCurrentMonth && day === today.getDate();
+                            const schedule = availabilitySchedule[dateStr];
+                            const hasAvailability = !!schedule && !isSunday;
+
+                            return (
+                              <motion.div
+                                key={day}
+                                initial={{ opacity: 0, scale: 0.8 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ delay: 0.5 + i * 0.01 }}
+                                className={`aspect-square rounded-lg flex flex-col items-center justify-center text-sm font-medium transition-all cursor-pointer hover:scale-105 ${
+                                  isToday
+                                    ? 'bg-yellow-400 text-gray-900'
+                                    : isSunday
+                                    ? 'bg-red-900/50 text-red-300 opacity-50'
+                                    : hasAvailability
+                                    ? 'bg-green-600 text-white'
+                                    : 'text-gray-500'
+                                }`}
+                                title={
+                                  isSunday
+                                    ? 'Sunday - Closed'
+                                    : schedule
+                                    ? `Available: ${schedule.start} - ${schedule.end}`
+                                    : 'Not available'
+                                }
+                              >
+                                <span>{day}</span>
+                                {schedule && !isSunday && (
+                                  <span className="text-[8px] mt-0.5 opacity-80">
+                                    {schedule.start}
+                                  </span>
+                                )}
+                              </motion.div>
+                            );
+                          })
                         );
-                      })}
+                      })()}
                     </div>
                     
                     {/* Legend */}
-                    <div className="flex items-center justify-center gap-4 text-xs pt-4 border-t border-gray-700">
+                    <div className="flex items-center justify-center gap-4 text-xs pt-4 border-t border-gray-700 flex-wrap">
                       <div className="flex items-center gap-1">
                         <div className="w-2 h-2 rounded-full bg-yellow-400" />
-                        <span className="text-gray-400">Current day</span>
+                        <span className="text-gray-400">Today</span>
                       </div>
                       <div className="flex items-center gap-1">
-                        <div className="w-2 h-2 rounded-full bg-gray-700" />
-                        <span className="text-gray-400">Done</span>
+                        <div className="w-2 h-2 rounded-full bg-green-600" />
+                        <span className="text-gray-400">Available</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <div className="w-2 h-2 rounded-full bg-red-900/50" />
+                        <span className="text-gray-400">Sunday (Closed)</span>
                       </div>
                     </div>
                   </div>
@@ -907,6 +1132,156 @@ const AdminDashboard = () => {
           </Card>
         </motion.div>
         </main>
+
+        {/* Availability Schedule Modal */}
+        <Dialog open={isAvailabilityModalOpen} onOpenChange={setIsAvailabilityModalOpen}>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Manage Availability Schedule</DialogTitle>
+              <DialogDescription>
+                Set your available dates and times. Sundays are automatically closed.
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-4 max-h-96 overflow-y-auto">
+              {Object.entries(availabilitySchedule)
+                .sort(([a], [b]) => new Date(a).getTime() - new Date(b).getTime())
+                .map(([dateStr, schedule]) => {
+                  const date = new Date(dateStr);
+                  const isSunday = date.getDay() === 0;
+                  return (
+                    <div key={dateStr} className="flex items-center gap-4 p-3 border rounded-lg">
+                      <div className="flex-1">
+                        <div className="font-medium">
+                          {date.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
+                        </div>
+                        {!isSunday && schedule && (
+                          <div className="text-sm text-gray-600">
+                            {schedule.start} - {schedule.end}
+                          </div>
+                        )}
+                        {isSunday && (
+                          <div className="text-sm text-red-600">Sunday - Closed</div>
+                        )}
+                      </div>
+                      {!isSunday && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            const newSchedule = { ...availabilitySchedule };
+                            delete newSchedule[dateStr];
+                            setAvailabilitySchedule(newSchedule);
+                            localStorage.setItem('ownerAvailabilitySchedule', JSON.stringify(newSchedule));
+                            toast({
+                              title: 'Availability removed',
+                              description: `Removed availability for ${date.toLocaleDateString()}`,
+                            });
+                          }}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
+                  );
+                })}
+              
+              {Object.keys(availabilitySchedule).length === 0 && (
+                <p className="text-center text-gray-500 py-8">No availability scheduled. Add dates below.</p>
+              )}
+            </div>
+
+            <div className="mt-6 pt-6 border-t">
+              <h4 className="font-semibold mb-4">Add New Availability</h4>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const formData = new FormData(e.target as HTMLFormElement);
+                  const date = formData.get('date') as string;
+                  const start = formData.get('start') as string;
+                  const end = formData.get('end') as string;
+                  
+                  if (!date || !start || !end) {
+                    toast({
+                      title: 'Missing fields',
+                      description: 'Please fill in all fields',
+                      variant: 'destructive',
+                    });
+                    return;
+                  }
+
+                  const selectedDate = new Date(date);
+                  if (selectedDate.getDay() === 0) {
+                    toast({
+                      title: 'Sunday is closed',
+                      description: 'Cannot set availability for Sunday',
+                      variant: 'destructive',
+                    });
+                    return;
+                  }
+
+                  const newSchedule = {
+                    ...availabilitySchedule,
+                    [date]: { start, end },
+                  };
+                  setAvailabilitySchedule(newSchedule);
+                  localStorage.setItem('ownerAvailabilitySchedule', JSON.stringify(newSchedule));
+                  toast({
+                    title: 'Availability added',
+                    description: `Set availability for ${selectedDate.toLocaleDateString()} from ${start} to ${end}`,
+                  });
+                  
+                  (e.target as HTMLFormElement).reset();
+                }}
+                className="space-y-4"
+              >
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div>
+                    <Label htmlFor="date">Date</Label>
+                    <Input
+                      id="date"
+                      name="date"
+                      type="date"
+                      min={new Date().toISOString().split('T')[0]}
+                      required
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="start">Start Time</Label>
+                    <Input
+                      id="start"
+                      name="start"
+                      type="time"
+                      required
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="end">End Time</Label>
+                    <Input
+                      id="end"
+                      name="end"
+                      type="time"
+                      required
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-end gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsAvailabilityModalOpen(false)}
+                  >
+                    Close
+                  </Button>
+                  <Button type="submit">Add Availability</Button>
+                </div>
+              </form>
+            </div>
+          </DialogContent>
+        </Dialog>
     </AdminLayout>
   );
 };
