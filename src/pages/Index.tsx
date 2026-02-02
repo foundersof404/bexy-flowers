@@ -1,4 +1,4 @@
-import React, { Suspense, useRef, useEffect } from "react";
+import React, { Suspense, useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import {
   Sparkles,
@@ -364,6 +364,8 @@ const ProfessionalCustomSection = React.memo(() => {
 ProfessionalCustomSection.displayName = 'ProfessionalCustomSection';
 
 const Index = () => {
+  // Preload removed - components are lazy loaded on demand to improve mobile performance
+
   return (
     <div className="min-h-screen overflow-x-hidden relative">
       <UltraNavigation />

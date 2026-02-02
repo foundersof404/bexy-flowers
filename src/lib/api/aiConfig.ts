@@ -10,10 +10,11 @@ export const AI_CONFIG = {
    * Generation Settings
    */
   generation: {
-    // Default image dimensions (768x768 - optimized for speed while maintaining quality)
-    // Smaller resolution = faster generation (roughly 2x faster than 1024x1024)
-    defaultWidth: 768,
-    defaultHeight: 768,
+    // Default image dimensions (512x512 - optimized for FAST generation)
+    // 512x512 is ~4x faster than 1024x1024, ~2x faster than 768x768
+    // Quality is still good for preview/customization purposes
+    defaultWidth: 512,
+    defaultHeight: 512,
     
     // Automatically enhance prompts with professional keywords
     autoEnhancePrompts: true,
@@ -50,10 +51,10 @@ export const AI_CONFIG = {
   apis: {
     pollinations: {
       enabled: true,
-      // NEW API ENDPOINT (as of 2025)
-      // Documentation: https://gen.pollinations.ai
-      // Format: https://gen.pollinations.ai/image/{prompt}?key=YOUR_API_KEY
-      baseUrl: 'https://gen.pollinations.ai/image', // New API gateway endpoint
+      // CORRECT API ENDPOINT (as of 2025)
+      // Documentation: https://github.com/pollinations/pollinations/blob/main/APIDOCS.md
+      // Format: https://image.pollinations.ai/prompt/{prompt}?model=...&width=...&height=...
+      baseUrl: 'https://image.pollinations.ai/prompt', // Official image generation endpoint
       // SECURITY: API key removed from frontend - only used server-side in Netlify function
       // Never expose keys in frontend code - they are visible in browser DevTools and bundled JS
       // Use serverless function for unlimited rate limits (secret key)
@@ -75,13 +76,15 @@ export const AI_CONFIG = {
         // - 'kontext': FLUX.1 Kontext - Better context understanding
         // - 'nanobanana': NanoBanana - Affordable option
         // 
-        // RECOMMENDED for realistic flower photography:
-        // 'gptimage' - Best photorealism, understands text/logos well
-        // 'seedream-pro' - High quality, good for product photos
-        // 'turbo' - Good balance of quality and cost
-        model: 'gptimage', // Changed from 'flux' for more realistic results
-        width: 768, // Optimized resolution for faster generation while maintaining quality
-        height: 768, // Optimized resolution for faster generation while maintaining quality
+        // SPEED vs QUALITY tradeoff:
+        // 'flux' - FAST (5-15 seconds), default model
+        // 'turbo' - Fast (5-15 seconds), good quality
+        // 'gptimage' - Best photorealism, text/logo support (20-40 seconds at 512x512)
+        // 
+        // Using 'gptimage' for best quality flower images
+        model: 'gptimage', // Best photorealism for flower arrangements
+        width: 512, // Smaller resolution = faster generation (20-40s vs 60s at 768x768)
+        height: 512, // Smaller resolution = faster generation
       }
     },
     

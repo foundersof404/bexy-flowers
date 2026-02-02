@@ -713,10 +713,13 @@ export const handler: Handler = async (
     
     const prompt = promptValidation.sanitized || body.prompt || '';
     
-    // Get and validate parameters
-    const width = body.width || 768;
-    const height = body.height || 768;
-    const model = body.model || 'gptimage';
+    // Get and validate parameters - gptimage model with smaller resolution for faster generation
+    // 512x512 with 'gptimage' generates in 20-40 seconds vs 60+ seconds at 768x768
+    const width = body.width || 512;
+    const height = body.height || 512;
+    // FORCE gptimage model - ignore any model sent from frontend
+    // This ensures we ALWAYS use gptimage regardless of what the request contains
+    const model = 'gptimage'; // HARDCODED - DO NOT CHANGE
     
     const paramValidation = validateParameters(width, height, model);
     if (!paramValidation.valid) {
@@ -729,80 +732,122 @@ export const handler: Handler = async (
       };
     }
     
-    // Build Pollinations API URL
+    // Build Pollinations API URL using gen.pollinations.ai (authenticated endpoint)
+    // IMPORTANT: image.pollinations.ai ignores model parameter, gen.pollinations.ai respects it
     const encodedPrompt = encodeURIComponent(prompt);
-    const pollinationsUrl = `https://gen.pollinations.ai/image/${encodedPrompt}?key=${secretKey}&model=${model}&width=${width}&height=${height}`;
+    // Generate random seed to force fresh generation (prevents caching/fallback)
+    const seed = Math.floor(Math.random() * 1000000000);
+    // Use gen.pollinations.ai/image endpoint with API key for proper model selection
+    // Add key parameter for authentication (required for gptimage model)
+    const apiKey = secretKey || secretKey2 || '';
+    const pollinationsUrl = `https://gen.pollinations.ai/image/${encodedPrompt}?model=${model}&width=${width}&height=${height}&seed=${seed}&enhance=true&nologo=true&key=${apiKey}`;
     
-    // Log request (without secret key)
-    console.log('[Netlify Function] Generating image');
+    // Log request details (without secret key)
+    console.log('[Netlify Function] ========== IMAGE GENERATION REQUEST ==========');
     console.log('[Netlify Function] IP:', ip);
-    console.log('[Netlify Function] Model:', model);
+    console.log('[Netlify Function] Model: gptimage (ENFORCED)');
+    console.log('[Netlify Function] Actual model param:', model);
     console.log('[Netlify Function] Resolution:', `${width}x${height}`);
     console.log('[Netlify Function] Prompt length:', prompt.length);
+    console.log('[Netlify Function] Seed:', seed);
+    console.log('[Netlify Function] API Key present:', !!apiKey);
+    console.log('[Netlify Function] Full URL (without prompt/key):', `https://gen.pollinations.ai/image/[PROMPT]?model=${model}&width=${width}&height=${height}&seed=${seed}&enhance=true&nologo=true&key=[HIDDEN]`);
+    console.log('[Netlify Function] ===============================================');
     
     // Try primary key first, fallback to secondary key if it fails
     let response: Response;
     let usedKey: 'primary' | 'secondary' = 'primary';
     
-    // Timeout for Pollinations API (40 seconds - GPT image model needs more time for high-quality generation)
-    const FETCH_TIMEOUT = 40000;
+    // NO INTERNAL TIMEOUT - Let Netlify's 60-second function timeout handle it
+    // GPT image model can take 30-50+ seconds for high-quality generation
+    // We don't want to abort early - let the API complete naturally
     
-    // Helper function to fetch with timeout
-    const fetchWithTimeout = async (url: string, options: RequestInit = {}): Promise<Response> => {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT);
+    // NO RETRIES for gptimage model - it takes 20-40+ seconds to generate
+    // Netlify has a 60-second timeout, so we can only make ONE request
+    // Retrying would cause timeout (retry delays + API time > 60s)
+    const MAX_RETRIES = 0; // NO RETRIES - single request only
+    const RETRY_DELAYS: number[] = []; // Empty - no delays needed
+    
+    // Helper function to fetch with Bearer token authentication
+    // Using the secret key as Bearer token for better rate limits
+    const fetchWithAuth = async (url: string, token?: string): Promise<Response> => {
+      const headers: Record<string, string> = {
+        'Accept': 'image/*',
+        'User-Agent': 'BexyFlowers/1.0 (https://bexyflowers.shop)',
+      };
       
-      try {
-        const response = await fetch(url, {
-          ...options,
-          signal: controller.signal,
-        });
-        clearTimeout(timeoutId);
-        return response;
-      } catch (error) {
-        clearTimeout(timeoutId);
-        if (error instanceof Error && error.name === 'AbortError') {
-          throw new Error('Request timeout: Pollinations API took too long to respond. The service may be busy.');
-        }
-        throw error;
+      // Add Bearer token if available for better rate limits
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
       }
+      
+      return fetch(url, {
+        method: 'GET',
+        headers,
+      });
+    };
+    
+    // Helper function to attempt fetch with retries for transient errors (502, 503, 504)
+    const fetchWithRetry = async (url: string, keyLabel: string): Promise<Response> => {
+      let lastError: Error | null = null;
+      let lastResponse: Response | null = null;
+      
+      for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+        try {
+          if (attempt > 0) {
+            const delay = RETRY_DELAYS[attempt - 1] || 2000;
+            console.log(`[Netlify Function] Retry ${attempt}/${MAX_RETRIES} after ${delay}ms delay...`);
+            await new Promise(resolve => setTimeout(resolve, delay));
+          }
+          
+          // Use Bearer token authentication with the secret key for better rate limits
+          const resp = await fetchWithAuth(url, secretKey || secretKey2);
+          
+          // If transient error (502, 503, 504), retry
+          if (!resp.ok && (resp.status === 502 || resp.status === 503 || resp.status === 504)) {
+            console.warn(`[Netlify Function] ${keyLabel} key got ${resp.status}, will retry...`);
+            lastResponse = resp;
+            continue;
+          }
+          
+          return resp;
+        } catch (err) {
+          lastError = err instanceof Error ? err : new Error(String(err));
+          console.warn(`[Netlify Function] ${keyLabel} key fetch error:`, lastError.message);
+        }
+      }
+      
+      // All retries exhausted
+      if (lastResponse) return lastResponse;
+      throw lastError || new Error('All retries exhausted');
     };
     
     if (secretKey) {
       console.log('[Netlify Function] Trying primary API key');
       
       try {
-        response = await fetchWithTimeout(pollinationsUrl, {
-          method: 'GET',
-          headers: { 'Accept': 'image/*' },
-        });
+        response = await fetchWithRetry(pollinationsUrl, 'Primary');
         
-        // If primary key fails with rate limit (429), auth errors (401/403), or timeout (504), try secondary key
-        if (!response.ok && secretKey2 && (response.status === 429 || response.status === 401 || response.status === 403 || response.status === 504)) {
+        // If primary key fails with rate limit (429), auth errors (401/403), try secondary key
+        if (!response.ok && secretKey2 && (response.status === 429 || response.status === 401 || response.status === 403)) {
           console.warn('[Netlify Function] Primary key failed with status:', response.status);
           console.log('[Netlify Function] Falling back to secondary API key');
           
-          const pollinationsUrl2 = `https://gen.pollinations.ai/image/${encodedPrompt}?key=${secretKey2}&model=${model}&width=${width}&height=${height}`;
+          const pollinationsUrl2 = `https://gen.pollinations.ai/image/${encodedPrompt}?model=${model}&width=${width}&height=${height}&seed=${seed}&enhance=true&nologo=true&key=${secretKey2}`;
           
-          response = await fetchWithTimeout(pollinationsUrl2, {
-            method: 'GET',
-            headers: { 'Accept': 'image/*' },
-          });
+          response = await fetchWithRetry(pollinationsUrl2, 'Secondary');
           usedKey = 'secondary';
         }
       } catch (fetchError) {
-        // If primary key fetch fails with timeout or network error, try secondary key
-        if (secretKey2 && (fetchError instanceof Error && (fetchError.message.includes('timeout') || fetchError.message.includes('aborted')))) {
-          console.warn('[Netlify Function] Primary key request timed out or failed');
+        // If primary key fetch fails, try secondary key
+        if (secretKey2) {
+          console.warn('[Netlify Function] Primary key request failed');
           console.log('[Netlify Function] Falling back to secondary API key');
           
           try {
-            const pollinationsUrl2 = `https://gen.pollinations.ai/image/${encodedPrompt}?key=${secretKey2}&model=${model}&width=${width}&height=${height}`;
+            const pollinationsUrl2 = `https://gen.pollinations.ai/image/${encodedPrompt}?model=${model}&width=${width}&height=${height}&seed=${seed}&enhance=true&nologo=true&key=${secretKey2}`;
             
-            response = await fetchWithTimeout(pollinationsUrl2, {
-              method: 'GET',
-              headers: { 'Accept': 'image/*' },
-            });
+            response = await fetchWithRetry(pollinationsUrl2, 'Secondary');
             usedKey = 'secondary';
           } catch (secondaryError) {
             // Both keys failed
@@ -815,12 +860,9 @@ export const handler: Handler = async (
     } else if (secretKey2) {
       // If primary key is not set, use secondary key directly
       console.log('[Netlify Function] Primary key not set, using secondary API key');
-      const pollinationsUrl2 = `https://gen.pollinations.ai/image/${encodedPrompt}?key=${secretKey2}&model=${model}&width=${width}&height=${height}`;
+      const pollinationsUrl2 = `https://gen.pollinations.ai/image/${encodedPrompt}?model=${model}&width=${width}&height=${height}&seed=${seed}&enhance=true&nologo=true&key=${secretKey2}`;
       
-      response = await fetchWithTimeout(pollinationsUrl2, {
-        method: 'GET',
-        headers: { 'Accept': 'image/*' },
-      });
+      response = await fetchWithRetry(pollinationsUrl2, 'Secondary');
       usedKey = 'secondary';
     } else {
       throw new Error('No valid API key available');
@@ -834,7 +876,9 @@ export const handler: Handler = async (
       
       // Provide more specific error messages for common issues
       let userMessage = `Pollinations API error: ${response.status}`;
-      if (response.status === 504) {
+      if (response.status === 502) {
+        userMessage = 'AI service gateway error. The service may be temporarily overloaded. Please try again.';
+      } else if (response.status === 504) {
         userMessage = 'AI service is busy right now. Please try again in a moment.';
       } else if (response.status === 429) {
         userMessage = 'Rate limit exceeded. Please wait a moment before trying again.';

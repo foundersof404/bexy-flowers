@@ -154,9 +154,11 @@ const CarouselHero = ({ slidesToShow, isHomepage = false }: CarouselHeroProps = 
               });
             }
           } else {
-            // PERFORMANCE FIX: Pause video when not visible to save resources
+            setIsVideoVisible(false);
             if (videoElement) {
               videoElement.pause();
+              // Reset video to start when scrolled away (optional, saves memory)
+              videoElement.currentTime = 0;
             }
           }
         });
